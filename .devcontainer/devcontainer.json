@@ -1,0 +1,24 @@
+{
+  "name": "MebloPlan - Codespaces",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.formatOnSave": true,
+        "files.eol": "\n"
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  },
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": { "label": "Vite dev server", "onAutoForward": "openBrowser" }
+  },
+  "postCreateCommand": "npm ci"
+}

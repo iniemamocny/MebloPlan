@@ -1,0 +1,14 @@
+# Node
+node_modules/
+dist/
+.cache/
+.vite/
+*.log
+
+# Editor / OS
+.vscode/.history
+.DS_Store
+Thumbs.db
+
+# TS build
+*.tsbuildinfo
