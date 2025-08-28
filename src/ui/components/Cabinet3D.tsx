@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
+import { FAMILY, FAMILY_COLORS } from '../../core/catalog'
 
-export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, drawerFronts }:{ widthMM:number;heightMM:number;depthMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[] }){
+export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family }:{ widthMM:number;heightMM:number;depthMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY }){
   const ref = useRef<HTMLDivElement>(null)
   useEffect(()=>{
     // Wait until our container is available
@@ -34,7 +35,7 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     const backT = 0.003
     // Colour palette: carcase (light grey), front (warm wood), back (very light)
     const carcColour = new THREE.Color(0xf5f5f5)
-    const frontColour = new THREE.Color(0x977e65)
+    const frontColour = new THREE.Color(FAMILY_COLORS[family])
     const backColour = new THREE.Color(0xf0f0f0)
     // Materials
     const carcMat = new THREE.MeshStandardMaterial({ color: carcColour, metalness:0.1, roughness:0.8 })
@@ -117,33 +118,31 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
       handle.position.set(W / 2, H * 0.7, 0.01)
       cabGroup.add(handle)
     }
-    // Legs: four small cylinders at the corners
-    const footRadius = 0.02
-    const footHeight = 0.04
-    const footGeo = new THREE.CylinderGeometry(footRadius, footRadius, footHeight, 16)
-    const footMat = new THREE.MeshStandardMaterial({ color: 0x444444, metalness:0.3, roughness:0.7 })
-    // Front-left foot
-    const fl = new THREE.Mesh(footGeo, footMat)
-    fl.position.set(T + footRadius, -footHeight / 2, -T)
-    cabGroup.add(fl)
-    // Front-right foot
-    const fr = new THREE.Mesh(footGeo.clone(), footMat)
-    fr.position.set(W - T - footRadius, -footHeight / 2, -T)
-    cabGroup.add(fr)
-    // Back-left foot
-    const bl = new THREE.Mesh(footGeo.clone(), footMat)
-    bl.position.set(T + footRadius, -footHeight / 2, -D + T)
-    cabGroup.add(bl)
-    // Back-right foot
-    const br = new THREE.Mesh(footGeo.clone(), footMat)
-    br.position.set(W - T - footRadius, -footHeight / 2, -D + T)
-    cabGroup.add(br)
+    // Legs: only for base and tall cabinets
+    if (family === FAMILY.BASE || family === FAMILY.TALL) {
+      const footRadius = 0.02
+      const footHeight = 0.04
+      const footGeo = new THREE.CylinderGeometry(footRadius, footRadius, footHeight, 16)
+      const footMat = new THREE.MeshStandardMaterial({ color: 0x444444, metalness:0.3, roughness:0.7 })
+      const fl = new THREE.Mesh(footGeo, footMat)
+      fl.position.set(T + footRadius, -footHeight / 2, -T)
+      cabGroup.add(fl)
+      const fr = new THREE.Mesh(footGeo.clone(), footMat)
+      fr.position.set(W - T - footRadius, -footHeight / 2, -T)
+      cabGroup.add(fr)
+      const bl = new THREE.Mesh(footGeo.clone(), footMat)
+      bl.position.set(T + footRadius, -footHeight / 2, -D + T)
+      cabGroup.add(bl)
+      const br = new THREE.Mesh(footGeo.clone(), footMat)
+      br.position.set(W - T - footRadius, -footHeight / 2, -D + T)
+      cabGroup.add(br)
+    }
     // Render once
     renderer.render(scene, camera)
     // Clean up on unmount
     return () => {
       renderer.dispose()
     }
-  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts])
+  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family])
   return <div ref={ref} style={{ width: 260, height: 190, border: '1px solid #E5E7EB', borderRadius: 8, background: '#fff' }} />
 }
