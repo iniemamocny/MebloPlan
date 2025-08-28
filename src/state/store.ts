@@ -61,6 +61,8 @@ type Store = {
   globals: Globals
   prices: any
   modules: Module3D[]
+  past: Module3D[][]
+  future: Module3D[][]
   room: Room
   setRole:(r:'stolarz'|'klient')=>void
   updateGlobals:(fam:FAMILY, patch:Partial<Globals[FAMILY]>)=>void
@@ -69,6 +71,8 @@ type Store = {
   updateModule:(id:string,patch:Partial<Module3D>)=>void
   removeModule:(id:string)=>void
   clear:()=>void
+  undo:()=>void
+  redo:()=>void
   setRoom:(patch:Partial<Room>)=>void
   addWall:(w:{length:number; angle:number})=>void
   addOpening:(op:any)=>void
@@ -79,6 +83,8 @@ export const usePlannerStore = create<Store>((set,get)=>({
   globals: persisted?.globals || JSON.parse(JSON.stringify(defaultGlobal)),
   prices: persisted?.prices || JSON.parse(JSON.stringify(defaultPrices)),
   modules: persisted?.modules || [],
+  past: [],
+  future: [],
   room: persisted?.room || { walls:[], openings:[], height:2700 },
   setRole:(r)=>set({role:r}),
   updateGlobals:(fam,patch)=>set(s=>{
@@ -102,10 +108,40 @@ export const usePlannerStore = create<Store>((set,get)=>({
     return { globals: newGlobals, modules: updatedModules }
   }),
   updatePrices:(patch)=>set(s=>({ prices:{...s.prices,...patch} })),
-  addModule:(m)=>set(s=>({ modules:[...s.modules,m] })),
-  updateModule:(id,patch)=>set(s=>({ modules:s.modules.map(x=>x.id===id?{...x,...patch}:x)})),
-  removeModule:(id)=>set(s=>({ modules:s.modules.filter(x=>x.id!==id) })),
-  clear:()=>set({ modules:[] }),
+  addModule:(m)=>set(s=>({
+    past:[...s.past, JSON.parse(JSON.stringify(s.modules))],
+    modules:[...s.modules,m],
+    future:[],
+  })),
+  updateModule:(id,patch)=>set(s=>({
+    past:[...s.past, JSON.parse(JSON.stringify(s.modules))],
+    modules:s.modules.map(x=>x.id===id?{...x,...patch}:x),
+    future:[],
+  })),
+  removeModule:(id)=>set(s=>({
+    past:[...s.past, JSON.parse(JSON.stringify(s.modules))],
+    modules:s.modules.filter(x=>x.id!==id),
+    future:[],
+  })),
+  clear:()=>set(s=>({ past:[...s.past, JSON.parse(JSON.stringify(s.modules))], modules:[], future:[] })),
+  undo:()=>set(s=>{
+    if(s.past.length===0) return s
+    const previous = s.past[s.past.length-1]
+    return {
+      modules: previous,
+      past: s.past.slice(0,-1),
+      future: [...s.future, JSON.parse(JSON.stringify(s.modules))],
+    }
+  }),
+  redo:()=>set(s=>{
+    if(s.future.length===0) return s
+    const next = s.future[s.future.length-1]
+    return {
+      modules: next,
+      past: [...s.past, JSON.parse(JSON.stringify(s.modules))],
+      future: s.future.slice(0,-1),
+    }
+  }),
   setRoom:(patch)=>set(s=>({ room:{...s.room, ...patch} })),
   addWall:(w)=>set(s=>({ room:{...s.room, walls:[...s.room.walls, w]} })),
   addOpening:(op)=>set(s=>({ room:{...s.room, openings:[...s.room.openings, op]} })),
