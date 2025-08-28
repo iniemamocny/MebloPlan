@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { FAMILY, FAMILY_COLORS } from '../../core/catalog'
 
-export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family }:{ widthMM:number;heightMM:number;depthMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY }){
+export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves=1 }:{ widthMM:number;heightMM:number;depthMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number }){
   const ref = useRef<HTMLDivElement>(null)
   useEffect(()=>{
     // Wait until our container is available
@@ -69,11 +69,14 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     cabGroup.add(backBoard)
     // Shelves: simple horizontal boards (if drawers = 0) else skip
     if (drawers === 0) {
-      // Single mid shelf for visual interest
       const shelfGeo = new THREE.BoxGeometry(W - 2 * T, T, D)
-      const shelf = new THREE.Mesh(shelfGeo, carcMat)
-      shelf.position.set(W / 2, H / 2, -D / 2)
-      cabGroup.add(shelf)
+      const count = Math.max(0, shelves)
+      for (let i = 0; i < count; i++) {
+        const shelf = new THREE.Mesh(shelfGeo, carcMat)
+        const y = H * (i + 1) / (count + 1)
+        shelf.position.set(W / 2, y, -D / 2)
+        cabGroup.add(shelf)
+      }
     }
     // Front: if drawers > 0, split into drawer fronts; otherwise full door
     if (drawers > 0) {
@@ -143,6 +146,6 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     return () => {
       renderer.dispose()
     }
-  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family])
+  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves])
   return <div ref={ref} style={{ width: 260, height: 190, border: '1px solid #E5E7EB', borderRadius: 8, background: '#fff' }} />
 }

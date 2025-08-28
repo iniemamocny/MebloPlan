@@ -48,7 +48,8 @@ export default function App(){
 
   useEffect(()=>{
     const g = store.globals[family]
-    setAdv({ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:{...g.gaps} })
+    const defaultShelves = family===FAMILY.TALL ? 4 : 1
+    setAdv({ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:{...g.gaps}, shelves:g.shelves ?? defaultShelves })
   }, [family, store.globals])
 
   const undo = store.undo
@@ -143,15 +144,17 @@ export default function App(){
     }
     // Determine number of doors from advanced settings when no drawers are present
     const doorCount = !hasDrawers && typeof adv.doorCount === 'number' && adv.doorCount > 0 ? adv.doorCount : 1
-    // If this module has no drawers (no drawerFronts array), add a simple shelf
-    // positioned at mid-height inside the carcase.  Shelf spans the full depth
-    // and sits between the side panels (subtract thickness on both sides).
+    // If this module has no drawers, add adjustable number of shelves.
     if (!hasDrawers) {
       const shelfWidth = Math.max(0, W - 2 * T)
       const shelfGeo = new THREE.BoxGeometry(shelfWidth, T, D)
-      const shelf = new THREE.Mesh(shelfGeo, carcMat)
-      shelf.position.set(W / 2, legHeight + H / 2, -D / 2)
-      group.add(shelf)
+      const count = Math.max(0, adv.shelves ?? 1)
+      for (let i = 0; i < count; i++) {
+        const shelf = new THREE.Mesh(shelfGeo, carcMat)
+        const y = legHeight + (H * (i + 1)) / (count + 1)
+        shelf.position.set(W / 2, y, -D / 2)
+        group.add(shelf)
+      }
     }
     // Determine number of front pieces: if drawers are defined, use their count; otherwise use doorCount
     const nFronts = hasDrawers ? fronts.length : doorCount
@@ -725,10 +728,10 @@ export default function App(){
                       />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} />
                     </div>
                   </div>
                 )}
@@ -740,6 +743,12 @@ export default function App(){
                       <div><div className="small">Płyta</div><select className="input" value={gLocal.boardType} onChange={e=>setAdv({...gLocal, boardType:(e.target as HTMLSelectElement).value})}>{Object.keys(store.prices.board).map(k=><option key={k} value={k}>{k}</option>)}</select></div>
                       <div><div className="small">Front</div><select className="input" value={gLocal.frontType} onChange={e=>setAdv({...gLocal, frontType:(e.target as HTMLSelectElement).value})}>{Object.keys(store.prices.front).map(k=><option key={k} value={k}>{k}</option>)}</select></div>
                     </div>
+                    {!(variant?.key?.startsWith('s')) && (
+                      <div style={{marginTop:8}}>
+                        <div className="small">Liczba półek</div>
+                        <input className="input" type="number" min={0} value={gLocal.shelves||0} onChange={e=>setAdv({...gLocal, shelves:Number((e.target as HTMLInputElement).value)||0})} />
+                      </div>
+                    )}
                     <div style={{marginTop:8}}>
                       <div className="small">Szczeliny i wysokości frontów (ustawiaj graficznie)</div>
                       <TechDrawing
@@ -758,10 +767,10 @@ export default function App(){
                       />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} />
                     </div>
                     <div className="row" style={{marginTop:8}}>
                       <button className="btn" onClick={()=>onAdd(widthMM, gLocal)}>Wstaw szafkę</button>
