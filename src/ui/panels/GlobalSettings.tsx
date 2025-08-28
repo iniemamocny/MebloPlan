@@ -35,6 +35,9 @@ export default function GlobalSettings(){
             <Field label="Głębokość (mm)" value={g.depth} onChange={(v)=>set({depth:v})} />
             <Field label="Rodzaj płyty" type="select" value={g.boardType} onChange={(v)=>set({boardType:v})} options={Object.keys(store.prices.board)} />
             <Field label="Rodzaj frontu" type="select" value={g.frontType} onChange={(v)=>set({frontType:v})} options={Object.keys(store.prices.front)} />
+            <Field label="Zawias" type="select" value={g.hingeType} onChange={(v)=>set({hingeType:v})} options={Object.keys(store.prices.hinges)} />
+            <Field label="Prowadnice" type="select" value={g.drawerSlide} onChange={(v)=>set({drawerSlide:v})} options={Object.keys(store.prices.drawerSlide)} />
+            <Field label="Aventos" type="select" value={g.aventosType} onChange={(v)=>set({aventosType:v})} options={['Brak', ...Object.keys(store.prices.aventos)]} />
             {fam===FAMILY.BASE && (<>
               <Field label="Nóżki" type="select" value={g.legsType} onChange={(v)=>set({legsType:v})} options={Object.keys(store.prices.legs)} />
               <Field label="Odsunięcie od ściany (mm)" value={g.offsetWall||0} onChange={(v)=>set({offsetWall:v})} />

@@ -5,7 +5,7 @@ export type Price = { total:number; parts: Parts; counts:any }
 function hingeCountPerDoor(doorHeightMM:number){ if (doorHeightMM<=900) return 2; if (doorHeightMM<=1500) return 3; return 4 }
 export function computeModuleCost(params: {
   family: FAMILY; kind:string; variant:string; width:number;
-  adv: { height:number; depth:number; boardType:string; frontType:string; gaps?: any };
+  adv: { height:number; depth:number; boardType:string; frontType:string; gaps?: any; hingeType?:string; drawerSlide?:string; aventosType?:string };
 }): Price {
   const P = usePlannerStore.getState().prices
   const base = usePlannerStore.getState().globals[params.family]
@@ -31,13 +31,16 @@ export function computeModuleCost(params: {
   }
   const doorHeightMM = hMM - 100
   const hingesPerDoor = hingeCountPerDoor(doorHeightMM)
-  const hingesCost = (P.hinges['Blum ClipTop']||0) * hingesPerDoor * doors
-  const slidesCost = (P.drawerSlide['BLUM LEGRABOX']||0) * drawers
+  const hingeType = g.hingeType || 'Blum ClipTop'
+  const slideType = g.drawerSlide || 'BLUM LEGRABOX'
+  const selectedAventos = g.aventosType && g.aventosType !== 'Brak' ? g.aventosType as 'HK'|'HS' : aventosType
+  const hingesCost = (P.hinges[hingeType]||0) * hingesPerDoor * doors
+  const slidesCost = (P.drawerSlide[slideType]||0) * drawers
   const legsCount = params.family===FAMILY.BASE ? Math.max(4, Math.ceil(wMM/300)*2) : 0
   const legsCost = legsCount * (P.legs['Standard 10cm']||0)
   const hangersCount = (params.family===FAMILY.WALL || params.family===FAMILY.PAWLACZ) ? 2 : 0
   const hangersCost = hangersCount * (P.hangers['Standard']||0)
-  const aventosCost = aventosType ? (P.aventos[aventosType]||0) : 0
+  const aventosCost = selectedAventos ? (P.aventos[selectedAventos]||0) : 0
   const cargoCost = cargoW ? (P.cargo[cargoW]||0) : 0
   const boardArea = 2*(h*d)+2*(w*d)+1*(w*d)+0.4*(w*h)
   const boardCost = boardArea*boardPrice

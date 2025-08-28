@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { FAMILY, FAMILY_COLORS } from '../../core/catalog'
 
-export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family }:{ widthMM:number;heightMM:number;depthMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY }){
+export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves=1, hingeType, drawerSlide, aventosType }:{ widthMM:number;heightMM:number;depthMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number; hingeType?:string; drawerSlide?:string; aventosType?:string }){
   const ref = useRef<HTMLDivElement>(null)
   useEffect(()=>{
     // Wait until our container is available
@@ -69,11 +69,14 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     cabGroup.add(backBoard)
     // Shelves: simple horizontal boards (if drawers = 0) else skip
     if (drawers === 0) {
-      // Single mid shelf for visual interest
       const shelfGeo = new THREE.BoxGeometry(W - 2 * T, T, D)
-      const shelf = new THREE.Mesh(shelfGeo, carcMat)
-      shelf.position.set(W / 2, H / 2, -D / 2)
-      cabGroup.add(shelf)
+      const count = Math.max(0, shelves)
+      for (let i = 0; i < count; i++) {
+        const shelf = new THREE.Mesh(shelfGeo, carcMat)
+        const y = H * (i + 1) / (count + 1)
+        shelf.position.set(W / 2, y, -D / 2)
+        cabGroup.add(shelf)
+      }
     }
     // Front: if drawers > 0, split into drawer fronts; otherwise full door
     if (drawers > 0) {
@@ -99,6 +102,16 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
         // Position handle near top of drawer front
         handleMesh.position.set(W / 2, currentY + h - handleHeight * 1.5, 0.01)
         cabGroup.add(handleMesh)
+        // Drawer slide rails on both sides
+        const railGeo = new THREE.BoxGeometry(0.01, 0.02, D - 0.05)
+        const railMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness:0.6, roughness:0.4 })
+        const railY = currentY + h / 2
+        const leftRail = new THREE.Mesh(railGeo, railMat)
+        leftRail.position.set(T / 2, railY, -D / 2)
+        cabGroup.add(leftRail)
+        const rightRail = leftRail.clone()
+        rightRail.position.set(W - T / 2, railY, -D / 2)
+        cabGroup.add(rightRail)
         // Move up by this front's height for the next drawer
         currentY += h
       }
@@ -117,6 +130,28 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
       const handle = new THREE.Mesh(handleGeo, handleMat)
       handle.position.set(W / 2, H * 0.7, 0.01)
       cabGroup.add(handle)
+      // Hinges
+      const hingeMat = new THREE.MeshStandardMaterial({ color:0x888888, metalness:0.8, roughness:0.3 })
+      const hingeGeo = new THREE.CylinderGeometry(0.005, 0.005, 0.03, 8)
+      ;[H * 0.25, H * 0.75].forEach(y => {
+        const hinge = new THREE.Mesh(hingeGeo, hingeMat)
+        hinge.rotation.z = Math.PI / 2
+        hinge.position.set(0, y, -T / 2)
+        cabGroup.add(hinge)
+      })
+      // Aventos lift (if selected)
+      if (aventosType && aventosType !== 'Brak') {
+        const strutGeo = new THREE.CylinderGeometry(0.006, 0.006, 0.25, 8)
+        const strutMat = new THREE.MeshStandardMaterial({ color:0x888888, metalness:0.6, roughness:0.4 })
+        const leftStrut = new THREE.Mesh(strutGeo, strutMat)
+        leftStrut.position.set(T, H * 0.6, -D + 0.1)
+        leftStrut.rotation.z = -Math.PI / 4
+        cabGroup.add(leftStrut)
+        const rightStrut = leftStrut.clone()
+        rightStrut.position.set(W - T, H * 0.6, -D + 0.1)
+        rightStrut.rotation.z = Math.PI / 4
+        cabGroup.add(rightStrut)
+      }
     }
     // Legs: only for base and tall cabinets
     if (family === FAMILY.BASE || family === FAMILY.TALL) {
@@ -143,6 +178,6 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     return () => {
       renderer.dispose()
     }
-  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family])
+  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves, hingeType, drawerSlide, aventosType])
   return <div ref={ref} style={{ width: 260, height: 190, border: '1px solid #E5E7EB', borderRadius: 8, background: '#fff' }} />
 }

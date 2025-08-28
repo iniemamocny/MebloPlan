@@ -46,14 +46,14 @@ export function cutlistForModule(m:any, globals:any): { items: CutItem[]; edges:
   const addShelves = () => {
     const shelfW = clampPos(W-2*t - tol.assembly)
     const shelfD = clampPos(D-backT - tol.shelfFrontSetback)
-    if (m.family===FAMILY.BASE){
-      if (m.kind==='doors') { add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Półka', qty:1, w:shelfW, h:shelfD }); addEdge('ABS 1mm', shelfW, 'Półka — przód') }
-    }
-    if (m.family===FAMILY.WALL){
-      add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Półka', qty:1, w:shelfW, h:shelfD }); addEdge('ABS 1mm', shelfW, 'Półka — przód')
-    }
-    if (m.family===FAMILY.TALL){
-      add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Półka', qty:4, w:shelfW, h:shelfD }); addEdge('ABS 1mm', shelfW*4, 'Półki — przód sumarycznie')
+    let defaultShelves = 0
+    if (m.family===FAMILY.BASE && m.kind==='doors') defaultShelves = 1
+    else if (m.family===FAMILY.WALL) defaultShelves = 1
+    else if (m.family===FAMILY.TALL) defaultShelves = 4
+    const shelfQty = g.shelves !== undefined ? g.shelves : defaultShelves
+    if (shelfQty>0){
+      add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Półka', qty:shelfQty, w:shelfW, h:shelfD })
+      addEdge('ABS 1mm', shelfW*shelfQty, shelfQty>1?'Półki — przód sumarycznie':'Półka — przód')
     }
   }
 
