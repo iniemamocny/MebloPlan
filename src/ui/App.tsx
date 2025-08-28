@@ -51,6 +51,23 @@ export default function App(){
     setAdv({ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:{...g.gaps} })
   }, [family, store.globals])
 
+  const undo = store.undo
+  const redo = store.redo
+  useEffect(()=>{
+    const handler = (e:KeyboardEvent)=>{
+      if((e.ctrlKey||e.metaKey) && e.key==='z'){
+        e.preventDefault()
+        if(e.shiftKey) redo()
+        else undo()
+      }else if((e.ctrlKey||e.metaKey) && e.key==='y'){
+        e.preventDefault()
+        redo()
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return ()=>window.removeEventListener('keydown', handler)
+  }, [undo, redo])
+
   /**
    * Build a detailed cabinet mesh from a module definition.  The returned
    * THREE.Group contains individual parts (sides, top, bottom, back,
@@ -596,6 +613,8 @@ export default function App(){
         <div className="topbar row">
           <button className="btnGhost" onClick={()=>store.setRole(store.role==='stolarz'?'klient':'stolarz')}>Tryb: {store.role==='stolarz'?'Stolarz':'Klient'}</button>
           <button className="btnGhost" onClick={()=>{ setVariant(null); setKind(null); }}>Reset wyboru</button>
+          <button className="btnGhost" onClick={()=>store.undo()} disabled={store.past.length===0}>Cofnij</button>
+          <button className="btnGhost" onClick={()=>store.redo()} disabled={store.future.length===0}>Ponów</button>
           <button className="btnGhost" onClick={()=>store.clear()}>Wyczyść</button>
           <select className="btnGhost" value={selWall} onChange={e=>setSelWall(Number((e.target as HTMLSelectElement).value)||0)}>
             {getWallSegments().map((s,i)=> <option key={i} value={i}>Ściana {i+1} ({Math.round(s.length)} mm)</option>)}
