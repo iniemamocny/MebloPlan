@@ -109,10 +109,16 @@ export default function App(){
     const backMat = new THREE.MeshStandardMaterial({ color: backColour, metalness:0.05, roughness:0.9 })
     const handleMat = new THREE.MeshStandardMaterial({ color: handleColour, metalness:0.8, roughness:0.4 })
     const footMat = new THREE.MeshStandardMaterial({ color: footColour, metalness:0.3, roughness:0.7 })
+    const metalMat = new THREE.MeshStandardMaterial({ color: 0x777777, metalness:0.8, roughness:0.3 })
     const group = new THREE.Group()
     group.userData.kind = 'cab'
     // Extract advanced settings once at the beginning
     const adv = mod.adv || {}
+    const hingeType: string = adv.hingeType || ''
+    const hasBlumotion = hingeType.toLowerCase().includes('blumotion')
+    const openingMech = (adv.openingMechanism || '').toLowerCase()
+    const showHandles = !(openingMech.includes('tip') || openingMech.includes('push'))
+    const isAventos = adv.aventosType && adv.aventosType.toLowerCase() !== 'brak'
     // Carcase sides (add legHeight offset on Y axis)
     const sideGeo = new THREE.BoxGeometry(T, H, D)
     const leftSide = new THREE.Mesh(sideGeo, carcMat)
@@ -181,6 +187,42 @@ export default function App(){
     // Prepare arrays to capture animatable front groups and progress
     const frontGroups: THREE.Group[] = []
     const openProgress: number[] = openStates.map(v => (v ? 1 : 0))
+
+    const hingeCount = (doorH: number) => {
+      if (doorH <= 0.9) return 2
+      if (doorH <= 1.5) return 3
+      return 4
+    }
+    const addHinges = (grp: THREE.Group, doorH: number, side: 'left' | 'right') => {
+      if (isAventos) return
+      const count = hingeCount(doorH)
+      const topY = doorH / 2 - 0.1
+      const bottomY = -doorH / 2 + 0.1
+      for (let i = 0; i < count; i++) {
+        const y = count === 1 ? 0 : topY + (bottomY - topY) * i / (count - 1)
+        const hinge = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.02, 12), metalMat)
+        hinge.rotation.z = Math.PI / 2
+        const x = side === 'left' ? 0.01 : -0.01
+        hinge.position.set(x, y, -T + 0.005)
+        grp.add(hinge)
+        if (hasBlumotion) {
+          const damper = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.015, 0.02), metalMat)
+          const dx = side === 'left' ? 0.04 : -0.04
+          damper.position.set(dx, y, -T + 0.01)
+          grp.add(damper)
+        }
+      }
+    }
+    const cylinderBetween = (p1: THREE.Vector3, p2: THREE.Vector3) => {
+      const dir = new THREE.Vector3().subVectors(p2, p1)
+      const len = dir.length()
+      const geo = new THREE.CylinderGeometry(0.01, 0.01, len, 12)
+      const mesh = new THREE.Mesh(geo, metalMat)
+      const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5)
+      mesh.position.copy(mid)
+      mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize())
+      return mesh
+    }
     if (hasDrawers) {
       // Drawers: multiple front panels that slide outward
       let yStart = legHeight + ((gaps.bottom ?? 0) / 1000)
@@ -203,13 +245,25 @@ export default function App(){
         frontMesh.position.set(W / 2, yStart + hFront / 2, -T / 2)
         drawerGroup.add(frontMesh)
         // Handle placement for drawer: width up to 40 cm or half of cabinet width
-        const handleWidth = Math.min(0.4, W * 0.5)
-        const handleHeight = 0.02
-        const handleDepth = 0.03
-        const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
-        const handle = new THREE.Mesh(handleGeo, handleMat)
-        handle.position.set(W / 2, yStart + hFront - handleHeight * 1.5, 0.01)
-        drawerGroup.add(handle)
+        if (showHandles) {
+          const handleWidth = Math.min(0.4, W * 0.5)
+          const handleHeight = 0.02
+          const handleDepth = 0.03
+          const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
+          const handle = new THREE.Mesh(handleGeo, handleMat)
+          handle.position.set(W / 2, yStart + hFront - handleHeight * 1.5, 0.01)
+          drawerGroup.add(handle)
+        }
+        // Drawer slide rails (two per drawer, left/right)
+        const railDepth = D - T
+        const railGeo = new THREE.BoxGeometry(0.01, 0.01, railDepth)
+        const railY = yStart + hFront / 2
+        const leftRail = new THREE.Mesh(railGeo, metalMat)
+        leftRail.position.set(T + 0.01, railY, -D / 2)
+        group.add(leftRail)
+        const rightRail = new THREE.Mesh(railGeo.clone(), metalMat)
+        rightRail.position.set(W - T - 0.01, railY, -D / 2)
+        group.add(rightRail)
         group.add(drawerGroup)
         frontGroups[idx] = drawerGroup
         yStart += hFront
@@ -245,14 +299,17 @@ export default function App(){
           doorMesh.position.set(offsetX, 0, -T / 2)
           doorGroup.add(doorMesh)
           // Handle for door: width limited by half of segment, placed at 20% down from top
-          const handleWidth = Math.min(0.4, segmentW * 0.5)
-          const handleHeight = 0.02
-          const handleDepth = 0.03
-          const hGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
-          const handle = new THREE.Mesh(hGeo, handleMat)
-          const handleOffsetX = doorHinge === 'left' ? segmentW / 2 : -segmentW / 2
-          handle.position.set(handleOffsetX, H * 0.2, 0.01)
-          doorGroup.add(handle)
+          if (showHandles) {
+            const handleWidth = Math.min(0.4, segmentW * 0.5)
+            const handleHeight = 0.02
+            const handleDepth = 0.03
+            const hGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
+            const handle = new THREE.Mesh(hGeo, handleMat)
+            const handleOffsetX = doorHinge === 'left' ? segmentW / 2 : -segmentW / 2
+            handle.position.set(handleOffsetX, H * 0.2, 0.01)
+            doorGroup.add(handle)
+          }
+          addHinges(doorGroup, H, doorHinge)
           group.add(doorGroup)
           frontGroups[i] = doorGroup
         }
@@ -272,17 +329,28 @@ export default function App(){
         const doorMeshX = hingeSide === 'left' ? W / 2 : -W / 2
         doorMesh.position.set(doorMeshX, 0, -T / 2)
         doorGroup.add(doorMesh)
-        const handleWidth = Math.min(0.4, W * 0.5)
-        const handleHeight = 0.02
-        const handleDepth = 0.03
-        const hGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
-        const handle = new THREE.Mesh(hGeo, handleMat)
-        const handleX = hingeSide === 'left' ? W / 2 : -W / 2
-        handle.position.set(handleX, (H * 0.2), 0.01)
-        doorGroup.add(handle)
+        if (showHandles) {
+          const handleWidth = Math.min(0.4, W * 0.5)
+          const handleHeight = 0.02
+          const handleDepth = 0.03
+          const hGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
+          const handle = new THREE.Mesh(hGeo, handleMat)
+          const handleX = hingeSide === 'left' ? W / 2 : -W / 2
+          handle.position.set(handleX, (H * 0.2), 0.01)
+          doorGroup.add(handle)
+        }
+        addHinges(doorGroup, H, hingeSide)
         group.add(doorGroup)
         frontGroups[0] = doorGroup
       }
+    }
+    if (isAventos) {
+      const leftBack = new THREE.Vector3(T + 0.02, legHeight + H - 0.08, -D + T + 0.02)
+      const leftFront = new THREE.Vector3(T + 0.02, legHeight + H * 0.6, -T - 0.02)
+      group.add(cylinderBetween(leftBack, leftFront))
+      const rightBack = new THREE.Vector3(W - T - 0.02, legHeight + H - 0.08, -D + T + 0.02)
+      const rightFront = new THREE.Vector3(W - T - 0.02, legHeight + H * 0.6, -T - 0.02)
+      group.add(cylinderBetween(rightBack, rightFront))
     }
     // Attach open state, progress, front groups and animation speed to the cabinet group for animation
     group.userData.openStates = openStates
