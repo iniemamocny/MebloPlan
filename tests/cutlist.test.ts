@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { aggregateCutlist, type CutItem } from '../src/core/cutlist';
+import {
+  aggregateCutlist,
+  aggregateEdgebanding,
+  type CutItem,
+  type EdgeItem,
+} from '../src/core/cutlist';
 
 describe('aggregateCutlist', () => {
   it('aggregates items regardless of rotation', () => {
@@ -27,6 +32,25 @@ describe('aggregateCutlist', () => {
         expect.objectContaining({ material: 'Mat1', part: 'Drzwi', w: 50, h: 100, qty: 1 }),
         expect.objectContaining({ material: 'Mat2', part: 'Panel', w: 50, h: 100, qty: 1 }),
       ])
+    );
+  });
+});
+
+describe('aggregateEdgebanding', () => {
+  it('sums lengths for the same material and rounds totals', () => {
+    const edges: EdgeItem[] = [
+      { material: 'ABS 1mm', length: 100.4, part: 'A' },
+      { material: 'ABS 1mm', length: 100.4, part: 'B' },
+      { material: 'ABS 2mm', length: 50.2, part: 'C' },
+      { material: 'ABS 2mm', length: 25.7, part: 'D' },
+    ];
+    const result = aggregateEdgebanding(edges);
+    expect(result).toHaveLength(2);
+    expect(result).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ material: 'ABS 1mm', length: 201 }),
+        expect.objectContaining({ material: 'ABS 2mm', length: 76 }),
+      ]),
     );
   });
 });
