@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { FAMILY, FAMILY_COLORS } from '../../core/catalog'
 
-export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves=1 }:{ widthMM:number;heightMM:number;depthMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number }){
+export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves=1, plinthHeightMM=0, crownHeightMM=0, plinthDrawer=false }:{ widthMM:number;heightMM:number;depthMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number; plinthHeightMM?:number; crownHeightMM?:number; plinthDrawer?:boolean }){
   const ref = useRef<HTMLDivElement>(null)
   useEffect(()=>{
     // Wait until our container is available
@@ -30,6 +30,9 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     const W = widthMM / 1000
     const H = heightMM / 1000
     const D = depthMM / 1000
+    const plinthH = (plinthHeightMM||0)/1000
+    const crownH = (crownHeightMM||0)/1000
+    const bodyH = H - plinthH - crownH
     // Board thickness (18 mm) and back thickness (3 mm)
     const T = 0.018
     const backT = 0.003
@@ -46,26 +49,26 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     scene.add(cabGroup)
     // Build carcase: sides
     // Left side
-    const leftSideGeo = new THREE.BoxGeometry(T, H, D)
+    const leftSideGeo = new THREE.BoxGeometry(T, bodyH, D)
     const leftSide = new THREE.Mesh(leftSideGeo, carcMat)
-    leftSide.position.set(T / 2, H / 2, -D / 2)
+    leftSide.position.set(T / 2, plinthH + bodyH / 2, -D / 2)
     cabGroup.add(leftSide)
     // Right side
     const rightSide = new THREE.Mesh(leftSideGeo.clone(), carcMat)
-    rightSide.position.set(W - T / 2, H / 2, -D / 2)
+    rightSide.position.set(W - T / 2, plinthH + bodyH / 2, -D / 2)
     cabGroup.add(rightSide)
     // Top and bottom
     const horizGeo = new THREE.BoxGeometry(W, T, D)
     const bottomBoard = new THREE.Mesh(horizGeo, carcMat)
-    bottomBoard.position.set(W / 2, T / 2, -D / 2)
+    bottomBoard.position.set(W / 2, plinthH + T / 2, -D / 2)
     cabGroup.add(bottomBoard)
     const topBoard = new THREE.Mesh(horizGeo.clone(), carcMat)
-    topBoard.position.set(W / 2, H - T / 2, -D / 2)
+    topBoard.position.set(W / 2, plinthH + bodyH - T / 2, -D / 2)
     cabGroup.add(topBoard)
     // Back board
-    const backGeo = new THREE.BoxGeometry(W, H, backT)
+    const backGeo = new THREE.BoxGeometry(W, bodyH, backT)
     const backBoard = new THREE.Mesh(backGeo, backMat)
-    backBoard.position.set(W / 2, H / 2, -D + backT / 2)
+    backBoard.position.set(W / 2, plinthH + bodyH / 2, -D + backT / 2)
     cabGroup.add(backBoard)
     // Shelves: simple horizontal boards (if drawers = 0) else skip
     if (drawers === 0) {
@@ -73,7 +76,7 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
       const count = Math.max(0, shelves)
       for (let i = 0; i < count; i++) {
         const shelf = new THREE.Mesh(shelfGeo, carcMat)
-        const y = H * (i + 1) / (count + 1)
+        const y = plinthH + bodyH * (i + 1) / (count + 1)
         shelf.position.set(W / 2, y, -D / 2)
         cabGroup.add(shelf)
       }
@@ -81,10 +84,10 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     // Front: if drawers > 0, split into drawer fronts; otherwise full door
     if (drawers > 0) {
       // Determine heights of drawer fronts
-      const totalFrontHeight = Math.max(50, Math.round(heightMM - (gaps.top + gaps.bottom)))
+      const totalFrontHeight = Math.max(50, Math.round((heightMM - plinthHeightMM - crownHeightMM) - (gaps.top + gaps.bottom)))
       const arr = drawerFronts && drawerFronts.length === drawers ? drawerFronts : Array.from({ length: drawers }, () => Math.floor(totalFrontHeight / drawers))
       // Start stacking fronts from the bottom gap (convert mm to m)
-      let currentY = gaps.bottom / 1000
+      let currentY = plinthH + gaps.bottom / 1000
       for (let i = 0; i < drawers; i++) {
         const h = arr[i] / 1000
         const frontGeo = new THREE.BoxGeometry(W, h, T)
@@ -107,9 +110,9 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
       }
     } else {
       // Single door
-      const doorGeo = new THREE.BoxGeometry(W, H, T)
+      const doorGeo = new THREE.BoxGeometry(W, bodyH, T)
       const door = new THREE.Mesh(doorGeo, frontMat)
-      door.position.set(W / 2, H / 2, -T / 2)
+      door.position.set(W / 2, plinthH + bodyH / 2, -T / 2)
       cabGroup.add(door)
       // Handle: horizontal bar
       const handleWidth = Math.min(0.4, W * 0.5)
@@ -118,26 +121,50 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
       const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
       const handleMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness:0.8, roughness:0.4 })
       const handle = new THREE.Mesh(handleGeo, handleMat)
-      handle.position.set(W / 2, H * 0.7, 0.01)
+      handle.position.set(W / 2, plinthH + bodyH * 0.7, 0.01)
       cabGroup.add(handle)
+    }
+    // Plinth board or drawer
+    if (plinthH > 0) {
+      const plinthGeo = new THREE.BoxGeometry(W, plinthH, T)
+      const plinthMesh = new THREE.Mesh(plinthGeo, frontMat)
+      plinthMesh.position.set(W / 2, plinthH / 2, -T / 2)
+      cabGroup.add(plinthMesh)
+      if (plinthDrawer) {
+        const handleWidth = Math.min(0.4, W * 0.5)
+        const handleHeight = 0.02
+        const handleDepth = 0.03
+        const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
+        const handleMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness:0.8, roughness:0.4 })
+        const handleMesh = new THREE.Mesh(handleGeo, handleMat)
+        handleMesh.position.set(W / 2, plinthH - handleHeight * 1.5, 0.01)
+        cabGroup.add(handleMesh)
+      }
+    }
+    // Crown molding
+    if (crownH > 0) {
+      const crownGeo = new THREE.BoxGeometry(W, crownH, T)
+      const crownMesh = new THREE.Mesh(crownGeo, frontMat)
+      crownMesh.position.set(W / 2, plinthH + bodyH + crownH / 2, -T / 2)
+      cabGroup.add(crownMesh)
     }
     // Legs: only for base and tall cabinets
     if (family === FAMILY.BASE || family === FAMILY.TALL) {
       const footRadius = 0.02
-      const footHeight = 0.04
+      const footHeight = plinthH > 0 ? plinthH : 0.04
       const footGeo = new THREE.CylinderGeometry(footRadius, footRadius, footHeight, 16)
       const footMat = new THREE.MeshStandardMaterial({ color: 0x444444, metalness:0.3, roughness:0.7 })
       const fl = new THREE.Mesh(footGeo, footMat)
-      fl.position.set(T + footRadius, -footHeight / 2, -T)
+      fl.position.set(T + footRadius, footHeight / 2, -T)
       cabGroup.add(fl)
       const fr = new THREE.Mesh(footGeo.clone(), footMat)
-      fr.position.set(W - T - footRadius, -footHeight / 2, -T)
+      fr.position.set(W - T - footRadius, footHeight / 2, -T)
       cabGroup.add(fr)
       const bl = new THREE.Mesh(footGeo.clone(), footMat)
-      bl.position.set(T + footRadius, -footHeight / 2, -D + T)
+      bl.position.set(T + footRadius, footHeight / 2, -D + T)
       cabGroup.add(bl)
       const br = new THREE.Mesh(footGeo.clone(), footMat)
-      br.position.set(W - T - footRadius, -footHeight / 2, -D + T)
+      br.position.set(W - T - footRadius, footHeight / 2, -D + T)
       cabGroup.add(br)
     }
     // Render once
@@ -146,6 +173,6 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     return () => {
       renderer.dispose()
     }
-  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves])
+  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves, plinthHeightMM, crownHeightMM, plinthDrawer])
   return <div ref={ref} style={{ width: 260, height: 190, border: '1px solid #E5E7EB', borderRadius: 8, background: '#fff' }} />
 }

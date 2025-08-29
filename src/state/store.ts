@@ -7,13 +7,14 @@ export const defaultGaps: Gaps = { left:2, right:2, top:2, bottom:2, between:3 }
 export type Globals = Record<FAMILY, {
   height:number; depth:number; boardType:string; frontType:string;
   gaps: Gaps; legsType?:string; hangerType?:string; offsetWall?:number; shelves?:number;
+  plinthHeight?:number; crownHeight?:number;
 }>
 
 export const defaultGlobal: Globals = {
-  [FAMILY.BASE]: { height:800, depth:600, boardType:'Płyta 18mm', frontType:'Laminat', gaps:{...defaultGaps}, legsType:'Standard 10cm', offsetWall:30, shelves:1 },
-  [FAMILY.WALL]: { height:720, depth:320, boardType:'Płyta 18mm', frontType:'Laminat', gaps:{...defaultGaps}, hangerType:'Standard', offsetWall:20, shelves:1 },
-  [FAMILY.PAWLACZ]: { height:400, depth:600, boardType:'Płyta 18mm', frontType:'Laminat', gaps:{...defaultGaps}, hangerType:'Wzmocnione', offsetWall:30, shelves:1 },
-  [FAMILY.TALL]: { height:2100, depth:600, boardType:'Płyta 18mm', frontType:'Laminat', gaps:{...defaultGaps}, shelves:4 }
+  [FAMILY.BASE]: { height:800, depth:600, boardType:'Płyta 18mm', frontType:'Laminat', gaps:{...defaultGaps}, legsType:'Standard 10cm', offsetWall:30, shelves:1, plinthHeight:100, crownHeight:0 },
+  [FAMILY.WALL]: { height:720, depth:320, boardType:'Płyta 18mm', frontType:'Laminat', gaps:{...defaultGaps}, hangerType:'Standard', offsetWall:20, shelves:1, plinthHeight:0, crownHeight:50 },
+  [FAMILY.PAWLACZ]: { height:400, depth:600, boardType:'Płyta 18mm', frontType:'Laminat', gaps:{...defaultGaps}, hangerType:'Wzmocnione', offsetWall:30, shelves:1, plinthHeight:0, crownHeight:0 },
+  [FAMILY.TALL]: { height:2100, depth:600, boardType:'Płyta 18mm', frontType:'Laminat', gaps:{...defaultGaps}, shelves:4, plinthHeight:100, crownHeight:50 }
 }
 
 export const defaultPrices = {
@@ -45,7 +46,7 @@ type Module3D = {
   size:{ w:number; h:number; d:number }; position:[number,number,number]; rotationY?:number;
   price?: any; fittings?: any
   segIndex?: number | null
-  adv?: { height?:number; depth?:number; boardType?:string; frontType?:string; gaps?: Gaps; drawerFronts?: number[]; shelves?:number }
+  adv?: { height?:number; depth?:number; boardType?:string; frontType?:string; gaps?: Gaps; drawerFronts?: number[]; shelves?:number; plinthHeight?:number; crownHeight?:number; plinthDrawer?:boolean }
     /**
      * Array of booleans indicating whether each front on this module is open.
      * A single-element array corresponds to a single door; multiple elements
@@ -101,6 +102,8 @@ export const usePlannerStore = create<Store>((set,get)=>({
       if (patch.frontType !== undefined) newAdv.frontType = patch.frontType
       if (patch.gaps !== undefined) newAdv.gaps = { ...(m.adv?.gaps||{}), ...patch.gaps }
       if (patch.shelves !== undefined) newAdv.shelves = patch.shelves
+      if (patch.plinthHeight !== undefined) newAdv.plinthHeight = patch.plinthHeight
+      if (patch.crownHeight !== undefined) newAdv.crownHeight = patch.crownHeight
       const newSize = { ...m.size }
       if (patch.height !== undefined) newSize.h = patch.height/1000
       if (patch.depth !== undefined) newSize.d = patch.depth/1000

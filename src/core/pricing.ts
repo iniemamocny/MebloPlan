@@ -5,7 +5,7 @@ export type Price = { total:number; parts: Parts; counts:any }
 function hingeCountPerDoor(doorHeightMM:number){ if (doorHeightMM<=900) return 2; if (doorHeightMM<=1500) return 3; return 4 }
 export function computeModuleCost(params: {
   family: FAMILY; kind:string; variant:string; width:number;
-  adv: { height:number; depth:number; boardType:string; frontType:string; gaps?: any };
+  adv: { height:number; depth:number; boardType:string; frontType:string; gaps?: any; plinthHeight?:number; crownHeight?:number; plinthDrawer?:boolean };
 }): Price {
   const P = usePlannerStore.getState().prices
   const base = usePlannerStore.getState().globals[params.family]
@@ -13,7 +13,12 @@ export function computeModuleCost(params: {
   const hMM = g.height
   const dMM = g.depth
   const wMM = params.width
+  const plinthMM = g.plinthHeight || 0
+  const crownMM = g.crownHeight || 0
   const h = hMM/1000, d = dMM/1000, w = wMM/1000
+  const plinthM = plinthMM/1000
+  const crownM = crownMM/1000
+  const bodyH = h - plinthM - crownM
   const boardPrice = P.board[g.boardType] || 0
   const frontPrice = P.front[g.frontType] || 0
   const edgingPrice = P.edging['ABS 1mm'] || 0
@@ -29,7 +34,8 @@ export function computeModuleCost(params: {
   } else if(params.family===FAMILY.PAWLACZ){
     if(params.variant==='p1') doors=1; if(params.variant==='p2') doors=2; if(params.variant==='p3') doors=3
   }
-  const doorHeightMM = hMM - 100
+  if (g.plinthDrawer) drawers += 1
+  const doorHeightMM = hMM - plinthMM - crownMM
   const hingesPerDoor = hingeCountPerDoor(doorHeightMM)
   const hingesCost = (P.hinges['Blum ClipTop']||0) * hingesPerDoor * doors
   const slidesCost = (P.drawerSlide['BLUM LEGRABOX']||0) * drawers
@@ -39,11 +45,11 @@ export function computeModuleCost(params: {
   const hangersCost = hangersCount * (P.hangers['Standard']||0)
   const aventosCost = aventosType ? (P.aventos[aventosType]||0) : 0
   const cargoCost = cargoW ? (P.cargo[cargoW]||0) : 0
-  const boardArea = 2*(h*d)+2*(w*d)+1*(w*d)+0.4*(w*h)
+  const boardArea = 2*(bodyH*d)+2*(w*d)+1*(w*d)+0.4*(w*bodyH)
   const boardCost = boardArea*boardPrice
   const frontArea = w*h
   const frontCost = frontArea*frontPrice
-  const edgeMeters = 2*w + 2*h + 2*h + 2*d
+  const edgeMeters = 2*w + 2*bodyH + 2*bodyH + 2*d + (plinthM>0 ? (2*w + 2*plinthM) : 0) + (crownM>0 ? (2*w + 2*crownM) : 0)
   const edgingCost = edgeMeters * (edgingPrice||0)
   const cutCost = (edgeMeters) * (P.cut||4)
   const labor = P.labor||0

@@ -28,19 +28,22 @@ export function cutlistForModule(m:any, globals:any): { items: CutItem[]; edges:
   const W = Math.round(m.size.w*1000)
   const H = Math.round(m.size.h*1000)
   const D = Math.round(m.size.d*1000)
+  const plinth = g.plinthHeight || 0
+  const crown = g.crownHeight || 0
+  const bodyH = H - plinth - crown
 
   const add = (it:CutItem) => { items.push(it) }
   const addEdge = (material:'ABS 1mm'|'ABS 2mm', length:number, part:string) => { edges.push({ material, length: Math.max(0, Math.round(length)), part }) }
 
   // Box
   const addStandardBox = () => {
-    add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Bok', qty:2, w:clampPos(D), h:clampPos(H) })
-    addEdge('ABS 1mm', H*2, 'Boki — krawędź frontowa')
+    add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Bok', qty:2, w:clampPos(D), h:clampPos(bodyH) })
+    addEdge('ABS 1mm', bodyH*2, 'Boki — krawędź frontowa')
     add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Wieniec górny', qty:1, w:clampPos(W-2*t - tol.assembly), h:clampPos(D) })
     addEdge('ABS 1mm', (W-2*t - tol.assembly), 'Wieniec górny — przód')
     add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Wieniec dolny', qty:1, w:clampPos(W-2*t - tol.assembly), h:clampPos(D) })
     addEdge('ABS 1mm', (W-2*t - tol.assembly), 'Wieniec dolny — przód')
-    add({ moduleId:m.id, moduleLabel:m.label, material:`HDF ${backT}mm`, part:'Plecy', qty:1, w:clampPos(W-2*t - tol.backGroove), h:clampPos(H - tol.backGroove) })
+    add({ moduleId:m.id, moduleLabel:m.label, material:`HDF ${backT}mm`, part:'Plecy', qty:1, w:clampPos(W-2*t - tol.backGroove), h:clampPos(bodyH - tol.backGroove) })
   }
 
   const addShelves = () => {
@@ -59,8 +62,8 @@ export function cutlistForModule(m:any, globals:any): { items: CutItem[]; edges:
 
   if (m.family===FAMILY.BASE && m.kind==='corner'){
     const filler = 70
-    add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Zaślepka narożna', qty:1, w:clampPos(filler), h:clampPos(H) })
-    addEdge('ABS 1mm', H, 'Zaślepka narożna — krawędź frontowa')
+    add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Zaślepka narożna', qty:1, w:clampPos(filler), h:clampPos(bodyH) })
+    addEdge('ABS 1mm', bodyH, 'Zaślepka narożna — krawędź frontowa')
     addStandardBox(); addShelves()
   } else {
     addStandardBox(); addShelves()
@@ -68,7 +71,7 @@ export function cutlistForModule(m:any, globals:any): { items: CutItem[]; edges:
 
   const counts = m.price?.counts || { doors:0, drawers:0 }
   const availWforFront = W - gaps.left - gaps.right
-  const availHforFront = H - gaps.top - gaps.bottom
+  const availHforFront = bodyH - gaps.top - gaps.bottom
 
   if (counts.doors>0){
     const totalBetween = counts.doors>1 ? gaps.between : 0
@@ -77,37 +80,63 @@ export function cutlistForModule(m:any, globals:any): { items: CutItem[]; edges:
     add({ moduleId:m.id, moduleLabel:m.label, material:frontMat, part:'Front drzwi', qty:counts.doors, w:leafW, h:leafH })
   }
 
-  if (counts.drawers>0){
+  const plinthDrawer = g.plinthDrawer ? 1 : 0
+  const normalDrawers = Math.max(0, counts.drawers - plinthDrawer)
+  if (normalDrawers>0){
     const adv = m.adv || {}
     const fronts:number[]|undefined = adv.drawerFronts
     if (counts.doors>0){
       const drawerFrontH = clampPos(fronts && fronts.length>0 ? fronts[0] : Math.min(180, Math.max(120, Math.floor(availHforFront*0.25))))
       add({ moduleId:m.id, moduleLabel:m.label, material:frontMat, part:'Front szuflady', qty:1, w:clampPos(availWforFront), h:drawerFrontH })
     } else {
-      if (fronts && fronts.length===counts.drawers){
+      if (fronts && fronts.length===normalDrawers){
         fronts.forEach(hF=> add({ moduleId:m.id, moduleLabel:m.label, material:frontMat, part:'Front szuflady', qty:1, w:clampPos(availWforFront), h:clampPos(hF) }))
       } else {
-        const baseH = Math.floor(availHforFront / counts.drawers)
-        let rem = availHforFront - baseH*counts.drawers
-        for (let i=0;i<counts.drawers;i++){
-          const hF = clampPos(baseH + (i===counts.drawers-1 ? rem : 0))
+        const baseH = Math.floor(availHforFront / normalDrawers)
+        let rem = availHforFront - baseH*normalDrawers
+        for (let i=0;i<normalDrawers;i++){
+          const hF = clampPos(baseH + (i===normalDrawers-1 ? rem : 0))
           add({ moduleId:m.id, moduleLabel:m.label, material:frontMat, part:'Front szuflady', qty:1, w:clampPos(availWforFront), h:hF })
         }
       }
     }
   }
 
-  if (counts.drawers>0){
+  if (plinthDrawer){
+    add({ moduleId:m.id, moduleLabel:m.label, material:frontMat, part:'Front szuflady cokołowej', qty:1, w:clampPos(availWforFront), h:clampPos(plinth) })
+    addEdge('ABS 1mm', availWforFront, 'Front szuflady cokołowej — górna krawędź')
+  } else if (plinth>0){
+    add({ moduleId:m.id, moduleLabel:m.label, material:frontMat, part:'Cokół front', qty:1, w:clampPos(availWforFront), h:clampPos(plinth) })
+    addEdge('ABS 1mm', availWforFront, 'Cokół front — górna krawędź')
+  }
+
+  if (crown>0){
+    add({ moduleId:m.id, moduleLabel:m.label, material:frontMat, part:'Listwa górna front', qty:1, w:clampPos(availWforFront), h:clampPos(crown) })
+    addEdge('ABS 1mm', availWforFront, 'Listwa górna front — dolna krawędź')
+  }
+
+  if (normalDrawers>0){
     const slideClear = 26
     const boxW = clampPos(availWforFront - slideClear)
     const boxD = clampPos(D - 50)
     const boxH = clampPos(110)
-    for (let i=0;i<counts.drawers;i++){
+    for (let i=0;i<normalDrawers;i++){
       add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Szuflada bok', qty:2, w:boxD, h:boxH })
       add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Szuflada przód/tył', qty:2, w:clampPos(boxW-2*t), h:boxH })
       add({ moduleId:m.id, moduleLabel:m.label, material:`HDF 3mm`, part:'Szuflada dno', qty:1, w:boxW, h:boxD })
       addEdge('ABS 1mm', (boxW-2*t)*2, 'Szuflada przód/tył — górna krawędź')
     }
+  }
+
+  if (plinthDrawer){
+    const slideClear = 26
+    const boxW = clampPos(availWforFront - slideClear)
+    const boxD = clampPos(D - 50)
+    const boxH = clampPos(Math.max(50, plinth - 20))
+    add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Szuflada bok', qty:2, w:boxD, h:boxH })
+    add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Szuflada przód/tył', qty:2, w:clampPos(boxW-2*t), h:boxH })
+    add({ moduleId:m.id, moduleLabel:m.label, material:`HDF 3mm`, part:'Szuflada dno', qty:1, w:boxW, h:boxD })
+    addEdge('ABS 1mm', (boxW-2*t)*2, 'Szuflada przód/tył — górna krawędź')
   }
 
   return { items, edges }
