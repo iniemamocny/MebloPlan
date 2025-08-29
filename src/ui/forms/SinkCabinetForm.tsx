@@ -1,5 +1,6 @@
 import React from 'react'
 import SingleMMInput from '../components/SingleMMInput'
+// Shared form types to prevent cross-form imports and merge conflicts
 import { CabinetFormValues, CabinetFormProps } from './types'
 
 export default function SinkCabinetForm({ values, onChange }: CabinetFormProps){
