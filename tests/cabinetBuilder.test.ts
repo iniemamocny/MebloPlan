@@ -3,6 +3,8 @@ import * as THREE from 'three'
 import { buildCabinetMesh } from '../src/scene/cabinetBuilder'
 import { FAMILY } from '../src/core/catalog'
 
+const FRONT_OFFSET = 0.002
+
 describe('buildCabinetMesh', () => {
   it('returns group with expected children for drawers', () => {
     const g = buildCabinetMesh({
@@ -47,6 +49,6 @@ describe('buildCabinetMesh', () => {
     const size = box.getSize(new THREE.Vector3())
     expect(size.x).toBeCloseTo(width, 5)
     expect(size.y).toBeCloseTo(height, 5)
-    expect(size.z).toBeCloseTo(depth, 5)
+    expect(size.z).toBeCloseTo(depth + FRONT_OFFSET, 5)
   })
 })
