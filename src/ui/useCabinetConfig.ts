@@ -4,6 +4,7 @@ import { computeModuleCost } from '../core/pricing'
 import { usePlannerStore } from '../state/store'
 import { getWallSegments, projectPointToSegment } from '../utils/walls'
 import { autoWidthsForRun, placeAlongWall } from '../utils/auto'
+import { CabinetConfig } from './types'
 
 export function useCabinetConfig(
   family: FAMILY,
@@ -15,12 +16,12 @@ export function useCabinetConfig(
   const store = usePlannerStore()
   const [cfgTab, setCfgTab] = useState<'basic' | 'adv'>('basic')
   const [widthMM, setWidthMM] = useState(600)
-  const [adv, setAdv] = useState<any>(null)
+  const [adv, setAdvState] = useState<CabinetConfig | null>(null)
 
   useEffect(() => {
     const g = store.globals[family]
     const defaultShelves = family === FAMILY.TALL ? 4 : 1
-    setAdv({
+    setAdvState({
       height: g.height,
       depth: g.depth,
       boardType: g.boardType,
@@ -90,7 +91,7 @@ export function useCabinetConfig(
     return rest
   }
 
-  const onAdd = (widthLocal: number, advLocal: any) => {
+  const onAdd = (widthLocal: number, advLocal: CabinetConfig) => {
     if (!kind || !variant) return
     const g = {
       ...store.globals[family],
@@ -235,7 +236,7 @@ export function useCabinetConfig(
     })
   }
 
-  const gLocal = adv || store.globals[family]
+  const gLocal: CabinetConfig = adv || (store.globals[family] as CabinetConfig)
 
   return {
     cfgTab,
@@ -243,7 +244,7 @@ export function useCabinetConfig(
     widthMM,
     setWidthMM,
     adv,
-    setAdv,
+    setAdv: (v: CabinetConfig) => setAdvState(v),
     gLocal,
     onAdd,
     doAutoOnSelectedWall

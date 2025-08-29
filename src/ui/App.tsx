@@ -11,6 +11,7 @@ import SingleMMInput from './components/SingleMMInput'
 import SceneViewer from './SceneViewer'
 import CabinetConfigurator from './CabinetConfigurator'
 import useCabinetConfig from './useCabinetConfig'
+import { CabinetConfig } from './types'
 
 export default function App(){
   const [boardL, setBoardL] = useState<number>(()=>{ try{ return Number(localStorage.getItem('boardL')||2800) }catch{ return 2800 } })
@@ -32,7 +33,25 @@ export default function App(){
   const [addCountertop] = useState(true)
   const threeRef = useRef<any>({})
 
-  const { cfgTab, setCfgTab, widthMM, setWidthMM, setAdv, gLocal, onAdd, doAutoOnSelectedWall } = useCabinetConfig(
+  const {
+    cfgTab,
+    setCfgTab,
+    widthMM,
+    setWidthMM,
+    setAdv,
+    gLocal,
+    onAdd,
+    doAutoOnSelectedWall
+  }: {
+    cfgTab: 'basic' | 'adv'
+    setCfgTab: (t: 'basic' | 'adv') => void
+    widthMM: number
+    setWidthMM: (n: number) => void
+    setAdv: (v: CabinetConfig) => void
+    gLocal: CabinetConfig
+    onAdd: (width: number, adv: CabinetConfig) => void
+    doAutoOnSelectedWall: () => void
+  } = useCabinetConfig(
     family,
     kind,
     variant,
@@ -113,19 +132,19 @@ export default function App(){
           <button className={`tabBtn ${tab==='room'?'active':''}`} onClick={()=>setTab('room')}>Pomieszczenie</button>
           <button className={`tabBtn ${tab==='costs'?'active':''}`} onClick={()=>setTab('costs')}>Koszty</button>
           <button className={`tabBtn ${tab==='cut'?'active':''}`} onClick={()=>setTab('cut')}>Formatki</button>
-          <button className={`tabBtn ${tab==='phase8'?'active':''}`} onClick={()=>setTab('cab')}></button>
+            {/* placeholder removed */}
         </div>
 
         {tab==='cab' && (<>
           <div>
             <div className="h1">Typ szafki</div>
-            <TypePicker family={family} setFamily={(f)=>{ setFamily(f); setKind(null); setVariant(null); }} />
+              <TypePicker family={family} setFamily={(f: FAMILY)=>{ setFamily(f); setKind(null); setVariant(null); }} />
           </div>
 
           <div className="section">
             <div className="hd"><div><div className="h1">Podkategorie ({FAMILY_LABELS[family]})</div></div></div>
             <div className="bd">
-              <KindTabs family={family} kind={kind} setKind={(k)=>{ setKind(k); setVariant(null); }} />
+                <KindTabs family={family} kind={kind} setKind={(k: Kind)=>{ setKind(k); setVariant(null); }} />
             </div>
           </div>
 
@@ -133,7 +152,7 @@ export default function App(){
             <div className="section">
               <div className="hd"><div><div className="h1">Wariant</div></div></div>
               <div className="bd">
-                <VariantList kind={kind} onPick={(v)=>{ setVariant(v); setCfgTab('basic'); }} />
+                  <VariantList kind={kind} onPick={(v: Variant)=>{ setVariant(v); setCfgTab('basic'); }} />
               </div>
             </div>
           )}
