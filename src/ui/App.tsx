@@ -49,7 +49,7 @@ export default function App(){
   useEffect(()=>{
     const g = store.globals[family]
     const defaultShelves = family===FAMILY.TALL ? 4 : 1
-    setAdv({ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:{...g.gaps}, shelves:g.shelves ?? defaultShelves })
+    setAdv({ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:{...g.gaps}, shelves:g.shelves ?? defaultShelves, backPanel:g.backPanel })
   }, [family, store.globals])
 
   const undo = store.undo
@@ -111,6 +111,8 @@ export default function App(){
     const footMat = new THREE.MeshStandardMaterial({ color: footColour, metalness:0.3, roughness:0.7 })
     const group = new THREE.Group()
     group.userData.kind = 'cab'
+    // Extract advanced settings once at the beginning
+    const adv = mod.adv || {}
     // Carcase sides (add legHeight offset on Y axis)
     const sideGeo = new THREE.BoxGeometry(T, H, D)
     const leftSide = new THREE.Mesh(sideGeo, carcMat)
@@ -128,12 +130,23 @@ export default function App(){
     top.position.set(W / 2, legHeight + H - T / 2, -D / 2)
     group.add(top)
     // Back panel
-    const backGeo = new THREE.BoxGeometry(W, H, backT)
-    const back = new THREE.Mesh(backGeo, backMat)
-    back.position.set(W / 2, legHeight + H / 2, -D + backT / 2)
-    group.add(back)
-    // Extract advanced settings once at the beginning
-    const adv = mod.adv || {}
+    const backStyle = adv.backPanel || 'full'
+    if (backStyle === 'full') {
+      const backGeo = new THREE.BoxGeometry(W, H, backT)
+      const back = new THREE.Mesh(backGeo, backMat)
+      back.position.set(W / 2, legHeight + H / 2, -D + backT / 2)
+      group.add(back)
+    } else if (backStyle === 'split') {
+      const gap = 0.002
+      const halfH = (H - gap) / 2
+      const backGeo = new THREE.BoxGeometry(W, halfH, backT)
+      const bottomBack = new THREE.Mesh(backGeo, backMat)
+      bottomBack.position.set(W / 2, legHeight + halfH / 2, -D + backT / 2)
+      group.add(bottomBack)
+      const topBack = new THREE.Mesh(backGeo.clone(), backMat)
+      topBack.position.set(W / 2, legHeight + H - halfH / 2, -D + backT / 2)
+      group.add(topBack)
+    }
     const gaps = adv.gaps || { top: 0, bottom: 0 }
     // Determine if the cabinet has drawers (presence of drawerFronts array)
     const hasDrawers = Array.isArray(adv.drawerFronts) && adv.drawerFronts.length > 0
@@ -510,7 +523,7 @@ export default function App(){
     const g = { ...store.globals[family], ...advLocal, gaps: { ...store.globals[family].gaps, ...(advLocal?.gaps||{}) } }
     const h = (g.height)/1000, d=(g.depth)/1000, w=(widthMM)/1000
     const id = `mod_${Date.now()}_${Math.floor(Math.random()*1e6)}`
-    const price = computeModuleCost({ family, kind:kind.key, variant:variant.key, width: widthMM, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:g.gaps } })
+    const price = computeModuleCost({ family, kind:kind.key, variant:variant.key, width: widthMM, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:g.gaps, backPanel:g.backPanel } })
     const snap = snapToWalls({ w, h, d }, family)
     // Augment advanced settings with defaults for hinge, drawer slide type and animation speed if missing.
     // Additionally, compute drawer front heights based on the selected variant if none were provided.
@@ -600,7 +613,7 @@ export default function App(){
     placed.forEach((pl,i)=>{
       const wmm = widths[i]; const w=wmm/1000
       const id = `auto_${Date.now()}_${i}_${Math.floor(Math.random()*1e6)}`
-      const price = computeModuleCost({ family, kind:(KIND_SETS[family][0]?.key)||'doors', variant:'d1', width: wmm, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:g.gaps } })
+      const price = computeModuleCost({ family, kind:(KIND_SETS[family][0]?.key)||'doors', variant:'d1', width: wmm, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:g.gaps, backPanel:g.backPanel } })
       let mod:any = { id, label:'Auto', family, kind:(KIND_SETS[family][0]?.key)||'doors', size:{ w,h,d }, position:[pl.center[0]/1000, h/2, pl.center[1]/1000], rotationY:pl.rot, segIndex: selWall, price, adv:g }
       mod = resolveCollisions(mod)
       store.addModule(mod)
@@ -728,10 +741,10 @@ export default function App(){
                       />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} backPanel={gLocal.backPanel} />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} backPanel={gLocal.backPanel} />
                     </div>
                   </div>
                 )}
@@ -742,6 +755,11 @@ export default function App(){
                       <div><div className="small">Głębokość (mm)</div><input className="input" type="number" value={gLocal.depth} onChange={e=>setAdv({...gLocal, depth:Number((e.target as HTMLInputElement).value)||0})} /></div>
                       <div><div className="small">Płyta</div><select className="input" value={gLocal.boardType} onChange={e=>setAdv({...gLocal, boardType:(e.target as HTMLSelectElement).value})}>{Object.keys(store.prices.board).map(k=><option key={k} value={k}>{k}</option>)}</select></div>
                       <div><div className="small">Front</div><select className="input" value={gLocal.frontType} onChange={e=>setAdv({...gLocal, frontType:(e.target as HTMLSelectElement).value})}>{Object.keys(store.prices.front).map(k=><option key={k} value={k}>{k}</option>)}</select></div>
+                      <div><div className="small">Plecy</div><select className="input" value={gLocal.backPanel||'full'} onChange={e=>setAdv({...gLocal, backPanel:(e.target as HTMLSelectElement).value})}>
+                        <option value="full">full</option>
+                        <option value="split">split</option>
+                        <option value="none">none</option>
+                      </select></div>
                     </div>
                     {!(variant?.key?.startsWith('s')) && (
                       <div style={{marginTop:8}}>
@@ -767,10 +785,10 @@ export default function App(){
                       />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} backPanel={gLocal.backPanel} />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} backPanel={gLocal.backPanel} />
                     </div>
                     <div className="row" style={{marginTop:8}}>
                       <button className="btn" onClick={()=>onAdd(widthMM, gLocal)}>Wstaw szafkę</button>
