@@ -36,6 +36,7 @@ export default function GlobalSettings(){
             <Field label="Rodzaj płyty" type="select" value={g.boardType} onChange={(v)=>set({boardType:v})} options={Object.keys(store.prices.board)} />
             <Field label="Grubość płyty (mm)" value={g.boardThickness ?? 18} onChange={(v)=>set({boardThickness:v})} />
             <Field label="Rodzaj frontu" type="select" value={g.frontType} onChange={(v)=>set({frontType:v})} options={Object.keys(store.prices.front)} />
+            <Field label="Plecy" type="select" value={g.backPanel||'full'} onChange={(v)=>set({backPanel:v})} options={['full','split','none']} />
             <Field label="Zawias" type="select" value={g.hingeType} onChange={(v)=>set({hingeType:v})} options={Object.keys(store.prices.hinges)} />
             <Field label="Prowadnice" type="select" value={g.drawerSlide} onChange={(v)=>set({drawerSlide:v})} options={Object.keys(store.prices.drawerSlide)} />
             <Field label="Aventos" type="select" value={g.aventosType} onChange={(v)=>set({aventosType:v})} options={['Brak', ...Object.keys(store.prices.aventos)]} />

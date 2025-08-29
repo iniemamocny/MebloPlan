@@ -5,7 +5,7 @@ export type Price = { total:number; parts: Parts; counts:any }
 function hingeCountPerDoor(doorHeightMM:number){ if (doorHeightMM<=900) return 2; if (doorHeightMM<=1500) return 3; return 4 }
 export function computeModuleCost(params: {
   family: FAMILY; kind:string; variant:string; width:number;
-  adv: { height:number; depth:number; boardType:string; boardThickness?:number; frontType:string; gaps?: any; hingeType?:string; drawerSlide?:string; aventosType?:string };
+  adv: { height:number; depth:number; boardType:string; boardThickness?:number; frontType:string; gaps?: any; hingeType?:string; drawerSlide?:string; aventosType?:string; backPanel?:'full'|'split'|'none' };
 }): Price {
   const P = usePlannerStore.getState().prices
   const base = usePlannerStore.getState().globals[params.family]
@@ -42,7 +42,10 @@ export function computeModuleCost(params: {
   const hangersCost = hangersCount * (P.hangers['Standard']||0)
   const aventosCost = selectedAventos ? (P.aventos[selectedAventos]||0) : 0
   const cargoCost = cargoW ? (P.cargo[cargoW]||0) : 0
-  const boardArea = 2*(h*d)+2*(w*d)+1*(w*d)+0.4*(w*h)
+  const carcArea = 2*(h*d)+2*(w*d)+0.4*(w*h)
+  const backStyle = g.backPanel || 'full'
+  const backArea = (backStyle==='none') ? 0 : w*h
+  const boardArea = carcArea + backArea
   const boardCost = boardArea*boardPrice
   const frontArea = w*h
   const frontCost = frontArea*frontPrice

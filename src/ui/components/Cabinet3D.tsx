@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { FAMILY, FAMILY_COLORS } from '../../core/catalog'
 
-export default function Cabinet3D({ widthMM, heightMM, depthMM, boardThickness=18, drawers, gaps, drawerFronts, family, shelves=1, hingeType, drawerSlide, aventosType }:{ widthMM:number;heightMM:number;depthMM:number;boardThickness?:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number; hingeType?:string; drawerSlide?:string; aventosType?:string }){
+export default function Cabinet3D({ widthMM, heightMM, depthMM, boardThickness=18, drawers, gaps, drawerFronts, family, shelves=1, hingeType, drawerSlide, aventosType, backPanel='full' }:{ widthMM:number;heightMM:number;depthMM:number;boardThickness?:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number; hingeType?:string; drawerSlide?:string; aventosType?:string; backPanel?:'full'|'split'|'none' }){
   const ref = useRef<HTMLDivElement>(null)
   useEffect(()=>{
     // Wait until our container is available
@@ -63,10 +63,23 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, boardThickness=1
     topBoard.position.set(W / 2, H - T / 2, -D / 2)
     cabGroup.add(topBoard)
     // Back board
-    const backGeo = new THREE.BoxGeometry(W, H, backT)
-    const backBoard = new THREE.Mesh(backGeo, backMat)
-    backBoard.position.set(W / 2, H / 2, -D + backT / 2)
-    cabGroup.add(backBoard)
+    if (backPanel !== 'none') {
+      if (backPanel === 'split') {
+        const halfH = (H - T) / 2
+        const backGeo = new THREE.BoxGeometry(W, halfH, backT)
+        const topBack = new THREE.Mesh(backGeo, backMat)
+        topBack.position.set(W / 2, H - halfH / 2 - T / 2, -D + backT / 2)
+        cabGroup.add(topBack)
+        const botBack = new THREE.Mesh(backGeo.clone(), backMat)
+        botBack.position.set(W / 2, halfH / 2 + T / 2, -D + backT / 2)
+        cabGroup.add(botBack)
+      } else {
+        const backGeo = new THREE.BoxGeometry(W, H, backT)
+        const backBoard = new THREE.Mesh(backGeo, backMat)
+        backBoard.position.set(W / 2, H / 2, -D + backT / 2)
+        cabGroup.add(backBoard)
+      }
+    }
     // Shelves: simple horizontal boards (if drawers = 0) else skip
     if (drawers === 0) {
       const shelfGeo = new THREE.BoxGeometry(W - 2 * T, T, D)
@@ -178,6 +191,6 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, boardThickness=1
     return () => {
       renderer.dispose()
     }
-  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves, hingeType, drawerSlide, aventosType])
+  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves, hingeType, drawerSlide, aventosType, backPanel])
   return <div ref={ref} style={{ width: 260, height: 190, border: '1px solid #E5E7EB', borderRadius: 8, background: '#fff' }} />
 }
