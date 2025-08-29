@@ -89,9 +89,6 @@ export function packIntoSheets(board:Board, parts:Part[]): Sheet[] {
     // nowy arkusz jeżeli się nie mieści w pionie
     if (y + p._h + board.kerf > board.L + 1e-6) {
       flushSheet(false) // start new sheet
-// start na nowym arkuszu
-// resetowane x,y,rowH już w flushSheet
-// teraz element powinien wejść
       if (p._w > board.W || p._h > board.L) {
         // teoretycznie niemożliwe po validateParts
         flushSheet(true)
