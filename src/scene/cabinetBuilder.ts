@@ -119,6 +119,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       const frontMesh = new THREE.Mesh(frontGeo, frontMat)
       const fg = new THREE.Group()
       fg.position.set(W / 2, currentY + h / 2, FRONT_OFFSET - T / 2)
+      fg.userData.closedZ = FRONT_OFFSET - T / 2
       frontMesh.position.set(0, 0, 0)
       fg.add(frontMesh)
       fg.userData.type = 'drawer'
