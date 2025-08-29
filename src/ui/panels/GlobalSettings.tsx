@@ -35,6 +35,15 @@ export default function GlobalSettings(){
             <Field label="Głębokość (mm)" value={g.depth} onChange={(v)=>set({depth:v})} />
             <Field label="Rodzaj płyty" type="select" value={g.boardType} onChange={(v)=>set({boardType:v})} options={Object.keys(store.prices.board)} />
             <Field label="Rodzaj frontu" type="select" value={g.frontType} onChange={(v)=>set({frontType:v})} options={Object.keys(store.prices.front)} />
+            {(fam===FAMILY.BASE || fam===FAMILY.TALL) && (
+              <Field label="Wysokość cokołu (mm)" value={g.plinthHeight||0} onChange={(v)=>set({plinthHeight:v})} />
+            )}
+            {(fam===FAMILY.WALL || fam===FAMILY.TALL) && (
+              <Field label="Listwa górna (mm)" value={g.crownHeight||0} onChange={(v)=>set({crownHeight:v})} />
+            )}
+            {(fam===FAMILY.BASE || fam===FAMILY.TALL) && (
+              <Field label="Cokół jako szuflada" type="select" value={g.plinthDrawer?'Tak':'Nie'} onChange={(v)=>set({plinthDrawer:v==='Tak'})} options={['Nie','Tak']} />
+            )}
             {fam===FAMILY.BASE && (<>
               <Field label="Nóżki" type="select" value={g.legsType} onChange={(v)=>set({legsType:v})} options={Object.keys(store.prices.legs)} />
               <Field label="Odsunięcie od ściany (mm)" value={g.offsetWall||0} onChange={(v)=>set({offsetWall:v})} />

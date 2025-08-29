@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { FAMILY, FAMILY_COLORS } from '../../core/catalog'
 
-export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves=1 }:{ widthMM:number;heightMM:number;depthMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number }){
+export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves=1, plinthMM=0, crownMM=0 }:{ widthMM:number;heightMM:number;depthMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number; plinthMM?:number; crownMM?:number }){
   const ref = useRef<HTMLDivElement>(null)
   useEffect(()=>{
     // Wait until our container is available
@@ -30,6 +30,8 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     const W = widthMM / 1000
     const H = heightMM / 1000
     const D = depthMM / 1000
+    const P = plinthMM/1000
+    const C = crownMM/1000
     // Board thickness (18 mm) and back thickness (3 mm)
     const T = 0.018
     const backT = 0.003
@@ -140,12 +142,24 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
       br.position.set(W - T - footRadius, -footHeight / 2, -D + T)
       cabGroup.add(br)
     }
+    if (plinthMM>0){
+      const plinthGeo = new THREE.BoxGeometry(W, P, D)
+      const plinth = new THREE.Mesh(plinthGeo, frontMat)
+      plinth.position.set(W/2, -P/2, -D/2)
+      cabGroup.add(plinth)
+    }
+    if (crownMM>0){
+      const crownGeo = new THREE.BoxGeometry(W, C, D)
+      const crown = new THREE.Mesh(crownGeo, carcMat)
+      crown.position.set(W/2, H + C/2, -D/2)
+      cabGroup.add(crown)
+    }
     // Render once
     renderer.render(scene, camera)
     // Clean up on unmount
     return () => {
       renderer.dispose()
     }
-  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves])
+  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves, plinthMM, crownMM])
   return <div ref={ref} style={{ width: 260, height: 190, border: '1px solid #E5E7EB', borderRadius: 8, background: '#fff' }} />
 }

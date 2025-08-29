@@ -21,6 +21,9 @@ export function cutlistForModule(m:any, globals:any): { items: CutItem[]; edges:
   const g = m.adv ? { ...base, ...m.adv, gaps: { ...base.gaps, ...(m.adv.gaps||{}) } } : base
   const gaps = (g.gaps)||{ left:2,right:2,top:2,bottom:2,between:3 }
   const t = parseThickness(g.boardType || 'Płyta 18mm')
+  const plinthH = g.plinthHeight||0
+  const crownH = g.crownHeight||0
+  const plinthDrawer = g.plinthDrawer
   const frontMat = `Front ${g.frontType||'Laminat'}`
   const backT = 3
   const items: CutItem[] = []
@@ -108,6 +111,18 @@ export function cutlistForModule(m:any, globals:any): { items: CutItem[]; edges:
       add({ moduleId:m.id, moduleLabel:m.label, material:`HDF 3mm`, part:'Szuflada dno', qty:1, w:boxW, h:boxD })
       addEdge('ABS 1mm', (boxW-2*t)*2, 'Szuflada przód/tył — górna krawędź')
     }
+  }
+
+  if (plinthH>0){
+    add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Cokół', qty:1, w:clampPos(W), h:clampPos(plinthH) })
+    addEdge('ABS 1mm', W, 'Cokół — krawędź górna')
+    if (plinthDrawer){
+      add({ moduleId:m.id, moduleLabel:m.label, material:frontMat, part:'Front cokołu', qty:1, w:clampPos(availWforFront), h:clampPos(plinthH) })
+    }
+  }
+  if (crownH>0){
+    add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Listwa górna', qty:1, w:clampPos(W), h:clampPos(crownH) })
+    addEdge('ABS 1mm', W, 'Listwa górna — krawędź dolna')
   }
 
   return { items, edges }

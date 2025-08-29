@@ -5,7 +5,7 @@ export type Price = { total:number; parts: Parts; counts:any }
 function hingeCountPerDoor(doorHeightMM:number){ if (doorHeightMM<=900) return 2; if (doorHeightMM<=1500) return 3; return 4 }
 export function computeModuleCost(params: {
   family: FAMILY; kind:string; variant:string; width:number;
-  adv: { height:number; depth:number; boardType:string; frontType:string; gaps?: any };
+  adv: { height:number; depth:number; boardType:string; frontType:string; gaps?: any; plinthHeight?:number; crownHeight?:number; plinthDrawer?:boolean };
 }): Price {
   const P = usePlannerStore.getState().prices
   const base = usePlannerStore.getState().globals[params.family]
@@ -17,6 +17,9 @@ export function computeModuleCost(params: {
   const boardPrice = P.board[g.boardType] || 0
   const frontPrice = P.front[g.frontType] || 0
   const edgingPrice = P.edging['ABS 1mm'] || 0
+  const plinthH = g.plinthHeight||0
+  const crownH = g.crownHeight||0
+  const plinthDrawer = g.plinthDrawer
   let doors = 0, drawers = 0, cargoW: '150'|'200'|'300'|null = null, aventosType: 'HK'|'HS'|null = null, kits = 0
   if(params.family===FAMILY.BASE){
     if(params.kind==='doors'){ if(params.variant==='d1') doors=1; if(params.variant==='d2') doors=2; if(params.variant==='d1+drawer'){ doors=1; drawers=1 } if(params.variant==='d2+drawer'){ doors=2; drawers=1 } if(params.variant==='sink'){ doors=2; kits += (P.sinkKit||0) } if(params.variant==='hob'){ doors=2 } }
@@ -29,6 +32,7 @@ export function computeModuleCost(params: {
   } else if(params.family===FAMILY.PAWLACZ){
     if(params.variant==='p1') doors=1; if(params.variant==='p2') doors=2; if(params.variant==='p3') doors=3
   }
+  if(plinthDrawer && params.family===FAMILY.BASE) drawers += 1
   const doorHeightMM = hMM - 100
   const hingesPerDoor = hingeCountPerDoor(doorHeightMM)
   const hingesCost = (P.hinges['Blum ClipTop']||0) * hingesPerDoor * doors
@@ -39,11 +43,14 @@ export function computeModuleCost(params: {
   const hangersCost = hangersCount * (P.hangers['Standard']||0)
   const aventosCost = aventosType ? (P.aventos[aventosType]||0) : 0
   const cargoCost = cargoW ? (P.cargo[cargoW]||0) : 0
-  const boardArea = 2*(h*d)+2*(w*d)+1*(w*d)+0.4*(w*h)
+  let boardArea = 2*(h*d)+2*(w*d)+1*(w*d)+0.4*(w*h)
+  boardArea += (plinthH/1000)*w + (crownH/1000)*w
   const boardCost = boardArea*boardPrice
-  const frontArea = w*h
+  let frontArea = w*h
+  if(plinthDrawer) frontArea += w*(plinthH/1000)
   const frontCost = frontArea*frontPrice
-  const edgeMeters = 2*w + 2*h + 2*h + 2*d
+  let edgeMeters = 2*w + 2*h + 2*h + 2*d
+  if(plinthDrawer) edgeMeters += 2*w + 2*(plinthH/1000)
   const edgingCost = edgeMeters * (edgingPrice||0)
   const cutCost = (edgeMeters) * (P.cut||4)
   const labor = P.labor||0
