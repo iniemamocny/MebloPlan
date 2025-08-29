@@ -4,6 +4,7 @@ import { computeModuleCost } from '../core/pricing'
 import { usePlannerStore } from '../state/store'
 import { getWallSegments, projectPointToSegment } from '../utils/walls'
 import { autoWidthsForRun, placeAlongWall } from '../utils/auto'
+import { Module3D, ModuleAdv } from '../types'
 import { CabinetConfig } from './types'
 
 export function useCabinetConfig(
@@ -37,17 +38,21 @@ export function useCabinetConfig(
     if (segs.length === 0)
       return {
         pos: [
-          store.modules.reduce((s: any, x: any) => s + x.size.w, 0) + mSize.w / 2,
+          store.modules.reduce((s, x) => s + x.size.w, 0) + mSize.w / 2,
           mSize.h / 2,
           0
-        ],
+        ] as [number, number, number],
         rot: 0,
-        segIndex: null
+        segIndex: null as number | null
       }
-    let best: any = null
+    let best: {
+      seg: ReturnType<typeof getWallSegments>[number]
+      pr: ReturnType<typeof projectPointToSegment>
+      i: number
+    } | null = null
     const guess = { x: 0, y: 0 }
     segs.forEach((seg, i) => {
-      const pr = projectPointToSegment(guess.x, guess.y, seg as any)
+      const pr = projectPointToSegment(guess.x, guess.y, seg)
       if (!best || pr.dist < best.pr.dist) best = { seg, pr, i }
     })
     const gl = store.globals[fam]
@@ -61,17 +66,17 @@ export function useCabinetConfig(
     const z = best.pr.y / 1000 + uy * offset
     const rot = -best.seg.angle
     const y = mSize.h / 2
-    return { pos: [x, y, z], rot, segIndex: best.i }
+    return { pos: [x, y, z] as [number, number, number], rot, segIndex: best.i }
   }
 
-  const collides = (a: any, b: any) => {
-    const dx = Math.abs(a.position[0] - b.position[0]),
-      dz = Math.abs(a.position[2] - b.position[2])
+  const collides = (a: Module3D, b: Module3D) => {
+    const dx = Math.abs(a.position[0] - b.position[0])
+    const dz = Math.abs(a.position[2] - b.position[2])
     return dx < (a.size.w + b.size.w) / 2 && dz < (a.size.d + b.size.d) / 2
   }
 
-  const resolveCollisions = (mod: any) => {
-    let tryMod = { ...mod }
+  const resolveCollisions = (mod: Module3D): Module3D => {
+    let tryMod: Module3D = { ...mod }
     let loops = 0
     const step = 0.02
     const segs = getWallSegments()
@@ -79,7 +84,7 @@ export function useCabinetConfig(
     const tangent = seg
       ? { x: (seg.b.x - seg.a.x) / seg.length, y: (seg.b.y - seg.a.y) / seg.length }
       : { x: 1, y: 0 }
-    while (store.modules.some((m: any) => collides(tryMod, m)) && loops < 500) {
+    while (store.modules.some((m) => collides(tryMod, m)) && loops < 500) {
       tryMod.position = [
         tryMod.position[0] + tangent.x * step,
         tryMod.position[1],
@@ -88,16 +93,16 @@ export function useCabinetConfig(
       loops++
     }
     const { segIndex, ...rest } = tryMod
-    return rest
+    return rest as Module3D
   }
 
   const onAdd = (widthLocal: number, advLocal: CabinetConfig) => {
     if (!kind || !variant) return
-    const g = {
+    const g: CabinetConfig = {
       ...store.globals[family],
       ...advLocal,
       gaps: { ...store.globals[family].gaps, ...(advLocal?.gaps || {}) }
-    }
+    } as CabinetConfig
     const h = g.height / 1000,
       d = g.depth / 1000,
       w = widthLocal / 1000
@@ -120,7 +125,12 @@ export function useCabinetConfig(
       { prices: store.prices, globals: store.globals }
     )
     const snap = snapToWalls({ w, h, d }, family)
-    const advAugmented: any = { ...g }
+    const advAugmented: ModuleAdv & {
+      hinge?: string
+      drawerSlide?: string
+      animationSpeed?: number
+      doorCount?: number
+    } = { ...g }
     if (!advAugmented.hinge) advAugmented.hinge = 'left'
     if (!advAugmented.drawerSlide) advAugmented.drawerSlide = 'BLUM LEGRABOX'
     if (advAugmented.animationSpeed === undefined) advAugmented.animationSpeed = 0.15
@@ -166,7 +176,7 @@ export function useCabinetConfig(
       advAugmented.drawerFronts = heights
     }
     advAugmented.doorCount = impliedDoors
-    let mod: any = {
+    let mod: Module3D = {
       id,
       label: variant.label,
       family,
@@ -219,7 +229,7 @@ export function useCabinetConfig(
         },
         { prices: store.prices, globals: store.globals }
       )
-      let mod: any = {
+      let mod: Module3D = {
         id,
         label: 'Auto',
         family,
@@ -229,7 +239,7 @@ export function useCabinetConfig(
         rotationY: pl.rot,
         segIndex: selWall,
         price,
-        adv: g
+        adv: g as ModuleAdv
       }
       mod = resolveCollisions(mod)
       store.addModule(mod)
