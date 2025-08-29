@@ -4,6 +4,7 @@ import React, { useMemo } from 'react'
 import { usePlannerStore } from '../../state/store'
 import { cutlistForModule, aggregateCutlist, toCSV, aggregateEdgebanding } from '../../core/cutlist'
 import jsPDF from 'jspdf'
+import useLocalStorageState from '../hooks/useLocalStorageState'
 
 export default function CutlistTab(){
   const store = usePlannerStore()
@@ -42,12 +43,17 @@ export default function CutlistTab(){
   }
 
   
+  const [boardL] = useLocalStorageState<number>('boardL', 2800)
+  // Default board width changed from 2100 mm to 2070 mm to reflect updated sheet dimensions
+  const [boardW] = useLocalStorageState<number>('boardW', 2070)
+  const [boardKerf] = useLocalStorageState<number>('boardKerf', 3)
+  const [boardHasGrain] = useLocalStorageState<boolean>('boardHasGrain', true)
+
   const board = {
-    L: Number(localStorage.getItem('boardL')||2800),
-    // Default board width changed from 2100 mm to 2070 mm to reflect updated sheet dimensions
-    W: Number(localStorage.getItem('boardW')||2070),
-    kerf: Number(localStorage.getItem('boardKerf')||3),
-    hasGrain: (localStorage.getItem('boardHasGrain')||'1')==='1'
+    L: boardL,
+    W: boardW,
+    kerf: boardKerf,
+    hasGrain: boardHasGrain
   }
   const items = aggregated.map((row: any) => ({
     w: Math.round(row.w || 0),

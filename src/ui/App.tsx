@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import useLocalStorageState from './hooks/useLocalStorageState'
 import { FAMILY, FAMILY_LABELS, Kind, Variant } from '../core/catalog'
 import { usePlannerStore } from '../state/store'
 import GlobalSettings from './panels/GlobalSettings'
@@ -14,15 +15,10 @@ import useCabinetConfig from './useCabinetConfig'
 import { CabinetConfig } from './types'
 
 export default function App(){
-  const [boardL, setBoardL] = useState<number>(()=>{ try{ return Number(localStorage.getItem('boardL')||2800) }catch{ return 2800 } })
-  const [boardW, setBoardW] = useState<number>(()=>{ try{ return Number(localStorage.getItem('boardW')||2070) }catch{ return 2070 } })
-  const [boardKerf, setBoardKerf] = useState<number>(()=>{ try{ return Number(localStorage.getItem('boardKerf')||3) }catch{ return 3 } })
-  const [boardHasGrain, setBoardHasGrain] = useState<boolean>(()=>{ try{ return (localStorage.getItem('boardHasGrain')||'1')==='1' }catch{ return true } })
-
-  useEffect(()=>{ try{ localStorage.setItem('boardL', String(boardL)) }catch{} }, [boardL])
-  useEffect(()=>{ try{ localStorage.setItem('boardW', String(boardW)) }catch{} }, [boardW])
-  useEffect(()=>{ try{ localStorage.setItem('boardKerf', String(boardKerf)) }catch{} }, [boardKerf])
-  useEffect(()=>{ try{ localStorage.setItem('boardHasGrain', boardHasGrain?'1':'0') }catch{} }, [boardHasGrain])
+  const [boardL, setBoardL] = useLocalStorageState<number>('boardL', 2800)
+  const [boardW, setBoardW] = useLocalStorageState<number>('boardW', 2070)
+  const [boardKerf, setBoardKerf] = useLocalStorageState<number>('boardKerf', 3)
+  const [boardHasGrain, setBoardHasGrain] = useLocalStorageState<boolean>('boardHasGrain', true)
 
   const store = usePlannerStore()
   const [tab, setTab] = useState<'cab'|'room'|'costs'|'cut'>('cab')
