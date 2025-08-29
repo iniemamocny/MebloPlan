@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { setupThree } from '../scene/engine'
+import { buildCabinetMesh } from '../scene/cabinetBuilder'
 import { FAMILY, FAMILY_LABELS, Kind, Variant, KIND_SETS } from '../core/catalog'
 import { usePlannerStore } from '../state/store'
 import GlobalSettings from './panels/GlobalSettings'
@@ -69,337 +70,38 @@ export default function App(){
     return ()=>window.removeEventListener('keydown', handler)
   }, [undo, redo])
 
-  /**
-   * Build a detailed cabinet mesh from a module definition.  The returned
-   * THREE.Group contains individual parts (sides, top, bottom, back,
-   * front boards, handles and feet) assembled relative to the module's
-   * local origin.  Board thickness and back thickness are fixed at
-   * 18 mm and 3 mm respectively.  Front splits are determined by the
-   * module's adv.drawerFronts array (if present); otherwise a single
-   * door is rendered.  Gaps are taken from adv.gaps when computing
-   * drawer heights.
-   */
-  const createCabinetMesh = (mod: any) => {
-    const W = mod.size.w
-    const H = mod.size.h
-    const D = mod.size.d
-    // board and back thickness in metres
-    const T = 0.018
-    const backT = 0.003
-    // Determine leg height based on global settings (in metres). Base cabinets use legs, others don't.
-    const famGlobal = store.globals[mod.family] || {}
-    let legHeight = 0
-    if (mod.family === FAMILY.BASE) {
-      const label: string = (famGlobal as any).legsType || ''
-      const match = label.match(/(\d+\.?\d*)/)
-      if (match) {
-        legHeight = parseFloat(match[1]) / 100 // convert from cm to m
-      } else {
-        legHeight = 0.1 // default 10 cm
-      }
-    }
-    // Colour palette
-    const carcColour = new THREE.Color(0xf5f5f5)
-    const frontColour = new THREE.Color(0x977e65)
-    const backColour = new THREE.Color(0xf0f0f0)
-    const handleColour = new THREE.Color(0x333333)
-    const footColour = new THREE.Color(0x444444)
-    const carcMat = new THREE.MeshStandardMaterial({ color: carcColour, metalness:0.1, roughness:0.8 })
-    const frontMat = new THREE.MeshStandardMaterial({ color: frontColour, metalness:0.2, roughness:0.6 })
-    const backMat = new THREE.MeshStandardMaterial({ color: backColour, metalness:0.05, roughness:0.9 })
-    const handleMat = new THREE.MeshStandardMaterial({ color: handleColour, metalness:0.8, roughness:0.4 })
-    const footMat = new THREE.MeshStandardMaterial({ color: footColour, metalness:0.3, roughness:0.7 })
-    const hardwareMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness:0.8, roughness:0.3 })
-    const group = new THREE.Group()
-    group.userData.kind = 'cab'
-    // Extract advanced settings once at the beginning
-    const adv = mod.adv || {}
-    const hingeType = adv.hingeType || ''
-    const hasBlumotion = /blumotion/i.test(hingeType)
-    const openingMech = adv.openingMechanism || ''
-    const showHandles = !openingMech || /uchwyt|handle/i.test(openingMech.toLowerCase())
-    // Carcase sides (add legHeight offset on Y axis)
-    const sideGeo = new THREE.BoxGeometry(T, H, D)
-    const leftSide = new THREE.Mesh(sideGeo, carcMat)
-    leftSide.position.set(T / 2, legHeight + H / 2, -D / 2)
-    group.add(leftSide)
-    const rightSide = new THREE.Mesh(sideGeo.clone(), carcMat)
-    rightSide.position.set(W - T / 2, legHeight + H / 2, -D / 2)
-    group.add(rightSide)
-    // Top and bottom boards
-    const horizGeo = new THREE.BoxGeometry(W, T, D)
-    const bottom = new THREE.Mesh(horizGeo, carcMat)
-    bottom.position.set(W / 2, legHeight + T / 2, -D / 2)
-    group.add(bottom)
-    const top = new THREE.Mesh(horizGeo.clone(), carcMat)
-    top.position.set(W / 2, legHeight + H - T / 2, -D / 2)
-    group.add(top)
-    // Back panel
-    const backStyle = adv.backPanel || 'full'
-    if (backStyle === 'full') {
-      const backGeo = new THREE.BoxGeometry(W, H, backT)
-      const back = new THREE.Mesh(backGeo, backMat)
-      back.position.set(W / 2, legHeight + H / 2, -D + backT / 2)
-      group.add(back)
-    } else if (backStyle === 'split') {
-      // Two-piece back panel with a 2 mm gap between halves
-      const gap = 0.002
-      const halfH = (H - gap) / 2
-      const backGeo = new THREE.BoxGeometry(W, halfH, backT)
-      const bottomBack = new THREE.Mesh(backGeo, backMat)
-      bottomBack.position.set(W / 2, legHeight + halfH / 2, -D + backT / 2)
-      group.add(bottomBack)
-      const topBack = new THREE.Mesh(backGeo.clone(), backMat)
-      topBack.position.set(W / 2, legHeight + H - halfH / 2, -D + backT / 2)
-      group.add(topBack)
-    } else if (backStyle === 'none') {
-      // No back panel requested
-    }
-    const gaps = adv.gaps || { top: 0, bottom: 0 }
-    // Determine if the cabinet has drawers (presence of drawerFronts array)
-    const hasDrawers = Array.isArray(adv.drawerFronts) && adv.drawerFronts.length > 0
-    // Convert drawer front heights from mm to m; empty array if no drawers
-    let fronts: number[] = []
-    if (hasDrawers) {
-      fronts = adv.drawerFronts!.map((mm: number) => (mm ?? 0) / 1000)
-    }
-    // Determine number of doors from advanced settings when no drawers are present
-    const doorCount = !hasDrawers && typeof adv.doorCount === 'number' && adv.doorCount > 0 ? adv.doorCount : 1
-    // If this module has no drawers, add adjustable number of shelves.
-    if (!hasDrawers) {
-      const shelfWidth = Math.max(0, W - 2 * T)
-      const shelfGeo = new THREE.BoxGeometry(shelfWidth, T, D)
-      const count = Math.max(0, adv.shelves ?? 1)
-      for (let i = 0; i < count; i++) {
-        const shelf = new THREE.Mesh(shelfGeo, carcMat)
-        const y = legHeight + (H * (i + 1)) / (count + 1)
-        shelf.position.set(W / 2, y, -D / 2)
-        group.add(shelf)
-      }
-    }
-    // Determine number of front pieces: if drawers are defined, use their count; otherwise use doorCount
-    const nFronts = hasDrawers ? fronts.length : doorCount
-    // Determine hinge side: default to left if unspecified
-    const hingeSide: 'left' | 'right' = (adv.hinge === 'right' ? 'right' : 'left') as 'left' | 'right'
-    // Initialize open states array.  Use mod.openStates if provided; otherwise all closed
-    const openStates: boolean[] = (mod.openStates && Array.isArray(mod.openStates)) ? [...mod.openStates] : new Array(nFronts).fill(false)
-    // Prepare arrays to capture animatable front groups and progress
-    const frontGroups: THREE.Group[] = []
-    const openProgress: number[] = openStates.map(v => (v ? 1 : 0))
-    if (hasDrawers) {
-      // Drawers: multiple front panels that slide outward
-      let yStart = legHeight + ((gaps.bottom ?? 0) / 1000)
-      fronts.forEach((hFront, idx) => {
-        const drawerGroup = new THREE.Group()
-        drawerGroup.userData = {
-          moduleId: mod.id,
-          frontIndex: idx,
-          type: 'drawer'
-        }
-        // Determine slide distance based on selected drawer slide type.  Use adv.drawerSlide or default.
-        const slideType = adv.drawerSlide || 'BLUM LEGRABOX'
-        let slideDist = 0.45
-        if (slideType === 'GTV') slideDist = 0.4
-        const maxSlide = Math.min(slideDist, D - T - 0.05)
-        drawerGroup.userData.slideDist = maxSlide
-        drawerGroup.position.set(0, 0, 0)
-        const frontGeo = new THREE.BoxGeometry(W, hFront, T)
-        const frontMesh = new THREE.Mesh(frontGeo, frontMat)
-        frontMesh.position.set(W / 2, yStart + hFront / 2, -T / 2)
-        drawerGroup.add(frontMesh)
-        if (showHandles) {
-          // Handle placement for drawer: width up to 40 cm or half of cabinet width
-          const handleWidth = Math.min(0.4, W * 0.5)
-          const handleHeight = 0.02
-          const handleDepth = 0.03
-          const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
-          const handle = new THREE.Mesh(handleGeo, handleMat)
-          handle.position.set(W / 2, yStart + hFront - handleHeight * 1.5, 0.01)
-          drawerGroup.add(handle)
-        }
-        // Drawer slide rails
-        const railThick = 0.01
-        const railLen = D - 2 * T
-        const railGeo = new THREE.BoxGeometry(railThick, railThick, railLen)
-        const leftRail = new THREE.Mesh(railGeo, hardwareMat)
-        leftRail.position.set(T + railThick / 2, yStart + hFront / 2, -T - railLen / 2)
-        drawerGroup.add(leftRail)
-        const rightRail = leftRail.clone()
-        rightRail.position.x = W - T - railThick / 2
-        drawerGroup.add(rightRail)
-        group.add(drawerGroup)
-        frontGroups[idx] = drawerGroup
-        yStart += hFront
-      })
-    } else {
-      if (doorCount > 1) {
-        // Multiple doors: split width evenly and assign hinge side per door
-        const segmentW = W / doorCount
-        for (let i = 0; i < doorCount; i++) {
-          // Alternate hinge sides for doors: even index -> left hinge, odd -> right hinge.  For single door, hingeSide is used but will not matter here.
-          const isEven = i % 2 === 0
-          const doorHinge: 'left' | 'right' = isEven ? 'left' : 'right'
-          const doorGroup = new THREE.Group()
-          doorGroup.userData = {
-            moduleId: mod.id,
-            frontIndex: i,
-            type: 'door',
-            hingeSide: doorHinge
-          }
-          // Determine pivot x based on hinge side and segment index
-          let pivotX: number
-          if (doorHinge === 'left') {
-            pivotX = i * segmentW
-          } else {
-            pivotX = (i + 1) * segmentW
-          }
-          doorGroup.position.set(pivotX, legHeight + H / 2, 0)
-          // Door panel geometry
-          const doorGeo = new THREE.BoxGeometry(segmentW, H, T)
-          const doorMesh = new THREE.Mesh(doorGeo, frontMat)
-          // Offset door mesh relative to pivot: left hinge -> centre at +segmentW/2; right hinge -> -segmentW/2
-          const offsetX = doorHinge === 'left' ? segmentW / 2 : -segmentW / 2
-          doorMesh.position.set(offsetX, 0, -T / 2)
-          doorGroup.add(doorMesh)
-          // Hinges along the pivot side
-          const hingeCount = H <= 0.9 ? 2 : H <= 1.5 ? 3 : 4
-          const hingeGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.02, 8)
-          for (let h = 0; h < hingeCount; h++) {
-            const hinge = new THREE.Mesh(hingeGeo, hardwareMat)
-            const hy = -H / 2 + (h + 0.5) * (H / hingeCount)
-            hinge.position.set(0, hy, -T)
-            doorGroup.add(hinge)
-          }
-          if (hasBlumotion) {
-            const dampGeo = new THREE.BoxGeometry(0.03, 0.01, 0.01)
-            const damper = new THREE.Mesh(dampGeo, hardwareMat)
-            const dampX = doorHinge === 'left' ? 0.015 : -0.015
-            damper.position.set(dampX, H / 2 - 0.05, -T)
-            doorGroup.add(damper)
-          }
-          if (showHandles) {
-            // Handle for door: width limited by half of segment, placed at 20% down from top
-            const handleWidth = Math.min(0.4, segmentW * 0.5)
-            const handleHeight = 0.02
-            const handleDepth = 0.03
-            const hGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
-            const handle = new THREE.Mesh(hGeo, handleMat)
-            const handleOffsetX = doorHinge === 'left' ? segmentW / 2 : -segmentW / 2
-            handle.position.set(handleOffsetX, H * 0.2, 0.01)
-            doorGroup.add(handle)
-          }
-          group.add(doorGroup)
-          frontGroups[i] = doorGroup
-        }
-      } else {
-        // Single door: rotate on hinge
-        const doorGroup = new THREE.Group()
-        doorGroup.userData = {
-          moduleId: mod.id,
-          frontIndex: 0,
-          type: 'door',
-          hingeSide
-        }
-        const pivotX = hingeSide === 'left' ? 0 : W
-        doorGroup.position.set(pivotX, legHeight + H / 2, 0)
-        const doorGeo = new THREE.BoxGeometry(W, H, T)
-        const doorMesh = new THREE.Mesh(doorGeo, frontMat)
-        const doorMeshX = hingeSide === 'left' ? W / 2 : -W / 2
-        doorMesh.position.set(doorMeshX, 0, -T / 2)
-        doorGroup.add(doorMesh)
-        // Hinges along the pivot side
-        const hingeCount = H <= 0.9 ? 2 : H <= 1.5 ? 3 : 4
-        const hingeGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.02, 8)
-        for (let h = 0; h < hingeCount; h++) {
-          const hinge = new THREE.Mesh(hingeGeo, hardwareMat)
-          const hy = -H / 2 + (h + 0.5) * (H / hingeCount)
-          hinge.position.set(0, hy, -T)
-          doorGroup.add(hinge)
-        }
-        if (hasBlumotion) {
-          const dampGeo = new THREE.BoxGeometry(0.03, 0.01, 0.01)
-          const damper = new THREE.Mesh(dampGeo, hardwareMat)
-          const dampX = hingeSide === 'left' ? 0.015 : -0.015
-          damper.position.set(dampX, H / 2 - 0.05, -T)
-          doorGroup.add(damper)
-        }
-        if (showHandles) {
-          const handleWidth = Math.min(0.4, W * 0.5)
-          const handleHeight = 0.02
-          const handleDepth = 0.03
-          const hGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
-          const handle = new THREE.Mesh(hGeo, handleMat)
-          const handleX = hingeSide === 'left' ? W / 2 : -W / 2
-          handle.position.set(handleX, (H * 0.2), 0.01)
-          doorGroup.add(handle)
-        }
-        group.add(doorGroup)
-        frontGroups[0] = doorGroup
-      }
-    }
-    // Attach open state, progress, front groups and animation speed to the cabinet group for animation
-    group.userData.openStates = openStates
-    group.userData.openProgress = openProgress
-    group.userData.frontGroups = frontGroups
-    // Store animation speed (time constant) on the group; allow override via adv.animationSpeed (in seconds per full cycle).  Default speed factor is 0.15
-    const animSpeed = (typeof adv.animationSpeed === 'number' && adv.animationSpeed > 0) ? adv.animationSpeed : 0.15
-    group.userData.animSpeed = animSpeed
-    // Mounting strips (listwy montażowe) near bottom and top, flush with back
-    if (mod.family === FAMILY.BASE) {
-      const stripDepth = 0.05 // 5 cm depth
-      const stripHeight = T
-      const stripWidth = W - 2 * T
-      const stripGeo = new THREE.BoxGeometry(stripWidth, stripHeight, stripDepth)
-      // Bottom strip: offset 8 cm from carcase bottom
-      const bottomY = legHeight + T + 0.08 + stripHeight / 2
-      const bs = new THREE.Mesh(stripGeo, carcMat)
-      bs.position.set(W / 2, bottomY, -D + backT + stripDepth / 2)
-      group.add(bs)
-      // Top strip: offset 8 cm from carcase top
-      const topY = legHeight + H - T - 0.08 - stripHeight / 2
-      const ts = new THREE.Mesh(stripGeo.clone(), carcMat)
-      ts.position.set(W / 2, topY, -D + backT + stripDepth / 2)
-      group.add(ts)
-    }
-    // Feet: four cylinders at corners; use legHeight for foot height
-    if (legHeight > 0) {
-      const footRadius = 0.03
-      const footHeight = legHeight
-      const footGeo = new THREE.CylinderGeometry(footRadius, footRadius, footHeight, 16)
-      // front-left
-      const fl = new THREE.Mesh(footGeo, footMat)
-      fl.position.set(T + footRadius, footHeight / 2, -T)
-      group.add(fl)
-      // front-right
-      const fr = new THREE.Mesh(footGeo.clone(), footMat)
-      fr.position.set(W - T - footRadius, footHeight / 2, -T)
-      group.add(fr)
-      // back-left
-      const bl = new THREE.Mesh(footGeo.clone(), footMat)
-      bl.position.set(T + footRadius, footHeight / 2, -D + T)
-      group.add(bl)
-      // back-right
-      const br = new THREE.Mesh(footGeo.clone(), footMat)
-      br.position.set(W - T - footRadius, footHeight / 2, -D + T)
-      group.add(br)
-    }
-    // Aventos struts for lift mechanisms
-    if (adv.aventosType && adv.aventosType !== 'Brak') {
-      const strutLen = Math.min(D * 0.6, 0.3)
-      const strutGeo = new THREE.CylinderGeometry(0.005, 0.005, strutLen, 8)
-      const leftStrut = new THREE.Mesh(strutGeo, hardwareMat)
-      leftStrut.rotation.z = -Math.PI / 4
-      leftStrut.position.set(T + 0.02, legHeight + H - 0.1, -T - strutLen / 2)
-      group.add(leftStrut)
-      const rightStrut = new THREE.Mesh(strutGeo.clone(), hardwareMat)
-      rightStrut.rotation.z = Math.PI / 4
-      rightStrut.position.set(W - T - 0.02, legHeight + H - 0.1, -T - strutLen / 2)
-      group.add(rightStrut)
-    }
-    return group
+const createCabinetMesh = (mod: any) => {
+  const W = mod.size.w
+  const H = mod.size.h
+  const D = mod.size.d
+  const adv = mod.adv || {}
+  const famGlobal = store.globals[mod.family] || {}
+  let legHeight = 0
+  if (mod.family === FAMILY.BASE) {
+    const label: string = (famGlobal as any).legsType || ''
+    const match = label.match(/(\d+\.?\d*)/)
+    if (match) legHeight = parseFloat(match[1]) / 100
+    else legHeight = 0.1
   }
+  const drawers = Array.isArray(adv.drawerFronts) ? adv.drawerFronts.length : 0
+  const group = buildCabinetMesh({
+    width: W,
+    height: H,
+    depth: D,
+    drawers,
+    gaps: adv.gaps || { top: 0, bottom: 0 },
+    drawerFronts: adv.drawerFronts,
+    family: mod.family,
+    shelves: adv.shelves,
+    backPanel: adv.backPanel,
+    legHeight,
+    showHandles: true
+  })
+  group.userData.kind = 'cab'
+  return group
+}
 
-  const drawScene = () => {
+const drawScene = () => {
     const group = threeRef.current?.group
     if (!group) return
     // Remove previous cabinet and countertop meshes
