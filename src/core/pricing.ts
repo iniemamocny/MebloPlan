@@ -5,7 +5,7 @@ export type Price = { total:number; parts: Parts; counts:any }
 function hingeCountPerDoor(doorHeightMM:number){ if (doorHeightMM<=900) return 2; if (doorHeightMM<=1500) return 3; return 4 }
 export function computeModuleCost(params: {
   family: FAMILY; kind:string; variant:string; width:number;
-  adv: { height:number; depth:number; boardType:string; frontType:string; gaps?: any };
+  adv: { height:number; depth:number; boardType:string; frontType:string; openingMechanism?:'standard'|'TIP-ON'|'BLUMOTION'; gaps?: any };
 }): Price {
   const P = usePlannerStore.getState().prices
   const base = usePlannerStore.getState().globals[params.family]
@@ -31,7 +31,10 @@ export function computeModuleCost(params: {
   }
   const doorHeightMM = hMM - 100
   const hingesPerDoor = hingeCountPerDoor(doorHeightMM)
-  const hingesCost = (P.hinges['Blum ClipTop']||0) * hingesPerDoor * doors
+  let hingeKey = 'Blum ClipTop'
+  if (g.openingMechanism === 'TIP-ON') hingeKey = 'Blum TIP-ON'
+  else if (g.openingMechanism === 'BLUMOTION') hingeKey = 'Blum ClipTop BLUMOTION'
+  const hingesCost = (P.hinges[hingeKey]||0) * hingesPerDoor * doors
   const slidesCost = (P.drawerSlide['BLUM LEGRABOX']||0) * drawers
   const legsCount = params.family===FAMILY.BASE ? Math.max(4, Math.ceil(wMM/300)*2) : 0
   const legsCost = legsCount * (P.legs['Standard 10cm']||0)

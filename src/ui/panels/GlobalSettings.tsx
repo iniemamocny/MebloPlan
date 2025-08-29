@@ -35,6 +35,7 @@ export default function GlobalSettings(){
             <Field label="Głębokość (mm)" value={g.depth} onChange={(v)=>set({depth:v})} />
             <Field label="Rodzaj płyty" type="select" value={g.boardType} onChange={(v)=>set({boardType:v})} options={Object.keys(store.prices.board)} />
             <Field label="Rodzaj frontu" type="select" value={g.frontType} onChange={(v)=>set({frontType:v})} options={Object.keys(store.prices.front)} />
+            <Field label="Mechanizm" type="select" value={g.openingMechanism||'standard'} onChange={(v)=>set({openingMechanism:v})} options={['standard','TIP-ON','BLUMOTION']} />
             {fam===FAMILY.BASE && (<>
               <Field label="Nóżki" type="select" value={g.legsType} onChange={(v)=>set({legsType:v})} options={Object.keys(store.prices.legs)} />
               <Field label="Odsunięcie od ściany (mm)" value={g.offsetWall||0} onChange={(v)=>set({offsetWall:v})} />

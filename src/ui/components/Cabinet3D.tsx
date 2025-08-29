@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { FAMILY, FAMILY_COLORS } from '../../core/catalog'
 
-export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves=1 }:{ widthMM:number;heightMM:number;depthMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number }){
+export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves=1, openingMechanism='standard' }:{ widthMM:number;heightMM:number;depthMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number; openingMechanism?:'standard'|'TIP-ON'|'BLUMOTION' }){
   const ref = useRef<HTMLDivElement>(null)
   useEffect(()=>{
     // Wait until our container is available
@@ -92,16 +92,18 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
         // Position each drawer front; note: y is bottom of front + h/2
         frontMesh.position.set(W / 2, currentY + h / 2, -T / 2)
         cabGroup.add(frontMesh)
-        // Add handle for each drawer: small dark box centered horizontally
-        const handleWidth = Math.min(0.4, W * 0.5)
-        const handleHeight = 0.02
-        const handleDepth = 0.03
-        const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
-        const handleMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness:0.8, roughness:0.4 })
-        const handleMesh = new THREE.Mesh(handleGeo, handleMat)
-        // Position handle near top of drawer front
-        handleMesh.position.set(W / 2, currentY + h - handleHeight * 1.5, 0.01)
-        cabGroup.add(handleMesh)
+        if (openingMechanism !== 'TIP-ON') {
+          // Add handle for each drawer: small dark box centered horizontally
+          const handleWidth = Math.min(0.4, W * 0.5)
+          const handleHeight = 0.02
+          const handleDepth = 0.03
+          const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
+          const handleMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness:0.8, roughness:0.4 })
+          const handleMesh = new THREE.Mesh(handleGeo, handleMat)
+          // Position handle near top of drawer front
+          handleMesh.position.set(W / 2, currentY + h - handleHeight * 1.5, 0.01)
+          cabGroup.add(handleMesh)
+        }
         // Move up by this front's height for the next drawer
         currentY += h
       }
@@ -111,15 +113,27 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
       const door = new THREE.Mesh(doorGeo, frontMat)
       door.position.set(W / 2, H / 2, -T / 2)
       cabGroup.add(door)
-      // Handle: horizontal bar
-      const handleWidth = Math.min(0.4, W * 0.5)
-      const handleHeight = 0.02
-      const handleDepth = 0.03
-      const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
-      const handleMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness:0.8, roughness:0.4 })
-      const handle = new THREE.Mesh(handleGeo, handleMat)
-      handle.position.set(W / 2, H * 0.7, 0.01)
-      cabGroup.add(handle)
+      if (openingMechanism !== 'TIP-ON') {
+        // Handle: horizontal bar
+        const handleWidth = Math.min(0.4, W * 0.5)
+        const handleHeight = 0.02
+        const handleDepth = 0.03
+        const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
+        const handleMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness:0.8, roughness:0.4 })
+        const handle = new THREE.Mesh(handleGeo, handleMat)
+        handle.position.set(W / 2, H * 0.7, 0.01)
+        cabGroup.add(handle)
+      }
+      if (openingMechanism !== 'standard') {
+        const hingeGeo = new THREE.SphereGeometry(0.01, 8, 8)
+        const hingeMat = new THREE.MeshStandardMaterial({ color: openingMechanism === 'BLUMOTION' ? 0x0000ff : 0x00aa00 })
+        const h1 = new THREE.Mesh(hingeGeo, hingeMat)
+        h1.position.set(T / 2, H * 0.2, -T / 2 - 0.01)
+        cabGroup.add(h1)
+        const h2 = h1.clone()
+        h2.position.set(T / 2, H * 0.8, -T / 2 - 0.01)
+        cabGroup.add(h2)
+      }
     }
     // Legs: only for base and tall cabinets
     if (family === FAMILY.BASE || family === FAMILY.TALL) {
@@ -146,6 +160,6 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     return () => {
       renderer.dispose()
     }
-  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves])
+    }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves, openingMechanism])
   return <div ref={ref} style={{ width: 260, height: 190, border: '1px solid #E5E7EB', borderRadius: 8, background: '#fff' }} />
 }
