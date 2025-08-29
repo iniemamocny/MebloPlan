@@ -40,7 +40,14 @@ export function cutlistForModule(m:any, globals:any): { items: CutItem[]; edges:
     addEdge('ABS 1mm', (W-2*t - tol.assembly), 'Wieniec górny — przód')
     add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Wieniec dolny', qty:1, w:clampPos(W-2*t - tol.assembly), h:clampPos(D) })
     addEdge('ABS 1mm', (W-2*t - tol.assembly), 'Wieniec dolny — przód')
-    add({ moduleId:m.id, moduleLabel:m.label, material:`HDF ${backT}mm`, part:'Plecy', qty:1, w:clampPos(W-2*t - tol.backGroove), h:clampPos(H - tol.backGroove) })
+    if ((g.backPanel||'full') !== 'none') {
+      if ((g.backPanel||'full') === 'split') {
+        const hPiece = clampPos((H - tol.backGroove) / 2)
+        add({ moduleId:m.id, moduleLabel:m.label, material:`HDF ${backT}mm`, part:'Plecy', qty:2, w:clampPos(W-2*t - tol.backGroove), h:hPiece })
+      } else {
+        add({ moduleId:m.id, moduleLabel:m.label, material:`HDF ${backT}mm`, part:'Plecy', qty:1, w:clampPos(W-2*t - tol.backGroove), h:clampPos(H - tol.backGroove) })
+      }
+    }
   }
 
   const addShelves = () => {

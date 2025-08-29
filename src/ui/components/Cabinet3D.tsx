@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { FAMILY, FAMILY_COLORS } from '../../core/catalog'
 
-export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves=1 }:{ widthMM:number;heightMM:number;depthMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number }){
+export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves=1, backPanel='full' }:{ widthMM:number;heightMM:number;depthMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number; backPanel?:'full'|'split'|'none' }){
   const ref = useRef<HTMLDivElement>(null)
   useEffect(()=>{
     // Wait until our container is available
@@ -63,10 +63,22 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     topBoard.position.set(W / 2, H - T / 2, -D / 2)
     cabGroup.add(topBoard)
     // Back board
-    const backGeo = new THREE.BoxGeometry(W, H, backT)
-    const backBoard = new THREE.Mesh(backGeo, backMat)
-    backBoard.position.set(W / 2, H / 2, -D + backT / 2)
-    cabGroup.add(backBoard)
+    if (backPanel !== 'none') {
+      if (backPanel === 'split') {
+        const backGeo = new THREE.BoxGeometry(W, H / 2, backT)
+        const back1 = new THREE.Mesh(backGeo, backMat)
+        back1.position.set(W / 2, H / 4, -D + backT / 2)
+        cabGroup.add(back1)
+        const back2 = new THREE.Mesh(backGeo.clone(), backMat)
+        back2.position.set(W / 2, (3 * H) / 4, -D + backT / 2)
+        cabGroup.add(back2)
+      } else {
+        const backGeo = new THREE.BoxGeometry(W, H, backT)
+        const backBoard = new THREE.Mesh(backGeo, backMat)
+        backBoard.position.set(W / 2, H / 2, -D + backT / 2)
+        cabGroup.add(backBoard)
+      }
+    }
     // Shelves: simple horizontal boards (if drawers = 0) else skip
     if (drawers === 0) {
       const shelfGeo = new THREE.BoxGeometry(W - 2 * T, T, D)
