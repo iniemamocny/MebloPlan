@@ -49,7 +49,7 @@ export default function App(){
   useEffect(()=>{
     const g = store.globals[family]
     const defaultShelves = family===FAMILY.TALL ? 4 : 1
-    setAdv({ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:{...g.gaps}, shelves:g.shelves ?? defaultShelves })
+    setAdv({ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:{...g.gaps}, shelves:g.shelves ?? defaultShelves, openingMechanism:g.openingMechanism })
   }, [family, store.globals])
 
   const undo = store.undo
@@ -135,6 +135,8 @@ export default function App(){
     // Extract advanced settings once at the beginning
     const adv = mod.adv || {}
     const gaps = adv.gaps || { top: 0, bottom: 0 }
+    const mechanism: 'standard' | 'TIP-ON' | 'BLUMOTION' = adv.openingMechanism || store.globals[mod.family]?.openingMechanism || 'standard'
+    const showHandle = mechanism !== 'TIP-ON'
     // Determine if the cabinet has drawers (presence of drawerFronts array)
     const hasDrawers = Array.isArray(adv.drawerFronts) && adv.drawerFronts.length > 0
     // Convert drawer front heights from mm to m; empty array if no drawers
@@ -186,14 +188,16 @@ export default function App(){
         const frontMesh = new THREE.Mesh(frontGeo, frontMat)
         frontMesh.position.set(W / 2, yStart + hFront / 2, -T / 2)
         drawerGroup.add(frontMesh)
-        // Handle placement for drawer: width up to 40 cm or half of cabinet width
-        const handleWidth = Math.min(0.4, W * 0.5)
-        const handleHeight = 0.02
-        const handleDepth = 0.03
-        const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
-        const handle = new THREE.Mesh(handleGeo, handleMat)
-        handle.position.set(W / 2, yStart + hFront - handleHeight * 1.5, 0.01)
-        drawerGroup.add(handle)
+        if (showHandle) {
+          // Handle placement for drawer: width up to 40 cm or half of cabinet width
+          const handleWidth = Math.min(0.4, W * 0.5)
+          const handleHeight = 0.02
+          const handleDepth = 0.03
+          const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
+          const handle = new THREE.Mesh(handleGeo, handleMat)
+          handle.position.set(W / 2, yStart + hFront - handleHeight * 1.5, 0.01)
+          drawerGroup.add(handle)
+        }
         group.add(drawerGroup)
         frontGroups[idx] = drawerGroup
         yStart += hFront
@@ -228,15 +232,27 @@ export default function App(){
           const offsetX = doorHinge === 'left' ? segmentW / 2 : -segmentW / 2
           doorMesh.position.set(offsetX, 0, -T / 2)
           doorGroup.add(doorMesh)
-          // Handle for door: width limited by half of segment, placed at 20% down from top
-          const handleWidth = Math.min(0.4, segmentW * 0.5)
-          const handleHeight = 0.02
-          const handleDepth = 0.03
-          const hGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
-          const handle = new THREE.Mesh(hGeo, handleMat)
-          const handleOffsetX = doorHinge === 'left' ? segmentW / 2 : -segmentW / 2
-          handle.position.set(handleOffsetX, H * 0.2, 0.01)
-          doorGroup.add(handle)
+          const doorWidth = segmentW
+          if (showHandle) {
+            // Handle for door: width limited by half of segment, placed at 20% down from top
+            const handleWidth = Math.min(0.4, segmentW * 0.5)
+            const handleHeight = 0.02
+            const handleDepth = 0.03
+            const hGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
+            const handle = new THREE.Mesh(hGeo, handleMat)
+            const handleOffsetX = doorHinge === 'left' ? segmentW / 2 : -segmentW / 2
+            handle.position.set(handleOffsetX, H * 0.2, 0.01)
+            doorGroup.add(handle)
+          }
+          if (mechanism === 'BLUMOTION') {
+            const hingeGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.02, 8)
+            const hingeMat = new THREE.MeshStandardMaterial({ color: 0x0000ff, metalness:0.4, roughness:0.6 })
+            const hingeMarker = new THREE.Mesh(hingeGeo, hingeMat)
+            const hx = doorHinge === 'left' ? -doorWidth/2 + 0.01 : doorWidth/2 - 0.01
+            hingeMarker.rotation.z = Math.PI / 2
+            hingeMarker.position.set(hx, 0, -T / 2)
+            doorGroup.add(hingeMarker)
+          }
           group.add(doorGroup)
           frontGroups[i] = doorGroup
         }
@@ -256,14 +272,25 @@ export default function App(){
         const doorMeshX = hingeSide === 'left' ? W / 2 : -W / 2
         doorMesh.position.set(doorMeshX, 0, -T / 2)
         doorGroup.add(doorMesh)
-        const handleWidth = Math.min(0.4, W * 0.5)
-        const handleHeight = 0.02
-        const handleDepth = 0.03
-        const hGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
-        const handle = new THREE.Mesh(hGeo, handleMat)
-        const handleX = hingeSide === 'left' ? W / 2 : -W / 2
-        handle.position.set(handleX, (H * 0.2), 0.01)
-        doorGroup.add(handle)
+        if (showHandle) {
+          const handleWidth = Math.min(0.4, W * 0.5)
+          const handleHeight = 0.02
+          const handleDepth = 0.03
+          const hGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
+          const handle = new THREE.Mesh(hGeo, handleMat)
+          const handleX = hingeSide === 'left' ? W / 2 : -W / 2
+          handle.position.set(handleX, (H * 0.2), 0.01)
+          doorGroup.add(handle)
+        }
+        if (mechanism === 'BLUMOTION') {
+          const hingeGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.02, 8)
+          const hingeMat = new THREE.MeshStandardMaterial({ color: 0x0000ff, metalness:0.4, roughness:0.6 })
+          const hingeMarker = new THREE.Mesh(hingeGeo, hingeMat)
+          const hx = hingeSide === 'left' ? -W/2 + 0.01 : W/2 - 0.01
+          hingeMarker.rotation.z = Math.PI / 2
+          hingeMarker.position.set(hx, 0, -T / 2)
+          doorGroup.add(hingeMarker)
+        }
         group.add(doorGroup)
         frontGroups[0] = doorGroup
       }
@@ -510,7 +537,7 @@ export default function App(){
     const g = { ...store.globals[family], ...advLocal, gaps: { ...store.globals[family].gaps, ...(advLocal?.gaps||{}) } }
     const h = (g.height)/1000, d=(g.depth)/1000, w=(widthMM)/1000
     const id = `mod_${Date.now()}_${Math.floor(Math.random()*1e6)}`
-    const price = computeModuleCost({ family, kind:kind.key, variant:variant.key, width: widthMM, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:g.gaps } })
+    const price = computeModuleCost({ family, kind:kind.key, variant:variant.key, width: widthMM, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:g.gaps, openingMechanism:g.openingMechanism } })
     const snap = snapToWalls({ w, h, d }, family)
     // Augment advanced settings with defaults for hinge, drawer slide type and animation speed if missing.
     // Additionally, compute drawer front heights based on the selected variant if none were provided.
@@ -600,7 +627,7 @@ export default function App(){
     placed.forEach((pl,i)=>{
       const wmm = widths[i]; const w=wmm/1000
       const id = `auto_${Date.now()}_${i}_${Math.floor(Math.random()*1e6)}`
-      const price = computeModuleCost({ family, kind:(KIND_SETS[family][0]?.key)||'doors', variant:'d1', width: wmm, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:g.gaps } })
+      const price = computeModuleCost({ family, kind:(KIND_SETS[family][0]?.key)||'doors', variant:'d1', width: wmm, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:g.gaps, openingMechanism:g.openingMechanism } })
       let mod:any = { id, label:'Auto', family, kind:(KIND_SETS[family][0]?.key)||'doors', size:{ w,h,d }, position:[pl.center[0]/1000, h/2, pl.center[1]/1000], rotationY:pl.rot, segIndex: selWall, price, adv:g }
       mod = resolveCollisions(mod)
       store.addModule(mod)
@@ -728,10 +755,10 @@ export default function App(){
                       />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} openingMechanism={gLocal.openingMechanism} />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} openingMechanism={gLocal.openingMechanism} />
                     </div>
                   </div>
                 )}
@@ -742,6 +769,7 @@ export default function App(){
                       <div><div className="small">Głębokość (mm)</div><input className="input" type="number" value={gLocal.depth} onChange={e=>setAdv({...gLocal, depth:Number((e.target as HTMLInputElement).value)||0})} /></div>
                       <div><div className="small">Płyta</div><select className="input" value={gLocal.boardType} onChange={e=>setAdv({...gLocal, boardType:(e.target as HTMLSelectElement).value})}>{Object.keys(store.prices.board).map(k=><option key={k} value={k}>{k}</option>)}</select></div>
                       <div><div className="small">Front</div><select className="input" value={gLocal.frontType} onChange={e=>setAdv({...gLocal, frontType:(e.target as HTMLSelectElement).value})}>{Object.keys(store.prices.front).map(k=><option key={k} value={k}>{k}</option>)}</select></div>
+                      <div><div className="small">Mechanizm</div><select className="input" value={gLocal.openingMechanism} onChange={e=>setAdv({...gLocal, openingMechanism:(e.target as HTMLSelectElement).value})}>{Object.keys(store.prices.openingMechanism||{}).map(k=><option key={k} value={k}>{k}</option>)}</select></div>
                     </div>
                     {!(variant?.key?.startsWith('s')) && (
                       <div style={{marginTop:8}}>
@@ -767,10 +795,10 @@ export default function App(){
                       />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} openingMechanism={gLocal.openingMechanism} />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} openingMechanism={gLocal.openingMechanism} />
                     </div>
                     <div className="row" style={{marginTop:8}}>
                       <button className="btn" onClick={()=>onAdd(widthMM, gLocal)}>Wstaw szafkę</button>

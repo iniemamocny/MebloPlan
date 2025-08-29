@@ -1,11 +1,11 @@
 import { FAMILY } from './catalog'
 import { usePlannerStore } from '../state/store'
-export type Parts = { board:number; front:number; edging:number; cut:number; hinges:number; slides:number; legs:number; hangers:number; aventos:number; cargo:number; kits:number; labor:number }
+export type Parts = { board:number; front:number; edging:number; cut:number; hinges:number; slides:number; legs:number; hangers:number; aventos:number; cargo:number; kits:number; labor:number; mechanism:number }
 export type Price = { total:number; parts: Parts; counts:any }
 function hingeCountPerDoor(doorHeightMM:number){ if (doorHeightMM<=900) return 2; if (doorHeightMM<=1500) return 3; return 4 }
 export function computeModuleCost(params: {
   family: FAMILY; kind:string; variant:string; width:number;
-  adv: { height:number; depth:number; boardType:string; frontType:string; gaps?: any };
+  adv: { height:number; depth:number; boardType:string; frontType:string; gaps?: any; openingMechanism?: 'standard' | 'TIP-ON' | 'BLUMOTION' };
 }): Price {
   const P = usePlannerStore.getState().prices
   const base = usePlannerStore.getState().globals[params.family]
@@ -39,6 +39,7 @@ export function computeModuleCost(params: {
   const hangersCost = hangersCount * (P.hangers['Standard']||0)
   const aventosCost = aventosType ? (P.aventos[aventosType]||0) : 0
   const cargoCost = cargoW ? (P.cargo[cargoW]||0) : 0
+  const mechanismCost = (P.openingMechanism?.[g.openingMechanism] || 0) * (doors + drawers)
   const boardArea = 2*(h*d)+2*(w*d)+1*(w*d)+0.4*(w*h)
   const boardCost = boardArea*boardPrice
   const frontArea = w*h
@@ -47,7 +48,7 @@ export function computeModuleCost(params: {
   const edgingCost = edgeMeters * (edgingPrice||0)
   const cutCost = (edgeMeters) * (P.cut||4)
   const labor = P.labor||0
-  const parts = { board: Math.round(boardCost), front: Math.round(frontCost), edging: Math.round(edgingCost), cut: Math.round(cutCost), hinges: Math.round(hingesCost), slides: Math.round(slidesCost), legs: Math.round(legsCost), hangers: Math.round(hangersCost), aventos: Math.round(aventosCost), cargo: Math.round(cargoCost), kits: Math.round(kits), labor: Math.round(labor) }
+  const parts = { board: Math.round(boardCost), front: Math.round(frontCost), edging: Math.round(edgingCost), cut: Math.round(cutCost), hinges: Math.round(hingesCost), slides: Math.round(slidesCost), legs: Math.round(legsCost), hangers: Math.round(hangersCost), aventos: Math.round(aventosCost), cargo: Math.round(cargoCost), kits: Math.round(kits), labor: Math.round(labor), mechanism: Math.round(mechanismCost) }
   const subtotal = Object.values(parts).reduce((s,n)=>s+(n||0),0)
   const total = Math.round(subtotal*(1+(P.margin||0)))
   return { total, parts, counts:{ doors, drawers, legs:legsCount, hangers:hangersCount, hinges:hingesPerDoor*doors } }
