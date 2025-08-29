@@ -12,7 +12,6 @@ import { getWallSegments, projectPointToSegment } from '../utils/walls'
 import { autoWidthsForRun, placeAlongWall } from '../utils/auto'
 import CutlistTab from './panels/CutlistTab'
 // cabinet generator and 3D viewer separate from the main planner.
-import CabinetsPhase8Tab from './panels/CabinetsPhase8Tab'
 import BoxPreview from './components/BoxPreview'
 import TechDrawing from './components/TechDrawing'
 import Cabinet3D from './components/Cabinet3D'
@@ -678,7 +677,6 @@ export default function App(){
           <button className={`tabBtn ${tab==='room'?'active':''}`} onClick={()=>setTab('room')}>Pomieszczenie</button>
           <button className={`tabBtn ${tab==='costs'?'active':''}`} onClick={()=>setTab('costs')}>Koszty</button>
           <button className={`tabBtn ${tab==='cut'?'active':''}`} onClick={()=>setTab('cut')}>Formatki</button>
-          <button className={`tabBtn ${tab==='phase8'?'active':''}`} onClick={()=>setTab('cab')}></button>
         </div>
 
         {tab==='cab' && (<>
@@ -729,9 +727,6 @@ export default function App(){
                     <div style={{marginTop:8}}>
                       <TechDrawing
                         mode="view"
-                        family={family}
-                        kindKey={kind?.key||'doors'}
-                        variantKey={variant?.key||'d1'}
                         widthMM={widthMM}
                         heightMM={gLocal.height}
                         depthMM={gLocal.depth}
@@ -770,9 +765,6 @@ export default function App(){
                       <div className="small">Szczeliny i wysokości frontów (ustawiaj graficznie)</div>
                       <TechDrawing
                         mode="edit"
-                        family={family}
-                        kindKey={kind?.key||'doors'}
-                        variantKey={variant?.key||'d1'}
                         widthMM={widthMM}
                         heightMM={gLocal.height}
                         depthMM={gLocal.depth}
