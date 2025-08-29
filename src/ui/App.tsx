@@ -157,8 +157,6 @@ export default function App(){
         {tab==='room' && (<RoomTab three={threeRef} />)}
         {tab==='costs' && (<CostsTab />)}
         {tab==='cut' && (<CutlistTab />)}
-            provides a simplified cabinet builder with its own cutlist
-            and 3D viewer.
 
       </aside>
     </div>
