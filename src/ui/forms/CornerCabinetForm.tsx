@@ -1,18 +1,6 @@
 import React from 'react'
 import SingleMMInput from '../components/SingleMMInput'
-
-export interface CabinetFormValues {
-  width: number
-  height: number
-  depth: number
-  adv?: any
-  hardware?: any
-}
-
-export interface CabinetFormProps {
-  values: CabinetFormValues
-  onChange: (vals: CabinetFormValues) => void
-}
+import { CabinetFormValues, CabinetFormProps } from './types'
 
 export default function CornerCabinetForm({ values, onChange }: CabinetFormProps){
   const { width, height, depth, adv, hardware } = values

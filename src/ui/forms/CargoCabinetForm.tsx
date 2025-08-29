@@ -1,6 +1,6 @@
 import React from 'react'
 import SingleMMInput from '../components/SingleMMInput'
-import { CabinetFormValues, CabinetFormProps } from './CornerCabinetForm'
+import { CabinetFormValues, CabinetFormProps } from './types'
 
 export default function CargoCabinetForm({ values, onChange }: CabinetFormProps){
   const { width, height, depth, adv, hardware } = values
