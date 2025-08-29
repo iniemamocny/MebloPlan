@@ -48,8 +48,10 @@ export default function App(){
 
   useEffect(()=>{
     const g = store.globals[family]
-    const defaultShelves = family===FAMILY.TALL ? 4 : 1
-    setAdv({ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:{...g.gaps}, shelves:g.shelves ?? defaultShelves })
+    const defaultShelves = g.shelves ?? (family===FAMILY.TALL ? 4 : 1)
+    const step = defaultShelves>0 ? Math.round(g.height/(defaultShelves+1)) : 0
+    const shelfLocs = defaultShelves>0 ? Array.from({length:defaultShelves}, (_,i)=> step*(i+1)) : []
+    setAdv({ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:{...g.gaps}, shelfLocs, partitions:[] })
   }, [family, store.globals])
 
   const undo = store.undo
@@ -132,6 +134,15 @@ export default function App(){
     const back = new THREE.Mesh(backGeo, backMat)
     back.position.set(W / 2, legHeight + H / 2, -D + backT / 2)
     group.add(back)
+    // Internal vertical partitions
+    const partitions: {pos:number; thick:number}[] = Array.isArray(mod.adv?.partitions) ? mod.adv.partitions : []
+    partitions.forEach(p=>{
+      const pT = (p.thick||18)/1000
+      const geo = new THREE.BoxGeometry(pT, H, D)
+      const mesh = new THREE.Mesh(geo, carcMat)
+      mesh.position.set(p.pos/1000, legHeight + H/2, -D/2)
+      group.add(mesh)
+    })
     // Extract advanced settings once at the beginning
     const adv = mod.adv || {}
     const gaps = adv.gaps || { top: 0, bottom: 0 }
@@ -144,17 +155,17 @@ export default function App(){
     }
     // Determine number of doors from advanced settings when no drawers are present
     const doorCount = !hasDrawers && typeof adv.doorCount === 'number' && adv.doorCount > 0 ? adv.doorCount : 1
-    // If this module has no drawers, add adjustable number of shelves.
+    // If this module has no drawers, add shelves at specified heights
     if (!hasDrawers) {
       const shelfWidth = Math.max(0, W - 2 * T)
       const shelfGeo = new THREE.BoxGeometry(shelfWidth, T, D)
-      const count = Math.max(0, adv.shelves ?? 1)
-      for (let i = 0; i < count; i++) {
+      const locs:number[] = Array.isArray(adv.shelfLocs) ? adv.shelfLocs : []
+      locs.forEach(loc=>{
         const shelf = new THREE.Mesh(shelfGeo, carcMat)
-        const y = legHeight + (H * (i + 1)) / (count + 1)
+        const y = legHeight + loc/1000
         shelf.position.set(W / 2, y, -D / 2)
         group.add(shelf)
-      }
+      })
     }
     // Determine number of front pieces: if drawers are defined, use their count; otherwise use doorCount
     const nFronts = hasDrawers ? fronts.length : doorCount
@@ -728,10 +739,10 @@ export default function App(){
                       />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} partitions={gLocal.partitions} shelfLocs={gLocal.shelfLocs||[]} />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} partitions={gLocal.partitions} shelfLocs={gLocal.shelfLocs||[]} />
                     </div>
                   </div>
                 )}
@@ -745,10 +756,53 @@ export default function App(){
                     </div>
                     {!(variant?.key?.startsWith('s')) && (
                       <div style={{marginTop:8}}>
-                        <div className="small">Liczba półek</div>
-                        <input className="input" type="number" min={0} value={gLocal.shelves||0} onChange={e=>setAdv({...gLocal, shelves:Number((e.target as HTMLInputElement).value)||0})} />
+                        <div className="small">Półki (mm od dołu)</div>
+                        {(gLocal.shelfLocs||[]).map((s,i)=>(
+                          <div key={i} className="row" style={{marginTop:4, gap:4}}>
+                            <input className="input" type="number" value={s} onChange={e=>{
+                              const val = Number((e.target as HTMLInputElement).value)||0
+                              const arr = (gLocal.shelfLocs||[]).slice(); arr[i]=val
+                              setAdv({...gLocal, shelfLocs:arr})
+                            }} />
+                            <button className="btnGhost" onClick={()=>{
+                              const arr = (gLocal.shelfLocs||[]).slice(); arr.splice(i,1)
+                              setAdv({...gLocal, shelfLocs:arr})
+                            }}>Usuń</button>
+                          </div>
+                        ))}
+                        <button className="btnGhost" style={{marginTop:4}} onClick={()=>{
+                          const arr = (gLocal.shelfLocs||[]).slice();
+                          arr.push( Math.round(gLocal.height/2) )
+                          setAdv({...gLocal, shelfLocs:arr})
+                        }}>Dodaj półkę</button>
                       </div>
                     )}
+                    <div style={{marginTop:8}}>
+                      <div className="small">Przegrody pionowe (pozycja mm / grubość mm)</div>
+                      {(gLocal.partitions||[]).map((p,i)=>(
+                        <div key={i} className="grid3" style={{marginTop:4, alignItems:'flex-end', gap:4}}>
+                          <input className="input" type="number" value={p.pos} onChange={e=>{
+                            const val = Number((e.target as HTMLInputElement).value)||0
+                            const arr = (gLocal.partitions||[]).slice(); arr[i]={...arr[i], pos:val}
+                            setAdv({...gLocal, partitions:arr})
+                          }} />
+                          <input className="input" type="number" value={p.thick} onChange={e=>{
+                            const val = Number((e.target as HTMLInputElement).value)||0
+                            const arr = (gLocal.partitions||[]).slice(); arr[i]={...arr[i], thick:val}
+                            setAdv({...gLocal, partitions:arr})
+                          }} />
+                          <button className="btnGhost" onClick={()=>{
+                            const arr = (gLocal.partitions||[]).slice(); arr.splice(i,1)
+                            setAdv({...gLocal, partitions:arr})
+                          }}>Usuń</button>
+                        </div>
+                      ))}
+                      <button className="btnGhost" style={{marginTop:4}} onClick={()=>{
+                        const arr = (gLocal.partitions||[]).slice();
+                        arr.push({pos: Math.round(widthMM/2), thick:18})
+                        setAdv({...gLocal, partitions:arr})
+                      }}>Dodaj przegrodę</button>
+                    </div>
                     <div style={{marginTop:8}}>
                       <div className="small">Szczeliny i wysokości frontów (ustawiaj graficznie)</div>
                       <TechDrawing
@@ -767,10 +821,10 @@ export default function App(){
                       />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} partitions={gLocal.partitions} shelfLocs={gLocal.shelfLocs||[]} />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} partitions={gLocal.partitions} shelfLocs={gLocal.shelfLocs||[]} />
                     </div>
                     <div className="row" style={{marginTop:8}}>
                       <button className="btn" onClick={()=>onAdd(widthMM, gLocal)}>Wstaw szafkę</button>

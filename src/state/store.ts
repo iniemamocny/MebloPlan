@@ -45,7 +45,17 @@ type Module3D = {
   size:{ w:number; h:number; d:number }; position:[number,number,number]; rotationY?:number;
   price?: any; fittings?: any
   segIndex?: number | null
-  adv?: { height?:number; depth?:number; boardType?:string; frontType?:string; gaps?: Gaps; drawerFronts?: number[]; shelves?:number }
+  adv?: {
+    height?:number;
+    depth?:number;
+    boardType?:string;
+    frontType?:string;
+    gaps?: Gaps;
+    drawerFronts?: number[];
+    shelves?:number;
+    partitions?: { pos:number; thick:number }[];
+    shelfLocs?: number[];
+  }
     /**
      * Array of booleans indicating whether each front on this module is open.
      * A single-element array corresponds to a single door; multiple elements
