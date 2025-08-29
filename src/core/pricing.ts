@@ -1,5 +1,6 @@
 import { FAMILY } from './catalog'
 import { Parts, Price, PricingData, ModuleAdv, PriceCounts } from '../types'
+import { variantRules } from './variantRules'
 function hingeCountPerDoor(doorHeightMM:number){ if (doorHeightMM<=900) return 2; if (doorHeightMM<=1500) return 3; return 4 }
 type AdvParams = Required<Pick<ModuleAdv,'height'|'depth'|'boardType'|'frontType'>> & Omit<ModuleAdv,'height'|'depth'|'boardType'|'frontType'>
 
@@ -20,17 +21,19 @@ export function computeModuleCost(
   const boardPrice = P.board[g.boardType] || 0
   const frontPrice = P.front[g.frontType] || 0
   const edgingPrice = P.edging['ABS 1mm'] || 0
-  let doors = 0, drawers = 0, cargoW: '150'|'200'|'300'|null = null, aventosType: 'HK'|'HS'|null = null, kits = 0
-  if(params.family===FAMILY.BASE){
-    if(params.kind==='doors'){ if(params.variant==='d1') doors=1; if(params.variant==='d2') doors=2; if(params.variant==='d1+drawer'){ doors=1; drawers=1 } if(params.variant==='d2+drawer'){ doors=2; drawers=1 } if(params.variant==='sink'){ doors=2; kits += (P.sinkKit||0) } if(params.variant==='hob'){ doors=2 } }
-    if(params.kind==='drawers'){ if(params.variant.startsWith('s')) drawers = Number(params.variant.slice(1))||0 }
-    if(params.kind==='cargo'){ if(params.variant==='cargo150') cargoW='150'; if(params.variant==='cargo200') cargoW='200'; if(params.variant==='cargo300') cargoW='300' }
-  } else if(params.family===FAMILY.TALL){
-    if(params.variant==='t1') doors=1; if(params.variant==='t2') doors=2; if(params.variant==='oven'){ kits += (P.dwKit||0) } if(params.variant==='oven+mw'){ kits += (P.dwKit||0) + 100 } if(params.variant==='fridge'){ kits += (P.fridgeKit||0); doors=2 }
-  } else if(params.family===FAMILY.WALL){
-    if(params.variant==='wd1') doors=1; if(params.variant==='wd2') doors=2; if(params.variant==='hood'){ kits += (P.hoodKit||0); doors=2 } if(params.variant==='avHK'){ aventosType='HK' } if(params.variant==='avHS'){ aventosType='HS' }
-  } else if(params.family===FAMILY.PAWLACZ){
-    if(params.variant==='p1') doors=1; if(params.variant==='p2') doors=2; if(params.variant==='p3') doors=3
+  let doors = 0,
+    drawers = 0,
+    cargoW: '150' | '200' | '300' | null = null,
+    aventosType: 'HK' | 'HS' | null = null,
+    kits = 0
+
+  const rule = variantRules[params.family]?.[params.variant]
+  if (rule) {
+    doors = rule.doors ?? 0
+    drawers = rule.drawers ?? 0
+    cargoW = rule.cargo ?? null
+    aventosType = rule.aventos ?? null
+    kits = (rule.kits || []).reduce((sum, k) => sum + (P[k] || 0), 0)
   }
   const doorHeightMM = hMM - 100
   const hingesPerDoor = hingeCountPerDoor(doorHeightMM)

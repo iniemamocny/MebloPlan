@@ -32,6 +32,7 @@ export interface Prices {
   sinkKit: number
   dwKit: number
   fridgeKit: number
+  mwKit: number
   handle: Record<string, number>
   labor: number
   margin: number
