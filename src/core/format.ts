@@ -8,6 +8,8 @@ export type Part = {
   qty?: number
 }
 
+type PreparedPart = Part & { _w:number; _h:number }
+
 export type SheetPlan = { ok: boolean; reason?: string; sheets: number }
 
 export function validateParts(board: Board, parts: Part[]): SheetPlan {
@@ -58,10 +60,10 @@ export function packIntoSheets(board:Board, parts:Part[]): Sheet[] {
     for (let i=0;i<q;i++) units.push({...p})
   }
   // Sortuj malejąco po h potem w (po orientacji wstępnej)
-  const prepared = units.map(u => {
+  const prepared: PreparedPart[] = units.map(u => {
     const o = orient(u, board)
     return { ...u, _w:o.w, _h:o.h }
-  }).sort((a:any,b:any)=> (b._h - a._h) || (b._w - a._w))
+  }).sort((a,b)=> (b._h - a._h) || (b._w - a._w))
 
   const sheets: Sheet[] = []
   let sheetIndex = 1
