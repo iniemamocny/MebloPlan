@@ -744,9 +744,6 @@ export default function App(){
                     <div className="row" style={{marginTop:8}}>
                       <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} boardThicknessMM={gLocal.boardThickness} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} backPanel={gLocal.backPanel} />
                     </div>
-                    <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} boardThicknessMM={gLocal.boardThickness} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} backPanel={gLocal.backPanel} />
-                    </div>
                   </div>
                 )}
                 {cfgTab==='adv' && (
@@ -786,9 +783,6 @@ export default function App(){
                         onChangeGaps={(gg)=>setAdv({ ...gLocal, gaps: gg })}
                         onChangeDrawerFronts={(arr)=>setAdv({ ...gLocal, drawerFronts: arr })}
                       />
-                    </div>
-                    <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} boardThicknessMM={gLocal.boardThickness} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} backPanel={gLocal.backPanel} />
                     </div>
                     <div className="row" style={{marginTop:8}}>
                       <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} boardThicknessMM={gLocal.boardThickness} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} backPanel={gLocal.backPanel} />
