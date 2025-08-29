@@ -174,7 +174,7 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
                     fg.rotation.y = (sign * Math.PI) / 2 * prog
                   } else if (fg.userData.type === 'drawer') {
                     const slide = fg.userData.slideDist || 0.45
-                    fg.position.z = -slide * prog
+                    fg.position.z = (fg.userData.closedZ ?? 0) - slide * prog
                   }
                 }
               }
