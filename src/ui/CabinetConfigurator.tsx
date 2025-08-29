@@ -3,6 +3,8 @@ import { FAMILY, Kind, Variant } from '../core/catalog'
 import { usePlannerStore } from '../state/store'
 import TechDrawing from './components/TechDrawing'
 import Cabinet3D from './components/Cabinet3D'
+import { CabinetConfig } from './types'
+import { Gaps } from '../types'
 
 interface Props {
   family: FAMILY
@@ -12,9 +14,9 @@ interface Props {
   setCfgTab: (t: 'basic' | 'adv') => void
   widthMM: number
   setWidthMM: (n: number) => void
-  gLocal: any
-  setAdv: (v: any) => void
-  onAdd: (width: number, adv: any) => void
+  gLocal: CabinetConfig
+  setAdv: (v: CabinetConfig) => void
+  onAdd: (width: number, adv: CabinetConfig) => void
 }
 
 const CabinetConfigurator: React.FC<Props> = ({
@@ -112,8 +114,8 @@ const CabinetConfigurator: React.FC<Props> = ({
                 gaps={gLocal.gaps}
                 drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)}
                 drawerFronts={gLocal.drawerFronts}
-                onChangeGaps={(gg)=>setAdv({ ...gLocal, gaps: gg })}
-                onChangeDrawerFronts={(arr)=>setAdv({ ...gLocal, drawerFronts: arr })}
+                onChangeGaps={(gg: Gaps) => setAdv({ ...gLocal, gaps: gg })}
+                onChangeDrawerFronts={(arr: number[]) => setAdv({ ...gLocal, drawerFronts: arr })}
               />
             </div>
             <div className="row" style={{marginTop:8}}>
