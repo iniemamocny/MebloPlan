@@ -45,7 +45,16 @@ type Module3D = {
   size:{ w:number; h:number; d:number }; position:[number,number,number]; rotationY?:number;
   price?: any; fittings?: any
   segIndex?: number | null
-  adv?: { height?:number; depth?:number; boardType?:string; frontType?:string; gaps?: Gaps; drawerFronts?: number[]; shelves?:number }
+  adv?: {
+    height?:number;
+    depth?:number;
+    boardType?:string;
+    frontType?:string;
+    gaps?: Gaps;
+    drawerFronts?: number[];
+    shelfPositions?: number[];
+    partitions?: { position:number; thickness:number }[];
+  }
     /**
      * Array of booleans indicating whether each front on this module is open.
      * A single-element array corresponds to a single door; multiple elements
@@ -100,7 +109,12 @@ export const usePlannerStore = create<Store>((set,get)=>({
       if (patch.boardType !== undefined) newAdv.boardType = patch.boardType
       if (patch.frontType !== undefined) newAdv.frontType = patch.frontType
       if (patch.gaps !== undefined) newAdv.gaps = { ...(m.adv?.gaps||{}), ...patch.gaps }
-      if (patch.shelves !== undefined) newAdv.shelves = patch.shelves
+      if (patch.shelves !== undefined) {
+        const count = patch.shelves
+        const h = patch.height !== undefined ? patch.height : (newAdv.height ?? s.globals[fam].height)
+        const arr = count && h ? Array.from({ length: count }, (_, i) => Math.round((h * (i + 1)) / (count + 1))) : []
+        newAdv.shelfPositions = arr
+      }
       const newSize = { ...m.size }
       if (patch.height !== undefined) newSize.h = patch.height/1000
       if (patch.depth !== undefined) newSize.d = patch.depth/1000

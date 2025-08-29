@@ -50,20 +50,29 @@ export function cutlistForModule(m:any, globals:any): { items: CutItem[]; edges:
     if (m.family===FAMILY.BASE && m.kind==='doors') defaultShelves = 1
     else if (m.family===FAMILY.WALL) defaultShelves = 1
     else if (m.family===FAMILY.TALL) defaultShelves = 4
-    const shelfQty = g.shelves !== undefined ? g.shelves : defaultShelves
+    const shelfQty = Array.isArray(g.shelfPositions) ? g.shelfPositions.length : (g.shelves !== undefined ? g.shelves : defaultShelves)
     if (shelfQty>0){
       add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Półka', qty:shelfQty, w:shelfW, h:shelfD })
       addEdge('ABS 1mm', shelfW*shelfQty, shelfQty>1?'Półki — przód sumarycznie':'Półka — przód')
     }
   }
 
+  const addPartitions = () => {
+    const parts = Array.isArray(g.partitions) ? g.partitions : []
+    parts.forEach((p:any) => {
+      const pt = typeof p.thickness === 'number' ? p.thickness : t
+      add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${pt}mm`, part:'Przegroda pionowa', qty:1, w:clampPos(D), h:clampPos(H) })
+      addEdge('ABS 1mm', H, 'Przegroda pionowa — krawędź frontowa')
+    })
+  }
+
   if (m.family===FAMILY.BASE && m.kind==='corner'){
     const filler = 70
     add({ moduleId:m.id, moduleLabel:m.label, material:`Płyta ${t}mm`, part:'Zaślepka narożna', qty:1, w:clampPos(filler), h:clampPos(H) })
     addEdge('ABS 1mm', H, 'Zaślepka narożna — krawędź frontowa')
-    addStandardBox(); addShelves()
+    addStandardBox(); addPartitions(); addShelves()
   } else {
-    addStandardBox(); addShelves()
+    addStandardBox(); addPartitions(); addShelves()
   }
 
   const counts = m.price?.counts || { doors:0, drawers:0 }

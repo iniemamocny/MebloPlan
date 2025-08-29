@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { FAMILY, FAMILY_COLORS } from '../../core/catalog'
 
-export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves=1 }:{ widthMM:number;heightMM:number;depthMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number }){
+export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelfPositions=[], partitions=[] }:{ widthMM:number;heightMM:number;depthMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelfPositions?:number[]; partitions?:{ position:number; thickness:number }[] }){
   const ref = useRef<HTMLDivElement>(null)
   useEffect(()=>{
     // Wait until our container is available
@@ -67,16 +67,22 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     const backBoard = new THREE.Mesh(backGeo, backMat)
     backBoard.position.set(W / 2, H / 2, -D + backT / 2)
     cabGroup.add(backBoard)
-    // Shelves: simple horizontal boards (if drawers = 0) else skip
+    // Partitions
+    partitions.forEach(p => {
+      const pt = (p.thickness || 18) / 1000
+      const partGeo = new THREE.BoxGeometry(pt, H, D)
+      const part = new THREE.Mesh(partGeo, carcMat)
+      part.position.set((p.position) / 1000, H / 2, -D / 2)
+      cabGroup.add(part)
+    })
+    // Shelves: horizontal boards at specified positions when no drawers
     if (drawers === 0) {
       const shelfGeo = new THREE.BoxGeometry(W - 2 * T, T, D)
-      const count = Math.max(0, shelves)
-      for (let i = 0; i < count; i++) {
+      shelfPositions.forEach(yMM => {
         const shelf = new THREE.Mesh(shelfGeo, carcMat)
-        const y = H * (i + 1) / (count + 1)
-        shelf.position.set(W / 2, y, -D / 2)
+        shelf.position.set(W / 2, yMM / 1000, -D / 2)
         cabGroup.add(shelf)
-      }
+      })
     }
     // Front: if drawers > 0, split into drawer fronts; otherwise full door
     if (drawers > 0) {
@@ -146,6 +152,6 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     return () => {
       renderer.dispose()
     }
-  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves])
+  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelfPositions, partitions])
   return <div ref={ref} style={{ width: 260, height: 190, border: '1px solid #E5E7EB', borderRadius: 8, background: '#fff' }} />
 }
