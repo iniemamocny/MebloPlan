@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { FAMILY, FAMILY_COLORS } from '../../core/catalog'
 
-export default function Cabinet3D({ widthMM, heightMM, depthMM, boardThicknessMM, drawers, gaps, drawerFronts, family, shelves=1, backPanel='full' }:{ widthMM:number;heightMM:number;depthMM:number;boardThicknessMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number; backPanel?:'full'|'split'|'none' }){
+export default function Cabinet3D({ widthMM, heightMM, depthMM, boardThicknessMM=18, drawers, gaps, drawerFronts, family, shelves=1, backPanel='full' }:{ widthMM:number;heightMM:number;depthMM:number;boardThicknessMM?:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number; backPanel?:'full'|'split'|'none' }){
   const ref = useRef<HTMLDivElement>(null)
   useEffect(()=>{
     // Wait until our container is available
@@ -30,8 +30,8 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, boardThicknessMM
     const W = widthMM / 1000
     const H = heightMM / 1000
     const D = depthMM / 1000
-    // Board thickness (convert mm to m) and back thickness (3 mm)
-    const T = (boardThicknessMM || 18) / 1000
+    // Board thickness (provided in mm) and back thickness (3 mm)
+    const T = boardThicknessMM/1000
     const backT = 0.003
     // Colour palette: carcase (light grey), front (warm wood), back (very light)
     const carcColour = new THREE.Color(0xf5f5f5)
