@@ -13,9 +13,7 @@ export const KIND_SETS: Record<FAMILY, Kind[]> = {
       { key:'d1', label:'1 drzwiczki' },
       { key:'d2', label:'2 drzwiczki' },
       { key:'d1+drawer', label:'1 drzwiczki + szuflada' },
-      { key:'d2+drawer', label:'2 drzwiczki + szuflada' },
-      { key:'sink', label:'Zlewowa' },
-      { key:'hob', label:'Pod płytę' }
+      { key:'d2+drawer', label:'2 drzwiczki + szuflada' }
     ]},
     { key:'drawers', label:'Szuflady', variants:[
       { key:'s1', label:'1 szuflada' },
@@ -27,16 +25,25 @@ export const KIND_SETS: Record<FAMILY, Kind[]> = {
       { key:'blind-L', label:'Ślepa L' },
       { key:'blind-R', label:'Ślepa P' }
     ]},
+    { key:'sink', label:'Zlewowe', variants:[
+      { key:'sink', label:'Szafka zlewozmywakowa' }
+    ]},
     { key:'cargo', label:'Cargo dolne', variants:[
       { key:'cargo150', label:'Cargo 150' },
       { key:'cargo200', label:'Cargo 200' },
       { key:'cargo300', label:'Cargo 300' }
+    ]},
+    { key:'appliance', label:'Pod AGD', variants:[
+      { key:'dw', label:'Zmywarka' },
+      { key:'hob', label:'Pod płytę' }
     ]}
   ],
   [FAMILY.TALL]: [
     { key:'tall', label:'Słupki', variants:[
       { key:'t1', label:'1 drzwi' },
-      { key:'t2', label:'2 drzwi' },
+      { key:'t2', label:'2 drzwi' }
+    ]},
+    { key:'appliance', label:'AGD w słupku', variants:[
       { key:'oven', label:'Piekarnik' },
       { key:'oven+mw', label:'Piekarnik + MW' },
       { key:'fridge', label:'Lodówka' }
@@ -45,7 +52,9 @@ export const KIND_SETS: Record<FAMILY, Kind[]> = {
   [FAMILY.WALL]: [
     { key:'doors', label:'Drzwiczki', variants:[
       { key:'wd1', label:'1 drzwiczki' },
-      { key:'wd2', label:'2 drzwiczki' },
+      { key:'wd2', label:'2 drzwiczki' }
+    ]},
+    { key:'appliance', label:'Pod AGD', variants:[
       { key:'hood', label:'Okapowa' },
       { key:'avHK', label:'Aventos HK' },
       { key:'avHS', label:'Aventos HS' }

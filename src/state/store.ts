@@ -41,7 +41,7 @@ const persisted = (()=>{
 })()
 
 type Module3D = {
-  id:string; label:string; family:FAMILY; kind:string;
+  id:string; label:string; family:FAMILY; kind:string; variant?:string;
   size:{ w:number; h:number; d:number }; position:[number,number,number]; rotationY?:number;
   price?: any; fittings?: any
   segIndex?: number | null
