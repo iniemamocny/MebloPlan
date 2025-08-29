@@ -1,11 +1,11 @@
 import { FAMILY } from './catalog'
 import { usePlannerStore } from '../state/store'
-export type Parts = { board:number; front:number; edging:number; cut:number; hinges:number; slides:number; legs:number; hangers:number; aventos:number; cargo:number; kits:number; labor:number }
+export type Parts = { board:number; front:number; edging:number; cut:number; hinges:number; slides:number; legs:number; hangers:number; aventos:number; cargo:number; opening:number; kits:number; labor:number }
 export type Price = { total:number; parts: Parts; counts:any }
 function hingeCountPerDoor(doorHeightMM:number){ if (doorHeightMM<=900) return 2; if (doorHeightMM<=1500) return 3; return 4 }
 export function computeModuleCost(params: {
   family: FAMILY; kind:string; variant:string; width:number;
-  adv: { height:number; depth:number; boardType:string; boardThickness?:number; frontType:string; gaps?: any; hingeType?:string; drawerSlide?:string; aventosType?:string; backPanel?:'full'|'split'|'none' };
+  adv: { height:number; depth:number; boardType:string; boardThickness?:number; frontType:string; gaps?: any; hingeType?:string; drawerSlide?:string; aventosType?:string; openingMechanism?:string; backPanel?:'full'|'split'|'none' };
 }): Price {
   const P = usePlannerStore.getState().prices
   const base = usePlannerStore.getState().globals[params.family]
@@ -33,9 +33,11 @@ export function computeModuleCost(params: {
   const hingesPerDoor = hingeCountPerDoor(doorHeightMM)
   const hingeType = g.hingeType || 'Blum ClipTop'
   const slideType = g.drawerSlide || 'BLUM LEGRABOX'
+  const openingType = g.openingMechanism || 'Standard'
   const selectedAventos = g.aventosType && g.aventosType !== 'Brak' ? g.aventosType as 'HK'|'HS' : aventosType
   const hingesCost = (P.hinges[hingeType]||0) * hingesPerDoor * doors
   const slidesCost = (P.drawerSlide[slideType]||0) * drawers
+  const openingCost = (P.opening[openingType]||0) * doors
   const legsCount = params.family===FAMILY.BASE ? Math.max(4, Math.ceil(wMM/300)*2) : 0
   const legsCost = legsCount * (P.legs['Standard 10cm']||0)
   const hangersCount = (params.family===FAMILY.WALL || params.family===FAMILY.PAWLACZ) ? 2 : 0
@@ -53,7 +55,7 @@ export function computeModuleCost(params: {
   const edgingCost = edgeMeters * (edgingPrice||0)
   const cutCost = (edgeMeters) * (P.cut||4)
   const labor = P.labor||0
-  const parts = { board: Math.round(boardCost), front: Math.round(frontCost), edging: Math.round(edgingCost), cut: Math.round(cutCost), hinges: Math.round(hingesCost), slides: Math.round(slidesCost), legs: Math.round(legsCost), hangers: Math.round(hangersCost), aventos: Math.round(aventosCost), cargo: Math.round(cargoCost), kits: Math.round(kits), labor: Math.round(labor) }
+  const parts = { board: Math.round(boardCost), front: Math.round(frontCost), edging: Math.round(edgingCost), cut: Math.round(cutCost), hinges: Math.round(hingesCost), slides: Math.round(slidesCost), legs: Math.round(legsCost), hangers: Math.round(hangersCost), aventos: Math.round(aventosCost), cargo: Math.round(cargoCost), opening: Math.round(openingCost), kits: Math.round(kits), labor: Math.round(labor) }
   const subtotal = Object.values(parts).reduce((s,n)=>s+(n||0),0)
   const total = Math.round(subtotal*(1+(P.margin||0)))
   return { total, parts, counts:{ doors, drawers, legs:legsCount, hangers:hangersCount, hinges:hingesPerDoor*doors } }

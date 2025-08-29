@@ -40,6 +40,7 @@ export default function GlobalSettings(){
             <Field label="Zawias" type="select" value={g.hingeType} onChange={(v)=>set({hingeType:v})} options={Object.keys(store.prices.hinges)} />
             <Field label="Prowadnice" type="select" value={g.drawerSlide} onChange={(v)=>set({drawerSlide:v})} options={Object.keys(store.prices.drawerSlide)} />
             <Field label="Aventos" type="select" value={g.aventosType} onChange={(v)=>set({aventosType:v})} options={['Brak', ...Object.keys(store.prices.aventos)]} />
+            <Field label="Mechanizm" type="select" value={g.openingMechanism} onChange={(v)=>set({openingMechanism:v})} options={['Standard','TIP-ON','BLUMOTION']} />
             {fam===FAMILY.BASE && (<>
               <Field label="Nóżki" type="select" value={g.legsType} onChange={(v)=>set({legsType:v})} options={Object.keys(store.prices.legs)} />
               <Field label="Odsunięcie od ściany (mm)" value={g.offsetWall||0} onChange={(v)=>set({offsetWall:v})} />

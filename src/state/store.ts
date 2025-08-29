@@ -7,14 +7,14 @@ export const defaultGaps: Gaps = { left:2, right:2, top:2, bottom:2, between:3 }
 export type Globals = Record<FAMILY, {
   height:number; depth:number; boardType:string; boardThickness:number; frontType:string;
   gaps: Gaps; legsType?:string; hangerType?:string; offsetWall?:number; shelves?:number;
-  hingeType?:string; drawerSlide?:string; aventosType?:string; backPanel?:'full'|'split'|'none';
+  hingeType?:string; drawerSlide?:string; aventosType?:string; openingMechanism?:string; backPanel?:'full'|'split'|'none';
 }>
 
 export const defaultGlobal: Globals = {
-  [FAMILY.BASE]: { height:800, depth:600, boardType:'Płyta 18mm', boardThickness:18, frontType:'Laminat', gaps:{...defaultGaps}, legsType:'Standard 10cm', offsetWall:30, shelves:1, hingeType:'Blum ClipTop', drawerSlide:'BLUM LEGRABOX', aventosType:'Brak', backPanel:'full' },
-  [FAMILY.WALL]: { height:720, depth:320, boardType:'Płyta 18mm', boardThickness:18, frontType:'Laminat', gaps:{...defaultGaps}, hangerType:'Standard', offsetWall:20, shelves:1, hingeType:'Blum ClipTop', drawerSlide:'BLUM LEGRABOX', aventosType:'Brak', backPanel:'full' },
-  [FAMILY.PAWLACZ]: { height:400, depth:600, boardType:'Płyta 18mm', boardThickness:18, frontType:'Laminat', gaps:{...defaultGaps}, hangerType:'Wzmocnione', offsetWall:30, shelves:1, hingeType:'Blum ClipTop', drawerSlide:'BLUM LEGRABOX', aventosType:'Brak', backPanel:'full' },
-  [FAMILY.TALL]: { height:2100, depth:600, boardType:'Płyta 18mm', boardThickness:18, frontType:'Laminat', gaps:{...defaultGaps}, shelves:4, hingeType:'Blum ClipTop', drawerSlide:'BLUM LEGRABOX', aventosType:'Brak', backPanel:'full' }
+  [FAMILY.BASE]: { height:800, depth:600, boardType:'Płyta 18mm', boardThickness:18, frontType:'Laminat', gaps:{...defaultGaps}, legsType:'Standard 10cm', offsetWall:30, shelves:1, hingeType:'Blum ClipTop', drawerSlide:'BLUM LEGRABOX', aventosType:'Brak', openingMechanism:'Standard', backPanel:'full' },
+  [FAMILY.WALL]: { height:720, depth:320, boardType:'Płyta 18mm', boardThickness:18, frontType:'Laminat', gaps:{...defaultGaps}, hangerType:'Standard', offsetWall:20, shelves:1, hingeType:'Blum ClipTop', drawerSlide:'BLUM LEGRABOX', aventosType:'Brak', openingMechanism:'Standard', backPanel:'full' },
+  [FAMILY.PAWLACZ]: { height:400, depth:600, boardType:'Płyta 18mm', boardThickness:18, frontType:'Laminat', gaps:{...defaultGaps}, hangerType:'Wzmocnione', offsetWall:30, shelves:1, hingeType:'Blum ClipTop', drawerSlide:'BLUM LEGRABOX', aventosType:'Brak', openingMechanism:'Standard', backPanel:'full' },
+  [FAMILY.TALL]: { height:2100, depth:600, boardType:'Płyta 18mm', boardThickness:18, frontType:'Laminat', gaps:{...defaultGaps}, shelves:4, hingeType:'Blum ClipTop', drawerSlide:'BLUM LEGRABOX', aventosType:'Brak', openingMechanism:'Standard', backPanel:'full' }
 }
 
 export const defaultPrices = {
@@ -27,6 +27,7 @@ export const defaultPrices = {
   hinges: { 'Blum ClipTop': 16, 'GTV': 9 },
   drawerSlide: { 'BLUM LEGRABOX': 68, 'BLUM TANDEMBOX': 48, 'GTV': 22 },
   aventos: { 'HK': 180, 'HS': 240 },
+  opening: { 'Standard': 0, 'TIP-ON': 20, 'BLUMOTION': 30 },
   cargo: { '150': 180, '200': 210, '300': 260 },
   hoodKit: 160,
   sinkKit: 80,
@@ -46,7 +47,7 @@ type Module3D = {
   size:{ w:number; h:number; d:number }; position:[number,number,number]; rotationY?:number;
   price?: any; fittings?: any
   segIndex?: number | null
-  adv?: { height?:number; depth?:number; boardType?:string; boardThickness?:number; frontType?:string; gaps?: Gaps; drawerFronts?: number[]; shelves?:number; hingeType?:string; drawerSlide?:string; aventosType?:string; backPanel?:'full'|'split'|'none' }
+  adv?: { height?:number; depth?:number; boardType?:string; boardThickness?:number; frontType?:string; gaps?: Gaps; drawerFronts?: number[]; shelves?:number; hingeType?:string; drawerSlide?:string; aventosType?:string; openingMechanism?:string; backPanel?:'full'|'split'|'none' }
     /**
      * Array of booleans indicating whether each front on this module is open.
      * A single-element array corresponds to a single door; multiple elements
@@ -106,6 +107,7 @@ export const usePlannerStore = create<Store>((set,get)=>({
       if (patch.hingeType !== undefined) newAdv.hingeType = patch.hingeType
       if (patch.drawerSlide !== undefined) newAdv.drawerSlide = patch.drawerSlide
       if (patch.aventosType !== undefined) newAdv.aventosType = patch.aventosType
+      if (patch.openingMechanism !== undefined) newAdv.openingMechanism = patch.openingMechanism
       if (patch.backPanel !== undefined) newAdv.backPanel = patch.backPanel
       const newSize = { ...m.size }
       if (patch.height !== undefined) newSize.h = patch.height/1000

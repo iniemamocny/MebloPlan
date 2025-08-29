@@ -58,6 +58,7 @@ export default function App(){
       hingeType:g.hingeType,
       drawerSlide:g.drawerSlide,
       aventosType:g.aventosType,
+      openingMechanism:g.openingMechanism,
       backPanel:g.backPanel
     })
   }, [family, store.globals])
@@ -558,7 +559,7 @@ export default function App(){
     const g = { ...store.globals[family], ...advLocal, gaps: { ...store.globals[family].gaps, ...(advLocal?.gaps||{}) } }
     const h = (g.height)/1000, d=(g.depth)/1000, w=(widthMM)/1000
     const id = `mod_${Date.now()}_${Math.floor(Math.random()*1e6)}`
-    const price = computeModuleCost({ family, kind:kind.key, variant:variant.key, width: widthMM, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, boardThickness:g.boardThickness, frontType:g.frontType, gaps:g.gaps, hingeType:g.hingeType, drawerSlide:g.drawerSlide, aventosType:g.aventosType, backPanel:g.backPanel } })
+    const price = computeModuleCost({ family, kind:kind.key, variant:variant.key, width: widthMM, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, boardThickness:g.boardThickness, frontType:g.frontType, gaps:g.gaps, hingeType:g.hingeType, drawerSlide:g.drawerSlide, aventosType:g.aventosType, openingMechanism:g.openingMechanism, backPanel:g.backPanel } })
     const snap = snapToWalls({ w, h, d }, family)
     // Augment advanced settings with defaults for hinge, drawer slide type and animation speed if missing.
     // Additionally, compute drawer front heights based on the selected variant if none were provided.
@@ -569,9 +570,10 @@ export default function App(){
     if (!advAugmented.hinge) advAugmented.hinge = 'left'
     // Set default drawer slide and hinge types
     if (!advAugmented.hingeType) advAugmented.hingeType = 'Blum ClipTop'
-    if (!advAugmented.drawerSlide) advAugmented.drawerSlide = 'BLUM LEGRABOX'
-    if (!advAugmented.aventosType) advAugmented.aventosType = 'Brak'
-    if (!advAugmented.backPanel) advAugmented.backPanel = 'full'
+      if (!advAugmented.drawerSlide) advAugmented.drawerSlide = 'BLUM LEGRABOX'
+      if (!advAugmented.aventosType) advAugmented.aventosType = 'Brak'
+      if (!advAugmented.openingMechanism) advAugmented.openingMechanism = 'Standard'
+      if (!advAugmented.backPanel) advAugmented.backPanel = 'full'
     // Set default animation speed
     if (advAugmented.animationSpeed === undefined) advAugmented.animationSpeed = 0.15
     // Determine number of drawers implied by the variant key.  Variants starting with 's' encode the number of drawers directly (e.g. 's3');
@@ -651,7 +653,7 @@ export default function App(){
     placed.forEach((pl,i)=>{
       const wmm = widths[i]; const w=wmm/1000
       const id = `auto_${Date.now()}_${i}_${Math.floor(Math.random()*1e6)}`
-      const price = computeModuleCost({ family, kind:(KIND_SETS[family][0]?.key)||'doors', variant:'d1', width: wmm, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, boardThickness:g.boardThickness, frontType:g.frontType, gaps:g.gaps, hingeType:g.hingeType, drawerSlide:g.drawerSlide, aventosType:g.aventosType, backPanel:g.backPanel } })
+      const price = computeModuleCost({ family, kind:(KIND_SETS[family][0]?.key)||'doors', variant:'d1', width: wmm, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, boardThickness:g.boardThickness, frontType:g.frontType, gaps:g.gaps, hingeType:g.hingeType, drawerSlide:g.drawerSlide, aventosType:g.aventosType, openingMechanism:g.openingMechanism, backPanel:g.backPanel } })
       let mod:any = { id, label:'Auto', family, kind:(KIND_SETS[family][0]?.key)||'doors', size:{ w,h,d }, position:[pl.center[0]/1000, h/2, pl.center[1]/1000], rotationY:pl.rot, segIndex: selWall, price, adv:g }
       mod = resolveCollisions(mod)
       store.addModule(mod)
@@ -778,7 +780,7 @@ export default function App(){
                       />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} boardThickness={gLocal.boardThickness} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} hingeType={gLocal.hingeType} drawerSlide={gLocal.drawerSlide} aventosType={gLocal.aventosType} backPanel={gLocal.backPanel} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} boardThickness={gLocal.boardThickness} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} hingeType={gLocal.hingeType} drawerSlide={gLocal.drawerSlide} aventosType={gLocal.aventosType} openingMechanism={gLocal.openingMechanism} backPanel={gLocal.backPanel} />
                     </div>
                   </div>
                 )}
@@ -800,6 +802,7 @@ export default function App(){
                         <div><div className="small">Prowadnice</div><select className="input" value={gLocal.drawerSlide} onChange={e=>setAdv({...gLocal, drawerSlide:(e.target as HTMLSelectElement).value})}>{Object.keys(store.prices.drawerSlide).map(k=><option key={k} value={k}>{k}</option>)}</select></div>
                       )}
                       <div><div className="small">Aventos</div><select className="input" value={gLocal.aventosType} onChange={e=>setAdv({...gLocal, aventosType:(e.target as HTMLSelectElement).value})}>{['Brak', ...Object.keys(store.prices.aventos)].map(k=><option key={k} value={k}>{k}</option>)}</select></div>
+                      <div><div className="small">Mechanizm</div><select className="input" value={gLocal.openingMechanism} onChange={e=>setAdv({...gLocal, openingMechanism:(e.target as HTMLSelectElement).value})}>{['Standard','TIP-ON','BLUMOTION'].map(k=><option key={k} value={k}>{k}</option>)}</select></div>
                     </div>
                     {!(variant?.key?.startsWith('s')) && (
                       <div style={{marginTop:8}}>
@@ -825,7 +828,7 @@ export default function App(){
                       />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} boardThickness={gLocal.boardThickness} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} hingeType={gLocal.hingeType} drawerSlide={gLocal.drawerSlide} aventosType={gLocal.aventosType} backPanel={gLocal.backPanel} />
+                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} boardThickness={gLocal.boardThickness} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} hingeType={gLocal.hingeType} drawerSlide={gLocal.drawerSlide} aventosType={gLocal.aventosType} openingMechanism={gLocal.openingMechanism} backPanel={gLocal.backPanel} />
                     </div>
                     <div className="row" style={{marginTop:8}}>
                       <button className="btn" onClick={()=>onAdd(widthMM, gLocal)}>Wstaw szafkę</button>
