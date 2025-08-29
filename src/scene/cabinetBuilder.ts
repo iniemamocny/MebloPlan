@@ -38,6 +38,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     backThickness: backT = 0.003,
   } = opts
 
+  const FRONT_OFFSET = 0.002
+
   const carcColour = new THREE.Color(0xf5f5f5)
   const frontColour = new THREE.Color(FAMILY_COLORS[family])
   const backColour = new THREE.Color(0xf0f0f0)
@@ -111,7 +113,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       const h = arr[i] / 1000
       const frontGeo = new THREE.BoxGeometry(W, h, T)
       const frontMesh = new THREE.Mesh(frontGeo, frontMat)
-      frontMesh.position.set(W / 2, currentY + h / 2, -T / 2)
+      frontMesh.position.set(W / 2, currentY + h / 2, FRONT_OFFSET - T / 2)
       group.add(frontMesh)
       if (showHandles) {
         const handleWidth = Math.min(0.4, W * 0.5)
@@ -119,7 +121,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
         const handleDepth = 0.03
         const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
         const handle = new THREE.Mesh(handleGeo, handleMat)
-        handle.position.set(W / 2, currentY + h - handleHeight * 1.5, 0.01)
+        handle.position.set(W / 2, currentY + h - handleHeight * 1.5, 0.01 + FRONT_OFFSET)
         group.add(handle)
       }
       currentY += h
@@ -127,7 +129,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   } else {
     const doorGeo = new THREE.BoxGeometry(W, H, T)
     const door = new THREE.Mesh(doorGeo, frontMat)
-    door.position.set(W / 2, legHeight + H / 2, -T / 2)
+    door.position.set(W / 2, legHeight + H / 2, FRONT_OFFSET - T / 2)
     group.add(door)
     if (showHandles) {
       const handleWidth = Math.min(0.4, W * 0.5)
@@ -135,7 +137,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       const handleDepth = 0.03
       const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
       const handle = new THREE.Mesh(handleGeo, handleMat)
-      handle.position.set(W / 2, legHeight + H * 0.7, 0.01)
+      handle.position.set(W / 2, legHeight + H * 0.7, 0.01 + FRONT_OFFSET)
       group.add(handle)
     }
   }
