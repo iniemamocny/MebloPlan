@@ -45,6 +45,7 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
     const adv: ModuleAdv = mod.adv ?? {}
     const legHeight = getLegHeight(mod, store.globals)
     const drawers = Array.isArray(adv.drawerFronts) ? adv.drawerFronts.length : 0
+    const hinge = (adv as any).hinge as 'left' | 'right' | undefined
     const group = buildCabinetMesh({
       width: W,
       height: H,
@@ -56,9 +57,14 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       shelves: adv.shelves,
       backPanel: adv.backPanel,
       legHeight,
-      showHandles: true
+      showHandles: true,
+      hinge
     })
     group.userData.kind = 'cab'
+    const fg = group.userData.frontGroups || []
+    group.userData.openStates = mod.openStates?.slice(0, fg.length) || new Array(fg.length).fill(false)
+    group.userData.openProgress = new Array(fg.length).fill(0)
+    group.userData.animSpeed = (adv as any).animationSpeed ?? 0.15
     return group
   }
 

@@ -15,6 +15,7 @@ export interface CabinetOptions {
   showHandles?: boolean
   boardThickness?: number
   backThickness?: number
+  hinge?: 'left' | 'right'
 }
 
 /**
@@ -53,6 +54,9 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   const footMat = new THREE.MeshStandardMaterial({ color: footColour, metalness: 0.3, roughness: 0.7 })
 
   const group = new THREE.Group()
+  const frontGroups: THREE.Group[] = []
+  const openStates: boolean[] = []
+  const openProgress: number[] = []
 
   // Sides
   const sideGeo = new THREE.BoxGeometry(T, H, D)
@@ -108,38 +112,59 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     const arr = drawerFronts && drawerFronts.length === drawers
       ? drawerFronts
       : Array.from({ length: drawers }, () => Math.floor(totalFrontHeight / drawers))
-    let currentY = legHeight + (gaps.bottom / 1000)
+    let currentY = legHeight + gaps.bottom / 1000
     for (let i = 0; i < drawers; i++) {
       const h = arr[i] / 1000
       const frontGeo = new THREE.BoxGeometry(W, h, T)
       const frontMesh = new THREE.Mesh(frontGeo, frontMat)
-      frontMesh.position.set(W / 2, currentY + h / 2, FRONT_OFFSET - T / 2)
-      group.add(frontMesh)
+      const fg = new THREE.Group()
+      fg.position.set(W / 2, currentY + h / 2, FRONT_OFFSET - T / 2)
+      frontMesh.position.set(0, 0, 0)
+      fg.add(frontMesh)
+      fg.userData.type = 'drawer'
+      fg.userData.frontIndex = frontGroups.length
+      fg.userData.slideDist = -Math.min(0.45, D)
+      frontGroups.push(fg)
+      openStates.push(false)
+      openProgress.push(0)
       if (showHandles) {
         const handleWidth = Math.min(0.4, W * 0.5)
         const handleHeight = 0.02
         const handleDepth = 0.03
         const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
         const handle = new THREE.Mesh(handleGeo, handleMat)
-        handle.position.set(W / 2, currentY + h - handleHeight * 1.5, 0.01 + FRONT_OFFSET)
-        group.add(handle)
+        handle.position.set(0, h / 2 - handleHeight * 1.5, T / 2 + 0.01)
+        frontMesh.add(handle)
       }
+      group.add(fg)
       currentY += h
     }
   } else {
+    const hingeSide = opts.hinge === 'right' ? 'right' : 'left'
     const doorGeo = new THREE.BoxGeometry(W, H, T)
-    const door = new THREE.Mesh(doorGeo, frontMat)
-    door.position.set(W / 2, legHeight + H / 2, FRONT_OFFSET - T / 2)
-    group.add(door)
+    const doorMesh = new THREE.Mesh(doorGeo, frontMat)
+    const fg = new THREE.Group()
+    const pivotX = hingeSide === 'left' ? 0 : W
+    fg.position.set(pivotX, legHeight + H / 2, FRONT_OFFSET - T / 2)
+    doorMesh.position.set(hingeSide === 'left' ? W / 2 : -W / 2, 0, 0)
+    fg.add(doorMesh)
+    fg.userData.type = 'door'
+    fg.userData.frontIndex = frontGroups.length
+    fg.userData.hingeSide = hingeSide
+    frontGroups.push(fg)
+    openStates.push(false)
+    openProgress.push(0)
     if (showHandles) {
       const handleWidth = Math.min(0.4, W * 0.5)
       const handleHeight = 0.02
       const handleDepth = 0.03
       const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
       const handle = new THREE.Mesh(handleGeo, handleMat)
-      handle.position.set(W / 2, legHeight + H * 0.7, 0.01 + FRONT_OFFSET)
-      group.add(handle)
+      const xPos = hingeSide === 'left' ? W / 2 - handleWidth / 2 : -W / 2 + handleWidth / 2
+      handle.position.set(xPos, H * 0.2, T / 2 + 0.01)
+      doorMesh.add(handle)
     }
+    group.add(fg)
   }
 
   // Feet (hardware)
@@ -160,6 +185,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     br.position.set(W - T - footRadius, footHeight / 2, -D + T)
     group.add(br)
   }
-
+  group.userData.frontGroups = frontGroups
+  group.userData.openStates = openStates
+  group.userData.openProgress = openProgress
   return group
 }
