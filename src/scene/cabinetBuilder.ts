@@ -118,8 +118,9 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       const frontGeo = new THREE.BoxGeometry(W, h, T)
       const frontMesh = new THREE.Mesh(frontGeo, frontMat)
       const fg = new THREE.Group()
-      fg.position.set(W / 2, currentY + h / 2, FRONT_OFFSET - T / 2)
-      fg.userData.closedZ = FRONT_OFFSET - T / 2
+      // Start each drawer front completely in front of the carcass with a 2 mm gap
+      fg.position.set(W / 2, currentY + h / 2, FRONT_OFFSET + T / 2)
+      fg.userData.closedZ = FRONT_OFFSET + T / 2
       frontMesh.position.set(0, 0, 0)
       fg.add(frontMesh)
       fg.userData.type = 'drawer'
@@ -144,11 +145,12 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     const hingeSide = opts.hinge === 'right' ? 'right' : 'left'
     const doorGeo = new THREE.BoxGeometry(W, H, T)
     const doorMesh = new THREE.Mesh(doorGeo, frontMat)
-    const fg = new THREE.Group()
-    const pivotX = hingeSide === 'left' ? 0 : W
-    fg.position.set(pivotX, legHeight + H / 2, FRONT_OFFSET - T / 2)
-    doorMesh.position.set(hingeSide === 'left' ? W / 2 : -W / 2, 0, 0)
-    fg.add(doorMesh)
+      const fg = new THREE.Group()
+      const pivotX = hingeSide === 'left' ? 0 : W
+      // Hinge pivot sits 2 mm in front of the carcass, door hangs entirely in front
+      fg.position.set(pivotX, legHeight + H / 2, FRONT_OFFSET)
+      doorMesh.position.set(hingeSide === 'left' ? W / 2 : -W / 2, 0, T / 2)
+      fg.add(doorMesh)
     fg.userData.type = 'door'
     fg.userData.frontIndex = frontGroups.length
     fg.userData.hingeSide = hingeSide
