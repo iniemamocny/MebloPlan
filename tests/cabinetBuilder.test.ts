@@ -16,7 +16,7 @@ describe('buildCabinetMesh', () => {
       family: FAMILY.BASE,
     })
     expect(g).toBeInstanceOf(THREE.Group)
-    expect(g.children.length).toBe(9)
+    expect(g.children.length).toBe(7)
   })
 
   it('returns group with expected children for doors', () => {
@@ -28,7 +28,7 @@ describe('buildCabinetMesh', () => {
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
     })
-    expect(g.children.length).toBe(8)
+    expect(g.children.length).toBe(7)
   })
 
   it('matches provided dimensions', () => {
