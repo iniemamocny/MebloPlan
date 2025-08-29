@@ -523,7 +523,10 @@ export default function App(){
     const g = { ...store.globals[family], ...advLocal, gaps: { ...store.globals[family].gaps, ...(advLocal?.gaps||{}) } }
     const h = (g.height)/1000, d=(g.depth)/1000, w=(widthMM)/1000
     const id = `mod_${Date.now()}_${Math.floor(Math.random()*1e6)}`
-    const price = computeModuleCost({ family, kind:kind.key, variant:variant.key, width: widthMM, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:g.gaps, backPanel:g.backPanel } })
+    const price = computeModuleCost(
+      { family, kind:kind.key, variant:variant.key, width: widthMM, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:g.gaps, backPanel:g.backPanel } },
+      { prices: store.prices, globals: store.globals }
+    )
     const snap = snapToWalls({ w, h, d }, family)
     // Augment advanced settings with defaults for hinge, drawer slide type and animation speed if missing.
     // Additionally, compute drawer front heights based on the selected variant if none were provided.
@@ -613,7 +616,10 @@ export default function App(){
     placed.forEach((pl,i)=>{
       const wmm = widths[i]; const w=wmm/1000
       const id = `auto_${Date.now()}_${i}_${Math.floor(Math.random()*1e6)}`
-      const price = computeModuleCost({ family, kind:(KIND_SETS[family][0]?.key)||'doors', variant:'d1', width: wmm, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:g.gaps, backPanel:g.backPanel } })
+      const price = computeModuleCost(
+        { family, kind:(KIND_SETS[family][0]?.key)||'doors', variant:'d1', width: wmm, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:g.gaps, backPanel:g.backPanel } },
+        { prices: store.prices, globals: store.globals }
+      )
       let mod:any = { id, label:'Auto', family, kind:(KIND_SETS[family][0]?.key)||'doors', size:{ w,h,d }, position:[pl.center[0]/1000, h/2, pl.center[1]/1000], rotationY:pl.rot, segIndex: selWall, price, adv:g }
       mod = resolveCollisions(mod)
       store.addModule(mod)
