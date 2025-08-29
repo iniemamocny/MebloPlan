@@ -1,27 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react'
-import * as THREE from 'three'
-import { setupThree } from '../scene/engine'
-import { buildCabinetMesh } from '../scene/cabinetBuilder'
-import { FAMILY, FAMILY_LABELS, Kind, Variant, KIND_SETS } from '../core/catalog'
+import { FAMILY, FAMILY_LABELS, Kind, Variant } from '../core/catalog'
 import { usePlannerStore } from '../state/store'
 import GlobalSettings from './panels/GlobalSettings'
 import RoomTab from './panels/RoomTab'
 import CostsTab from './panels/CostsTab'
 import TypePicker, { KindTabs, VariantList } from './panels/CatalogPicker'
-import { computeModuleCost } from '../core/pricing'
-import { getWallSegments, projectPointToSegment } from '../utils/walls'
-import { autoWidthsForRun, placeAlongWall } from '../utils/auto'
+import { getWallSegments } from '../utils/walls'
 import CutlistTab from './panels/CutlistTab'
-// cabinet generator and 3D viewer separate from the main planner.
-import CabinetsPhase8Tab from './panels/CabinetsPhase8Tab'
-import BoxPreview from './components/BoxPreview'
-import TechDrawing from './components/TechDrawing'
-import Cabinet3D from './components/Cabinet3D'
 import SingleMMInput from './components/SingleMMInput'
+import SceneViewer from './SceneViewer'
+import CabinetConfigurator from './CabinetConfigurator'
+import useCabinetConfig from './useCabinetConfig'
 
 export default function App(){
   const [boardL, setBoardL] = useState<number>(()=>{ try{ return Number(localStorage.getItem('boardL')||2800) }catch{ return 2800 } })
-  // Default board width changed from 2100 mm to 2070 mm to reflect updated sheet dimensions
   const [boardW, setBoardW] = useState<number>(()=>{ try{ return Number(localStorage.getItem('boardW')||2070) }catch{ return 2070 } })
   const [boardKerf, setBoardKerf] = useState<number>(()=>{ try{ return Number(localStorage.getItem('boardKerf')||3) }catch{ return 3 } })
   const [boardHasGrain, setBoardHasGrain] = useState<boolean>(()=>{ try{ return (localStorage.getItem('boardHasGrain')||'1')==='1' }catch{ return true } })
@@ -37,21 +29,16 @@ export default function App(){
   const [kind, setKind] = useState<Kind|null>(null)
   const [variant, setVariant] = useState<Variant|null>(null)
   const [selWall, setSelWall] = useState(0)
-  const [addCountertop, setAddCountertop] = useState(true)
-  const [cfgTab, setCfgTab] = useState<'basic'|'adv'>('basic')
-  const [widthMM, setWidthMM] = useState(600)
-  const [adv, setAdv] = useState<any>(null)
-
-  const containerRef = useRef<HTMLDivElement>(null)
+  const [addCountertop] = useState(true)
   const threeRef = useRef<any>({})
 
-  useEffect(()=>{ if(!containerRef.current) return; threeRef.current = setupThree(containerRef.current) },[])
-
-  useEffect(()=>{
-    const g = store.globals[family]
-    const defaultShelves = family===FAMILY.TALL ? 4 : 1
-    setAdv({ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:{...g.gaps}, shelves:g.shelves ?? defaultShelves, backPanel:g.backPanel })
-  }, [family, store.globals])
+  const { cfgTab, setCfgTab, widthMM, setWidthMM, setAdv, gLocal, onAdd, doAutoOnSelectedWall } = useCabinetConfig(
+    family,
+    kind,
+    variant,
+    selWall,
+    setVariant
+  )
 
   const undo = store.undo
   const redo = store.redo
@@ -70,341 +57,12 @@ export default function App(){
     return ()=>window.removeEventListener('keydown', handler)
   }, [undo, redo])
 
-const createCabinetMesh = (mod: any) => {
-  const W = mod.size.w
-  const H = mod.size.h
-  const D = mod.size.d
-  const adv = mod.adv || {}
-  const famGlobal = store.globals[mod.family] || {}
-  let legHeight = 0
-  if (mod.family === FAMILY.BASE) {
-    const label: string = (famGlobal as any).legsType || ''
-    const match = label.match(/(\d+\.?\d*)/)
-    if (match) legHeight = parseFloat(match[1]) / 100
-    else legHeight = 0.1
-  }
-  const drawers = Array.isArray(adv.drawerFronts) ? adv.drawerFronts.length : 0
-  const group = buildCabinetMesh({
-    width: W,
-    height: H,
-    depth: D,
-    drawers,
-    gaps: adv.gaps || { top: 0, bottom: 0 },
-    drawerFronts: adv.drawerFronts,
-    family: mod.family,
-    shelves: adv.shelves,
-    backPanel: adv.backPanel,
-    legHeight,
-    showHandles: true
-  })
-  group.userData.kind = 'cab'
-  return group
-}
-
-const drawScene = () => {
-    const group = threeRef.current?.group
-    if (!group) return
-    // Remove previous cabinet and countertop meshes
-    ;[...group.children].forEach((c: any) => {
-      if (c.userData?.kind === 'cab' || c.userData?.kind === 'top') {
-        group.remove(c)
-        // Dispose geometries and materials
-        c.traverse((obj: any) => {
-          if (obj.isMesh) {
-            obj.geometry?.dispose?.()
-            if (Array.isArray(obj.material)) obj.material.forEach((m: any) => m.dispose())
-            else obj.material?.dispose?.()
-          }
-        })
-      }
-    })
-    store.modules.forEach((m: any) => {
-      // Build a detailed cabinet mesh
-      const cabMesh = createCabinetMesh(m)
-      // Determine leg height for positioning
-      const famGlobal = store.globals[m.family] || {}
-      let legHeight = 0
-      if (m.family === FAMILY.BASE) {
-        const label: string = (famGlobal as any).legsType || ''
-        const match = label.match(/(\d+\.?\d*)/)
-        if (match) legHeight = parseFloat(match[1]) / 100
-        else legHeight = 0.1
-      }
-      // Position and rotate according to module. Base cabinets sit on legs at ground level (y=0), others preserve original y.
-      const baseY = m.family === FAMILY.BASE ? 0 : m.position[1]
-      cabMesh.position.set(m.position[0], baseY, m.position[2])
-      cabMesh.rotation.y = m.rotationY || 0
-      group.add(cabMesh)
-      // Add countertop for base cabinets if enabled
-      if (addCountertop && m.family === FAMILY.BASE) {
-        const topThickness = 0.04
-        const top = new THREE.Mesh(
-          new THREE.BoxGeometry(m.size.w, topThickness, m.size.d),
-          new THREE.MeshStandardMaterial({ color: 0xbfa06a })
-        )
-        // Place the countertop above the carcase and legs
-        const topY = baseY + legHeight + m.size.h + topThickness / 2
-        top.position.set(m.position[0], topY, m.position[2])
-        top.rotation.y = m.rotationY || 0
-        top.userData.kind = 'top'
-        group.add(top)
-      }
-    })
-  }
-  useEffect(drawScene, [store.modules, addCountertop])
-
-  // Add pointer event listener to enable interactive opening of cabinet doors and drawers.
-  useEffect(() => {
-    const three = threeRef.current
-    if (!three || !three.renderer || !three.camera || !three.group) return
-    const renderer = three.renderer as THREE.WebGLRenderer
-    const camera = three.camera as THREE.PerspectiveCamera
-    const group = three.group as THREE.Group
-    const raycaster = new THREE.Raycaster()
-    const handlePointer = (event: PointerEvent) => {
-      // calculate mouse position in normalized device coordinates (-1 to +1)
-      const rect = renderer.domElement.getBoundingClientRect()
-      const mouse = new THREE.Vector2(
-        ((event.clientX - rect.left) / rect.width) * 2 - 1,
-        -((event.clientY - rect.top) / rect.height) * 2 + 1
-      )
-      raycaster.setFromCamera(mouse, camera)
-      // intersect with all children of group (recursively)
-      const intersects = raycaster.intersectObjects(group.children, true)
-      if (intersects.length === 0) return
-      // find nearest object with userData indicating a door/drawer
-      let obj: any = intersects[0].object
-      while (obj && !obj.userData?.type) {
-        obj = obj.parent
-      }
-      if (!obj || !obj.userData) return
-      const { moduleId, frontIndex, type } = obj.userData
-      if (frontIndex === undefined) return
-      // Find the parent cabinet group (userData.kind === 'cab')
-      let cab: any = obj
-      while (cab && cab.userData?.kind !== 'cab') {
-        cab = cab.parent
-      }
-      if (!cab || !cab.userData) return
-      // Toggle open state on cabinet's userData and leave store untouched
-      const openStates: boolean[] = cab.userData.openStates || []
-      if (frontIndex >= 0 && frontIndex < openStates.length) {
-        openStates[frontIndex] = !openStates[frontIndex]
-        cab.userData.openStates = openStates
-      }
-    }
-    renderer.domElement.addEventListener('pointerdown', handlePointer)
-    return () => {
-      renderer.domElement.removeEventListener('pointerdown', handlePointer)
-    }
-  }, [store.modules])
-
-  // Animation loop to smoothly interpolate door rotation and drawer translation.
-  useEffect(() => {
-    let animId: number
-    const animate = () => {
-      const three = threeRef.current
-      if (three && three.group) {
-        const group = three.group as THREE.Group
-        // Iterate over each cabinet group and update its front animations
-        group.children.forEach((cab: any) => {
-          if (cab.userData?.kind === 'cab') {
-            const openStates: boolean[] = cab.userData.openStates || []
-            const openProgress: number[] = cab.userData.openProgress || []
-            const frontGroups: any[] = cab.userData.frontGroups || []
-            openStates.forEach((target, idx) => {
-              let prog = openProgress[idx] ?? 0
-              const dest = target ? 1 : 0
-              const diff = dest - prog
-              if (Math.abs(diff) > 0.001) {
-                // Smoothly approach the target with a simple ease.  Use cabinet-specific animSpeed if provided.
-                const speed = cab.userData.animSpeed || 0.15
-                prog += diff * speed
-                // Snap to target if close enough
-                if (Math.abs(dest - prog) < 0.02) prog = dest
-                openProgress[idx] = prog
-                const fg = frontGroups[idx]
-                if (fg) {
-                  if (fg.userData.type === 'door') {
-                    const hingeSide = fg.userData.hingeSide || 'left'
-                    const sign = hingeSide === 'left' ? -1 : 1
-                    fg.rotation.y = sign * Math.PI / 2 * prog
-                  } else if (fg.userData.type === 'drawer') {
-                    const slide = fg.userData.slideDist || 0.45
-                    fg.position.z = -slide * prog
-                  }
-                }
-              }
-            })
-          }
-        })
-      }
-      animId = requestAnimationFrame(animate)
-    }
-    animId = requestAnimationFrame(animate)
-    return () => {
-      cancelAnimationFrame(animId)
-    }
-  }, [])
-
-  const snapToWalls = (mSize:{w:number;h:number;d:number}, fam:FAMILY) => {
-    const segs = getWallSegments()
-    if (segs.length===0) return { pos:[(store.modules.reduce((s:any,x:any)=>s+x.size.w,0)) + mSize.w/2, mSize.h/2, 0], rot:0, segIndex:null }
-    let best:any=null
-    const guess = { x:0, y:0 }
-    segs.forEach((seg,i)=>{
-      const pr = projectPointToSegment(guess.x, guess.y, seg as any)
-      if (!best || pr.dist<best.pr.dist) best={ seg, pr, i }
-    })
-    const gl = store.globals[fam]
-    const offset = (gl.offsetWall||0) / 1000
-    const nx = (best.seg.b.y - best.seg.a.y)
-    const ny = -(best.seg.b.x - best.seg.a.x)
-    const nlen = Math.hypot(nx,ny)||1
-    const ux = nx/nlen, uy = ny/nlen
-    const x = (best.pr.x/1000) + ux*offset
-    const z = (best.pr.y/1000) + uy*offset
-    const rot = -best.seg.angle
-    const y = mSize.h/2
-    return { pos:[x,y,z], rot, segIndex: best.i }
-  }
-
-  const collides = (a:any, b:any) => {
-    const dx = Math.abs(a.position[0]-b.position[0]), dz=Math.abs(a.position[2]-b.position[2])
-    return (dx < (a.size.w+b.size.w)/2) && (dz < (a.size.d+b.size.d)/2)
-  }
-
-  const resolveCollisions = (mod:any) => {
-    let tryMod = {...mod}
-    let loops=0
-    const step=0.02
-    const segs = getWallSegments()
-    const seg = (typeof mod.segIndex==='number') ? segs[mod.segIndex] : null
-    const tangent = seg ? { x:(seg.b.x-seg.a.x)/seg.length, y:(seg.b.y-seg.a.y)/seg.length } : { x:1, y:0 }
-    while (store.modules.some((m:any)=>collides(tryMod,m)) && loops<500){
-      tryMod.position = [ tryMod.position[0] + tangent.x*step, tryMod.position[1], tryMod.position[2] + tangent.y*step ]
-      loops++
-    }
-    const {segIndex, ...rest} = tryMod
-    return rest
-  }
-
-  const onAdd = (widthMM:number, advLocal:any) => {
-    if (!kind || !variant) return
-    const g = { ...store.globals[family], ...advLocal, gaps: { ...store.globals[family].gaps, ...(advLocal?.gaps||{}) } }
-    const h = (g.height)/1000, d=(g.depth)/1000, w=(widthMM)/1000
-    const id = `mod_${Date.now()}_${Math.floor(Math.random()*1e6)}`
-    const price = computeModuleCost(
-      { family, kind:kind.key, variant:variant.key, width: widthMM, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:g.gaps, backPanel:g.backPanel } },
-      { prices: store.prices, globals: store.globals }
-    )
-    const snap = snapToWalls({ w, h, d }, family)
-    // Augment advanced settings with defaults for hinge, drawer slide type and animation speed if missing.
-    // Additionally, compute drawer front heights based on the selected variant if none were provided.
-    const advAugmented: any = { ...g }
-    // Merge in provided advLocal properties (e.g. user overrides)
-    // They are already in g because advLocal merged into g above.
-    // Set default hinge side
-    if (!advAugmented.hinge) advAugmented.hinge = 'left'
-    // Set default drawer slide type
-    if (!advAugmented.drawerSlide) advAugmented.drawerSlide = 'BLUM LEGRABOX'
-    // Set default animation speed
-    if (advAugmented.animationSpeed === undefined) advAugmented.animationSpeed = 0.15
-    // Determine number of drawers implied by the variant key.  Variants starting with 's' encode the number of drawers directly (e.g. 's3');
-    // variants containing '+drawer' (e.g. 'd2+drawer') imply a single drawer; otherwise zero.
-    let impliedDrawers = 0
-    if (variant && variant.key) {
-      const vkey = variant.key
-      if (vkey.startsWith('s')) {
-        const num = Number(vkey.slice(1))
-        if (!isNaN(num)) impliedDrawers = num
-      } else if (vkey.includes('+drawer')) {
-        impliedDrawers = 1
-      }
-    }
-    // Determine number of doors implied by the variant.  For variants that begin with 'd' and do not include '+drawer',
-    // extract the numeric count after 'd'.  If absent or invalid, default to 1.  Sink/hob variants are treated as two doors.
-    let impliedDoors = 1
-    if (variant && variant.key) {
-      const vkey = variant.key
-      // Only consider base 'doors' kind; other kinds like tall/wall/pawlacz may use different prefixes (e.g. 'wd2', 'p3').
-      // Extract the leading digits in the key.
-      const m = vkey.match(/^(?:d|wd|p)(\d+)/)
-      if (m && m[1]) {
-        const n = Number(m[1])
-        if (!isNaN(n) && n > 0) impliedDoors = n
-      } else if (vkey.startsWith('sink') || vkey.startsWith('hob')) {
-        // Sink and hob cabinets typically have two doors
-        impliedDoors = 2
-      }
-      // For variants containing '+drawer', we assume only one door above the drawer even if the key starts with d2.  This simplified
-      // assumption means combined variants like 'd2+drawer' will render as a single door and a drawer instead of two doors and a drawer.
-      if (vkey.includes('+drawer')) {
-        impliedDoors = 1
-      }
-    }
-    // If no custom drawerFronts are provided and drawers are implied, create equal front heights (in mm) and assign to advAugmented.drawerFronts.
-    if ((!Array.isArray(advAugmented.drawerFronts) || advAugmented.drawerFronts.length === 0) && impliedDrawers > 0) {
-      // Deduct top/bottom gaps from the total available height
-      const totalFrontMM = Math.max(50, Math.round(g.height - ((g.gaps.top || 0) + (g.gaps.bottom || 0))))
-      const heights: number[] = []
-      for (let i = 0; i < impliedDrawers; i++) {
-        heights.push(Math.floor(totalFrontMM / impliedDrawers))
-      }
-      const sum = heights.reduce((a, b) => a + b, 0)
-      if (sum !== totalFrontMM) heights[heights.length - 1] += (totalFrontMM - sum)
-      advAugmented.drawerFronts = heights
-    }
-    // Persist implied door count to advanced settings so the mesh can be constructed accordingly when no drawers are specified
-    advAugmented.doorCount = impliedDoors
-    let mod: any = {
-      id,
-      label: variant.label,
-      family,
-      kind: kind.key,
-      size: { w, h, d },
-      position: snap.pos,
-      rotationY: snap.rot,
-      segIndex: snap.segIndex,
-      price,
-      adv: advAugmented,
-    }
-    // Determine number of front pieces to initialize openStates array.  Use number of drawer fronts if defined; otherwise use door count.
-    const nFrontsInit = Array.isArray(advAugmented.drawerFronts) && advAugmented.drawerFronts.length > 0 ? advAugmented.drawerFronts.length : (advAugmented.doorCount || 1)
-    mod.openStates = new Array(nFrontsInit).fill(false)
-    mod = resolveCollisions(mod)
-    store.addModule(mod)
-    setVariant(null)
-  }
-
-  const doAutoOnSelectedWall = () => {
-    const segs = getWallSegments(); if (segs.length===0) return alert('Brak ścian')
-    const seg = segs[0 + (selWall % segs.length)]
-    const len = seg.length
-    const widths = autoWidthsForRun(len)
-    const g = store.globals[family]; const h=(g.height)/1000; const d=(g.depth)/1000
-    const placed = placeAlongWall(widths, seg, 5)
-    placed.forEach((pl,i)=>{
-      const wmm = widths[i]; const w=wmm/1000
-      const id = `auto_${Date.now()}_${i}_${Math.floor(Math.random()*1e6)}`
-      const price = computeModuleCost(
-        { family, kind:(KIND_SETS[family][0]?.key)||'doors', variant:'d1', width: wmm, adv:{ height:g.height, depth:g.depth, boardType:g.boardType, frontType:g.frontType, gaps:g.gaps, backPanel:g.backPanel } },
-        { prices: store.prices, globals: store.globals }
-      )
-      let mod:any = { id, label:'Auto', family, kind:(KIND_SETS[family][0]?.key)||'doors', size:{ w,h,d }, position:[pl.center[0]/1000, h/2, pl.center[1]/1000], rotationY:pl.rot, segIndex: selWall, price, adv:g }
-      mod = resolveCollisions(mod)
-      store.addModule(mod)
-    })
-  }
-
-  const gLocal = adv || store.globals[family]
-
   return (
     <div className="app">
-      <div className="canvasWrap" >
-        <div ref={containerRef} style={{ position:'absolute', inset:0 }} />
+      <div className="canvasWrap">
+        <SceneViewer threeRef={threeRef} addCountertop={addCountertop} />
         <div className="topbar row">
-          <button className="btnGhost" onClick={()=>store.setRole(store.role==='stolarz'?'klient':'stolarz')}>Tryb: {store.role==='stolarz'?'Stolarz':'Klient'}</button>
+          <button className="btnGhost" onClick={()=>store.setRole(store.role==='stolarz'?'klient':'stolarz')}>Tryb: {store.role=='stolarz'?'Stolarz':'Klient'}</button>
           <button className="btnGhost" onClick={()=>{ setVariant(null); setKind(null); }}>Reset wyboru</button>
           <button className="btnGhost" onClick={()=>store.undo()} disabled={store.past.length===0}>Cofnij</button>
           <button className="btnGhost" onClick={()=>store.redo()} disabled={store.future.length===0}>Ponów</button>
@@ -481,114 +139,18 @@ const drawScene = () => {
           )}
 
           {variant && (
-            <div className="section">
-              <div className="hd">
-                <div><div className="h1">Konfiguracja — {variant.label}</div></div>
-                <div className="tabs">
-                  <button className={`tabBtn ${cfgTab==='basic'?'active':''}`} onClick={()=>setCfgTab('basic')}>Podstawowe</button>
-                  <button className={`tabBtn ${cfgTab==='adv'?'active':''}`} onClick={()=>setCfgTab('adv')}>Zaawansowane</button>
-                </div>
-              </div>
-              <div className="bd">
-                {cfgTab==='basic' && (
-                  <div>
-                    <div className="grid2">
-                      <div>
-                        <div className="small">Szerokość (mm)</div>
-                        <input className="input" type="number" min={200} max={2400} step={1} value={widthMM} onChange={e=>setWidthMM(Number((e.target as HTMLInputElement).value)||0)} onKeyDown={(e)=>{
-                          if (e.key==='Enter'){ const v = Number((e.target as HTMLInputElement).value)||0; if(v>0) onAdd(v, gLocal) }
-                        }}/>
-                      </div>
-                      <div className="row" style={{alignItems:'flex-end'}}>
-                        <button className="btn" onClick={()=>onAdd(widthMM, gLocal)}>Wstaw szafkę</button>
-                      </div>
-                    </div>
-                    <div style={{marginTop:8}}>
-                      <TechDrawing
-                        mode="view"
-                        family={family}
-                        kindKey={kind?.key||'doors'}
-                        variantKey={variant?.key||'d1'}
-                        widthMM={widthMM}
-                        heightMM={gLocal.height}
-                        depthMM={gLocal.depth}
-                        gaps={gLocal.gaps}
-                        drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)}
-                        drawerFronts={gLocal.drawerFronts}
-                      />
-                    </div>
-                    <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D
-                        family={family}
-                        widthMM={widthMM}
-                        heightMM={gLocal.height}
-                        depthMM={gLocal.depth}
-                        drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)}
-                        gaps={{ top: gLocal.gaps.top, bottom: gLocal.gaps.bottom }}
-                        drawerFronts={gLocal.drawerFronts}
-                        shelves={gLocal.shelves}
-                        backPanel={gLocal.backPanel}
-                      />
-                    </div>
-                  </div>
-                )}
-                {cfgTab==='adv' && (
-                  <div>
-                    <div className="grid4">
-                      <div><div className="small">Wysokość (mm)</div><input className="input" type="number" value={gLocal.height} onChange={e=>setAdv({...gLocal, height:Number((e.target as HTMLInputElement).value)||0})} /></div>
-                      <div><div className="small">Głębokość (mm)</div><input className="input" type="number" value={gLocal.depth} onChange={e=>setAdv({...gLocal, depth:Number((e.target as HTMLInputElement).value)||0})} /></div>
-                      <div><div className="small">Płyta</div><select className="input" value={gLocal.boardType} onChange={e=>setAdv({...gLocal, boardType:(e.target as HTMLSelectElement).value})}>{Object.keys(store.prices.board).map(k=><option key={k} value={k}>{k}</option>)}</select></div>
-                      <div><div className="small">Front</div><select className="input" value={gLocal.frontType} onChange={e=>setAdv({...gLocal, frontType:(e.target as HTMLSelectElement).value})}>{Object.keys(store.prices.front).map(k=><option key={k} value={k}>{k}</option>)}</select></div>
-                      <div><div className="small">Plecy</div><select className="input" value={gLocal.backPanel||'full'} onChange={e=>setAdv({...gLocal, backPanel:(e.target as HTMLSelectElement).value})}>
-                        <option value="full">full</option>
-                        <option value="split">split</option>
-                        <option value="none">none</option>
-                      </select></div>
-                    </div>
-                    {!(variant?.key?.startsWith('s')) && (
-                      <div style={{marginTop:8}}>
-                        <div className="small">Liczba półek</div>
-                        <input className="input" type="number" min={0} value={gLocal.shelves||0} onChange={e=>setAdv({...gLocal, shelves:Number((e.target as HTMLInputElement).value)||0})} />
-                      </div>
-                    )}
-                    <div style={{marginTop:8}}>
-                      <div className="small">Szczeliny i wysokości frontów (ustawiaj graficznie)</div>
-                      <TechDrawing
-                        mode="edit"
-                        family={family}
-                        kindKey={kind?.key||'doors'}
-                        variantKey={variant?.key||'d1'}
-                        widthMM={widthMM}
-                        heightMM={gLocal.height}
-                        depthMM={gLocal.depth}
-                        gaps={gLocal.gaps}
-                        drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)}
-                        drawerFronts={gLocal.drawerFronts}
-                        onChangeGaps={(gg)=>setAdv({ ...gLocal, gaps: gg })}
-                        onChangeDrawerFronts={(arr)=>setAdv({ ...gLocal, drawerFronts: arr })}
-                      />
-                    </div>
-                    <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D
-                        family={family}
-                        widthMM={widthMM}
-                        heightMM={gLocal.height}
-                        depthMM={gLocal.depth}
-                        drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)}
-                        gaps={{ top: gLocal.gaps.top, bottom: gLocal.gaps.bottom }}
-                        drawerFronts={gLocal.drawerFronts}
-                        shelves={gLocal.shelves}
-                        backPanel={gLocal.backPanel}
-                      />
-                    </div>
-                    <div className="row" style={{marginTop:8}}>
-                      <button className="btn" onClick={()=>onAdd(widthMM, gLocal)}>Wstaw szafkę</button>
-                      <button className="btnGhost" onClick={()=>setCfgTab('basic')}>← Podstawowe</button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <CabinetConfigurator
+              family={family}
+              kind={kind}
+              variant={variant}
+              cfgTab={cfgTab}
+              setCfgTab={setCfgTab}
+              widthMM={widthMM}
+              setWidthMM={setWidthMM}
+              gLocal={gLocal}
+              setAdv={setAdv}
+              onAdd={onAdd}
+            />
           )}
         </>)}
 
@@ -596,8 +158,8 @@ const drawScene = () => {
         {tab==='costs' && (<CostsTab />)}
         {tab==='cut' && (<CutlistTab />)}
             provides a simplified cabinet builder with its own cutlist
-            and 3D viewer. 
-        
+            and 3D viewer.
+
       </aside>
     </div>
   )
