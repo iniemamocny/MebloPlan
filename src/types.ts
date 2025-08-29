@@ -1,0 +1,107 @@
+import { FAMILY } from './core/catalog'
+
+export type Gaps = { left:number; right:number; top:number; bottom:number; between:number }
+
+export interface GlobalsItem {
+  height:number
+  depth:number
+  boardType:string
+  frontType:string
+  gaps: Gaps
+  legsType?:string
+  hangerType?:string
+  offsetWall?:number
+  shelves?:number
+  backPanel?:'full'|'split'|'none'
+}
+
+export type Globals = Record<FAMILY, GlobalsItem>
+
+export interface Prices {
+  board: Record<string, number>
+  front: Record<string, number>
+  edging: Record<string, number>
+  cut: number
+  legs: Record<string, number>
+  hangers: Record<string, number>
+  hinges: Record<string, number>
+  drawerSlide: Record<string, number>
+  aventos: Record<string, number>
+  cargo: Record<string, number>
+  hoodKit: number
+  sinkKit: number
+  dwKit: number
+  fridgeKit: number
+  handle: Record<string, number>
+  labor: number
+  margin: number
+}
+
+export interface Parts {
+  board:number
+  front:number
+  edging:number
+  cut:number
+  hinges:number
+  slides:number
+  legs:number
+  hangers:number
+  aventos:number
+  cargo:number
+  kits:number
+  labor:number
+}
+
+export interface PriceCounts {
+  doors:number
+  drawers:number
+  legs:number
+  hangers:number
+  hinges:number
+}
+
+export interface Price {
+  total:number
+  parts: Parts
+  counts: PriceCounts
+}
+
+export interface ModuleAdv {
+  height?:number
+  depth?:number
+  boardType?:string
+  frontType?:string
+  gaps?: Gaps
+  drawerFronts?: number[]
+  shelves?:number
+  backPanel?:'full'|'split'|'none'
+}
+
+export interface Module3D {
+  id:string
+  label:string
+  family:FAMILY
+  kind:string
+  size:{ w:number; h:number; d:number }
+  position:[number,number,number]
+  rotationY?:number
+  price?: Price
+  fittings?: Record<string, number>
+  segIndex?: number | null
+  adv?: ModuleAdv
+  openStates?: boolean[]
+}
+
+export type Opening = Record<string, number>
+
+export interface Room {
+  walls: { length:number; angle:number }[]
+  openings: Opening[]
+  height:number
+}
+
+export interface PricingData {
+  prices: Prices
+  globals: Globals
+}
+

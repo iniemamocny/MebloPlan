@@ -1,14 +1,8 @@
 import { create } from 'zustand'
 import { FAMILY } from '../core/catalog'
+import { Module3D, Room, Globals, Prices, Opening, Gaps } from '../types'
 
-export type Gaps = { left:number; right:number; top:number; bottom:number; between:number }
 export const defaultGaps: Gaps = { left:2, right:2, top:2, bottom:2, between:3 }
-
-export type Globals = Record<FAMILY, {
-  height:number; depth:number; boardType:string; frontType:string;
-  gaps: Gaps; legsType?:string; hangerType?:string; offsetWall?:number; shelves?:number;
-  backPanel?:'full'|'split'|'none';
-}>
 
 export const defaultGlobal: Globals = {
   [FAMILY.BASE]: { height:800, depth:600, boardType:'Płyta 18mm', frontType:'Laminat', gaps:{...defaultGaps}, legsType:'Standard 10cm', offsetWall:30, shelves:1, backPanel:'full' },
@@ -17,7 +11,7 @@ export const defaultGlobal: Globals = {
   [FAMILY.TALL]: { height:2100, depth:600, boardType:'Płyta 18mm', frontType:'Laminat', gaps:{...defaultGaps}, shelves:4, backPanel:'full' }
 }
 
-export const defaultPrices = {
+export const defaultPrices: Prices = {
   board: { 'Płyta 18mm': 120, 'Płyta 19mm': 140, 'Płyta 25mm': 200 },
   front: { Laminat: 220, Lakier: 420, Fornir: 520 },
   edging: { 'ABS 1mm': 2.5, 'ABS 2mm': 3.2 },
@@ -41,33 +35,17 @@ const persisted = (()=>{
   try{ return JSON.parse(localStorage.getItem('kv7_state')||'null') }catch{ return null }
 })()
 
-type Module3D = {
-  id:string; label:string; family:FAMILY; kind:string;
-  size:{ w:number; h:number; d:number }; position:[number,number,number]; rotationY?:number;
-  price?: any; fittings?: any
-  segIndex?: number | null
-  adv?: { height?:number; depth?:number; boardType?:string; frontType?:string; gaps?: Gaps; drawerFronts?: number[]; shelves?:number; backPanel?:'full'|'split'|'none' }
-    /**
-     * Array of booleans indicating whether each front on this module is open.
-     * A single-element array corresponds to a single door; multiple elements
-     * correspond to drawers.  If undefined, the cabinet is assumed closed.
-     */
-    openStates?: boolean[]
-}
-
-type Room = { walls: { length:number; angle:number }[]; openings: any[]; height:number }
-
 type Store = {
   role: 'stolarz'|'klient'
   globals: Globals
-  prices: any
+  prices: Prices
   modules: Module3D[]
   past: Module3D[][]
   future: Module3D[][]
   room: Room
   setRole:(r:'stolarz'|'klient')=>void
   updateGlobals:(fam:FAMILY, patch:Partial<Globals[FAMILY]>)=>void
-  updatePrices:(patch:any)=>void
+  updatePrices:(patch:Partial<Prices>)=>void
   addModule:(m:Module3D)=>void
   updateModule:(id:string,patch:Partial<Module3D>)=>void
   removeModule:(id:string)=>void
@@ -76,7 +54,7 @@ type Store = {
   redo:()=>void
   setRoom:(patch:Partial<Room>)=>void
   addWall:(w:{length:number; angle:number})=>void
-  addOpening:(op:any)=>void
+  addOpening:(op: Opening)=>void
 }
 
 export const usePlannerStore = create<Store>((set,get)=>({

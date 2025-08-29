@@ -1,4 +1,5 @@
 import { FAMILY } from './catalog'
+import { Module3D, Globals, PriceCounts } from '../types'
 
 function parseThickness(boardType:string): number{
   const m = boardType?.match(/(\d+)(?=\s*mm)/i)
@@ -16,7 +17,7 @@ const tol = {
   shelfFrontSetback: 0
 } as const
 
-export function cutlistForModule(m:any, globals:any): { items: CutItem[]; edges: EdgeItem[] } {
+export function cutlistForModule(m: Module3D, globals: Globals): { items: CutItem[]; edges: EdgeItem[] } {
   const base = globals[m.family] || {}
   const g = m.adv ? { ...base, ...m.adv, gaps: { ...base.gaps, ...(m.adv.gaps||{}) } } : base
   const gaps = (g.gaps)||{ left:2,right:2,top:2,bottom:2,between:3 }
@@ -73,7 +74,7 @@ export function cutlistForModule(m:any, globals:any): { items: CutItem[]; edges:
     addStandardBox(); addShelves()
   }
 
-  const counts = m.price?.counts || { doors:0, drawers:0 }
+  const counts: PriceCounts = m.price?.counts || { doors:0, drawers:0, legs:0, hangers:0, hinges:0 }
   const availWforFront = W - gaps.left - gaps.right
   const availHforFront = H - gaps.top - gaps.bottom
 
