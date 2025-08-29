@@ -1,13 +1,32 @@
 import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
+import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { setupThree } from '../scene/engine'
 import { buildCabinetMesh } from '../scene/cabinetBuilder'
 import { FAMILY } from '../core/catalog'
 import { usePlannerStore } from '../state/store'
+import { Module3D, ModuleAdv, Globals } from '../types'
+
+interface ThreeContext {
+  scene: THREE.Scene
+  camera: THREE.PerspectiveCamera
+  renderer: THREE.WebGLRenderer
+  controls: OrbitControls
+  group: THREE.Group
+}
 
 interface Props {
-  threeRef: React.MutableRefObject<any>
+  threeRef: React.MutableRefObject<ThreeContext | null>
   addCountertop: boolean
+}
+
+const getLegHeight = (mod: Module3D, globals: Globals): number => {
+  if (mod.family !== FAMILY.BASE) return 0
+  const famGlobal = globals[mod.family]
+  const label: string = famGlobal?.legsType || ''
+  const match = label.match(/(\d+\.?\d*)/)
+  if (match) return parseFloat(match[1]) / 100
+  return 0.1
 }
 
 const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
@@ -19,19 +38,12 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
     threeRef.current = setupThree(containerRef.current)
   }, [threeRef])
 
-  const createCabinetMesh = (mod: any) => {
+  const createCabinetMesh = (mod: Module3D) => {
     const W = mod.size.w
     const H = mod.size.h
     const D = mod.size.d
-    const adv = mod.adv || {}
-    const famGlobal = store.globals[mod.family] || {}
-    let legHeight = 0
-    if (mod.family === FAMILY.BASE) {
-      const label: string = (famGlobal as any).legsType || ''
-      const match = label.match(/(\d+\.?\d*)/)
-      if (match) legHeight = parseFloat(match[1]) / 100
-      else legHeight = 0.1
-    }
+    const adv: ModuleAdv = mod.adv ?? {}
+    const legHeight = getLegHeight(mod, store.globals)
     const drawers = Array.isArray(adv.drawerFronts) ? adv.drawerFronts.length : 0
     const group = buildCabinetMesh({
       width: W,
@@ -53,28 +65,21 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
   const drawScene = () => {
     const group = threeRef.current?.group
     if (!group) return
-    ;[...group.children].forEach((c: any) => {
+    ;[...group.children].forEach((c) => {
       if (c.userData?.kind === 'cab' || c.userData?.kind === 'top') {
         group.remove(c)
-        c.traverse((obj: any) => {
-          if (obj.isMesh) {
-            obj.geometry?.dispose?.()
-            if (Array.isArray(obj.material)) obj.material.forEach((m: any) => m.dispose())
-            else obj.material?.dispose?.()
+        c.traverse((obj) => {
+          if (obj instanceof THREE.Mesh) {
+            obj.geometry.dispose()
+            if (Array.isArray(obj.material)) obj.material.forEach((m) => m.dispose())
+            else obj.material.dispose()
           }
         })
       }
     })
-    store.modules.forEach((m: any) => {
+    store.modules.forEach((m: Module3D) => {
       const cabMesh = createCabinetMesh(m)
-      const famGlobal = store.globals[m.family] || {}
-      let legHeight = 0
-      if (m.family === FAMILY.BASE) {
-        const label: string = (famGlobal as any).legsType || ''
-        const match = label.match(/(\d+\.?\d*)/)
-        if (match) legHeight = parseFloat(match[1]) / 100
-        else legHeight = 0.1
-      }
+      const legHeight = getLegHeight(m, store.globals)
       const baseY = m.family === FAMILY.BASE ? 0 : m.position[1]
       cabMesh.position.set(m.position[0], baseY, m.position[2])
       cabMesh.rotation.y = m.rotationY || 0
@@ -111,14 +116,14 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       raycaster.setFromCamera(mouse, camera)
       const intersects = raycaster.intersectObjects(group.children, true)
       if (intersects.length === 0) return
-      let obj: any = intersects[0].object
+      let obj: THREE.Object3D | null = intersects[0].object
       while (obj && !obj.userData?.type) {
         obj = obj.parent
       }
       if (!obj || !obj.userData) return
-      const { frontIndex } = obj.userData
+      const { frontIndex } = obj.userData as { frontIndex?: number }
       if (frontIndex === undefined) return
-      let cab: any = obj
+      let cab: THREE.Object3D | null = obj
       while (cab && cab.userData?.kind !== 'cab') {
         cab = cab.parent
       }
@@ -141,11 +146,11 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       const three = threeRef.current
       if (three && three.group) {
         const group = three.group as THREE.Group
-        group.children.forEach((cab: any) => {
+        group.children.forEach((cab) => {
           if (cab.userData?.kind === 'cab') {
             const openStates: boolean[] = cab.userData.openStates || []
             const openProgress: number[] = cab.userData.openProgress || []
-            const frontGroups: any[] = cab.userData.frontGroups || []
+            const frontGroups: THREE.Object3D[] = cab.userData.frontGroups || []
             openStates.forEach((target, idx) => {
               let prog = openProgress[idx] ?? 0
               const dest = target ? 1 : 0
