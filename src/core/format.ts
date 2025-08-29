@@ -182,7 +182,7 @@ export function packGuillotine(board:Board, parts:Part[]): Sheet[] {
   for (const p of prepared) {
     let placedHere = false
     // try each free rect and each allowed orientation, choose best fit (min leftover area)
-    let bestIdx = -1, bestW=0, bestH=0, bestScore=1e18, bestPos={x:0,y:0}, bestFrIdx=-1
+    let bestW=0, bestH=0, bestScore=1e18, bestPos={x:0,y:0}, bestFrIdx=-1
     for (let frIdx=0; frIdx<free.length; frIdx++){
       const fr = free[frIdx]
       for (const o of orientations(board, p)){
@@ -190,7 +190,6 @@ export function packGuillotine(board:Board, parts:Part[]): Sheet[] {
           const leftover = (fr.w - o.w) * fr.h + fr.w * (fr.h - o.h) // prosty score
           if (leftover < bestScore){
             bestScore = leftover
-            bestIdx = frIdx
             bestW = o.w; bestH = o.h
             bestPos = { x: fr.x, y: fr.y }
             bestFrIdx = frIdx
@@ -198,7 +197,7 @@ export function packGuillotine(board:Board, parts:Part[]): Sheet[] {
         }
       }
     }
-    if (bestIdx >= 0){
+    if (bestFrIdx >= 0){
       // place
       placed.push({ ...p, x: bestPos.x, y: bestPos.y, _w: bestW, _h: bestH, idx: counter++ })
       const fr = free[bestFrIdx]
@@ -208,7 +207,7 @@ export function packGuillotine(board:Board, parts:Part[]): Sheet[] {
       const generated = splitFreeRect(fr, bestPos.x, bestPos.y, bestW, bestH, board.kerf)
       free.push(...generated)
       free = cleanFree(free)
-      placedHere = true // <-- placeholder to ensure we revise later
+      placedHere = true
     }
 
     if (!placedHere){
