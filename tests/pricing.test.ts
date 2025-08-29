@@ -74,5 +74,34 @@ describe('computeModuleCost', () => {
     )
     expect(price.counts.hinges).toBe(8)
   })
+
+  it('adds sink kit for sink base cabinet', () => {
+    const price = computeModuleCost(
+      {
+        family: FAMILY.BASE,
+        kind: 'doors',
+        variant: 'sink',
+        width: 600,
+        adv: advFor(FAMILY.BASE),
+      },
+      { prices: defaultPrices, globals: defaultGlobal }
+    )
+    expect(price.counts.doors).toBe(2)
+    expect(price.parts.kits).toBe(defaultPrices.sinkKit)
+  })
+
+  it('uses microwave kit for oven+mw tall cabinet', () => {
+    const price = computeModuleCost(
+      {
+        family: FAMILY.TALL,
+        kind: 'tall',
+        variant: 'oven+mw',
+        width: 600,
+        adv: advFor(FAMILY.TALL),
+      },
+      { prices: defaultPrices, globals: defaultGlobal }
+    )
+    expect(price.parts.kits).toBe(defaultPrices.dwKit + defaultPrices.mwKit)
+  })
 })
 

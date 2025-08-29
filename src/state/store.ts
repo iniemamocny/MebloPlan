@@ -26,6 +26,7 @@ export const defaultPrices: Prices = {
   sinkKit: 80,
   dwKit: 90,
   fridgeKit: 120,
+  mwKit: 100,
   handle: { 'Brak': 0, 'Uchwyt T': 8 },
   labor: 0,
   margin: 0.15
