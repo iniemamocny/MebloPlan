@@ -72,12 +72,13 @@ export default function App(){
   /**
    * Build a detailed cabinet mesh from a module definition.  The returned
    * THREE.Group contains individual parts (sides, top, bottom, back,
-   * front boards, handles and feet) assembled relative to the module's
+   * front boards, hardware and feet) assembled relative to the module's
    * local origin.  Board thickness and back thickness are fixed at
    * 18 mm and 3 mm respectively.  Front splits are determined by the
    * module's adv.drawerFronts array (if present); otherwise a single
    * door is rendered.  Gaps are taken from adv.gaps when computing
-   * drawer heights.
+   * drawer heights.  Hinges, drawer slides, handles and Aventos struts
+   * are configured from advanced settings.
    */
   const createCabinetMesh = (mod: any) => {
     const W = mod.size.w
