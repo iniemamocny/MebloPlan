@@ -1,14 +1,16 @@
 import { FAMILY } from './catalog'
-import { usePlannerStore } from '../state/store'
 export type Parts = { board:number; front:number; edging:number; cut:number; hinges:number; slides:number; legs:number; hangers:number; aventos:number; cargo:number; kits:number; labor:number }
 export type Price = { total:number; parts: Parts; counts:any }
 function hingeCountPerDoor(doorHeightMM:number){ if (doorHeightMM<=900) return 2; if (doorHeightMM<=1500) return 3; return 4 }
-export function computeModuleCost(params: {
-  family: FAMILY; kind:string; variant:string; width:number;
-  adv: { height:number; depth:number; boardType:string; frontType:string; gaps?: any; backPanel?:'full'|'split'|'none' };
-}): Price {
-  const P = usePlannerStore.getState().prices
-  const base = usePlannerStore.getState().globals[params.family]
+export function computeModuleCost(
+  params: {
+    family: FAMILY; kind:string; variant:string; width:number;
+    adv: { height:number; depth:number; boardType:string; frontType:string; gaps?: any; backPanel?:'full'|'split'|'none' };
+  },
+  data: { prices:any; globals:any }
+): Price {
+  const P = data.prices
+  const base = data.globals[params.family]
   const g = { ...base, ...params.adv, gaps: { ...base.gaps, ...(params.adv.gaps||{}) } }
   const hMM = g.height
   const dMM = g.depth
