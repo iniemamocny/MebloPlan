@@ -518,10 +518,17 @@ const drawScene = () => {
                       />
                     </div>
                     <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} backPanel={gLocal.backPanel} />
-                    </div>
-                    <div className="row" style={{marginTop:8}}>
-                      <Cabinet3D family={family} widthMM={widthMM} heightMM={gLocal.height} depthMM={gLocal.depth} drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)} gaps={{top:gLocal.gaps.top, bottom:gLocal.gaps.bottom}} drawerFronts={gLocal.drawerFronts} shelves={gLocal.shelves} backPanel={gLocal.backPanel} />
+                      <Cabinet3D
+                        family={family}
+                        widthMM={widthMM}
+                        heightMM={gLocal.height}
+                        depthMM={gLocal.depth}
+                        drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)}
+                        gaps={{ top: gLocal.gaps.top, bottom: gLocal.gaps.bottom }}
+                        drawerFronts={gLocal.drawerFronts}
+                        shelves={gLocal.shelves}
+                        backPanel={gLocal.backPanel}
+                      />
                     </div>
                   </div>
                 )}
