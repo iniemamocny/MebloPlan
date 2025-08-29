@@ -63,21 +63,21 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     topBoard.position.set(W / 2, H - T / 2, -D / 2)
     cabGroup.add(topBoard)
     // Back board
-    if (backPanel !== 'none') {
-      if (backPanel === 'split') {
-        const backGeo = new THREE.BoxGeometry(W, H / 2, backT)
-        const back1 = new THREE.Mesh(backGeo, backMat)
-        back1.position.set(W / 2, H / 4, -D + backT / 2)
-        cabGroup.add(back1)
-        const back2 = new THREE.Mesh(backGeo.clone(), backMat)
-        back2.position.set(W / 2, (3 * H) / 4, -D + backT / 2)
-        cabGroup.add(back2)
-      } else {
-        const backGeo = new THREE.BoxGeometry(W, H, backT)
-        const backBoard = new THREE.Mesh(backGeo, backMat)
-        backBoard.position.set(W / 2, H / 2, -D + backT / 2)
-        cabGroup.add(backBoard)
-      }
+    if (backPanel === 'full') {
+      const backGeo = new THREE.BoxGeometry(W, H, backT)
+      const backBoard = new THREE.Mesh(backGeo, backMat)
+      backBoard.position.set(W / 2, H / 2, -D + backT / 2)
+      cabGroup.add(backBoard)
+    } else if (backPanel === 'split') {
+      const gap = 0.002
+      const halfH = (H - gap) / 2
+      const backGeo = new THREE.BoxGeometry(W, halfH, backT)
+      const bottomBack = new THREE.Mesh(backGeo, backMat)
+      bottomBack.position.set(W / 2, halfH / 2, -D + backT / 2)
+      cabGroup.add(bottomBack)
+      const topBack = new THREE.Mesh(backGeo.clone(), backMat)
+      topBack.position.set(W / 2, H - halfH / 2, -D + backT / 2)
+      cabGroup.add(topBack)
     }
     // Shelves: simple horizontal boards (if drawers = 0) else skip
     if (drawers === 0) {
@@ -158,6 +158,6 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     return () => {
       renderer.dispose()
     }
-  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves])
+  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves, backPanel])
   return <div ref={ref} style={{ width: 260, height: 190, border: '1px solid #E5E7EB', borderRadius: 8, background: '#fff' }} />
 }
