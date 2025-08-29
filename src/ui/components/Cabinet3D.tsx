@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { FAMILY, FAMILY_COLORS } from '../../core/catalog'
 
-export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves=1 }:{ widthMM:number;heightMM:number;depthMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number }){
+export default function Cabinet3D({ widthMM, heightMM, depthMM, boardThicknessMM, drawers, gaps, drawerFronts, family, shelves=1 }:{ widthMM:number;heightMM:number;depthMM:number;boardThicknessMM:number;drawers:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number }){
   const ref = useRef<HTMLDivElement>(null)
   useEffect(()=>{
     // Wait until our container is available
@@ -30,8 +30,8 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     const W = widthMM / 1000
     const H = heightMM / 1000
     const D = depthMM / 1000
-    // Board thickness (18 mm) and back thickness (3 mm)
-    const T = 0.018
+    // Board thickness (convert mm to m) and back thickness (3 mm)
+    const T = (boardThicknessMM || 18) / 1000
     const backT = 0.003
     // Colour palette: carcase (light grey), front (warm wood), back (very light)
     const carcColour = new THREE.Color(0xf5f5f5)
@@ -146,6 +146,6 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, drawers, gaps, d
     return () => {
       renderer.dispose()
     }
-  }, [widthMM, heightMM, depthMM, drawers, gaps, drawerFronts, family, shelves])
+  }, [widthMM, heightMM, depthMM, boardThicknessMM, drawers, gaps, drawerFronts, family, shelves])
   return <div ref={ref} style={{ width: 260, height: 190, border: '1px solid #E5E7EB', borderRadius: 8, background: '#fff' }} />
 }

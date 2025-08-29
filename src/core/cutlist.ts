@@ -20,7 +20,7 @@ export function cutlistForModule(m:any, globals:any): { items: CutItem[]; edges:
   const base = globals[m.family] || {}
   const g = m.adv ? { ...base, ...m.adv, gaps: { ...base.gaps, ...(m.adv.gaps||{}) } } : base
   const gaps = (g.gaps)||{ left:2,right:2,top:2,bottom:2,between:3 }
-  const t = parseThickness(g.boardType || 'Płyta 18mm')
+  const t = g.boardThickness ?? parseThickness(g.boardType || 'Płyta 18mm')
   const frontMat = `Front ${g.frontType||'Laminat'}`
   const backT = 3
   const items: CutItem[] = []

@@ -7,6 +7,7 @@ type Props = {
   heightMM:number
   depthMM:number
   boardType?:string
+  boardThicknessMM?:number
   gaps:Gaps
   drawers:number
   drawerFronts?: number[]
@@ -44,11 +45,11 @@ function DimV({ x, y1, y2, label, left=false }:{ x:number; y1:number; y2:number;
 }
 
 export default function TechDrawing({
-  mode, widthMM, heightMM, depthMM, boardType, gaps, drawers, drawerFronts, onChangeGaps, onChangeDrawerFronts
+  mode, widthMM, heightMM, depthMM, boardType, boardThicknessMM, gaps, drawers, drawerFronts, onChangeGaps, onChangeDrawerFronts
 }:Props){
   const W = 360, H = 230
   const pad = 14
-  const t = parseThickness(boardType)
+  const t = boardThicknessMM ?? parseThickness(boardType)
   const innerW = W - pad*2
   const innerH = H - pad*2
   const [drag, setDrag] = useState<{tag:string; startY:number; startVals:any}|null>(null)

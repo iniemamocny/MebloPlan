@@ -33,6 +33,7 @@ export default function GlobalSettings(){
           <div className="grid3">
             <Field label="Wysokość (mm)" value={g.height} onChange={(v)=>set({height:v})} />
             <Field label="Głębokość (mm)" value={g.depth} onChange={(v)=>set({depth:v})} />
+            <Field label="Grubość płyty (mm)" value={g.boardThickness} onChange={(v)=>set({boardThickness:v})} />
             <Field label="Rodzaj płyty" type="select" value={g.boardType} onChange={(v)=>set({boardType:v})} options={Object.keys(store.prices.board)} />
             <Field label="Rodzaj frontu" type="select" value={g.frontType} onChange={(v)=>set({frontType:v})} options={Object.keys(store.prices.front)} />
             {fam===FAMILY.BASE && (<>
