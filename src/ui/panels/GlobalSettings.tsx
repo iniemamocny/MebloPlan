@@ -34,6 +34,7 @@ export default function GlobalSettings(){
             <Field label="Wysokość (mm)" value={g.height} onChange={(v)=>set({height:v})} />
             <Field label="Głębokość (mm)" value={g.depth} onChange={(v)=>set({depth:v})} />
             <Field label="Rodzaj płyty" type="select" value={g.boardType} onChange={(v)=>set({boardType:v})} options={Object.keys(store.prices.board)} />
+            <Field label="Grubość płyty (mm)" value={g.boardThickness ?? 18} onChange={(v)=>set({boardThickness:v})} />
             <Field label="Rodzaj frontu" type="select" value={g.frontType} onChange={(v)=>set({frontType:v})} options={Object.keys(store.prices.front)} />
             <Field label="Zawias" type="select" value={g.hingeType} onChange={(v)=>set({hingeType:v})} options={Object.keys(store.prices.hinges)} />
             <Field label="Prowadnice" type="select" value={g.drawerSlide} onChange={(v)=>set({drawerSlide:v})} options={Object.keys(store.prices.drawerSlide)} />

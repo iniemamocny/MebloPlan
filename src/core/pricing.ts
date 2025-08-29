@@ -5,7 +5,7 @@ export type Price = { total:number; parts: Parts; counts:any }
 function hingeCountPerDoor(doorHeightMM:number){ if (doorHeightMM<=900) return 2; if (doorHeightMM<=1500) return 3; return 4 }
 export function computeModuleCost(params: {
   family: FAMILY; kind:string; variant:string; width:number;
-  adv: { height:number; depth:number; boardType:string; frontType:string; gaps?: any; hingeType?:string; drawerSlide?:string; aventosType?:string };
+  adv: { height:number; depth:number; boardType:string; boardThickness?:number; frontType:string; gaps?: any; hingeType?:string; drawerSlide?:string; aventosType?:string };
 }): Price {
   const P = usePlannerStore.getState().prices
   const base = usePlannerStore.getState().globals[params.family]
