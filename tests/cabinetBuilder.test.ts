@@ -49,6 +49,7 @@ describe('buildCabinetMesh', () => {
     const size = box.getSize(new THREE.Vector3())
     expect(size.x).toBeCloseTo(width, 5)
     expect(size.y).toBeCloseTo(height, 5)
-    expect(size.z).toBeCloseTo(depth + FRONT_OFFSET, 5)
+    const boardThickness = 0.018
+    expect(size.z).toBeCloseTo(depth + boardThickness + FRONT_OFFSET, 5)
   })
 })
