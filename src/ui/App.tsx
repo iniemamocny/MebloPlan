@@ -11,8 +11,6 @@ import { computeModuleCost } from '../core/pricing'
 import { getWallSegments, projectPointToSegment } from '../utils/walls'
 import { autoWidthsForRun, placeAlongWall } from '../utils/auto'
 import CutlistTab from './panels/CutlistTab'
-// cabinet generator and 3D viewer separate from the main planner.
-import CabinetsPhase8Tab from './panels/CabinetsPhase8Tab'
 import BoxPreview from './components/BoxPreview'
 import TechDrawing from './components/TechDrawing'
 import Cabinet3D from './components/Cabinet3D'
@@ -714,7 +712,6 @@ export default function App(){
           <button className={`tabBtn ${tab==='room'?'active':''}`} onClick={()=>setTab('room')}>Pomieszczenie</button>
           <button className={`tabBtn ${tab==='costs'?'active':''}`} onClick={()=>setTab('costs')}>Koszty</button>
           <button className={`tabBtn ${tab==='cut'?'active':''}`} onClick={()=>setTab('cut')}>Formatki</button>
-          <button className={`tabBtn ${tab==='phase8'?'active':''}`} onClick={()=>setTab('cab')}></button>
         </div>
 
         {tab==='cab' && (<>
@@ -834,8 +831,6 @@ export default function App(){
         {tab==='room' && (<RoomTab three={threeRef} />)}
         {tab==='costs' && (<CostsTab />)}
         {tab==='cut' && (<CutlistTab />)}
-            provides a simplified cabinet builder with its own cutlist
-            and 3D viewer. 
         
       </aside>
     </div>
