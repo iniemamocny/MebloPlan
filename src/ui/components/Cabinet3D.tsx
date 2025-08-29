@@ -63,22 +63,21 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, boardThickness=1
     topBoard.position.set(W / 2, H - T / 2, -D / 2)
     cabGroup.add(topBoard)
     // Back board
-    if (backPanel !== 'none') {
-      if (backPanel === 'split') {
-        const halfH = (H - T) / 2
-        const backGeo = new THREE.BoxGeometry(W, halfH, backT)
-        const topBack = new THREE.Mesh(backGeo, backMat)
-        topBack.position.set(W / 2, H - halfH / 2 - T / 2, -D + backT / 2)
-        cabGroup.add(topBack)
-        const botBack = new THREE.Mesh(backGeo.clone(), backMat)
-        botBack.position.set(W / 2, halfH / 2 + T / 2, -D + backT / 2)
-        cabGroup.add(botBack)
-      } else {
-        const backGeo = new THREE.BoxGeometry(W, H, backT)
-        const backBoard = new THREE.Mesh(backGeo, backMat)
-        backBoard.position.set(W / 2, H / 2, -D + backT / 2)
-        cabGroup.add(backBoard)
-      }
+    if (backPanel === 'full') {
+      const backGeo = new THREE.BoxGeometry(W, H, backT)
+      const backBoard = new THREE.Mesh(backGeo, backMat)
+      backBoard.position.set(W / 2, H / 2, -D + backT / 2)
+      cabGroup.add(backBoard)
+    } else if (backPanel === 'split') {
+      const gap = 0.002
+      const halfH = (H - gap) / 2
+      const backGeo = new THREE.BoxGeometry(W, halfH, backT)
+      const bottomBack = new THREE.Mesh(backGeo, backMat)
+      bottomBack.position.set(W / 2, halfH / 2, -D + backT / 2)
+      cabGroup.add(bottomBack)
+      const topBack = new THREE.Mesh(backGeo.clone(), backMat)
+      topBack.position.set(W / 2, H - halfH / 2, -D + backT / 2)
+      cabGroup.add(topBack)
     }
     // Shelves: simple horizontal boards (if drawers = 0) else skip
     if (drawers === 0) {
