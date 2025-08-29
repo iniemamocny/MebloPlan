@@ -137,6 +137,7 @@ export default function App(){
       back.position.set(W / 2, legHeight + H / 2, -D + backT / 2)
       group.add(back)
     } else if (backStyle === 'split') {
+      // Two-piece back panel with a 2 mm gap between halves
       const gap = 0.002
       const halfH = (H - gap) / 2
       const backGeo = new THREE.BoxGeometry(W, halfH, backT)
@@ -146,6 +147,8 @@ export default function App(){
       const topBack = new THREE.Mesh(backGeo.clone(), backMat)
       topBack.position.set(W / 2, legHeight + H - halfH / 2, -D + backT / 2)
       group.add(topBack)
+    } else if (backStyle === 'none') {
+      // No back panel requested
     }
     const gaps = adv.gaps || { top: 0, bottom: 0 }
     // Determine if the cabinet has drawers (presence of drawerFronts array)
