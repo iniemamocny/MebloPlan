@@ -109,10 +109,15 @@ export default function App(){
     const backMat = new THREE.MeshStandardMaterial({ color: backColour, metalness:0.05, roughness:0.9 })
     const handleMat = new THREE.MeshStandardMaterial({ color: handleColour, metalness:0.8, roughness:0.4 })
     const footMat = new THREE.MeshStandardMaterial({ color: footColour, metalness:0.3, roughness:0.7 })
+    const hardwareMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness:0.8, roughness:0.3 })
     const group = new THREE.Group()
     group.userData.kind = 'cab'
     // Extract advanced settings once at the beginning
     const adv = mod.adv || {}
+    const hingeType = adv.hingeType || ''
+    const hasBlumotion = /blumotion/i.test(hingeType)
+    const openingMech = adv.openingMechanism || ''
+    const showHandles = !openingMech || /uchwyt|handle/i.test(openingMech.toLowerCase())
     // Carcase sides (add legHeight offset on Y axis)
     const sideGeo = new THREE.BoxGeometry(T, H, D)
     const leftSide = new THREE.Mesh(sideGeo, carcMat)
@@ -202,14 +207,26 @@ export default function App(){
         const frontMesh = new THREE.Mesh(frontGeo, frontMat)
         frontMesh.position.set(W / 2, yStart + hFront / 2, -T / 2)
         drawerGroup.add(frontMesh)
-        // Handle placement for drawer: width up to 40 cm or half of cabinet width
-        const handleWidth = Math.min(0.4, W * 0.5)
-        const handleHeight = 0.02
-        const handleDepth = 0.03
-        const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
-        const handle = new THREE.Mesh(handleGeo, handleMat)
-        handle.position.set(W / 2, yStart + hFront - handleHeight * 1.5, 0.01)
-        drawerGroup.add(handle)
+        if (showHandles) {
+          // Handle placement for drawer: width up to 40 cm or half of cabinet width
+          const handleWidth = Math.min(0.4, W * 0.5)
+          const handleHeight = 0.02
+          const handleDepth = 0.03
+          const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
+          const handle = new THREE.Mesh(handleGeo, handleMat)
+          handle.position.set(W / 2, yStart + hFront - handleHeight * 1.5, 0.01)
+          drawerGroup.add(handle)
+        }
+        // Drawer slide rails
+        const railThick = 0.01
+        const railLen = D - 2 * T
+        const railGeo = new THREE.BoxGeometry(railThick, railThick, railLen)
+        const leftRail = new THREE.Mesh(railGeo, hardwareMat)
+        leftRail.position.set(T + railThick / 2, yStart + hFront / 2, -T - railLen / 2)
+        drawerGroup.add(leftRail)
+        const rightRail = leftRail.clone()
+        rightRail.position.x = W - T - railThick / 2
+        drawerGroup.add(rightRail)
         group.add(drawerGroup)
         frontGroups[idx] = drawerGroup
         yStart += hFront
@@ -244,15 +261,33 @@ export default function App(){
           const offsetX = doorHinge === 'left' ? segmentW / 2 : -segmentW / 2
           doorMesh.position.set(offsetX, 0, -T / 2)
           doorGroup.add(doorMesh)
-          // Handle for door: width limited by half of segment, placed at 20% down from top
-          const handleWidth = Math.min(0.4, segmentW * 0.5)
-          const handleHeight = 0.02
-          const handleDepth = 0.03
-          const hGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
-          const handle = new THREE.Mesh(hGeo, handleMat)
-          const handleOffsetX = doorHinge === 'left' ? segmentW / 2 : -segmentW / 2
-          handle.position.set(handleOffsetX, H * 0.2, 0.01)
-          doorGroup.add(handle)
+          // Hinges along the pivot side
+          const hingeCount = H <= 0.9 ? 2 : H <= 1.5 ? 3 : 4
+          const hingeGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.02, 8)
+          for (let h = 0; h < hingeCount; h++) {
+            const hinge = new THREE.Mesh(hingeGeo, hardwareMat)
+            const hy = -H / 2 + (h + 0.5) * (H / hingeCount)
+            hinge.position.set(0, hy, -T)
+            doorGroup.add(hinge)
+          }
+          if (hasBlumotion) {
+            const dampGeo = new THREE.BoxGeometry(0.03, 0.01, 0.01)
+            const damper = new THREE.Mesh(dampGeo, hardwareMat)
+            const dampX = doorHinge === 'left' ? 0.015 : -0.015
+            damper.position.set(dampX, H / 2 - 0.05, -T)
+            doorGroup.add(damper)
+          }
+          if (showHandles) {
+            // Handle for door: width limited by half of segment, placed at 20% down from top
+            const handleWidth = Math.min(0.4, segmentW * 0.5)
+            const handleHeight = 0.02
+            const handleDepth = 0.03
+            const hGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
+            const handle = new THREE.Mesh(hGeo, handleMat)
+            const handleOffsetX = doorHinge === 'left' ? segmentW / 2 : -segmentW / 2
+            handle.position.set(handleOffsetX, H * 0.2, 0.01)
+            doorGroup.add(handle)
+          }
           group.add(doorGroup)
           frontGroups[i] = doorGroup
         }
@@ -272,14 +307,32 @@ export default function App(){
         const doorMeshX = hingeSide === 'left' ? W / 2 : -W / 2
         doorMesh.position.set(doorMeshX, 0, -T / 2)
         doorGroup.add(doorMesh)
-        const handleWidth = Math.min(0.4, W * 0.5)
-        const handleHeight = 0.02
-        const handleDepth = 0.03
-        const hGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
-        const handle = new THREE.Mesh(hGeo, handleMat)
-        const handleX = hingeSide === 'left' ? W / 2 : -W / 2
-        handle.position.set(handleX, (H * 0.2), 0.01)
-        doorGroup.add(handle)
+        // Hinges along the pivot side
+        const hingeCount = H <= 0.9 ? 2 : H <= 1.5 ? 3 : 4
+        const hingeGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.02, 8)
+        for (let h = 0; h < hingeCount; h++) {
+          const hinge = new THREE.Mesh(hingeGeo, hardwareMat)
+          const hy = -H / 2 + (h + 0.5) * (H / hingeCount)
+          hinge.position.set(0, hy, -T)
+          doorGroup.add(hinge)
+        }
+        if (hasBlumotion) {
+          const dampGeo = new THREE.BoxGeometry(0.03, 0.01, 0.01)
+          const damper = new THREE.Mesh(dampGeo, hardwareMat)
+          const dampX = hingeSide === 'left' ? 0.015 : -0.015
+          damper.position.set(dampX, H / 2 - 0.05, -T)
+          doorGroup.add(damper)
+        }
+        if (showHandles) {
+          const handleWidth = Math.min(0.4, W * 0.5)
+          const handleHeight = 0.02
+          const handleDepth = 0.03
+          const hGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleDepth)
+          const handle = new THREE.Mesh(hGeo, handleMat)
+          const handleX = hingeSide === 'left' ? W / 2 : -W / 2
+          handle.position.set(handleX, (H * 0.2), 0.01)
+          doorGroup.add(handle)
+        }
         group.add(doorGroup)
         frontGroups[0] = doorGroup
       }
@@ -329,6 +382,19 @@ export default function App(){
       const br = new THREE.Mesh(footGeo.clone(), footMat)
       br.position.set(W - T - footRadius, footHeight / 2, -D + T)
       group.add(br)
+    }
+    // Aventos struts for lift mechanisms
+    if (adv.aventosType && adv.aventosType !== 'Brak') {
+      const strutLen = Math.min(D * 0.6, 0.3)
+      const strutGeo = new THREE.CylinderGeometry(0.005, 0.005, strutLen, 8)
+      const leftStrut = new THREE.Mesh(strutGeo, hardwareMat)
+      leftStrut.rotation.z = -Math.PI / 4
+      leftStrut.position.set(T + 0.02, legHeight + H - 0.1, -T - strutLen / 2)
+      group.add(leftStrut)
+      const rightStrut = new THREE.Mesh(strutGeo.clone(), hardwareMat)
+      rightStrut.rotation.z = Math.PI / 4
+      rightStrut.position.set(W - T - 0.02, legHeight + H - 0.1, -T - strutLen / 2)
+      group.add(rightStrut)
     }
     return group
   }
