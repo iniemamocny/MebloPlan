@@ -1,5 +1,4 @@
 import { validateParts, type Part } from '../../core/format'
-import MultiMaterialPreview from '../components/MultiMaterialPreview'
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { usePlannerStore } from '../../state/store'
@@ -129,8 +128,6 @@ return (
         </div>
         { !plan.ok && <div className="small" style={{marginTop:4}}>{plan.reason}</div> }
       </div>
-
-      <MultiMaterialPreview L={board.L} W={board.W} kerf={board.kerf} hasGrain={board.hasGrain} items={items} />
 
       <div className="hd"><div><div className="h1">{t('cutlist.title')}</div></div></div>
       <div className="bd">
