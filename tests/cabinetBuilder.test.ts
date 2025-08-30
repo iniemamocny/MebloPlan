@@ -31,6 +31,27 @@ describe('buildCabinetMesh', () => {
     expect(g.children.length).toBe(7)
   })
 
+  it('adds divider when dividerPosition provided', () => {
+    const g = buildCabinetMesh({
+      width: 1,
+      height: 0.9,
+      depth: 0.5,
+      drawers: 0,
+      doorCount: 3,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      dividerPosition: 'left',
+    })
+    const div = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs(c.position.x - 1 / 3) < 0.001 &&
+        (c as THREE.Mesh).geometry instanceof THREE.BoxGeometry &&
+        (c as any).geometry.parameters.width === 0.018
+    )
+    expect(div).toBeTruthy()
+  })
+
   it('matches provided dimensions', () => {
     const width = 0.8
     const height = 0.7

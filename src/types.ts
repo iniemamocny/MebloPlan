@@ -77,6 +77,7 @@ export interface ModuleAdv {
   drawerFronts?: number[]
   shelves?:number
   backPanel?:'full'|'split'|'none'
+  dividerPosition?: 'left' | 'right' | 'center'
 }
 
 export interface Module3D {
