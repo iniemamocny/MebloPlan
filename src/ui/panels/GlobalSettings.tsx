@@ -37,22 +37,13 @@ export default function GlobalSettings(){
             <Field label="Rodzaj frontu" type="select" value={g.frontType} onChange={(v)=>set({frontType:v})} options={Object.keys(store.prices.front)} />
             <Field label="Plecy" type="select" value={g.backPanel||'full'} onChange={(v)=>set({backPanel:v})} options={['full','split','none']} />
             {fam===FAMILY.BASE && (<>
-              <Field
-                label="Nóżki"
-                type="select"
-                value={g.legsType}
-                onChange={(v)=>{
-                  const m = v.match(/(\d+)/)
-                  set({ legsType:v, legsHeight: m ? Number(m[1])*10 : g.legsHeight })
-                }}
-                options={Object.keys(store.prices.legs)}
-              />
+              <Field label={t('global.legs')} type="select" value={g.legsType} onChange={(v)=>set({legsType:v})} options={Object.keys(store.prices.legs)} />
               <Field label="Wysokość nóżek (mm)" value={g.legsHeight||0} onChange={(v)=>set({legsHeight:v})} />
-              <Field label="Odsunięcie od ściany (mm)" value={g.offsetWall||0} onChange={(v)=>set({offsetWall:v})} />
+              <Field label={t('global.offsetWall')} value={g.offsetWall||0} onChange={(v)=>set({offsetWall:v})} />
             </>)}
             {(fam===FAMILY.WALL || fam===FAMILY.PAWLACZ) && (<>
               <Field label="Zawieszki" type="select" value={g.hangerType} onChange={(v)=>set({hangerType:v})} options={Object.keys(store.prices.hangers)} />
-              <Field label="Odsunięcie od ściany (mm)" value={g.offsetWall||0} onChange={(v)=>set({offsetWall:v})} />
+              <Field label={t('global.offsetWall')} value={g.offsetWall||0} onChange={(v)=>set({offsetWall:v})} />
             </>)}
           </div>
           <div style={{marginTop:8}}>
