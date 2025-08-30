@@ -6,6 +6,21 @@ import { cutlistForModule, aggregateCutlist, toCSV, aggregateEdgebanding } from 
 import jsPDF from 'jspdf'
 import useLocalStorageState from '../hooks/useLocalStorageState'
 
+interface BoardConfig {
+  L: number
+  W: number
+  kerf: number
+  hasGrain: boolean
+}
+
+interface CutItem {
+  w: number
+  h: number
+  qty: number
+  part: string
+  requireGrain: boolean
+}
+
 export default function CutlistTab(){
   const store = usePlannerStore()
   const detailedPack = useMemo(()=> store.modules.map(m=>cutlistForModule(m, store.globals)), [store.modules, store.globals])
@@ -49,21 +64,28 @@ export default function CutlistTab(){
   const [boardKerf] = useLocalStorageState<number>('boardKerf', 3)
   const [boardHasGrain] = useLocalStorageState<boolean>('boardHasGrain', true)
 
-  const board = {
+  const board: BoardConfig = {
     L: boardL,
     W: boardW,
     kerf: boardKerf,
     hasGrain: boardHasGrain
   }
-  const items = aggregated.map((row: any) => ({
+  const items: CutItem[] = aggregated.map((row) => ({
     w: Math.round(row.w || 0),
     h: Math.round(row.h || 0),
     qty: Math.max(1, Math.round(row.qty || 1)),
     part: row.part || row.material || 'elem',
     requireGrain: /wieniec|półka/i.test(row.part || '')
   }))
-  const plan = validateParts(board as any, items as any)
-  const packedSheets = (window as any).__packedSheetsLen as number ?? undefined;(window as any).__lastPlan = plan
+  const plan = validateParts(board, items.map<Part>(it => ({
+    w: it.w,
+    h: it.h,
+    qty: it.qty,
+    name: it.part,
+    requireGrain: it.requireGrain
+  })))
+  const packedSheets = window.__packedSheetsLen ?? undefined
+  window.__lastPlan = plan
 
 return (
 <div className="section">
