@@ -52,6 +52,9 @@ const CabinetConfigurator: React.FC<Props> = ({
   const { t } = useTranslation()
   const [doorsCount, setDoorsCount] = useState(1)
   const [drawersCount, setDrawersCount] = useState(0)
+  const [openSection, setOpenSection] = useState<
+    'korpus' | 'fronty' | 'okucie' | 'nozki' | 'rysunki' | null
+  >('korpus')
   const FormComponent = kind ? FORM_COMPONENTS[kind.key] : null
   const formValues: CabinetFormValues = {
     height: gLocal.height,
@@ -181,8 +184,14 @@ const CabinetConfigurator: React.FC<Props> = ({
           )}
         </div>
 
-        <details>
-          <summary>{t('configurator.sections.korpus')}</summary>
+        <details open={openSection === 'korpus'}>
+          <summary
+            onClick={() =>
+              setOpenSection(openSection === 'korpus' ? null : 'korpus')
+            }
+          >
+            {t('configurator.sections.korpus')}
+          </summary>
           <div>
             {FormComponent && (
               <div style={{ marginBottom: 8 }}>
@@ -279,8 +288,14 @@ const CabinetConfigurator: React.FC<Props> = ({
           </div>
         </details>
 
-        <details>
-          <summary>{t('configurator.sections.fronty')}</summary>
+        <details open={openSection === 'fronty'}>
+          <summary
+            onClick={() =>
+              setOpenSection(openSection === 'fronty' ? null : 'fronty')
+            }
+          >
+            {t('configurator.sections.fronty')}
+          </summary>
           <div>
             <div className="grid4">
               <div>
@@ -330,8 +345,14 @@ const CabinetConfigurator: React.FC<Props> = ({
           </div>
         </details>
 
-        <details>
-          <summary>{t('configurator.sections.okucie')}</summary>
+        <details open={openSection === 'okucie'}>
+          <summary
+            onClick={() =>
+              setOpenSection(openSection === 'okucie' ? null : 'okucie')
+            }
+          >
+            {t('configurator.sections.okucie')}
+          </summary>
           <div>
             <div className="grid2">
               <div>
@@ -346,8 +367,14 @@ const CabinetConfigurator: React.FC<Props> = ({
           </div>
         </details>
 
-        <details>
-          <summary>{t('configurator.sections.nozki')}</summary>
+        <details open={openSection === 'nozki'}>
+          <summary
+            onClick={() =>
+              setOpenSection(openSection === 'nozki' ? null : 'nozki')
+            }
+          >
+            {t('configurator.sections.nozki')}
+          </summary>
           <div>
             <div className="grid2">
               <div>
