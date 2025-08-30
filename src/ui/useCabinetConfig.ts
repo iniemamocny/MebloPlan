@@ -31,6 +31,7 @@ export function useCabinetConfig(
       gaps: { ...g.gaps },
       shelves: g.shelves ?? defaultShelves,
       backPanel: g.backPanel,
+      edgeBanding: 'front',
     });
   }, [family, store.globals]);
 
@@ -138,6 +139,7 @@ export function useCabinetConfig(
           frontType: g.frontType,
           gaps: g.gaps,
           backPanel: g.backPanel,
+          edgeBanding: g.edgeBanding,
         },
         doorsCount,
         drawersCount,
@@ -224,6 +226,7 @@ export function useCabinetConfig(
             frontType: g.frontType,
             gaps: g.gaps,
             backPanel: g.backPanel,
+            edgeBanding: 'front',
           },
           doorsCount: 1,
           drawersCount: 0,
@@ -240,7 +243,7 @@ export function useCabinetConfig(
         rotationY: pl.rot,
         segIndex: selWall,
         price,
-        adv: { ...g, doorCount: 1 } as ModuleAdv,
+        adv: { ...g, doorCount: 1, edgeBanding: 'front' } as ModuleAdv,
       };
       mod = resolveCollisions(mod);
       store.addModule(mod);

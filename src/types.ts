@@ -78,6 +78,7 @@ export interface ModuleAdv {
   shelves?:number
   backPanel?:'full'|'split'|'none'
   dividerPosition?: 'left' | 'right' | 'center'
+  edgeBanding?: 'none' | 'front' | 'full'
 }
 
 export interface Module3D {

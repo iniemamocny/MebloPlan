@@ -19,6 +19,7 @@ export interface CabinetOptions {
   hinge?: 'left' | 'right';
   dividerPosition?: 'left' | 'right' | 'center';
   showEdges?: boolean;
+  edgeBanding?: 'none' | 'front' | 'full';
 }
 
 /**
@@ -43,6 +44,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     backThickness: backT = 0.003,
     dividerPosition,
     showEdges = false,
+    edgeBanding = 'none',
   } = opts;
 
   const FRONT_OFFSET = 0.002;
@@ -78,6 +80,26 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     metalness: 0.3,
     roughness: 0.7,
   });
+  const bandThickness = edgeBanding === 'full' ? 0.002 : 0.001;
+  const bandMat = new THREE.MeshStandardMaterial({
+    color: edgeBanding === 'full' ? 0xffaa00 : 0xffdd99,
+    metalness: 0.2,
+    roughness: 0.6,
+  });
+
+  const addBand = (
+    x: number,
+    y: number,
+    z: number,
+    w: number,
+    h: number,
+    d: number,
+  ) => {
+    const geo = new THREE.BoxGeometry(w, h, d);
+    const mesh = new THREE.Mesh(geo, bandMat);
+    mesh.position.set(x, y, z);
+    group.add(mesh);
+  };
 
   const group = new THREE.Group();
   const frontGroups: THREE.Group[] = [];
@@ -101,6 +123,44 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   rightSide.position.set(W - T / 2, legHeight + H / 2, -D / 2);
   addEdges(rightSide);
   group.add(rightSide);
+  if (edgeBanding !== 'none') {
+    addBand(T / 2, legHeight + H / 2, bandThickness / 2, T, H, bandThickness);
+    addBand(
+      W - T / 2,
+      legHeight + H / 2,
+      bandThickness / 2,
+      T,
+      H,
+      bandThickness,
+    );
+    if (edgeBanding === 'full') {
+      addBand(T / 2, legHeight + bandThickness / 2, -D / 2, T, bandThickness, D);
+      addBand(
+        T / 2,
+        legHeight + H - bandThickness / 2,
+        -D / 2,
+        T,
+        bandThickness,
+        D,
+      );
+      addBand(
+        W - T / 2,
+        legHeight + bandThickness / 2,
+        -D / 2,
+        T,
+        bandThickness,
+        D,
+      );
+      addBand(
+        W - T / 2,
+        legHeight + H - bandThickness / 2,
+        -D / 2,
+        T,
+        bandThickness,
+        D,
+      );
+    }
+  }
 
   // Top and bottom
   const horizGeo = new THREE.BoxGeometry(W, T, D);
@@ -112,6 +172,37 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   top.position.set(W / 2, legHeight + H - T / 2, -D / 2);
   addEdges(top);
   group.add(top);
+  if (edgeBanding !== 'none') {
+    addBand(W / 2, legHeight + T / 2, bandThickness / 2, W, T, bandThickness);
+    addBand(W / 2, legHeight + H - T / 2, bandThickness / 2, W, T, bandThickness);
+    if (edgeBanding === 'full') {
+      addBand(bandThickness / 2, legHeight + T / 2, -D / 2, bandThickness, T, D);
+      addBand(
+        W - bandThickness / 2,
+        legHeight + T / 2,
+        -D / 2,
+        bandThickness,
+        T,
+        D,
+      );
+      addBand(
+        bandThickness / 2,
+        legHeight + H - T / 2,
+        -D / 2,
+        bandThickness,
+        T,
+        D,
+      );
+      addBand(
+        W - bandThickness / 2,
+        legHeight + H - T / 2,
+        -D / 2,
+        bandThickness,
+        T,
+        D,
+      );
+    }
+  }
 
   // Back panel styles
   if (backPanel === 'full') {
@@ -144,6 +235,27 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       shelf.position.set(W / 2, y, -D / 2);
       addEdges(shelf);
       group.add(shelf);
+      if (edgeBanding !== 'none') {
+        addBand(W / 2, y, bandThickness / 2, W - 2 * T, T, bandThickness);
+        if (edgeBanding === 'full') {
+          addBand(
+            T + bandThickness / 2,
+            y,
+            -D / 2,
+            bandThickness,
+            T,
+            D,
+          );
+          addBand(
+            W - T - bandThickness / 2,
+            y,
+            -D / 2,
+            bandThickness,
+            T,
+            D,
+          );
+        }
+      }
     }
   }
 
@@ -156,6 +268,20 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     divider.position.set(x, legHeight + H / 2, -D / 2);
     addEdges(divider);
     group.add(divider);
+    if (edgeBanding !== 'none') {
+      addBand(x, legHeight + H / 2, bandThickness / 2, T, H, bandThickness);
+      if (edgeBanding === 'full') {
+        addBand(x, legHeight + bandThickness / 2, -D / 2, T, bandThickness, D);
+        addBand(
+          x,
+          legHeight + H - bandThickness / 2,
+          -D / 2,
+          T,
+          bandThickness,
+          D,
+        );
+      }
+    }
   }
 
   // Fronts
