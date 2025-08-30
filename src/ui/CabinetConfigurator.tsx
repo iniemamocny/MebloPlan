@@ -6,6 +6,14 @@ import TechDrawing from './components/TechDrawing'
 import Cabinet3D from './components/Cabinet3D'
 import { CabinetConfig } from './types'
 import { Gaps } from '../types'
+import {
+  CornerCabinetForm,
+  SinkCabinetForm,
+  CargoCabinetForm,
+  ApplianceCabinetForm,
+  CabinetFormValues,
+  CabinetFormProps,
+} from './forms'
 
 interface Props {
   family: FAMILY
@@ -25,6 +33,13 @@ interface Props {
   ) => void
 }
 
+const FORM_COMPONENTS: Record<string, React.ComponentType<CabinetFormProps>> = {
+  corner: CornerCabinetForm,
+  sink: SinkCabinetForm,
+  cargo: CargoCabinetForm,
+  appliance: ApplianceCabinetForm,
+}
+
 const CabinetConfigurator: React.FC<Props> = ({
   family,
   kind,
@@ -41,6 +56,21 @@ const CabinetConfigurator: React.FC<Props> = ({
   const { t } = useTranslation()
   const [doorsCount, setDoorsCount] = useState(1)
   const [drawersCount, setDrawersCount] = useState(0)
+  const FormComponent = kind ? FORM_COMPONENTS[kind.key] : null
+  const formValues: CabinetFormValues = {
+    width: widthMM,
+    height: gLocal.height,
+    depth: gLocal.depth,
+    doorsCount,
+    drawersCount,
+    adv: gLocal,
+  }
+  const handleFormChange = (vals: CabinetFormValues) => {
+    setWidthMM(vals.width)
+    setAdv({ ...gLocal, height: vals.height, depth: vals.depth })
+    if (typeof vals.doorsCount === 'number') setDoorsCount(vals.doorsCount)
+    if (typeof vals.drawersCount === 'number') setDrawersCount(vals.drawersCount)
+  }
 
   useEffect(() => {
     if (kind?.key === 'doors') {
@@ -180,6 +210,11 @@ const CabinetConfigurator: React.FC<Props> = ({
         )}
         {cfgTab==='adv' && (
           <div>
+            {FormComponent && (
+              <div style={{marginBottom:8}}>
+                <FormComponent values={formValues} onChange={handleFormChange} />
+              </div>
+            )}
             <div className="grid4">
               <div><div className="small">{t('configurator.height')}</div><input className="input" type="number" value={gLocal.height} onChange={e=>setAdv({...gLocal, height:Number((e.target as HTMLInputElement).value)||0})} /></div>
               <div><div className="small">{t('configurator.depth')}</div><input className="input" type="number" value={gLocal.depth} onChange={e=>setAdv({...gLocal, depth:Number((e.target as HTMLInputElement).value)||0})} /></div>

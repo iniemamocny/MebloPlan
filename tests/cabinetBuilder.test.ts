@@ -19,6 +19,21 @@ describe('buildCabinetMesh', () => {
     expect(g.children.length).toBe(7)
   })
 
+  it('creates provided number of drawer groups', () => {
+    const g = buildCabinetMesh({
+      width: 1,
+      height: 0.9,
+      depth: 0.5,
+      drawers: 3,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+    })
+    const drawers = g.children.filter(
+      (c) => c instanceof THREE.Group && (c as any).userData.type === 'drawer'
+    )
+    expect(drawers.length).toBe(3)
+  })
+
   it('returns group with expected children for doors', () => {
     const g = buildCabinetMesh({
       width: 1,
@@ -29,6 +44,22 @@ describe('buildCabinetMesh', () => {
       family: FAMILY.BASE,
     })
     expect(g.children.length).toBe(7)
+  })
+
+  it('creates provided number of door groups', () => {
+    const g = buildCabinetMesh({
+      width: 1,
+      height: 0.9,
+      depth: 0.5,
+      drawers: 0,
+      doorCount: 2,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+    })
+    const doors = g.children.filter(
+      (c) => c instanceof THREE.Group && (c as any).userData.type === 'door'
+    )
+    expect(doors.length).toBe(2)
   })
 
   it('adds divider when dividerPosition provided', () => {

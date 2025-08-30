@@ -94,7 +94,15 @@
   "forms": {
     "width": "Szerokość",
     "height": "Wysokość",
-    "depth": "Głębokość"
+    "depth": "Głębokość",
+    "doorsCount": "Liczba drzwi",
+    "drawersCount": "Liczba szuflad",
+    "sections": {
+      "dimensions": "Wymiary",
+      "fronts": "Fronty",
+      "advanced": "Zaawansowane",
+      "hardware": "Okucia"
+    }
   },
   "costs": {
     "title": "Koszty",

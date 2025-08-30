@@ -6,6 +6,8 @@ export interface CabinetFormValues {
   width: number
   height: number
   depth: number
+  doorsCount?: number
+  drawersCount?: number
   adv?: any
   hardware?: any
 }
@@ -17,16 +19,38 @@ export interface CabinetFormProps {
 
 export default function CornerCabinetForm({ values, onChange }: CabinetFormProps){
   const { t } = useTranslation()
-  const { width, height, depth, adv, hardware } = values
+  const { width, height, depth, doorsCount = 0, drawersCount = 0, adv, hardware } = values
   const update = (patch: Partial<CabinetFormValues>) => onChange({ ...values, ...patch })
   return (
     <div>
-      <SingleMMInput label={t('forms.width')} value={width} onChange={w=>update({ width:w })} />
-      <SingleMMInput label={t('forms.height')} value={height} onChange={h=>update({ height:h })} />
-      <SingleMMInput label={t('forms.depth')} value={depth} onChange={d=>update({ depth:d })} />
-      {/* Advanced settings and hardware options are passed through unchanged */}
-      {adv && <pre style={{ display:'none' }}>{JSON.stringify(adv)}</pre>}
-      {hardware && <pre style={{ display:'none' }}>{JSON.stringify(hardware)}</pre>}
+      <details open>
+        <summary>{t('forms.sections.dimensions')}</summary>
+        <div>
+          <div className="small">{t('forms.width')}</div>
+          <SingleMMInput value={width} onChange={w=>update({ width:w })} />
+          <div className="small">{t('forms.height')}</div>
+          <SingleMMInput value={height} onChange={h=>update({ height:h })} />
+          <div className="small">{t('forms.depth')}</div>
+          <SingleMMInput value={depth} onChange={d=>update({ depth:d })} />
+        </div>
+      </details>
+      <details>
+        <summary>{t('forms.sections.fronts')}</summary>
+        <div>
+          <div className="small">{t('forms.doorsCount')}</div>
+          <SingleMMInput min={0} step={1} value={doorsCount} onChange={n=>update({ doorsCount:n })} />
+          <div className="small">{t('forms.drawersCount')}</div>
+          <SingleMMInput min={0} step={1} value={drawersCount} onChange={n=>update({ drawersCount:n })} />
+        </div>
+      </details>
+      <details>
+        <summary>{t('forms.sections.advanced')}</summary>
+        {adv && <pre style={{ display:'none' }}>{JSON.stringify(adv)}</pre>}
+      </details>
+      <details>
+        <summary>{t('forms.sections.hardware')}</summary>
+        {hardware && <pre style={{ display:'none' }}>{JSON.stringify(hardware)}</pre>}
+      </details>
     </div>
   )
 }
