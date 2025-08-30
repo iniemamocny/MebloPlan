@@ -75,7 +75,8 @@
       "korpus": "Carcass",
       "fronty": "Fronts",
       "okucie": "Hardware",
-      "nozki": "Legs"
+      "nozki": "Legs",
+      "rysunki": "Drawings"
     },
     "width": "Width (mm)",
     "insertCabinet": "Insert cabinet",

@@ -269,22 +269,6 @@ const CabinetConfigurator: React.FC<Props> = ({
                 />
               </div>
             )}
-            <div style={{ marginTop: 8 }}>
-              <div className="small">{t('configurator.gapsTitle')}</div>
-              <TechDrawing
-                mode="edit"
-                widthMM={widthMM}
-                heightMM={gLocal.height}
-                depthMM={gLocal.depth}
-                gaps={gLocal.gaps}
-                doorsCount={doorsCount}
-                drawersCount={drawersCount}
-                drawerFronts={gLocal.drawerFronts}
-                dividerPosition={gLocal.dividerPosition}
-                onChangeGaps={(gg: Gaps) => setAdv({ ...gLocal, gaps: gg })}
-                onChangeDrawerFronts={(arr: number[]) => setAdv({ ...gLocal, drawerFronts: arr })}
-              />
-            </div>
           </div>
         </details>
 
@@ -386,6 +370,29 @@ const CabinetConfigurator: React.FC<Props> = ({
                 <input className="input" placeholder="-" />
               </div>
             </div>
+          </div>
+        </details>
+        <details open={openSection === 'rysunki'}>
+          <summary onClick={() => setOpenSection('rysunki')}>
+            {t('configurator.sections.rysunki')}
+          </summary>
+          <div>
+            <div className="small">{t('configurator.gapsTitle')}</div>
+            <TechDrawing
+              mode="edit"
+              widthMM={widthMM}
+              heightMM={gLocal.height}
+              depthMM={gLocal.depth}
+              gaps={gLocal.gaps}
+              doorsCount={doorsCount}
+              drawersCount={drawersCount}
+              drawerFronts={gLocal.drawerFronts}
+              dividerPosition={gLocal.dividerPosition}
+              onChangeGaps={(gg: Gaps) => setAdv({ ...gLocal, gaps: gg })}
+              onChangeDrawerFronts={(arr: number[]) =>
+                setAdv({ ...gLocal, drawerFronts: arr })
+              }
+            />
           </div>
         </details>
       </div>
