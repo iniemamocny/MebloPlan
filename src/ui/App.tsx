@@ -1,24 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
-import useLocalStorageState from './hooks/useLocalStorageState';
 import { FAMILY, Kind, Variant } from '../core/catalog';
 import { usePlannerStore } from '../state/store';
 import GlobalSettings from './panels/GlobalSettings';
 import SceneViewer from './SceneViewer';
 import useCabinetConfig from './useCabinetConfig';
-import { CabinetConfig } from './types';
 import TopBar from './TopBar';
-import MainTabs from './MainTabs';
 import { createTranslator } from './i18n';
 
 export default function App() {
-  const [boardL, setBoardL] = useLocalStorageState<number>('boardL', 2800);
-  const [boardW, setBoardW] = useLocalStorageState<number>('boardW', 2070);
-  const [boardKerf, setBoardKerf] = useLocalStorageState<number>('boardKerf', 3);
-  const [boardHasGrain, setBoardHasGrain] = useLocalStorageState<boolean>('boardHasGrain', true);
-
   const store = usePlannerStore();
-  const [tab, setTab] = useState<'cab' | 'room' | 'costs' | 'cut'>('cab');
-  const [family, setFamily] = useState<FAMILY>(FAMILY.BASE);
+  const [family] = useState<FAMILY>(FAMILY.BASE);
   const [kind, setKind] = useState<Kind | null>(null);
   const [variant, setVariant] = useState<Variant | null>(null);
   const [selWall, setSelWall] = useState(0);
@@ -32,25 +23,13 @@ export default function App() {
     localStorage.setItem('lang', lang);
   }, [lang, i18n]);
 
-  const {
-    cfgTab,
-    setCfgTab,
-    widthMM,
-    setWidthMM,
-    setAdv,
-    gLocal,
-    onAdd,
-    doAutoOnSelectedWall,
-  }: {
-    cfgTab: 'basic' | 'adv';
-    setCfgTab: (t: 'basic' | 'adv') => void;
-    widthMM: number;
-    setWidthMM: (n: number) => void;
-    setAdv: (v: CabinetConfig) => void;
-    gLocal: CabinetConfig;
-    onAdd: (width: number, adv: CabinetConfig) => void;
-    doAutoOnSelectedWall: () => void;
-  } = useCabinetConfig(family, kind, variant, selWall, setVariant);
+  const { doAutoOnSelectedWall } = useCabinetConfig(
+    family,
+    kind,
+    variant,
+    selWall,
+    setVariant,
+  );
 
   const undo = store.undo;
   const redo = store.redo;
@@ -71,6 +50,7 @@ export default function App() {
 
   return (
     <div className="app">
+      <GlobalSettings />
       <div className="canvasWrap">
         <SceneViewer threeRef={threeRef} addCountertop={addCountertop} />
         <TopBar
@@ -85,37 +65,6 @@ export default function App() {
           setLang={setLang}
         />
       </div>
-      <aside className="sidebar">
-        <GlobalSettings />
-
-        <MainTabs
-          t={t}
-          tab={tab}
-          setTab={setTab}
-          family={family}
-          setFamily={setFamily}
-          kind={kind}
-          setKind={setKind}
-          variant={variant}
-          setVariant={setVariant}
-          cfgTab={cfgTab}
-          setCfgTab={setCfgTab}
-          widthMM={widthMM}
-          setWidthMM={setWidthMM}
-          gLocal={gLocal}
-          setAdv={setAdv}
-          onAdd={onAdd}
-          threeRef={threeRef}
-          boardL={boardL}
-          setBoardL={setBoardL}
-          boardW={boardW}
-          setBoardW={setBoardW}
-          boardKerf={boardKerf}
-          setBoardKerf={setBoardKerf}
-          boardHasGrain={boardHasGrain}
-          setBoardHasGrain={setBoardHasGrain}
-        />
-      </aside>
     </div>
   );
 }
