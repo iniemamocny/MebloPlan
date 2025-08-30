@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import useLocalStorageState from './hooks/useLocalStorageState'
 import { FAMILY, FAMILY_LABELS, Kind, Variant } from '../core/catalog'
 import { usePlannerStore } from '../state/store'
@@ -14,6 +14,7 @@ import { CabinetConfig } from './types'
 import TopBar from './components/TopBar'
 import SheetSettingsPanel from './components/SheetSettingsPanel'
 import MainTabs from './components/MainTabs'
+import { createTranslator, Lang } from './i18n'
 
 export default function App(){
   const [boardL, setBoardL] = useLocalStorageState<number>('boardL', 2800)
@@ -29,6 +30,9 @@ export default function App(){
   const [selWall, setSelWall] = useState(0)
   const [addCountertop] = useState(true)
   const threeRef = useRef<any>({})
+
+  const [lang, setLang] = useLocalStorageState<Lang>('lang', 'pl')
+  const t = useMemo(() => createTranslator(lang), [lang])
 
   const {
     cfgTab,
@@ -77,14 +81,32 @@ export default function App(){
     <div className="app">
       <div className="canvasWrap">
         <SceneViewer threeRef={threeRef} addCountertop={addCountertop} />
-        <TopBar selWall={selWall} setSelWall={setSelWall} onResetSelection={()=>{ setVariant(null); setKind(null); }} doAutoOnSelectedWall={doAutoOnSelectedWall} />
+        <TopBar
+          selWall={selWall}
+          setSelWall={setSelWall}
+          onResetSelection={() => { setVariant(null); setKind(null); }}
+          doAutoOnSelectedWall={doAutoOnSelectedWall}
+          lang={lang}
+          setLang={setLang}
+          t={t}
+        />
       </div>
       <aside className="sidebar">
-        <SheetSettingsPanel boardL={boardL} boardW={boardW} boardKerf={boardKerf} boardHasGrain={boardHasGrain} setBoardL={setBoardL} setBoardW={setBoardW} setBoardKerf={setBoardKerf} setBoardHasGrain={setBoardHasGrain} />
+        <SheetSettingsPanel
+          boardL={boardL}
+          boardW={boardW}
+          boardKerf={boardKerf}
+          boardHasGrain={boardHasGrain}
+          setBoardL={setBoardL}
+          setBoardW={setBoardW}
+          setBoardKerf={setBoardKerf}
+          setBoardHasGrain={setBoardHasGrain}
+          t={t}
+        />
 
         <GlobalSettings />
 
-        <MainTabs tab={tab} setTab={setTab} />
+        <MainTabs tab={tab} setTab={setTab} t={t} />
 
         {tab==='cab' && (<>
           <div>
