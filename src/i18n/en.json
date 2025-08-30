@@ -24,7 +24,8 @@
       "cab": "Kitchen",
       "room": "Room",
       "costs": "Costs",
-      "cut": "Cutlist"
+      "cut": "Cutlist",
+      "global": "Settings"
     },
     "cabinetType": "Cabinet type",
     "subcategories": "Subcategories ({{family}})",
