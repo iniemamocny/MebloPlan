@@ -71,8 +71,12 @@
   },
   "configurator": {
     "title": "Konfiguracja — {{variant}}",
-    "basic": "Podstawowe",
-    "advanced": "Zaawansowane",
+    "sections": {
+      "korpus": "Korpus",
+      "fronty": "Fronty",
+      "okucie": "Okucie",
+      "nozki": "Nóżki"
+    },
     "width": "Szerokość (mm)",
     "insertCabinet": "Wstaw szafkę",
     "doorsCount": "Liczba drzwi",
@@ -88,8 +92,7 @@
       "full": "full",
       "split": "split",
       "none": "none"
-    },
-    "backToBasic": "← Podstawowe"
+    }
   },
   "forms": {
     "width": "Szerokość",

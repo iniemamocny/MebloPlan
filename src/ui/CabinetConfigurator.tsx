@@ -181,7 +181,7 @@ const CabinetConfigurator: React.FC<Props> = ({
         </div>
 
         <details>
-          <summary>Korpus</summary>
+          <summary>{t('configurator.sections.korpus')}</summary>
           <div>
             {FormComponent && (
               <div style={{ marginBottom: 8 }}>
@@ -279,7 +279,7 @@ const CabinetConfigurator: React.FC<Props> = ({
         </details>
 
         <details>
-          <summary>Fronty</summary>
+          <summary>{t('configurator.sections.fronty')}</summary>
           <div>
             <div className="grid4">
               <div>
@@ -330,7 +330,7 @@ const CabinetConfigurator: React.FC<Props> = ({
         </details>
 
         <details>
-          <summary>Okucie</summary>
+          <summary>{t('configurator.sections.okucie')}</summary>
           <div>
             <div className="grid2">
               <div>
@@ -346,7 +346,7 @@ const CabinetConfigurator: React.FC<Props> = ({
         </details>
 
         <details>
-          <summary>Nóżki</summary>
+          <summary>{t('configurator.sections.nozki')}</summary>
           <div>
             <div className="grid2">
               <div>
