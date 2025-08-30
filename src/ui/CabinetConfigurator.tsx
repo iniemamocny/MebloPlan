@@ -101,7 +101,7 @@ const CabinetConfigurator: React.FC<Props> = ({
         </div>
       </div>
       <div className="bd">
-        <div className="stickyControls">
+        <div className="configuratorHeader">
           <div className="preview">
             <Cabinet3D
               family={family}
