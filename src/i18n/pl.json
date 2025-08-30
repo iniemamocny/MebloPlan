@@ -89,7 +89,14 @@
       "split": "split",
       "none": "none"
     },
-    "backToBasic": "← Podstawowe"
+    "backToBasic": "← Podstawowe",
+    "corpus": "Korpus",
+    "fronts": "Fronty",
+    "fittings": "Okucie",
+    "legs": "Nóżki",
+    "hinge": "Zawias",
+    "drawerSlide": "Prowadnice",
+    "aventos": "Aventos"
   },
   "forms": {
     "width": "Szerokość",

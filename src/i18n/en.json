@@ -89,7 +89,14 @@
       "split": "split",
       "none": "none"
     },
-    "backToBasic": "← Basic"
+    "backToBasic": "← Basic",
+    "corpus": "Carcass",
+    "fronts": "Fronts",
+    "fittings": "Fittings",
+    "legs": "Legs",
+    "hinge": "Hinge",
+    "drawerSlide": "Drawer slide",
+    "aventos": "Aventos"
   },
   "forms": {
     "width": "Width",
