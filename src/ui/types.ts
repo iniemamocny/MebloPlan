@@ -10,5 +10,7 @@ export interface CabinetConfig {
   backPanel?: 'full' | 'split' | 'none'
   drawerFronts?: number[]
   dividerPosition?: 'left' | 'right' | 'center'
+  hardware?: any
+  legs?: any
 }
 

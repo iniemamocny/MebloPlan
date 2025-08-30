@@ -54,18 +54,19 @@ const CabinetConfigurator: React.FC<Props> = ({
   const [drawersCount, setDrawersCount] = useState(0)
   const FormComponent = kind ? FORM_COMPONENTS[kind.key] : null
   const formValues: CabinetFormValues = {
-    width: widthMM,
     height: gLocal.height,
     depth: gLocal.depth,
-    doorsCount,
-    drawersCount,
-    adv: gLocal,
+    hardware: gLocal.hardware,
+    legs: gLocal.legs,
   }
   const handleFormChange = (vals: CabinetFormValues) => {
-    setWidthMM(vals.width)
-    setAdv({ ...gLocal, height: vals.height, depth: vals.depth })
-    if (typeof vals.doorsCount === 'number') setDoorsCount(vals.doorsCount)
-    if (typeof vals.drawersCount === 'number') setDrawersCount(vals.drawersCount)
+    setAdv({
+      ...gLocal,
+      height: vals.height,
+      depth: vals.depth,
+      hardware: vals.hardware,
+      legs: vals.legs,
+    })
   }
 
   useEffect(() => {
