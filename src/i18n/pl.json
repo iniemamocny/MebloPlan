@@ -11,6 +11,7 @@
     "clear": "Wyczyść",
     "wallLabel": "Ściana {{num}} ({{len}} mm)",
     "autoWall": "Auto pod ścianę",
+    "auto": "Auto",
     "material": {
       "title": "Materiał (arkusz)",
       "boardHeight": "Wysokość arkusza L (mm)",
@@ -39,7 +40,8 @@
     "angle": "Kąt (°)",
     "addWall": "Dodaj ścianę",
     "addWindow": "Dodaj okno",
-    "addDoor": "Dodaj drzwi"
+    "addDoor": "Dodaj drzwi",
+    "noWalls": "Brak ścian"
   },
   "global": {
     "title": "Ustawienia ogólne",
@@ -104,7 +106,8 @@
       "item": "Pozycja",
       "amount": "Kwota (zł)",
       "total": "Razem"
-    }
+    },
+    "currency": "zł"
   },
   "cutlist": {
     "validation": "Walidacja formatu {{width}}×{{height}}",
@@ -128,6 +131,19 @@
       "h": "H (mm)",
       "length": "Długość (mm)",
       "lengthMb": "Długość (mb)"
+    },
+    "sheetPreview": {
+      "title": "Podgląd arkuszy {{W}}×{{L}} mm",
+      "count": "Liczba arkuszy: {{count}}",
+      "sheetLabel": "Arkusz {{index}}",
+      "note": "Rozmieszczenie poglądowe (strip nesting). Pełny optimizer wdrożymy później."
+    },
+    "multiMaterialPreview": {
+      "title": "Podgląd rozkroju — grupowanie wg materiału",
+      "count": "Arkuszy: {{count}}",
+      "sheetLabel": "Arkusz {{index}}",
+      "legend": "Legenda:",
+      "note": "Heurystyka \"guillotine\" (poglądowa). Dokładny nesting dodamy później."
     }
   }
 }
