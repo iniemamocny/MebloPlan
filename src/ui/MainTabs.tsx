@@ -127,7 +127,7 @@ export default function MainTabs({
               </div>
             </div>
 
-            {kind && (
+            {kind && !variant && (
               <div className="section">
                 <div className="hd">
                   <div>
