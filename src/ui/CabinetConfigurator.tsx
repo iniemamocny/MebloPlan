@@ -19,8 +19,6 @@ interface Props {
   family: FAMILY
   kind: Kind | null
   variant: Variant
-  cfgTab: 'basic' | 'adv'
-  setCfgTab: (t: 'basic' | 'adv') => void
   widthMM: number
   setWidthMM: (n: number) => void
   gLocal: CabinetConfig
@@ -44,13 +42,11 @@ const CabinetConfigurator: React.FC<Props> = ({
   family,
   kind,
   variant,
-  cfgTab,
-  setCfgTab,
   widthMM,
   setWidthMM,
   gLocal,
   setAdv,
-  onAdd
+  onAdd,
 }) => {
   const store = usePlannerStore()
   const { t } = useTranslation()
@@ -99,58 +95,210 @@ const CabinetConfigurator: React.FC<Props> = ({
   return (
     <div className="section">
       <div className="hd">
-        <div><div className="h1">{t('configurator.title',{variant:variant.label})}</div></div>
-        <div className="tabs">
-          <button className={`tabBtn ${cfgTab==='basic'?'active':''}`} onClick={()=>setCfgTab('basic')}>{t('configurator.basic')}</button>
-          <button className={`tabBtn ${cfgTab==='adv'?'active':''}`} onClick={()=>setCfgTab('adv')}>{t('configurator.advanced')}</button>
+        <div>
+          <div className="h1">{t('configurator.title', { variant: variant.label })}</div>
         </div>
       </div>
       <div className="bd">
-        {cfgTab==='basic' && (
-          <div>
-            <div className="grid2">
-              <div>
-                <div className="small">{t('configurator.width')}</div>
-                <input className="input" type="number" min={200} max={2400} step={1} value={widthMM} onChange={e=>setWidthMM(Number((e.target as HTMLInputElement).value)||0)} onKeyDown={(e)=>{ if (e.key==='Enter'){ const v = Number((e.target as HTMLInputElement).value)||0; if(v>0) onAdd(v, gLocal, doorsCount, drawersCount) } }} />
-              </div>
-              <div className="row" style={{alignItems:'flex-end'}}>
-                <button className="btn" onClick={()=>onAdd(widthMM, gLocal, doorsCount, drawersCount)}>{t('configurator.insertCabinet')}</button>
-              </div>
+        <div className="stickyControls">
+          <div className="preview">
+            <Cabinet3D
+              family={family}
+              widthMM={widthMM}
+              heightMM={gLocal.height}
+              depthMM={gLocal.depth}
+              doorsCount={doorsCount}
+              drawersCount={drawersCount}
+              gaps={{ top: gLocal.gaps.top, bottom: gLocal.gaps.bottom }}
+              drawerFronts={gLocal.drawerFronts}
+              shelves={gLocal.shelves}
+              backPanel={gLocal.backPanel}
+              dividerPosition={gLocal.dividerPosition}
+            />
+          </div>
+          <div className="grid2" style={{ marginTop: 8 }}>
+            <div>
+              <div className="small">{t('configurator.width')}</div>
+              <input
+                className="input"
+                type="number"
+                min={200}
+                max={2400}
+                step={1}
+                value={widthMM}
+                onChange={(e) => setWidthMM(Number((e.target as HTMLInputElement).value) || 0)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const v = Number((e.target as HTMLInputElement).value) || 0;
+                    if (v > 0) onAdd(v, gLocal, doorsCount, drawersCount);
+                  }
+                }}
+              />
             </div>
-            {kind?.key === 'doors' && (
-              <div style={{ marginTop: 8 }}>
-                <div className="small">{t('configurator.doorsCount')}</div>
-                <select
-                  className="input"
-                  value={doorsCount}
-                  onChange={(e) => setDoorsCount(Number((e.target as HTMLSelectElement).value))}
-                >
-                  {[1, 2, 3, 4].map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
+            <div className="row" style={{ alignItems: 'flex-end' }}>
+              <button
+                className="btn"
+                onClick={() => onAdd(widthMM, gLocal, doorsCount, drawersCount)}
+              >
+                {t('configurator.insertCabinet')}
+              </button>
+            </div>
+          </div>
+          {kind?.key === 'doors' && (
+            <div style={{ marginTop: 8 }}>
+              <div className="small">{t('configurator.doorsCount')}</div>
+              <select
+                className="input"
+                value={doorsCount}
+                onChange={(e) => setDoorsCount(Number((e.target as HTMLSelectElement).value))}
+              >
+                {[1, 2, 3, 4].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          {kind?.key === 'drawers' && (
+            <div style={{ marginTop: 8 }}>
+              <div className="small">{t('configurator.drawersCount')}</div>
+              <select
+                className="input"
+                value={drawersCount}
+                onChange={(e) =>
+                  setDrawersCount(Number((e.target as HTMLSelectElement).value))
+                }
+              >
+                {[1, 2, 3, 4].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
+        <details>
+          <summary>Korpus</summary>
+          <div>
+            {FormComponent && (
+              <div style={{ marginBottom: 8 }}>
+                <FormComponent values={formValues} onChange={handleFormChange} />
               </div>
             )}
-            {kind?.key === 'drawers' && (
-              <div style={{ marginTop: 8 }}>
-                <div className="small">{t('configurator.drawersCount')}</div>
+            <div className="grid4">
+              <div>
+                <div className="small">{t('configurator.height')}</div>
+                <input
+                  className="input"
+                  type="number"
+                  value={gLocal.height}
+                  onChange={(e) =>
+                    setAdv({ ...gLocal, height: Number((e.target as HTMLInputElement).value) || 0 })
+                  }
+                />
+              </div>
+              <div>
+                <div className="small">{t('configurator.depth')}</div>
+                <input
+                  className="input"
+                  type="number"
+                  value={gLocal.depth}
+                  onChange={(e) =>
+                    setAdv({ ...gLocal, depth: Number((e.target as HTMLInputElement).value) || 0 })
+                  }
+                />
+              </div>
+              <div>
+                <div className="small">{t('configurator.board')}</div>
                 <select
                   className="input"
-                  value={drawersCount}
+                  value={gLocal.boardType}
                   onChange={(e) =>
-                    setDrawersCount(Number((e.target as HTMLSelectElement).value))
+                    setAdv({ ...gLocal, boardType: (e.target as HTMLSelectElement).value })
                   }
                 >
-                  {[1, 2, 3, 4].map((n) => (
-                    <option key={n} value={n}>
-                      {n}
+                  {Object.keys(store.prices.board).map((k) => (
+                    <option key={k} value={k}>
+                      {k}
                     </option>
                   ))}
                 </select>
               </div>
+              <div>
+                <div className="small">{t('configurator.back')}</div>
+                <select
+                  className="input"
+                  value={gLocal.backPanel || 'full'}
+                  onChange={(e) =>
+                    setAdv({
+                      ...gLocal,
+                      backPanel: (e.target as HTMLSelectElement).value as CabinetConfig['backPanel'],
+                    })
+                  }
+                >
+                  <option value="full">{t('configurator.backOptions.full')}</option>
+                  <option value="split">{t('configurator.backOptions.split')}</option>
+                  <option value="none">{t('configurator.backOptions.none')}</option>
+                </select>
+              </div>
+            </div>
+            {drawersCount === 0 && (
+              <div style={{ marginTop: 8 }}>
+                <div className="small">{t('configurator.shelves')}</div>
+                <input
+                  className="input"
+                  type="number"
+                  min={0}
+                  value={gLocal.shelves || 0}
+                  onChange={(e) =>
+                    setAdv({ ...gLocal, shelves: Number((e.target as HTMLInputElement).value) || 0 })
+                  }
+                />
+              </div>
             )}
+            <div style={{ marginTop: 8 }}>
+              <div className="small">{t('configurator.gapsTitle')}</div>
+              <TechDrawing
+                mode="edit"
+                widthMM={widthMM}
+                heightMM={gLocal.height}
+                depthMM={gLocal.depth}
+                gaps={gLocal.gaps}
+                doorsCount={doorsCount}
+                drawersCount={drawersCount}
+                drawerFronts={gLocal.drawerFronts}
+                dividerPosition={gLocal.dividerPosition}
+                onChangeGaps={(gg: Gaps) => setAdv({ ...gLocal, gaps: gg })}
+                onChangeDrawerFronts={(arr: number[]) => setAdv({ ...gLocal, drawerFronts: arr })}
+              />
+            </div>
+          </div>
+        </details>
+
+        <details>
+          <summary>Fronty</summary>
+          <div>
+            <div className="grid4">
+              <div>
+                <div className="small">{t('configurator.front')}</div>
+                <select
+                  className="input"
+                  value={gLocal.frontType}
+                  onChange={(e) =>
+                    setAdv({ ...gLocal, frontType: (e.target as HTMLSelectElement).value })
+                  }
+                >
+                  {Object.keys(store.prices.front).map((k) => (
+                    <option key={k} value={k}>
+                      {k}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
             {Math.max(doorsCount, drawersCount) >= 3 && (
               <div style={{ marginTop: 8 }}>
                 <div className="small">Przegroda</div>
@@ -178,97 +326,40 @@ const CabinetConfigurator: React.FC<Props> = ({
                 )}
               </div>
             )}
-            <div style={{marginTop:8}}>
-              <TechDrawing
-                mode="view"
-                widthMM={widthMM}
-                heightMM={gLocal.height}
-                depthMM={gLocal.depth}
-                gaps={gLocal.gaps}
-                doorsCount={doorsCount}
-                drawersCount={drawersCount}
-                drawerFronts={gLocal.drawerFronts}
-                dividerPosition={gLocal.dividerPosition}
-              />
-            </div>
-            <div className="row" style={{marginTop:8}}>
-              <Cabinet3D
-                family={family}
-                widthMM={widthMM}
-                heightMM={gLocal.height}
-                depthMM={gLocal.depth}
-                doorsCount={doorsCount}
-                drawersCount={drawersCount}
-                gaps={{ top: gLocal.gaps.top, bottom: gLocal.gaps.bottom }}
-                drawerFronts={gLocal.drawerFronts}
-                shelves={gLocal.shelves}
-                backPanel={gLocal.backPanel}
-                dividerPosition={gLocal.dividerPosition}
-              />
-            </div>
           </div>
-        )}
-        {cfgTab==='adv' && (
+        </details>
+
+        <details>
+          <summary>Okucie</summary>
           <div>
-            {FormComponent && (
-              <div style={{marginBottom:8}}>
-                <FormComponent values={formValues} onChange={handleFormChange} />
+            <div className="grid2">
+              <div>
+                <div className="small">Zawias</div>
+                <input className="input" placeholder="-" />
               </div>
-            )}
-            <div className="grid4">
-              <div><div className="small">{t('configurator.height')}</div><input className="input" type="number" value={gLocal.height} onChange={e=>setAdv({...gLocal, height:Number((e.target as HTMLInputElement).value)||0})} /></div>
-              <div><div className="small">{t('configurator.depth')}</div><input className="input" type="number" value={gLocal.depth} onChange={e=>setAdv({...gLocal, depth:Number((e.target as HTMLInputElement).value)||0})} /></div>
-              <div><div className="small">{t('configurator.board')}</div><select className="input" value={gLocal.boardType} onChange={e=>setAdv({...gLocal, boardType:(e.target as HTMLSelectElement).value})}>{Object.keys(store.prices.board).map(k=><option key={k} value={k}>{k}</option>)}</select></div>
-              <div><div className="small">{t('configurator.front')}</div><select className="input" value={gLocal.frontType} onChange={e=>setAdv({...gLocal, frontType:(e.target as HTMLSelectElement).value})}>{Object.keys(store.prices.front).map(k=><option key={k} value={k}>{k}</option>)}</select></div>
-              <div><div className="small">{t('configurator.back')}</div><select className="input" value={gLocal.backPanel||'full'} onChange={e=>setAdv({...gLocal, backPanel:(e.target as HTMLSelectElement).value as CabinetConfig['backPanel']})}>
-                <option value="full">{t('configurator.backOptions.full')}</option>
-                <option value="split">{t('configurator.backOptions.split')}</option>
-                <option value="none">{t('configurator.backOptions.none')}</option>
-              </select></div>
-            </div>
-            {drawersCount === 0 && (
-              <div style={{marginTop:8}}>
-                <div className="small">{t('configurator.shelves')}</div>
-                <input className="input" type="number" min={0} value={gLocal.shelves||0} onChange={e=>setAdv({...gLocal, shelves:Number((e.target as HTMLInputElement).value)||0})} />
+              <div>
+                <div className="small">Prowadnica</div>
+                <input className="input" placeholder="-" />
               </div>
-            )}
-            <div style={{marginTop:8}}>
-              <div className="small">{t('configurator.gapsTitle')}</div>
-              <TechDrawing
-                mode="edit"
-                widthMM={widthMM}
-                heightMM={gLocal.height}
-                depthMM={gLocal.depth}
-                gaps={gLocal.gaps}
-                doorsCount={doorsCount}
-                drawersCount={drawersCount}
-                drawerFronts={gLocal.drawerFronts}
-                dividerPosition={gLocal.dividerPosition}
-                onChangeGaps={(gg: Gaps) => setAdv({ ...gLocal, gaps: gg })}
-                onChangeDrawerFronts={(arr: number[]) => setAdv({ ...gLocal, drawerFronts: arr })}
-              />
-            </div>
-            <div className="row" style={{marginTop:8}}>
-              <Cabinet3D
-                family={family}
-                widthMM={widthMM}
-                heightMM={gLocal.height}
-                depthMM={gLocal.depth}
-                doorsCount={doorsCount}
-                drawersCount={drawersCount}
-                gaps={{ top: gLocal.gaps.top, bottom: gLocal.gaps.bottom }}
-                drawerFronts={gLocal.drawerFronts}
-                shelves={gLocal.shelves}
-                backPanel={gLocal.backPanel}
-                dividerPosition={gLocal.dividerPosition}
-              />
-            </div>
-            <div className="row" style={{marginTop:8}}>
-              <button className="btn" onClick={()=>onAdd(widthMM, gLocal, doorsCount, drawersCount)}>{t('configurator.insertCabinet')}</button>
-              <button className="btnGhost" onClick={()=>setCfgTab('basic')}>{t('configurator.backToBasic')}</button>
             </div>
           </div>
-        )}
+        </details>
+
+        <details>
+          <summary>Nóżki</summary>
+          <div>
+            <div className="grid2">
+              <div>
+                <div className="small">Typ</div>
+                <input className="input" placeholder="-" />
+              </div>
+              <div>
+                <div className="small">Wysokość</div>
+                <input className="input" placeholder="-" />
+              </div>
+            </div>
+          </div>
+        </details>
       </div>
     </div>
   )

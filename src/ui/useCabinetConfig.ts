@@ -16,7 +16,6 @@ export function useCabinetConfig(
   setVariant: (v: Variant | null) => void,
 ) {
   const store = usePlannerStore();
-  const [cfgTab, setCfgTab] = useState<'basic' | 'adv'>('basic');
   const [widthMM, setWidthMM] = useState(600);
   const [adv, setAdvState] = useState<CabinetConfig | null>(null);
   const { t } = useTranslation();
@@ -251,8 +250,6 @@ export function useCabinetConfig(
   const gLocal: CabinetConfig = adv || (store.globals[family] as CabinetConfig);
 
   return {
-    cfgTab,
-    setCfgTab,
     widthMM,
     setWidthMM,
     adv,

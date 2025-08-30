@@ -24,8 +24,6 @@ export default function App() {
   }, [lang, i18n]);
 
   const {
-    cfgTab,
-    setCfgTab,
     widthMM,
     setWidthMM,
     gLocal,
@@ -70,8 +68,6 @@ export default function App() {
           setKind={setKind}
           variant={variant}
           setVariant={setVariant}
-          cfgTab={cfgTab}
-          setCfgTab={setCfgTab}
           widthMM={widthMM}
           setWidthMM={setWidthMM}
           gLocal={gLocal}
