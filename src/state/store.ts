@@ -5,10 +5,49 @@ import { Module3D, Room, Globals, Prices, Opening, Gaps } from '../types'
 export const defaultGaps: Gaps = { left:2, right:2, top:2, bottom:2, between:3 }
 
 export const defaultGlobal: Globals = {
-  [FAMILY.BASE]: { height:800, depth:600, boardType:'Płyta 18mm', frontType:'Laminat', gaps:{...defaultGaps}, legsType:'Standard 10cm', offsetWall:30, shelves:1, backPanel:'full' },
-  [FAMILY.WALL]: { height:720, depth:320, boardType:'Płyta 18mm', frontType:'Laminat', gaps:{...defaultGaps}, hangerType:'Standard', offsetWall:20, shelves:1, backPanel:'full' },
-  [FAMILY.PAWLACZ]: { height:400, depth:600, boardType:'Płyta 18mm', frontType:'Laminat', gaps:{...defaultGaps}, hangerType:'Wzmocnione', offsetWall:30, shelves:1, backPanel:'full' },
-  [FAMILY.TALL]: { height:2100, depth:600, boardType:'Płyta 18mm', frontType:'Laminat', gaps:{...defaultGaps}, shelves:4, backPanel:'full' }
+  [FAMILY.BASE]: {
+    height:800,
+    depth:600,
+    boardType:'Płyta 18mm',
+    frontType:'Laminat',
+    gaps:{...defaultGaps},
+    legsType:'Standard 10cm',
+    legsHeight:100,
+    offsetWall:30,
+    shelves:1,
+    backPanel:'full'
+  },
+  [FAMILY.WALL]: {
+    height:720,
+    depth:320,
+    boardType:'Płyta 18mm',
+    frontType:'Laminat',
+    gaps:{...defaultGaps},
+    hangerType:'Standard',
+    offsetWall:20,
+    shelves:1,
+    backPanel:'full'
+  },
+  [FAMILY.PAWLACZ]: {
+    height:400,
+    depth:600,
+    boardType:'Płyta 18mm',
+    frontType:'Laminat',
+    gaps:{...defaultGaps},
+    hangerType:'Wzmocnione',
+    offsetWall:30,
+    shelves:1,
+    backPanel:'full'
+  },
+  [FAMILY.TALL]: {
+    height:2100,
+    depth:600,
+    boardType:'Płyta 18mm',
+    frontType:'Laminat',
+    gaps:{...defaultGaps},
+    shelves:4,
+    backPanel:'full'
+  }
 }
 
 export const defaultPrices: Prices = {
