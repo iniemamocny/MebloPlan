@@ -18,6 +18,7 @@ export interface CabinetOptions {
   backThickness?: number;
   hinge?: 'left' | 'right';
   dividerPosition?: 'left' | 'right' | 'center';
+  showEdges?: boolean;
 }
 
 /**
@@ -41,6 +42,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     boardThickness: T = 0.018,
     backThickness: backT = 0.003,
     dividerPosition,
+    showEdges = false,
   } = opts;
 
   const FRONT_OFFSET = 0.002;
@@ -82,22 +84,33 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   const openStates: boolean[] = [];
   const openProgress: number[] = [];
 
+  const edgeMat = new THREE.LineBasicMaterial({ color: 0x000000 });
+  const addEdges = (mesh: THREE.Mesh) => {
+    if (!showEdges) return;
+    const e = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), edgeMat);
+    mesh.add(e);
+  };
+
   // Sides
   const sideGeo = new THREE.BoxGeometry(T, H, D);
   const leftSide = new THREE.Mesh(sideGeo, carcMat);
   leftSide.position.set(T / 2, legHeight + H / 2, -D / 2);
+  addEdges(leftSide);
   group.add(leftSide);
   const rightSide = new THREE.Mesh(sideGeo.clone(), carcMat);
   rightSide.position.set(W - T / 2, legHeight + H / 2, -D / 2);
+  addEdges(rightSide);
   group.add(rightSide);
 
   // Top and bottom
   const horizGeo = new THREE.BoxGeometry(W, T, D);
   const bottom = new THREE.Mesh(horizGeo, carcMat);
   bottom.position.set(W / 2, legHeight + T / 2, -D / 2);
+  addEdges(bottom);
   group.add(bottom);
   const top = new THREE.Mesh(horizGeo.clone(), carcMat);
   top.position.set(W / 2, legHeight + H - T / 2, -D / 2);
+  addEdges(top);
   group.add(top);
 
   // Back panel styles
@@ -105,6 +118,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     const backGeo = new THREE.BoxGeometry(W, H, backT);
     const back = new THREE.Mesh(backGeo, backMat);
     back.position.set(W / 2, legHeight + H / 2, -D + backT / 2);
+    addEdges(back);
     group.add(back);
   } else if (backPanel === 'split') {
     const gap = 0.002;
@@ -112,9 +126,11 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     const backGeo = new THREE.BoxGeometry(W, halfH, backT);
     const bottomBack = new THREE.Mesh(backGeo, backMat);
     bottomBack.position.set(W / 2, legHeight + halfH / 2, -D + backT / 2);
+    addEdges(bottomBack);
     group.add(bottomBack);
     const topBack = new THREE.Mesh(backGeo.clone(), backMat);
     topBack.position.set(W / 2, legHeight + H - halfH / 2, -D + backT / 2);
+    addEdges(topBack);
     group.add(topBack);
   }
 
@@ -126,6 +142,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       const shelf = new THREE.Mesh(shelfGeo, carcMat);
       const y = legHeight + (H * (i + 1)) / (count + 1);
       shelf.position.set(W / 2, y, -D / 2);
+      addEdges(shelf);
       group.add(shelf);
     }
   }
@@ -137,6 +154,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     if (dividerPosition === 'left') x = W / 3;
     else if (dividerPosition === 'right') x = (2 * W) / 3;
     divider.position.set(x, legHeight + H / 2, -D / 2);
+    addEdges(divider);
     group.add(divider);
   }
 
@@ -162,6 +180,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       fg.position.set(W / 2, currentY + h / 2, FRONT_OFFSET + T / 2);
       fg.userData.closedZ = FRONT_OFFSET + T / 2;
       frontMesh.position.set(0, 0, 0);
+      addEdges(frontMesh);
       fg.add(frontMesh);
       fg.userData.type = 'drawer';
       fg.userData.frontIndex = frontGroups.length;
@@ -201,6 +220,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
         0,
         T / 2,
       );
+      addEdges(doorMesh);
       fg.add(doorMesh);
       fg.userData.type = 'door';
       fg.userData.frontIndex = frontGroups.length;

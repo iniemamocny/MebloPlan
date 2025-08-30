@@ -124,4 +124,21 @@ describe('buildCabinetMesh', () => {
     const boardThickness = 0.018
     expect(size.z).toBeCloseTo(depth + boardThickness + FRONT_OFFSET, 5)
   })
+
+  it('adds edge outlines when showEdges is true', () => {
+    const g = buildCabinetMesh({
+      width: 1,
+      height: 0.9,
+      depth: 0.5,
+      drawers: 1,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      showEdges: true,
+    })
+    let edgesCount = 0
+    g.traverse((obj) => {
+      if (obj instanceof THREE.LineSegments) edgesCount++
+    })
+    expect(edgesCount).toBeGreaterThan(0)
+  })
 })
