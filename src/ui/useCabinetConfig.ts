@@ -19,8 +19,6 @@ export function useCabinetConfig(
   const [cfgTab, setCfgTab] = useState<'basic' | 'adv'>('basic');
   const [widthMM, setWidthMM] = useState(600);
   const [adv, setAdvState] = useState<CabinetConfig | null>(null);
-  const [doorsCount, setDoorsCount] = useState(1);
-  const [drawersCount, setDrawersCount] = useState(0);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -37,16 +35,7 @@ export function useCabinetConfig(
     });
   }, [family, store.globals]);
 
-  useEffect(() => {
-    if (!variant) return;
-    if (variant.key === 'drawers') {
-      setDoorsCount(0);
-      setDrawersCount(1);
-    } else {
-      setDoorsCount(1);
-      setDrawersCount(0);
-    }
-  }, [variant]);
+
 
   const snapToWalls = (
     mSize: { w: number; h: number; d: number },
@@ -121,7 +110,12 @@ export function useCabinetConfig(
     return rest as Module3D;
   };
 
-  const onAdd = (widthLocal: number, advLocal: CabinetConfig) => {
+  const onAdd = (
+    widthLocal: number,
+    advLocal: CabinetConfig,
+    doorsCount: number,
+    drawersCount: number,
+  ) => {
     if (!kind || !variant) return;
     const g: CabinetConfig = {
       ...store.globals[family],
@@ -266,10 +260,6 @@ export function useCabinetConfig(
     gLocal,
     onAdd,
     doAutoOnSelectedWall,
-    doorsCount,
-    setDoorsCount,
-    drawersCount,
-    setDrawersCount,
   };
 }
 

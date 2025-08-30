@@ -6,6 +6,7 @@ export interface CabinetOptions {
   height: number;
   depth: number;
   drawers: number;
+  doorCount?: number;
   gaps: { top: number; bottom: number };
   drawerFronts?: number[];
   family: FAMILY;
@@ -28,6 +29,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     height: H,
     depth: D,
     drawers,
+    doorCount = 1,
     gaps,
     drawerFronts,
     family,
@@ -172,39 +174,47 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       currentY += h;
     }
   } else {
-    const hingeSide = opts.hinge === 'right' ? 'right' : 'left';
-    const doorGeo = new THREE.BoxGeometry(W, H, T);
-    const doorMesh = new THREE.Mesh(doorGeo, frontMat);
-    const fg = new THREE.Group();
-    const pivotX = hingeSide === 'left' ? 0 : W;
-    // Hinge pivot sits 2 mm in front of the carcass, door hangs entirely in front
-    fg.position.set(pivotX, legHeight + H / 2, FRONT_OFFSET);
-    doorMesh.position.set(hingeSide === 'left' ? W / 2 : -W / 2, 0, T / 2);
-    fg.add(doorMesh);
-    fg.userData.type = 'door';
-    fg.userData.frontIndex = frontGroups.length;
-    fg.userData.hingeSide = hingeSide;
-    frontGroups.push(fg);
-    openStates.push(false);
-    openProgress.push(0);
-    if (showHandles) {
-      const handleWidth = Math.min(0.4, W * 0.5);
-      const handleHeight = 0.02;
-      const handleDepth = 0.03;
-      const handleGeo = new THREE.BoxGeometry(
-        handleWidth,
-        handleHeight,
-        handleDepth,
+    const doors = Math.max(1, doorCount);
+    const doorW = W / doors;
+    for (let i = 0; i < doors; i++) {
+      const hingeSide = i < doors / 2 ? 'left' : 'right';
+      const doorGeo = new THREE.BoxGeometry(doorW, H, T);
+      const doorMesh = new THREE.Mesh(doorGeo, frontMat);
+      const fg = new THREE.Group();
+      const pivotX = hingeSide === 'left' ? i * doorW : (i + 1) * doorW;
+      // Hinge pivot sits 2 mm in front of the carcass, door hangs entirely in front
+      fg.position.set(pivotX, legHeight + H / 2, FRONT_OFFSET);
+      doorMesh.position.set(
+        hingeSide === 'left' ? doorW / 2 : -doorW / 2,
+        0,
+        T / 2,
       );
-      const handle = new THREE.Mesh(handleGeo, handleMat);
-      const xPos =
-        hingeSide === 'left'
-          ? W / 2 - handleWidth / 2
-          : -W / 2 + handleWidth / 2;
-      handle.position.set(xPos, H * 0.2, T / 2 + 0.01);
-      doorMesh.add(handle);
+      fg.add(doorMesh);
+      fg.userData.type = 'door';
+      fg.userData.frontIndex = frontGroups.length;
+      fg.userData.hingeSide = hingeSide;
+      frontGroups.push(fg);
+      openStates.push(false);
+      openProgress.push(0);
+      if (showHandles) {
+        const handleWidth = Math.min(0.4, doorW * 0.5);
+        const handleHeight = 0.02;
+        const handleDepth = 0.03;
+        const handleGeo = new THREE.BoxGeometry(
+          handleWidth,
+          handleHeight,
+          handleDepth,
+        );
+        const handle = new THREE.Mesh(handleGeo, handleMat);
+        const xPos =
+          hingeSide === 'left'
+            ? doorW / 2 - handleWidth / 2
+            : -doorW / 2 + handleWidth / 2;
+        handle.position.set(xPos, H * 0.2, T / 2 + 0.01);
+        doorMesh.add(handle);
+      }
+      group.add(fg);
     }
-    group.add(fg);
   }
 
   // Feet (hardware)
