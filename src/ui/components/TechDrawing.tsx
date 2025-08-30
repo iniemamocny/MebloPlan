@@ -14,7 +14,8 @@ type Props = {
   depthMM: number;
   boardType?: string;
   gaps: Gaps;
-  drawers: number;
+  doorsCount: number;
+  drawersCount: number;
   drawerFronts?: number[];
   onChangeGaps?: (g: Gaps) => void;
   onChangeDrawerFronts?: (arr: number[]) => void;
@@ -110,7 +111,8 @@ export default function TechDrawing({
   depthMM,
   boardType,
   gaps,
-  drawers,
+  doorsCount,
+  drawersCount,
   drawerFronts,
   onChangeGaps,
   onChangeDrawerFronts,
@@ -136,24 +138,34 @@ export default function TechDrawing({
   }, [gaps, widthMM, heightMM]);
 
   const drawerSplits = useMemo(() => {
-    if (drawers <= 1) return [];
+    if (drawersCount <= 1) return [];
     const availFrontH = heightMM - (gaps.top + gaps.bottom);
     const arr =
-      drawerFronts && drawerFronts.length === drawers
+      drawerFronts && drawerFronts.length === drawersCount
         ? drawerFronts
-        : Array.from({ length: drawers }, () =>
-            Math.floor(availFrontH / drawers),
+        : Array.from({ length: drawersCount }, () =>
+            Math.floor(availFrontH / drawersCount),
           );
     const sum = arr.reduce((a, b) => a + b, 0);
     const pxPerMM = front.h / Math.max(1, sum);
     let cum = 0;
     const ys: number[] = [];
-    for (let i = 0; i < drawers - 1; i++) {
+    for (let i = 0; i < drawersCount - 1; i++) {
       cum += arr[i];
       ys.push(front.y + cum * pxPerMM);
     }
     return ys;
-  }, [drawers, drawerFronts, gaps, heightMM, front.h, front.y]);
+  }, [drawersCount, drawerFronts, gaps, heightMM, front.h, front.y]);
+
+  const doorSplits = useMemo(() => {
+    if (doorsCount <= 1) return [];
+    const step = front.w / doorsCount;
+    const xs: number[] = [];
+    for (let i = 1; i < doorsCount; i++) {
+      xs.push(front.x + step * i);
+    }
+    return xs;
+  }, [doorsCount, front.w, front.x]);
 
   const onMouseDown = (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
     if (mode !== 'edit') return;
@@ -180,10 +192,10 @@ export default function TechDrawing({
       const idx = Number(drag.tag.split('-')[1]);
       const availFrontH = heightMM - (gaps.top + gaps.bottom);
       const arr =
-        drawerFronts && drawerFronts.length === drawers
+        drawerFronts && drawerFronts.length === drawersCount
           ? drawerFronts.slice()
-          : Array.from({ length: drawers }, () =>
-              Math.floor(availFrontH / drawers),
+          : Array.from({ length: drawersCount }, () =>
+              Math.floor(availFrontH / drawersCount),
             );
       const sum = arr.reduce((a, b) => a + b, 0);
       const pxPerMM = front.h / Math.max(1, sum);
@@ -255,6 +267,18 @@ export default function TechDrawing({
           fill="#e5e7eb"
           stroke="#666"
         />
+        {/* podziały drzwi */}
+        {doorSplits.map((x, i) => (
+          <line
+            key={`door-${i}`}
+            x1={x}
+            y1={front.y}
+            x2={x}
+            y2={front.y + front.h}
+            stroke="#fff"
+            strokeWidth={2}
+          />
+        ))}
         {/* podziały szuflad */}
         {drawerSplits.map((y, i) => (
           <g key={i}>
@@ -380,7 +404,7 @@ export default function TechDrawing({
           stroke="#999"
         />
         {/* pomocnicze półki (symbolicznie) */}
-        {drawers > 0 && (
+        {drawersCount > 0 && (
           <>
             <rect
               x={pad + 12}

@@ -32,10 +32,6 @@ export default function App() {
     setAdv,
     onAdd,
     doAutoOnSelectedWall,
-    doorsCount,
-    setDoorsCount,
-    drawersCount,
-    setDrawersCount,
   } = useCabinetConfig(family, kind, variant, selWall, setVariant);
 
   const [tab, setTab] = useState<'cab' | 'room' | 'costs' | 'cut' | 'global' | null>(null);
@@ -81,10 +77,6 @@ export default function App() {
           gLocal={gLocal}
           setAdv={setAdv}
           onAdd={onAdd}
-          doorsCount={doorsCount}
-          setDoorsCount={setDoorsCount}
-          drawersCount={drawersCount}
-          setDrawersCount={setDrawersCount}
           threeRef={threeRef}
           boardL={boardL}
           setBoardL={setBoardL}

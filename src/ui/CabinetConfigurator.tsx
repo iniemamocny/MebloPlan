@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FAMILY, Kind, Variant } from '../core/catalog'
 import { usePlannerStore } from '../state/store'
@@ -17,11 +17,12 @@ interface Props {
   setWidthMM: (n: number) => void
   gLocal: CabinetConfig
   setAdv: (v: CabinetConfig) => void
-  onAdd: (width: number, adv: CabinetConfig) => void
-  doorsCount: number
-  setDoorsCount: (n: number) => void
-  drawersCount: number
-  setDrawersCount: (n: number) => void
+  onAdd: (
+    width: number,
+    adv: CabinetConfig,
+    doorsCount: number,
+    drawersCount: number,
+  ) => void
 }
 
 const CabinetConfigurator: React.FC<Props> = ({
@@ -34,14 +35,25 @@ const CabinetConfigurator: React.FC<Props> = ({
   setWidthMM,
   gLocal,
   setAdv,
-  onAdd,
-  doorsCount,
-  setDoorsCount,
-  drawersCount,
-  setDrawersCount
+  onAdd
 }) => {
   const store = usePlannerStore()
   const { t } = useTranslation()
+  const [doorsCount, setDoorsCount] = useState(1)
+  const [drawersCount, setDrawersCount] = useState(0)
+
+  useEffect(() => {
+    if (kind?.key === 'doors') {
+      setDoorsCount(1)
+      setDrawersCount(0)
+    } else if (kind?.key === 'drawers') {
+      setDoorsCount(0)
+      setDrawersCount(1)
+    } else {
+      setDoorsCount(0)
+      setDrawersCount(0)
+    }
+  }, [kind])
   return (
     <div className="section">
       <div className="hd">
@@ -57,28 +69,44 @@ const CabinetConfigurator: React.FC<Props> = ({
             <div className="grid2">
               <div>
                 <div className="small">{t('configurator.width')}</div>
-                <input className="input" type="number" min={200} max={2400} step={1} value={widthMM} onChange={e=>setWidthMM(Number((e.target as HTMLInputElement).value)||0)} onKeyDown={(e)=>{ if (e.key==='Enter'){ const v = Number((e.target as HTMLInputElement).value)||0; if(v>0) onAdd(v, gLocal) } }} />
+                <input className="input" type="number" min={200} max={2400} step={1} value={widthMM} onChange={e=>setWidthMM(Number((e.target as HTMLInputElement).value)||0)} onKeyDown={(e)=>{ if (e.key==='Enter'){ const v = Number((e.target as HTMLInputElement).value)||0; if(v>0) onAdd(v, gLocal, doorsCount, drawersCount) } }} />
               </div>
               <div className="row" style={{alignItems:'flex-end'}}>
-                <button className="btn" onClick={()=>onAdd(widthMM, gLocal)}>{t('configurator.insertCabinet')}</button>
+                <button className="btn" onClick={()=>onAdd(widthMM, gLocal, doorsCount, drawersCount)}>{t('configurator.insertCabinet')}</button>
               </div>
             </div>
-            {variant.key==='doors' && (
-              <div className="grid2" style={{marginTop:8}}>
-                <div>
-                  <div className="small">{t('configurator.doorsCount')}</div>
-                  <input className="input" type="number" min={0} value={doorsCount} onChange={e=>setDoorsCount(Number((e.target as HTMLInputElement).value)||0)} />
-                </div>
-                <div>
-                  <div className="small">{t('configurator.drawersCount')}</div>
-                  <input className="input" type="number" min={0} value={drawersCount} onChange={e=>setDrawersCount(Number((e.target as HTMLInputElement).value)||0)} />
-                </div>
+            {kind?.key === 'doors' && (
+              <div style={{ marginTop: 8 }}>
+                <div className="small">{t('configurator.doorsCount')}</div>
+                <select
+                  className="input"
+                  value={doorsCount}
+                  onChange={(e) => setDoorsCount(Number((e.target as HTMLSelectElement).value))}
+                >
+                  {[1, 2, 3, 4].map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
               </div>
             )}
-            {variant.key==='drawers' && (
-              <div style={{marginTop:8}}>
+            {kind?.key === 'drawers' && (
+              <div style={{ marginTop: 8 }}>
                 <div className="small">{t('configurator.drawersCount')}</div>
-                <input className="input" type="number" min={0} value={drawersCount} onChange={e=>setDrawersCount(Number((e.target as HTMLInputElement).value)||0)} />
+                <select
+                  className="input"
+                  value={drawersCount}
+                  onChange={(e) =>
+                    setDrawersCount(Number((e.target as HTMLSelectElement).value))
+                  }
+                >
+                  {[1, 2, 3, 4].map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
               </div>
             )}
             <div style={{marginTop:8}}>
@@ -88,7 +116,8 @@ const CabinetConfigurator: React.FC<Props> = ({
                 heightMM={gLocal.height}
                 depthMM={gLocal.depth}
                 gaps={gLocal.gaps}
-                drawers={drawersCount}
+                doorsCount={doorsCount}
+                drawersCount={drawersCount}
                 drawerFronts={gLocal.drawerFronts}
               />
             </div>
@@ -98,7 +127,8 @@ const CabinetConfigurator: React.FC<Props> = ({
                 widthMM={widthMM}
                 heightMM={gLocal.height}
                 depthMM={gLocal.depth}
-                drawers={drawersCount}
+                doorsCount={doorsCount}
+                drawersCount={drawersCount}
                 gaps={{ top: gLocal.gaps.top, bottom: gLocal.gaps.bottom }}
                 drawerFronts={gLocal.drawerFronts}
                 shelves={gLocal.shelves}
@@ -134,7 +164,8 @@ const CabinetConfigurator: React.FC<Props> = ({
                 heightMM={gLocal.height}
                 depthMM={gLocal.depth}
                 gaps={gLocal.gaps}
-                drawers={drawersCount}
+                doorsCount={doorsCount}
+                drawersCount={drawersCount}
                 drawerFronts={gLocal.drawerFronts}
                 onChangeGaps={(gg: Gaps) => setAdv({ ...gLocal, gaps: gg })}
                 onChangeDrawerFronts={(arr: number[]) => setAdv({ ...gLocal, drawerFronts: arr })}
@@ -146,7 +177,8 @@ const CabinetConfigurator: React.FC<Props> = ({
                 widthMM={widthMM}
                 heightMM={gLocal.height}
                 depthMM={gLocal.depth}
-                drawers={drawersCount}
+                doorsCount={doorsCount}
+                drawersCount={drawersCount}
                 gaps={{ top: gLocal.gaps.top, bottom: gLocal.gaps.bottom }}
                 drawerFronts={gLocal.drawerFronts}
                 shelves={gLocal.shelves}
@@ -154,7 +186,7 @@ const CabinetConfigurator: React.FC<Props> = ({
               />
             </div>
             <div className="row" style={{marginTop:8}}>
-              <button className="btn" onClick={()=>onAdd(widthMM, gLocal)}>{t('configurator.insertCabinet')}</button>
+              <button className="btn" onClick={()=>onAdd(widthMM, gLocal, doorsCount, drawersCount)}>{t('configurator.insertCabinet')}</button>
               <button className="btnGhost" onClick={()=>setCfgTab('basic')}>{t('configurator.backToBasic')}</button>
             </div>
           </div>
