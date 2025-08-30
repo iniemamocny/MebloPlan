@@ -58,6 +58,7 @@
     "frontType": "Front type",
     "backPanel": "Back",
     "legs": "Legs",
+    "legsHeight": "Leg height (mm)",
     "offsetWall": "Offset from wall (mm)",
     "hanger": "Hangers",
     "gapsTitle": "Gaps (mm)",

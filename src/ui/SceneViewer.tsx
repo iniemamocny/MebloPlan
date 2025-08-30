@@ -20,12 +20,11 @@ interface Props {
   addCountertop: boolean
 }
 
-const getLegHeight = (mod: Module3D, globals: Globals): number => {
+export const getLegHeight = (mod: Module3D, globals: Globals): number => {
   if (mod.family !== FAMILY.BASE) return 0
   const famGlobal = globals[mod.family]
-  const label: string = famGlobal?.legsType || ''
-  const match = label.match(/(\d+\.?\d*)/)
-  if (match) return parseFloat(match[1]) / 100
+  const h = famGlobal?.legsHeight
+  if (typeof h === 'number') return h / 1000
   return 0.1
 }
 

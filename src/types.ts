@@ -9,6 +9,7 @@ export interface GlobalsItem {
   frontType:string
   gaps: Gaps
   legsType?:string
+  legsHeight?:number
   hangerType?:string
   offsetWall?:number
   shelves?:number

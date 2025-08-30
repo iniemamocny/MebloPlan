@@ -18,6 +18,7 @@ export const defaultGlobal: Globals = {
     frontType: 'Laminat',
     gaps: { ...defaultGaps },
     legsType: 'Standard 10cm',
+    legsHeight: 100,
     offsetWall: 30,
     shelves: 1,
     backPanel: 'full',
