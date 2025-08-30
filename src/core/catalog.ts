@@ -13,20 +13,14 @@ export const KIND_SETS: Record<FAMILY, Kind[]> = {
       key:'doors',
       label:'Drzwiczki',
       variants:[
-        { key:'d1', label:'1 drzwiczki' },
-        { key:'d2', label:'2 drzwiczki' },
-        { key:'d1+drawer', label:'1 drzwiczki + szuflada' },
-        { key:'d2+drawer', label:'2 drzwiczki + szuflada' }
+        { key:'doors', label:'Drzwiczki' }
       ]
     },
     {
       key:'drawers',
       label:'Szuflady',
       variants:[
-        { key:'s1', label:'1 szuflada' },
-        { key:'s2', label:'2 szuflady' },
-        { key:'s3', label:'3 szuflady' },
-        { key:'s4', label:'4 szuflady' }
+        { key:'drawers', label:'Szuflady' }
       ]
     },
     {

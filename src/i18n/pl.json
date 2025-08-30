@@ -75,6 +75,8 @@
     "advanced": "Zaawansowane",
     "width": "Szerokość (mm)",
     "insertCabinet": "Wstaw szafkę",
+    "doorsCount": "Liczba drzwi",
+    "drawersCount": "Liczba szuflad",
     "height": "Wysokość (mm)",
     "depth": "Głębokość (mm)",
     "board": "Płyta",

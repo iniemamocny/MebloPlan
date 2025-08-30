@@ -27,6 +27,10 @@ interface MainTabsProps {
   gLocal: CabinetConfig;
   setAdv: (v: CabinetConfig) => void;
   onAdd: (width: number, adv: CabinetConfig) => void;
+  doorsCount: number;
+  setDoorsCount: (n: number) => void;
+  drawersCount: number;
+  setDrawersCount: (n: number) => void;
   threeRef: React.MutableRefObject<any>;
   boardL: number;
   setBoardL: (v: number) => void;
@@ -55,6 +59,10 @@ export default function MainTabs({
   gLocal,
   setAdv,
   onAdd,
+  doorsCount,
+  setDoorsCount,
+  drawersCount,
+  setDrawersCount,
   threeRef,
   boardL,
   setBoardL,
@@ -151,6 +159,10 @@ export default function MainTabs({
                 gLocal={gLocal}
                 setAdv={setAdv}
                 onAdd={onAdd}
+                doorsCount={doorsCount}
+                setDoorsCount={setDoorsCount}
+                drawersCount={drawersCount}
+                setDrawersCount={setDrawersCount}
               />
             )}
           </>
