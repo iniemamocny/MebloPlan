@@ -75,6 +75,8 @@
     "advanced": "Advanced",
     "width": "Width (mm)",
     "insertCabinet": "Insert cabinet",
+    "doorsCount": "Doors count",
+    "drawersCount": "Drawers count",
     "height": "Height (mm)",
     "depth": "Depth (mm)",
     "board": "Board",

@@ -18,6 +18,10 @@ interface Props {
   gLocal: CabinetConfig
   setAdv: (v: CabinetConfig) => void
   onAdd: (width: number, adv: CabinetConfig) => void
+  doorsCount: number
+  setDoorsCount: (n: number) => void
+  drawersCount: number
+  setDrawersCount: (n: number) => void
 }
 
 const CabinetConfigurator: React.FC<Props> = ({
@@ -30,7 +34,11 @@ const CabinetConfigurator: React.FC<Props> = ({
   setWidthMM,
   gLocal,
   setAdv,
-  onAdd
+  onAdd,
+  doorsCount,
+  setDoorsCount,
+  drawersCount,
+  setDrawersCount
 }) => {
   const store = usePlannerStore()
   const { t } = useTranslation()
@@ -55,17 +63,32 @@ const CabinetConfigurator: React.FC<Props> = ({
                 <button className="btn" onClick={()=>onAdd(widthMM, gLocal)}>{t('configurator.insertCabinet')}</button>
               </div>
             </div>
+            {variant.key==='doors' && (
+              <div className="grid2" style={{marginTop:8}}>
+                <div>
+                  <div className="small">{t('configurator.doorsCount')}</div>
+                  <input className="input" type="number" min={0} value={doorsCount} onChange={e=>setDoorsCount(Number((e.target as HTMLInputElement).value)||0)} />
+                </div>
+                <div>
+                  <div className="small">{t('configurator.drawersCount')}</div>
+                  <input className="input" type="number" min={0} value={drawersCount} onChange={e=>setDrawersCount(Number((e.target as HTMLInputElement).value)||0)} />
+                </div>
+              </div>
+            )}
+            {variant.key==='drawers' && (
+              <div style={{marginTop:8}}>
+                <div className="small">{t('configurator.drawersCount')}</div>
+                <input className="input" type="number" min={0} value={drawersCount} onChange={e=>setDrawersCount(Number((e.target as HTMLInputElement).value)||0)} />
+              </div>
+            )}
             <div style={{marginTop:8}}>
               <TechDrawing
                 mode="view"
-                family={family}
-                kindKey={kind?.key||'doors'}
-                variantKey={variant?.key||'d1'}
                 widthMM={widthMM}
                 heightMM={gLocal.height}
                 depthMM={gLocal.depth}
                 gaps={gLocal.gaps}
-                drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)}
+                drawers={drawersCount}
                 drawerFronts={gLocal.drawerFronts}
               />
             </div>
@@ -75,7 +98,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                 widthMM={widthMM}
                 heightMM={gLocal.height}
                 depthMM={gLocal.depth}
-                drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)}
+                drawers={drawersCount}
                 gaps={{ top: gLocal.gaps.top, bottom: gLocal.gaps.bottom }}
                 drawerFronts={gLocal.drawerFronts}
                 shelves={gLocal.shelves}
@@ -97,7 +120,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                 <option value="none">{t('configurator.backOptions.none')}</option>
               </select></div>
             </div>
-            {!(variant?.key?.startsWith('s')) && (
+            {drawersCount === 0 && (
               <div style={{marginTop:8}}>
                 <div className="small">{t('configurator.shelves')}</div>
                 <input className="input" type="number" min={0} value={gLocal.shelves||0} onChange={e=>setAdv({...gLocal, shelves:Number((e.target as HTMLInputElement).value)||0})} />
@@ -107,14 +130,11 @@ const CabinetConfigurator: React.FC<Props> = ({
               <div className="small">{t('configurator.gapsTitle')}</div>
               <TechDrawing
                 mode="edit"
-                family={family}
-                kindKey={kind?.key||'doors'}
-                variantKey={variant?.key||'d1'}
                 widthMM={widthMM}
                 heightMM={gLocal.height}
                 depthMM={gLocal.depth}
                 gaps={gLocal.gaps}
-                drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)}
+                drawers={drawersCount}
                 drawerFronts={gLocal.drawerFronts}
                 onChangeGaps={(gg: Gaps) => setAdv({ ...gLocal, gaps: gg })}
                 onChangeDrawerFronts={(arr: number[]) => setAdv({ ...gLocal, drawerFronts: arr })}
@@ -126,7 +146,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                 widthMM={widthMM}
                 heightMM={gLocal.height}
                 depthMM={gLocal.depth}
-                drawers={variant?.key?.startsWith('s') ? Number(variant.key.slice(1)) : (variant?.key?.includes('+drawer') ? 1 : 0)}
+                drawers={drawersCount}
                 gaps={{ top: gLocal.gaps.top, bottom: gLocal.gaps.bottom }}
                 drawerFronts={gLocal.drawerFronts}
                 shelves={gLocal.shelves}

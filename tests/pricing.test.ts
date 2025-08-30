@@ -22,9 +22,10 @@ describe('computeModuleCost', () => {
       {
         family: FAMILY.BASE,
         kind: 'doors',
-        variant: 'd2',
+        variant: 'doors',
         width: 600,
         adv: advFor(FAMILY.BASE),
+        doorsCount: 2,
       },
       { prices: defaultPrices, globals: defaultGlobal }
     )
@@ -37,9 +38,10 @@ describe('computeModuleCost', () => {
       {
         family: FAMILY.BASE,
         kind: 'drawers',
-        variant: 's3',
+        variant: 'drawers',
         width: 600,
         adv: advFor(FAMILY.BASE),
+        drawersCount: 3,
       },
       { prices: defaultPrices, globals: defaultGlobal }
     )

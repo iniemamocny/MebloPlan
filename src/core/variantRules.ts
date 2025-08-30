@@ -15,19 +15,13 @@ export interface VariantRule {
 export const variantRules: Record<FAMILY, Record<string, VariantRule>> = {
   [FAMILY.BASE]: (() => {
     const rules: Record<string, VariantRule> = {
-      d1: { doors: 1 },
-      d2: { doors: 2 },
-      'd1+drawer': { doors: 1, drawers: 1 },
-      'd2+drawer': { doors: 2, drawers: 1 },
+      doors: {},
+      drawers: {},
       sink: { doors: 2, kits: ['sinkKit'] },
       hob: { doors: 2 },
       cargo150: { cargo: '150' },
       cargo200: { cargo: '200' },
       cargo300: { cargo: '300' },
-    }
-    // drawer variants like s1, s2 ... s5
-    for (let i = 1; i <= 5; i++) {
-      rules[`s${i}`] = { drawers: i }
     }
     return rules
   })(),

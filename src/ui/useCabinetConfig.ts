@@ -19,6 +19,8 @@ export function useCabinetConfig(
   const [cfgTab, setCfgTab] = useState<'basic' | 'adv'>('basic');
   const [widthMM, setWidthMM] = useState(600);
   const [adv, setAdvState] = useState<CabinetConfig | null>(null);
+  const [doorsCount, setDoorsCount] = useState(1);
+  const [drawersCount, setDrawersCount] = useState(0);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -34,6 +36,17 @@ export function useCabinetConfig(
       backPanel: g.backPanel,
     });
   }, [family, store.globals]);
+
+  useEffect(() => {
+    if (!variant) return;
+    if (variant.key === 'drawers') {
+      setDoorsCount(0);
+      setDrawersCount(1);
+    } else {
+      setDoorsCount(1);
+      setDrawersCount(0);
+    }
+  }, [variant]);
 
   const snapToWalls = (
     mSize: { w: number; h: number; d: number },
@@ -133,6 +146,8 @@ export function useCabinetConfig(
           gaps: g.gaps,
           backPanel: g.backPanel,
         },
+        doorsCount,
+        drawersCount,
       },
       { prices: store.prices, globals: store.globals },
     );
@@ -147,49 +162,25 @@ export function useCabinetConfig(
     if (!advAugmented.drawerSlide) advAugmented.drawerSlide = 'BLUM LEGRABOX';
     if (advAugmented.animationSpeed === undefined)
       advAugmented.animationSpeed = 0.15;
-    let impliedDrawers = 0;
-    if (variant && variant.key) {
-      const vkey = variant.key;
-      if (vkey.startsWith('s')) {
-        const num = Number(vkey.slice(1));
-        if (!isNaN(num)) impliedDrawers = num;
-      } else if (vkey.includes('+drawer')) {
-        impliedDrawers = 1;
-      }
-    }
-    let impliedDoors = 1;
-    if (variant && variant.key) {
-      const vkey = variant.key;
-      const m = vkey.match(/^(?:d|wd|p)(\d+)/);
-      if (m && m[1]) {
-        const n = Number(m[1]);
-        if (!isNaN(n) && n > 0) impliedDoors = n;
-      } else if (vkey.startsWith('sink') || vkey.startsWith('hob')) {
-        impliedDoors = 2;
-      }
-      if (vkey.includes('+drawer')) {
-        impliedDoors = 1;
-      }
-    }
     if (
       (!Array.isArray(advAugmented.drawerFronts) ||
         advAugmented.drawerFronts.length === 0) &&
-      impliedDrawers > 0
+      drawersCount > 0
     ) {
       const totalFrontMM = Math.max(
         50,
         Math.round(g.height - ((g.gaps.top || 0) + (g.gaps.bottom || 0))),
       );
       const heights: number[] = [];
-      for (let i = 0; i < impliedDrawers; i++) {
-        heights.push(Math.floor(totalFrontMM / impliedDrawers));
+      for (let i = 0; i < drawersCount; i++) {
+        heights.push(Math.floor(totalFrontMM / drawersCount));
       }
       const sum = heights.reduce((a, b) => a + b, 0);
       if (sum !== totalFrontMM)
         heights[heights.length - 1] += totalFrontMM - sum;
       advAugmented.drawerFronts = heights;
     }
-    advAugmented.doorCount = impliedDoors;
+    advAugmented.doorCount = doorsCount;
     let mod: Module3D = {
       id,
       label: variant.label,
@@ -231,7 +222,7 @@ export function useCabinetConfig(
         {
           family,
           kind: KIND_SETS[family][0]?.key || 'doors',
-          variant: 'd1',
+          variant: 'doors',
           width: wmm,
           adv: {
             height: g.height,
@@ -241,6 +232,8 @@ export function useCabinetConfig(
             gaps: g.gaps,
             backPanel: g.backPanel,
           },
+          doorsCount: 1,
+          drawersCount: 0,
         },
         { prices: store.prices, globals: store.globals },
       );
@@ -254,7 +247,7 @@ export function useCabinetConfig(
         rotationY: pl.rot,
         segIndex: selWall,
         price,
-        adv: g as ModuleAdv,
+        adv: { ...g, doorCount: 1 } as ModuleAdv,
       };
       mod = resolveCollisions(mod);
       store.addModule(mod);
@@ -273,6 +266,10 @@ export function useCabinetConfig(
     gLocal,
     onAdd,
     doAutoOnSelectedWall,
+    doorsCount,
+    setDoorsCount,
+    drawersCount,
+    setDrawersCount,
   };
 }
 

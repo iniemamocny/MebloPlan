@@ -8,6 +8,8 @@ export function computeModuleCost(
   params: {
     family: FAMILY; kind:string; variant:string; width:number;
     adv: AdvParams;
+    doorsCount?: number;
+    drawersCount?: number;
   },
   data: PricingData
 ): Price {
@@ -35,6 +37,8 @@ export function computeModuleCost(
     aventosType = rule.aventos ?? null
     kits = (rule.kits || []).reduce((sum, k) => sum + (P[k] || 0), 0)
   }
+  if (typeof params.doorsCount === 'number') doors = params.doorsCount
+  if (typeof params.drawersCount === 'number') drawers = params.drawersCount
   const doorHeightMM = hMM - 100
   const hingesPerDoor = hingeCountPerDoor(doorHeightMM)
   const hingesCost = (P.hinges['Blum ClipTop']||0) * hingesPerDoor * doors
