@@ -58,6 +58,7 @@
     "frontType": "Rodzaj frontu",
     "backPanel": "Plecy",
     "legs": "Nóżki",
+    "legsHeight": "Wysokość nóżek (mm)",
     "offsetWall": "Odsunięcie od ściany (mm)",
     "hanger": "Zawieszki",
     "gapsTitle": "Szczeliny (mm)",
