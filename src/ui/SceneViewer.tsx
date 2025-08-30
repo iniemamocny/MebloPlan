@@ -28,9 +28,10 @@ export const getLegHeight = (mod: Module3D, globals: Globals): number => {
   return 0.1
 }
 
-const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const store = usePlannerStore()
+  const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
+    const containerRef = useRef<HTMLDivElement>(null)
+    const store = usePlannerStore()
+    const showEdges = store.role === 'stolarz'
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -66,7 +67,8 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       legHeight,
       showHandles: true,
       hinge,
-      dividerPosition
+      dividerPosition,
+      showEdges,
     })
     group.userData.kind = 'cab'
     const fg = group.userData.frontGroups || []
@@ -112,7 +114,7 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       }
     })
   }
-  useEffect(drawScene, [store.modules, addCountertop])
+  useEffect(drawScene, [store.modules, addCountertop, showEdges])
 
   useEffect(() => {
     const three = threeRef.current
