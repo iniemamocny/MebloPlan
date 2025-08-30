@@ -6,10 +6,11 @@ import SceneViewer from './SceneViewer';
 import useCabinetConfig from './useCabinetConfig';
 import TopBar from './TopBar';
 import { createTranslator } from './i18n';
+import MainTabs from './MainTabs';
 
 export default function App() {
   const store = usePlannerStore();
-  const [family] = useState<FAMILY>(FAMILY.BASE);
+  const [family, setFamily] = useState<FAMILY>(FAMILY.BASE);
   const [kind, setKind] = useState<Kind | null>(null);
   const [variant, setVariant] = useState<Variant | null>(null);
   const [selWall, setSelWall] = useState(0);
@@ -23,13 +24,22 @@ export default function App() {
     localStorage.setItem('lang', lang);
   }, [lang, i18n]);
 
-  const { doAutoOnSelectedWall } = useCabinetConfig(
-    family,
-    kind,
-    variant,
-    selWall,
-    setVariant,
-  );
+  const {
+    cfgTab,
+    setCfgTab,
+    widthMM,
+    setWidthMM,
+    gLocal,
+    setAdv,
+    onAdd,
+    doAutoOnSelectedWall,
+  } = useCabinetConfig(family, kind, variant, selWall, setVariant);
+
+  const [tab, setTab] = useState<'cab' | 'room' | 'costs' | 'cut'>('cab');
+  const [boardL, setBoardL] = useState(2800);
+  const [boardW, setBoardW] = useState(2070);
+  const [boardKerf, setBoardKerf] = useState(3);
+  const [boardHasGrain, setBoardHasGrain] = useState(false);
 
   const undo = store.undo;
   const redo = store.redo;
@@ -51,6 +61,35 @@ export default function App() {
   return (
     <div className="app">
       <GlobalSettings />
+      <div className="mainTabs">
+        <MainTabs
+          t={t}
+          tab={tab}
+          setTab={setTab}
+          family={family}
+          setFamily={setFamily}
+          kind={kind}
+          setKind={setKind}
+          variant={variant}
+          setVariant={setVariant}
+          cfgTab={cfgTab}
+          setCfgTab={setCfgTab}
+          widthMM={widthMM}
+          setWidthMM={setWidthMM}
+          gLocal={gLocal}
+          setAdv={setAdv}
+          onAdd={onAdd}
+          threeRef={threeRef}
+          boardL={boardL}
+          setBoardL={setBoardL}
+          boardW={boardW}
+          setBoardW={setBoardW}
+          boardKerf={boardKerf}
+          setBoardKerf={setBoardKerf}
+          boardHasGrain={boardHasGrain}
+          setBoardHasGrain={setBoardHasGrain}
+        />
+      </div>
       <div className="canvasWrap">
         <SceneViewer threeRef={threeRef} addCountertop={addCountertop} />
         <TopBar
