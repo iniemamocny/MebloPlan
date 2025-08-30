@@ -38,11 +38,11 @@ export default function GlobalSettings(){
             <Field label="Plecy" type="select" value={g.backPanel||'full'} onChange={(v)=>set({backPanel:v})} options={['full','split','none']} />
             {fam===FAMILY.BASE && (<>
               <Field label={t('global.legs')} type="select" value={g.legsType} onChange={(v)=>set({legsType:v})} options={Object.keys(store.prices.legs)} />
-              <Field label="Wysokość nóżek (mm)" value={g.legsHeight||0} onChange={(v)=>set({legsHeight:v})} />
+              <Field label={t('global.legsHeight')} value={g.legsHeight||0} onChange={(v)=>set({legsHeight:v})} />
               <Field label={t('global.offsetWall')} value={g.offsetWall||0} onChange={(v)=>set({offsetWall:v})} />
             </>)}
             {(fam===FAMILY.WALL || fam===FAMILY.PAWLACZ) && (<>
-              <Field label="Zawieszki" type="select" value={g.hangerType} onChange={(v)=>set({hangerType:v})} options={Object.keys(store.prices.hangers)} />
+              <Field label={t('global.hanger')} type="select" value={g.hangerType} onChange={(v)=>set({hangerType:v})} options={Object.keys(store.prices.hangers)} />
               <Field label={t('global.offsetWall')} value={g.offsetWall||0} onChange={(v)=>set({offsetWall:v})} />
             </>)}
           </div>
