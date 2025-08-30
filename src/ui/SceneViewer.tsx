@@ -45,11 +45,14 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
     const legHeight = getLegHeight(mod, store.globals)
     const drawers = Array.isArray(adv.drawerFronts) ? adv.drawerFronts.length : 0
     const hinge = (adv as any).hinge as 'left' | 'right' | undefined
-    const dividerPosition = (adv as any).dividerPosition as
-      | 'left'
-      | 'right'
-      | 'center'
-      | undefined
+    const dividerPosition =
+      drawers > 0
+        ? undefined
+        : ((adv as any).dividerPosition as
+            | 'left'
+            | 'right'
+            | 'center'
+            | undefined)
     const group = buildCabinetMesh({
       width: W,
       height: H,
