@@ -1,0 +1,133 @@
+{
+  "app": {
+    "mode": "Mode",
+    "roles": {
+      "stolarz": "Carpenter",
+      "klient": "Client"
+    },
+    "resetSelection": "Reset selection",
+    "undo": "Undo",
+    "redo": "Redo",
+    "clear": "Clear",
+    "wallLabel": "Wall {{num}} ({{len}} mm)",
+    "autoWall": "Auto for wall",
+    "material": {
+      "title": "Material (sheet)",
+      "boardHeight": "Sheet height L (mm)",
+      "boardWidth": "Sheet width W (mm)",
+      "kerf": "Kerf (mm)",
+      "grain": "Board has grain",
+      "info": "Without grain: pieces can rotate (must fit in {{l}}×{{w}} or {{w}}×{{l}}). With grain: elements requiring grain without rotation (h≤{{l}}, w≤{{w}})."
+    },
+    "tabs": {
+      "cab": "Kitchen",
+      "room": "Room",
+      "costs": "Costs",
+      "cut": "Cutlist"
+    },
+    "cabinetType": "Cabinet type",
+    "subcategories": "Subcategories ({{family}})",
+    "variant": "Variant"
+  },
+  "catalog": {
+    "choose": "Choose"
+  },
+  "room": {
+    "title": "Room — walls",
+    "height": "Height (mm)",
+    "wallLength": "Wall length (mm)",
+    "angle": "Angle (°)",
+    "addWall": "Add wall",
+    "addWindow": "Add window",
+    "addDoor": "Add door"
+  },
+  "global": {
+    "title": "Global settings",
+    "settings": "Settings — {{family}}",
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "margin": "Margin (0–1)",
+    "labor": "Labor (PLN)",
+    "cut": "Cut (PLN/m)",
+    "pricing": "Pricing",
+    "height": "Height (mm)",
+    "depth": "Depth (mm)",
+    "boardType": "Board type",
+    "frontType": "Front type",
+    "backPanel": "Back",
+    "legs": "Legs",
+    "offsetWall": "Offset from wall (mm)",
+    "hanger": "Hangers",
+    "gapsTitle": "Gaps (mm)",
+    "gapLeft": "Left gap",
+    "gapRight": "Right gap",
+    "gapTop": "Top gap",
+    "gapBottom": "Bottom gap",
+    "gapBetween": "Gap between fronts"
+  },
+  "configurator": {
+    "title": "Configuration — {{variant}}",
+    "basic": "Basic",
+    "advanced": "Advanced",
+    "width": "Width (mm)",
+    "insertCabinet": "Insert cabinet",
+    "height": "Height (mm)",
+    "depth": "Depth (mm)",
+    "board": "Board",
+    "front": "Front",
+    "back": "Back",
+    "shelves": "Number of shelves",
+    "gapsTitle": "Gaps and front heights (set graphically)",
+    "backOptions": {
+      "full": "full",
+      "split": "split",
+      "none": "none"
+    },
+    "backToBasic": "← Basic"
+  },
+  "forms": {
+    "width": "Width",
+    "height": "Height",
+    "depth": "Depth"
+  },
+  "costs": {
+    "title": "Costs",
+    "table": {
+      "module": "Module",
+      "width": "Width (mm)",
+      "family": "Type",
+      "doors": "Doors",
+      "drawers": "Drawers",
+      "total": "Total (PLN)"
+    },
+    "summary": {
+      "item": "Item",
+      "amount": "Amount (PLN)",
+      "total": "Total"
+    }
+  },
+  "cutlist": {
+    "validation": "Validation for sheet {{width}}×{{height}}",
+    "sheets": "Sheets: {{sheets}}",
+    "warning": "Warning: part does not fit",
+    "grainInfo": {
+      "with": "Material has grain: elements requiring grain without rotation (h≤{{l}}, w≤{{w}}).",
+      "without": "Material without grain: rotation allowed for all elements."
+    },
+    "title": "Cutlist",
+    "exportCsv": "Export CSV — detailed",
+    "exportCsvAgg": "Export CSV — aggregated",
+    "exportPdf": "Export PDF",
+    "preview": "Preview (aggregated)",
+    "edge": "Edgebanding (ABS 1mm/2mm)",
+    "headers": {
+      "material": "Material",
+      "part": "Part",
+      "qty": "Qty",
+      "w": "W (mm)",
+      "h": "H (mm)",
+      "length": "Length (mm)",
+      "lengthMb": "Length (m)"
+    }
+  }
+}

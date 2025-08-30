@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import useLocalStorageState from './hooks/useLocalStorageState'
 import { FAMILY, FAMILY_LABELS, Kind, Variant } from '../core/catalog'
 import { usePlannerStore } from '../state/store'
@@ -28,6 +29,9 @@ export default function App(){
   const [selWall, setSelWall] = useState(0)
   const [addCountertop] = useState(true)
   const threeRef = useRef<any>({})
+  const { t, i18n } = useTranslation()
+  const [lang, setLang] = useState(localStorage.getItem('lang') || i18n.language)
+  useEffect(() => { i18n.changeLanguage(lang); localStorage.setItem('lang', lang) }, [lang, i18n])
 
   const {
     cfgTab,
@@ -77,33 +81,37 @@ export default function App(){
       <div className="canvasWrap">
         <SceneViewer threeRef={threeRef} addCountertop={addCountertop} />
         <div className="topbar row">
-          <button className="btnGhost" onClick={()=>store.setRole(store.role==='stolarz'?'klient':'stolarz')}>Tryb: {store.role=='stolarz'?'Stolarz':'Klient'}</button>
-          <button className="btnGhost" onClick={()=>{ setVariant(null); setKind(null); }}>Reset wyboru</button>
-          <button className="btnGhost" onClick={()=>store.undo()} disabled={store.past.length===0}>Cofnij</button>
-          <button className="btnGhost" onClick={()=>store.redo()} disabled={store.future.length===0}>Ponów</button>
-          <button className="btnGhost" onClick={()=>store.clear()}>Wyczyść</button>
+          <button className="btnGhost" onClick={()=>store.setRole(store.role==='stolarz'?'klient':'stolarz')}>{t('app.mode')}: {t(`app.roles.${store.role}`)}</button>
+          <button className="btnGhost" onClick={()=>{ setVariant(null); setKind(null); }}>{t('app.resetSelection')}</button>
+          <button className="btnGhost" onClick={()=>store.undo()} disabled={store.past.length===0}>{t('app.undo')}</button>
+          <button className="btnGhost" onClick={()=>store.redo()} disabled={store.future.length===0}>{t('app.redo')}</button>
+          <button className="btnGhost" onClick={()=>store.clear()}>{t('app.clear')}</button>
           <select className="btnGhost" value={selWall} onChange={e=>setSelWall(Number((e.target as HTMLSelectElement).value)||0)}>
-            {getWallSegments().map((s,i)=> <option key={i} value={i}>Ściana {i+1} ({Math.round(s.length)} mm)</option>)}
+            {getWallSegments().map((s,i)=> <option key={i} value={i}>{t('app.wallLabel',{num:i+1,len:Math.round(s.length)})}</option>)}
           </select>
-          <button className="btn" onClick={doAutoOnSelectedWall}>Auto pod ścianę</button>
+          <button className="btn" onClick={doAutoOnSelectedWall}>{t('app.autoWall')}</button>
+          <select className="btnGhost" value={lang} onChange={e=>setLang((e.target as HTMLSelectElement).value)}>
+            <option value="pl">PL</option>
+            <option value="en">EN</option>
+          </select>
         </div>
       </div>
       <aside className="sidebar">
         <div className="section card">
           <div className="row" style={{ justifyContent:'space-between', alignItems:'center' }}>
-            <div className="h2">Materiał (arkusz)</div>
+            <div className="h2">{t('app.material.title')}</div>
           </div>
           <div style={{display:'grid', gridTemplateColumns:'repeat(4, minmax(120px, 1fr))', gap:12, marginTop:10}}>
             <div>
-              <div className="small">Wysokość arkusza L (mm)</div>
+              <div className="small">{t('app.material.boardHeight')}</div>
               <SingleMMInput value={boardL} onChange={v=>setBoardL(v)} max={4000} />
             </div>
             <div>
-              <div className="small">Szerokość arkusza W (mm)</div>
+              <div className="small">{t('app.material.boardWidth')}</div>
               <SingleMMInput value={boardW} onChange={v=>setBoardW(v)} max={4000} />
             </div>
             <div>
-              <div className="small">Kerf (mm)</div>
+              <div className="small">{t('app.material.kerf')}</div>
               <input className="input" type="number" min={0} max={10} step={0.1}
                     value={boardKerf}
                     onChange={e=>setBoardKerf(Math.max(0, Math.min(10, Number(e.target.value)||0)))} />
@@ -111,34 +119,33 @@ export default function App(){
             <div style={{display:'flex', alignItems:'end'}}>
               <label className="small" style={{display:'flex', gap:8, alignItems:'center'}}>
                 <input type="checkbox" checked={boardHasGrain} onChange={e=>setBoardHasGrain(e.target.checked)} />
-                Płyta ma usłojenie
+                {t('app.material.grain')}
               </label>
             </div>
           </div>
           <div className="tiny muted" style={{marginTop:6}}>
-            Bez usłojenia: formatki można obracać (muszą się zmieścić w {boardL}×{boardW} lub {boardW}×{boardL}).
-            Z usłojeniem: elementy wymagające słojów bez rotacji (h≤{boardL}, w≤{boardW}).
+            {t('app.material.info',{l:boardL,w:boardW})}
           </div>
         </div>
 
         <GlobalSettings />
 
         <div className="tabs">
-          <button className={`tabBtn ${tab==='cab'?'active':''}`} onClick={()=>setTab('cab')}>Kuchnia</button>
-          <button className={`tabBtn ${tab==='room'?'active':''}`} onClick={()=>setTab('room')}>Pomieszczenie</button>
-          <button className={`tabBtn ${tab==='costs'?'active':''}`} onClick={()=>setTab('costs')}>Koszty</button>
-          <button className={`tabBtn ${tab==='cut'?'active':''}`} onClick={()=>setTab('cut')}>Formatki</button>
+          <button className={`tabBtn ${tab==='cab'?'active':''}`} onClick={()=>setTab('cab')}>{t('app.tabs.cab')}</button>
+          <button className={`tabBtn ${tab==='room'?'active':''}`} onClick={()=>setTab('room')}>{t('app.tabs.room')}</button>
+          <button className={`tabBtn ${tab==='costs'?'active':''}`} onClick={()=>setTab('costs')}>{t('app.tabs.costs')}</button>
+          <button className={`tabBtn ${tab==='cut'?'active':''}`} onClick={()=>setTab('cut')}>{t('app.tabs.cut')}</button>
             {/* placeholder removed */}
         </div>
 
         {tab==='cab' && (<>
           <div>
-            <div className="h1">Typ szafki</div>
+            <div className="h1">{t('app.cabinetType')}</div>
               <TypePicker family={family} setFamily={(f: FAMILY)=>{ setFamily(f); setKind(null); setVariant(null); }} />
           </div>
 
           <div className="section">
-            <div className="hd"><div><div className="h1">Podkategorie ({FAMILY_LABELS[family]})</div></div></div>
+            <div className="hd"><div><div className="h1">{t('app.subcategories',{family:FAMILY_LABELS[family]})}</div></div></div>
             <div className="bd">
                 <KindTabs family={family} kind={kind} setKind={(k: Kind)=>{ setKind(k); setVariant(null); }} />
             </div>
@@ -146,7 +153,7 @@ export default function App(){
 
           {kind && (
             <div className="section">
-              <div className="hd"><div><div className="h1">Wariant</div></div></div>
+              <div className="hd"><div><div className="h1">{t('app.variant')}</div></div></div>
               <div className="bd">
                   <VariantList kind={kind} onPick={(v: Variant)=>{ setVariant(v); setCfgTab('basic'); }} />
               </div>

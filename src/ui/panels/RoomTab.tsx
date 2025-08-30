@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import * as THREE from 'three'
+import { useTranslation } from 'react-i18next'
 import { usePlannerStore } from '../../state/store'
 export default function RoomTab({ three }:{ three: React.MutableRefObject<any> }){
   const store = usePlannerStore()
+  const { t } = useTranslation()
   const [len, setLen] = useState(3000)
   const [angle, setAngle] = useState(0)
   const [height, setHeight] = useState(store.room.height||2700)
@@ -31,26 +33,26 @@ export default function RoomTab({ three }:{ three: React.MutableRefObject<any> }
   const addDoor = () => store.addOpening({ type:'door', wall:0, offset:100, width:900, height:2100 })
   return (
     <div className="section">
-      <div className="hd"><div><div className="h1">Pomieszczenie — ściany</div></div></div>
+      <div className="hd"><div><div className="h1">{t('room.title')}</div></div></div>
       <div className="bd">
         <div className="grid3">
           <div>
-            <div className="small">Wysokość (mm)</div>
+            <div className="small">{t('room.height')}</div>
             <input className="input" type="number" step="1" value={height} onChange={e=>setHeight(Number((e.target as HTMLInputElement).value)||0)} />
           </div>
           <div>
-            <div className="small">Długość ściany (mm)</div>
+            <div className="small">{t('room.wallLength')}</div>
             <input className="input" type="number" step="1" value={len} onChange={e=>setLen(Number((e.target as HTMLInputElement).value)||0)} />
           </div>
           <div>
-            <div className="small">Kąt (°)</div>
+            <div className="small">{t('room.angle')}</div>
             <input className="input" type="number" step="1" value={angle} onChange={e=>setAngle(Number((e.target as HTMLInputElement).value)||0)} />
           </div>
         </div>
         <div className="row" style={{marginTop:8}}>
-          <button className="btn" onClick={addWall}>Dodaj ścianę</button>
-          <button className="btnGhost" onClick={addWindow}>Dodaj okno</button>
-          <button className="btnGhost" onClick={addDoor}>Dodaj drzwi</button>
+          <button className="btn" onClick={addWall}>{t('room.addWall')}</button>
+          <button className="btnGhost" onClick={addWindow}>{t('room.addWindow')}</button>
+          <button className="btnGhost" onClick={addDoor}>{t('room.addDoor')}</button>
         </div>
       </div>
     </div>
