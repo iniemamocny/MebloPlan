@@ -24,7 +24,7 @@ export default function CornerCabinetForm({ values, onChange }: CabinetFormProps
   return (
     <div>
       <details open>
-        <summary>{t('forms.sections.dimensions')}</summary>
+        <summary>{t('configurator.sections.korpus')}</summary>
         <div>
           <div className="small">{t('forms.width')}</div>
           <SingleMMInput value={width} onChange={w=>update({ width:w })} />
@@ -35,7 +35,7 @@ export default function CornerCabinetForm({ values, onChange }: CabinetFormProps
         </div>
       </details>
       <details>
-        <summary>{t('forms.sections.fronts')}</summary>
+        <summary>{t('configurator.sections.fronty')}</summary>
         <div>
           <div className="small">{t('forms.doorsCount')}</div>
           <SingleMMInput min={0} step={1} value={doorsCount} onChange={n=>update({ doorsCount:n })} />
@@ -44,11 +44,11 @@ export default function CornerCabinetForm({ values, onChange }: CabinetFormProps
         </div>
       </details>
       <details>
-        <summary>{t('forms.sections.advanced')}</summary>
+        <summary>{t('configurator.sections.okucie')}</summary>
         {adv && <pre style={{ display:'none' }}>{JSON.stringify(adv)}</pre>}
       </details>
       <details>
-        <summary>{t('forms.sections.hardware')}</summary>
+        <summary>{t('configurator.sections.nozki')}</summary>
         {hardware && <pre style={{ display:'none' }}>{JSON.stringify(hardware)}</pre>}
       </details>
     </div>
