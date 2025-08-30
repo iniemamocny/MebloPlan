@@ -170,24 +170,22 @@ export default function TechDrawing({
   }, [doorsCount, front.w, front.x]);
 
   const dividerX = useMemo(() => {
-    const fronts = doorsCount > 0 ? doorsCount : drawersCount;
-    if (!dividerPosition || fronts < 3) return null;
-    if (dividerPosition === 'center') return front.x + front.w / 2;
-    const step = front.w / fronts;
+    if (!dividerPosition || doorsCount < 3) return null
+    if (dividerPosition === 'center') return front.x + front.w / 2
+    const step = front.w / doorsCount
     return dividerPosition === 'left'
       ? front.x + step
-      : front.x + front.w - step;
-  }, [dividerPosition, doorsCount, drawersCount, front.x, front.w]);
+      : front.x + front.w - step
+  }, [dividerPosition, doorsCount, front.x, front.w])
 
   const dividerSectionX = useMemo(() => {
-    const fronts = doorsCount > 0 ? doorsCount : drawersCount;
-    if (!dividerPosition || fronts < 3) return null;
-    const avail = innerW - 20;
-    let ratio = 0.5;
-    if (dividerPosition === 'left') ratio = 1 / fronts;
-    else if (dividerPosition === 'right') ratio = (fronts - 1) / fronts;
-    return pad + 10 + avail * ratio - 4;
-  }, [dividerPosition, doorsCount, drawersCount, innerW]);
+    if (!dividerPosition || doorsCount < 3) return null
+    const avail = innerW - 20
+    let ratio = 0.5
+    if (dividerPosition === 'left') ratio = 1 / doorsCount
+    else if (dividerPosition === 'right') ratio = (doorsCount - 1) / doorsCount
+    return pad + 10 + avail * ratio - 4
+  }, [dividerPosition, doorsCount, innerW])
 
   const onMouseDown = (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
     if (mode !== 'edit') return;

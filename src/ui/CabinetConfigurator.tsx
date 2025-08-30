@@ -86,7 +86,11 @@ const CabinetConfigurator: React.FC<Props> = ({
   }, [kind])
 
   useEffect(() => {
-    const fronts = Math.max(doorsCount, drawersCount)
+    if (drawersCount > 0) {
+      if (gLocal.dividerPosition) setAdv({ ...gLocal, dividerPosition: undefined })
+      return
+    }
+    const fronts = doorsCount
     if (fronts < 3) {
       if (gLocal.dividerPosition) setAdv({ ...gLocal, dividerPosition: undefined })
     } else if (fronts === 4) {
@@ -299,10 +303,10 @@ const CabinetConfigurator: React.FC<Props> = ({
                 </select>
               </div>
             </div>
-            {Math.max(doorsCount, drawersCount) >= 3 && (
+            {doorsCount >= 3 && (
               <div style={{ marginTop: 8 }}>
                 <div className="small">Przegroda</div>
-                {Math.max(doorsCount, drawersCount) === 3 ? (
+                {doorsCount === 3 ? (
                   <div className="row" style={{ gap: 8 }}>
                     <label>
                       <input

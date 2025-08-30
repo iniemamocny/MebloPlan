@@ -130,7 +130,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     }
   }
 
-  if (dividerPosition) {
+  if (dividerPosition && drawers === 0) {
     const divGeo = new THREE.BoxGeometry(T, H, D);
     const divider = new THREE.Mesh(divGeo, carcMat);
     let x = W / 2;

@@ -37,7 +37,7 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, doorsCount, draw
       shelves,
       backPanel,
       legHeight,
-      dividerPosition
+      dividerPosition: drawersCount > 0 ? undefined : dividerPosition
     })
     scene.add(cabGroup)
     renderer.render(scene, camera)
