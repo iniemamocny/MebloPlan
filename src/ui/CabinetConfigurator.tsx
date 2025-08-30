@@ -54,6 +54,18 @@ const CabinetConfigurator: React.FC<Props> = ({
       setDrawersCount(0)
     }
   }, [kind])
+
+  useEffect(() => {
+    const fronts = Math.max(doorsCount, drawersCount)
+    if (fronts < 3) {
+      if (gLocal.dividerPosition) setAdv({ ...gLocal, dividerPosition: undefined })
+    } else if (fronts === 4) {
+      if (gLocal.dividerPosition !== 'center')
+        setAdv({ ...gLocal, dividerPosition: 'center' })
+    } else if (fronts === 3 && !gLocal.dividerPosition) {
+      setAdv({ ...gLocal, dividerPosition: 'left' })
+    }
+  }, [doorsCount, drawersCount, gLocal])
   return (
     <div className="section">
       <div className="hd">
@@ -109,6 +121,33 @@ const CabinetConfigurator: React.FC<Props> = ({
                 </select>
               </div>
             )}
+            {Math.max(doorsCount, drawersCount) >= 3 && (
+              <div style={{ marginTop: 8 }}>
+                <div className="small">Przegroda</div>
+                {Math.max(doorsCount, drawersCount) === 3 ? (
+                  <div className="row" style={{ gap: 8 }}>
+                    <label>
+                      <input
+                        type="radio"
+                        checked={gLocal.dividerPosition === 'left'}
+                        onChange={() => setAdv({ ...gLocal, dividerPosition: 'left' })}
+                      />
+                      L
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        checked={gLocal.dividerPosition === 'right'}
+                        onChange={() => setAdv({ ...gLocal, dividerPosition: 'right' })}
+                      />
+                      P
+                    </label>
+                  </div>
+                ) : (
+                  <div className="small">Centralna</div>
+                )}
+              </div>
+            )}
             <div style={{marginTop:8}}>
               <TechDrawing
                 mode="view"
@@ -119,6 +158,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                 doorsCount={doorsCount}
                 drawersCount={drawersCount}
                 drawerFronts={gLocal.drawerFronts}
+                dividerPosition={gLocal.dividerPosition}
               />
             </div>
             <div className="row" style={{marginTop:8}}>
@@ -133,6 +173,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                 drawerFronts={gLocal.drawerFronts}
                 shelves={gLocal.shelves}
                 backPanel={gLocal.backPanel}
+                dividerPosition={gLocal.dividerPosition}
               />
             </div>
           </div>
@@ -167,6 +208,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                 doorsCount={doorsCount}
                 drawersCount={drawersCount}
                 drawerFronts={gLocal.drawerFronts}
+                dividerPosition={gLocal.dividerPosition}
                 onChangeGaps={(gg: Gaps) => setAdv({ ...gLocal, gaps: gg })}
                 onChangeDrawerFronts={(arr: number[]) => setAdv({ ...gLocal, drawerFronts: arr })}
               />
@@ -183,6 +225,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                 drawerFronts={gLocal.drawerFronts}
                 shelves={gLocal.shelves}
                 backPanel={gLocal.backPanel}
+                dividerPosition={gLocal.dividerPosition}
               />
             </div>
             <div className="row" style={{marginTop:8}}>

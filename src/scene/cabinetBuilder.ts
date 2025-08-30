@@ -17,6 +17,7 @@ export interface CabinetOptions {
   boardThickness?: number;
   backThickness?: number;
   hinge?: 'left' | 'right';
+  dividerPosition?: 'left' | 'right' | 'center';
 }
 
 /**
@@ -39,6 +40,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     showHandles = true,
     boardThickness: T = 0.018,
     backThickness: backT = 0.003,
+    dividerPosition,
   } = opts;
 
   const FRONT_OFFSET = 0.002;
@@ -126,6 +128,16 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       shelf.position.set(W / 2, y, -D / 2);
       group.add(shelf);
     }
+  }
+
+  if (dividerPosition) {
+    const divGeo = new THREE.BoxGeometry(T, H, D);
+    const divider = new THREE.Mesh(divGeo, carcMat);
+    let x = W / 2;
+    if (dividerPosition === 'left') x = W / 3;
+    else if (dividerPosition === 'right') x = (2 * W) / 3;
+    divider.position.set(x, legHeight + H / 2, -D / 2);
+    group.add(divider);
   }
 
   // Fronts

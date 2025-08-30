@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { FAMILY } from '../../core/catalog'
 import { buildCabinetMesh } from '../../scene/cabinetBuilder'
 
-export default function Cabinet3D({ widthMM, heightMM, depthMM, doorsCount, drawersCount, gaps, drawerFronts, family, shelves = 1, backPanel = 'full' }:{ widthMM:number;heightMM:number;depthMM:number;doorsCount:number;drawersCount:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number; backPanel?:'full'|'split'|'none' }){
+export default function Cabinet3D({ widthMM, heightMM, depthMM, doorsCount, drawersCount, gaps, drawerFronts, family, shelves = 1, backPanel = 'full', dividerPosition }:{ widthMM:number;heightMM:number;depthMM:number;doorsCount:number;drawersCount:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number; backPanel?:'full'|'split'|'none'; dividerPosition?:'left'|'right'|'center' }){
   const ref = useRef<HTMLDivElement>(null)
   useEffect(()=>{
     if (!ref.current) return
@@ -36,11 +36,12 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, doorsCount, draw
       family,
       shelves,
       backPanel,
-      legHeight
+      legHeight,
+      dividerPosition
     })
     scene.add(cabGroup)
     renderer.render(scene, camera)
     return () => { renderer.dispose() }
-  }, [widthMM, heightMM, depthMM, doorsCount, drawersCount, gaps, drawerFronts, family, shelves, backPanel])
+  }, [widthMM, heightMM, depthMM, doorsCount, drawersCount, gaps, drawerFronts, family, shelves, backPanel, dividerPosition])
   return <div ref={ref} style={{ width: 260, height: 190, border: '1px solid #E5E7EB', borderRadius: 8, background: '#fff' }} />
 }
