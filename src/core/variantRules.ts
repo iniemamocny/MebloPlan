@@ -1,14 +1,14 @@
-import { FAMILY } from './catalog'
+import { FAMILY } from './catalog';
 
 // Keys in Prices that represent discrete kit costs
-export type KitKey = 'hoodKit' | 'sinkKit' | 'dwKit' | 'fridgeKit' | 'mwKit'
+export type KitKey = 'hoodKit' | 'sinkKit' | 'dwKit' | 'fridgeKit' | 'mwKit';
 
 export interface VariantRule {
-  doors?: number
-  drawers?: number
-  kits?: KitKey[]
-  cargo?: '150' | '200' | '300'
-  aventos?: 'HK' | 'HS'
+  doors?: number;
+  drawers?: number;
+  kits?: KitKey[];
+  cargo?: '150' | '200' | '300';
+  aventos?: 'HK' | 'HS';
 }
 
 // Configuration describing behaviour of module variants
@@ -24,12 +24,12 @@ export const variantRules: Record<FAMILY, Record<string, VariantRule>> = {
       cargo150: { cargo: '150' },
       cargo200: { cargo: '200' },
       cargo300: { cargo: '300' },
-    }
+    };
     // drawer variants like s1, s2 ... s5
     for (let i = 1; i <= 5; i++) {
-      rules[`s${i}`] = { drawers: i }
+      rules[`s${i}`] = { drawers: i };
     }
-    return rules
+    return rules;
   })(),
   [FAMILY.TALL]: {
     t1: { doors: 1 },
@@ -50,5 +50,4 @@ export const variantRules: Record<FAMILY, Record<string, VariantRule>> = {
     p2: { doors: 2 },
     p3: { doors: 3 },
   },
-}
-
+};

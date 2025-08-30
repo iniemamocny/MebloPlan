@@ -10,10 +10,7 @@
         "editor.formatOnSave": true,
         "files.eol": "\n"
       },
-      "extensions": [
-        "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode"
-      ]
+      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
     }
   },
   "forwardPorts": [5173],

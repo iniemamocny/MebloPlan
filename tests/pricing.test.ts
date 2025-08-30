@@ -1,11 +1,11 @@
-import { describe, it, expect } from 'vitest'
-import { computeModuleCost } from '../src/core/pricing'
-import { FAMILY } from '../src/core/catalog'
-import { defaultPrices, defaultGlobal } from '../src/state/store'
+import { describe, it, expect } from 'vitest';
+import { computeModuleCost } from '../src/core/pricing';
+import { FAMILY } from '../src/core/catalog';
+import { defaultPrices, defaultGlobal } from '../src/state/store';
 
 // Helper to build adv object for a family
 function advFor(fam: FAMILY) {
-  const g = defaultGlobal[fam]
+  const g = defaultGlobal[fam];
   return {
     height: g.height,
     depth: g.depth,
@@ -13,7 +13,7 @@ function advFor(fam: FAMILY) {
     frontType: g.frontType,
     gaps: g.gaps,
     backPanel: g.backPanel,
-  }
+  };
 }
 
 describe('computeModuleCost', () => {
@@ -26,11 +26,11 @@ describe('computeModuleCost', () => {
         width: 600,
         adv: advFor(FAMILY.BASE),
       },
-      { prices: defaultPrices, globals: defaultGlobal }
-    )
-    expect(price.counts.doors).toBe(2)
-    expect(price.parts.hinges).toBe(64)
-  })
+      { prices: defaultPrices, globals: defaultGlobal },
+    );
+    expect(price.counts.doors).toBe(2);
+    expect(price.parts.hinges).toBe(64);
+  });
 
   it('includes slide costs for three-drawer module', () => {
     const price = computeModuleCost(
@@ -41,11 +41,13 @@ describe('computeModuleCost', () => {
         width: 600,
         adv: advFor(FAMILY.BASE),
       },
-      { prices: defaultPrices, globals: defaultGlobal }
-    )
-    expect(price.counts.drawers).toBe(3)
-    expect(price.parts.slides).toBe(defaultPrices.drawerSlide['BLUM LEGRABOX'] * 3)
-  })
+      { prices: defaultPrices, globals: defaultGlobal },
+    );
+    expect(price.counts.drawers).toBe(3);
+    expect(price.parts.slides).toBe(
+      defaultPrices.drawerSlide['BLUM LEGRABOX'] * 3,
+    );
+  });
 
   it('adds aventos cost for wall cabinet with HK lift', () => {
     const price = computeModuleCost(
@@ -56,10 +58,10 @@ describe('computeModuleCost', () => {
         width: 600,
         adv: advFor(FAMILY.WALL),
       },
-      { prices: defaultPrices, globals: defaultGlobal }
-    )
-    expect(price.parts.aventos).toBe(defaultPrices.aventos.HK)
-  })
+      { prices: defaultPrices, globals: defaultGlobal },
+    );
+    expect(price.parts.aventos).toBe(defaultPrices.aventos.HK);
+  });
 
   it('uses four hinges per door for tall cabinets', () => {
     const price = computeModuleCost(
@@ -70,10 +72,10 @@ describe('computeModuleCost', () => {
         width: 600,
         adv: advFor(FAMILY.TALL),
       },
-      { prices: defaultPrices, globals: defaultGlobal }
-    )
-    expect(price.counts.hinges).toBe(8)
-  })
+      { prices: defaultPrices, globals: defaultGlobal },
+    );
+    expect(price.counts.hinges).toBe(8);
+  });
 
   it('adds sink kit for sink base cabinet', () => {
     const price = computeModuleCost(
@@ -84,11 +86,11 @@ describe('computeModuleCost', () => {
         width: 600,
         adv: advFor(FAMILY.BASE),
       },
-      { prices: defaultPrices, globals: defaultGlobal }
-    )
-    expect(price.counts.doors).toBe(2)
-    expect(price.parts.kits).toBe(defaultPrices.sinkKit)
-  })
+      { prices: defaultPrices, globals: defaultGlobal },
+    );
+    expect(price.counts.doors).toBe(2);
+    expect(price.parts.kits).toBe(defaultPrices.sinkKit);
+  });
 
   it('uses microwave kit for oven+mw tall cabinet', () => {
     const price = computeModuleCost(
@@ -99,9 +101,8 @@ describe('computeModuleCost', () => {
         width: 600,
         adv: advFor(FAMILY.TALL),
       },
-      { prices: defaultPrices, globals: defaultGlobal }
-    )
-    expect(price.parts.kits).toBe(defaultPrices.dwKit + defaultPrices.mwKit)
-  })
-})
-
+      { prices: defaultPrices, globals: defaultGlobal },
+    );
+    expect(price.parts.kits).toBe(defaultPrices.dwKit + defaultPrices.mwKit);
+  });
+});

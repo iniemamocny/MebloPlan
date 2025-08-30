@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { validateParts, packGuillotine, type Board, type Part } from '../src/core/format';
+import {
+  validateParts,
+  packGuillotine,
+  type Board,
+  type Part,
+} from '../src/core/format';
 
 describe('validateParts', () => {
   const board: Board = { L: 200, W: 100, kerf: 2, hasGrain: false };
