@@ -1,0 +1,134 @@
+import React from 'react';
+import { FAMILY, FAMILY_LABELS } from '../core/catalog';
+import type { Kind, Variant } from '../core/catalog';
+import TypePicker, { KindTabs, VariantList } from './panels/CatalogPicker';
+import CabinetConfigurator from './CabinetConfigurator';
+import RoomTab from './panels/RoomTab';
+import CostsTab from './panels/CostsTab';
+import CutlistTab from './panels/CutlistTab';
+import { CabinetConfig } from './types';
+
+interface MainTabsProps {
+  t: (key: string, opts?: any) => string;
+  tab: 'cab' | 'room' | 'costs' | 'cut';
+  setTab: (t: 'cab' | 'room' | 'costs' | 'cut') => void;
+  family: FAMILY;
+  setFamily: (f: FAMILY) => void;
+  kind: Kind | null;
+  setKind: (k: Kind | null) => void;
+  variant: Variant | null;
+  setVariant: (v: Variant | null) => void;
+  cfgTab: 'basic' | 'adv';
+  setCfgTab: (t: 'basic' | 'adv') => void;
+  widthMM: number;
+  setWidthMM: (n: number) => void;
+  gLocal: CabinetConfig;
+  setAdv: (v: CabinetConfig) => void;
+  onAdd: (width: number, adv: CabinetConfig) => void;
+  threeRef: React.MutableRefObject<any>;
+}
+
+export default function MainTabs({
+  t,
+  tab,
+  setTab,
+  family,
+  setFamily,
+  kind,
+  setKind,
+  variant,
+  setVariant,
+  cfgTab,
+  setCfgTab,
+  widthMM,
+  setWidthMM,
+  gLocal,
+  setAdv,
+  onAdd,
+  threeRef,
+}: MainTabsProps) {
+  return (
+    <>
+      <div className="tabs">
+        <button className={`tabBtn ${tab === 'cab' ? 'active' : ''}`} onClick={() => setTab('cab')}>
+          {t('app.tabs.cab')}
+        </button>
+        <button className={`tabBtn ${tab === 'room' ? 'active' : ''}`} onClick={() => setTab('room')}>
+          {t('app.tabs.room')}
+        </button>
+        <button className={`tabBtn ${tab === 'costs' ? 'active' : ''}`} onClick={() => setTab('costs')}>
+          {t('app.tabs.costs')}
+        </button>
+        <button className={`tabBtn ${tab === 'cut' ? 'active' : ''}`} onClick={() => setTab('cut')}>
+          {t('app.tabs.cut')}
+        </button>
+      </div>
+
+      {tab === 'cab' && (
+        <>
+          <div>
+            <div className="h1">{t('app.cabinetType')}</div>
+            <TypePicker
+              family={family}
+              setFamily={(f: FAMILY) => {
+                setFamily(f);
+                setKind(null);
+                setVariant(null);
+              }}
+            />
+          </div>
+
+          <div className="section">
+            <div className="hd">
+              <div>
+                <div className="h1">{t('app.subcategories', { family: FAMILY_LABELS[family] })}</div>
+              </div>
+            </div>
+            <div className="bd">
+              <KindTabs
+                family={family}
+                kind={kind}
+                setKind={(k: Kind) => {
+                  setKind(k);
+                  setVariant(null);
+                }}
+              />
+            </div>
+          </div>
+
+          {kind && (
+            <div className="section">
+              <div className="hd">
+                <div>
+                  <div className="h1">{t('app.variant')}</div>
+                </div>
+              </div>
+              <div className="bd">
+                <VariantList kind={kind} onPick={(v: Variant) => { setVariant(v); setCfgTab('basic'); }} />
+              </div>
+            </div>
+          )}
+
+          {variant && (
+            <CabinetConfigurator
+              family={family}
+              kind={kind}
+              variant={variant}
+              cfgTab={cfgTab}
+              setCfgTab={setCfgTab}
+              widthMM={widthMM}
+              setWidthMM={setWidthMM}
+              gLocal={gLocal}
+              setAdv={setAdv}
+              onAdd={onAdd}
+            />
+          )}
+        </>
+      )}
+
+      {tab === 'room' && <RoomTab three={threeRef} />}
+      {tab === 'costs' && <CostsTab />}
+      {tab === 'cut' && <CutlistTab />}
+    </>
+  );
+}
