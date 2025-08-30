@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FAMILY, Kind, Variant } from '../core/catalog';
 import { usePlannerStore } from '../state/store';
-import GlobalSettings from './panels/GlobalSettings';
 import SceneViewer from './SceneViewer';
 import useCabinetConfig from './useCabinetConfig';
 import TopBar from './TopBar';
@@ -35,7 +34,7 @@ export default function App() {
     doAutoOnSelectedWall,
   } = useCabinetConfig(family, kind, variant, selWall, setVariant);
 
-  const [tab, setTab] = useState<'cab' | 'room' | 'costs' | 'cut' | null>(null);
+  const [tab, setTab] = useState<'cab' | 'room' | 'costs' | 'cut' | 'global' | null>(null);
   const [boardL, setBoardL] = useState(2800);
   const [boardW, setBoardW] = useState(2070);
   const [boardKerf, setBoardKerf] = useState(3);
@@ -60,7 +59,6 @@ export default function App() {
 
   return (
     <div className="app">
-      <GlobalSettings />
       <div className="mainTabs">
         <MainTabs
           t={t}

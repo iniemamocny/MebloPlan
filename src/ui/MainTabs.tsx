@@ -8,11 +8,12 @@ import CostsTab from './panels/CostsTab';
 import CutlistTab from './panels/CutlistTab';
 import { CabinetConfig } from './types';
 import SlidingPanel from './components/SlidingPanel';
+import GlobalSettings from './panels/GlobalSettings';
 
 interface MainTabsProps {
   t: (key: string, opts?: any) => string;
-  tab: 'cab' | 'room' | 'costs' | 'cut' | null;
-  setTab: (t: 'cab' | 'room' | 'costs' | 'cut' | null) => void;
+  tab: 'cab' | 'room' | 'costs' | 'cut' | 'global' | null;
+  setTab: (t: 'cab' | 'room' | 'costs' | 'cut' | 'global' | null) => void;
   family: FAMILY;
   setFamily: (f: FAMILY) => void;
   kind: Kind | null;
@@ -64,7 +65,7 @@ export default function MainTabs({
   boardHasGrain,
   setBoardHasGrain,
 }: MainTabsProps) {
-  const toggleTab = (name: 'cab' | 'room' | 'costs' | 'cut') => {
+  const toggleTab = (name: 'cab' | 'room' | 'costs' | 'cut' | 'global') => {
     setTab(tab === name ? null : name);
   };
 
@@ -82,6 +83,9 @@ export default function MainTabs({
         </button>
         <button className={`tabBtn ${tab === 'cut' ? 'active' : ''}`} onClick={() => toggleTab('cut')}>
           {t('app.tabs.cut')}
+        </button>
+        <button className={`tabBtn ${tab === 'global' ? 'active' : ''}`} onClick={() => toggleTab('global')}>
+          {t('app.tabs.global')}
         </button>
       </div>
 
@@ -162,6 +166,7 @@ export default function MainTabs({
             setBoardHasGrain={setBoardHasGrain}
           />
         )}
+        {tab === 'global' && <GlobalSettings />}
       </SlidingPanel>
     </>
   );
