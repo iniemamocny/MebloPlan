@@ -20,8 +20,6 @@ interface MainTabsProps {
   setKind: (k: Kind | null) => void;
   variant: Variant | null;
   setVariant: (v: Variant | null) => void;
-  cfgTab: 'basic' | 'adv';
-  setCfgTab: (t: 'basic' | 'adv') => void;
   widthMM: number;
   setWidthMM: (n: number) => void;
   gLocal: CabinetConfig;
@@ -53,8 +51,6 @@ export default function MainTabs({
   setKind,
   variant,
   setVariant,
-  cfgTab,
-  setCfgTab,
   widthMM,
   setWidthMM,
   gLocal,
@@ -139,7 +135,7 @@ export default function MainTabs({
                   </div>
                 </div>
                 <div className="bd">
-                  <VariantList kind={kind} onPick={(v: Variant) => { setVariant(v); setCfgTab('basic'); }} />
+                  <VariantList kind={kind} onPick={(v: Variant) => { setVariant(v); }} />
                 </div>
               </div>
             )}
@@ -149,8 +145,6 @@ export default function MainTabs({
                 family={family}
                 kind={kind}
                 variant={variant}
-                cfgTab={cfgTab}
-                setCfgTab={setCfgTab}
                 widthMM={widthMM}
                 setWidthMM={setWidthMM}
                 gLocal={gLocal}
