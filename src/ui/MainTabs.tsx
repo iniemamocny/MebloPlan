@@ -89,7 +89,11 @@ export default function MainTabs({
         </button>
       </div>
 
-      <SlidingPanel isOpen={tab !== null} onClose={() => setTab(null)}>
+      <SlidingPanel
+        isOpen={tab !== null}
+        onClose={() => setTab(null)}
+        className={tab !== null ? 'open' : ''}
+      >
         {tab === 'cab' && (
           <>
             <div>
