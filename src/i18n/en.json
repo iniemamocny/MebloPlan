@@ -94,7 +94,15 @@
   "forms": {
     "width": "Width",
     "height": "Height",
-    "depth": "Depth"
+    "depth": "Depth",
+    "doorsCount": "Doors count",
+    "drawersCount": "Drawers count",
+    "sections": {
+      "dimensions": "Dimensions",
+      "fronts": "Fronts",
+      "advanced": "Advanced",
+      "hardware": "Hardware"
+    }
   },
   "costs": {
     "title": "Costs",
