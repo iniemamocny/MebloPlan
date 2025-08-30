@@ -1,0 +1,133 @@
+{
+  "app": {
+    "mode": "Tryb",
+    "roles": {
+      "stolarz": "Stolarz",
+      "klient": "Klient"
+    },
+    "resetSelection": "Reset wyboru",
+    "undo": "Cofnij",
+    "redo": "Ponów",
+    "clear": "Wyczyść",
+    "wallLabel": "Ściana {{num}} ({{len}} mm)",
+    "autoWall": "Auto pod ścianę",
+    "material": {
+      "title": "Materiał (arkusz)",
+      "boardHeight": "Wysokość arkusza L (mm)",
+      "boardWidth": "Szerokość arkusza W (mm)",
+      "kerf": "Kerf (mm)",
+      "grain": "Płyta ma usłojenie",
+      "info": "Bez usłojenia: formatki można obracać (muszą się zmieścić w {{l}}×{{w}} lub {{w}}×{{l}}). Z usłojeniem: elementy wymagające słojów bez rotacji (h≤{{l}}, w≤{{w}})."
+    },
+    "tabs": {
+      "cab": "Kuchnia",
+      "room": "Pomieszczenie",
+      "costs": "Koszty",
+      "cut": "Formatki"
+    },
+    "cabinetType": "Typ szafki",
+    "subcategories": "Podkategorie ({{family}})",
+    "variant": "Wariant"
+  },
+  "catalog": {
+    "choose": "Wybierz"
+  },
+  "room": {
+    "title": "Pomieszczenie — ściany",
+    "height": "Wysokość (mm)",
+    "wallLength": "Długość ściany (mm)",
+    "angle": "Kąt (°)",
+    "addWall": "Dodaj ścianę",
+    "addWindow": "Dodaj okno",
+    "addDoor": "Dodaj drzwi"
+  },
+  "global": {
+    "title": "Ustawienia ogólne",
+    "settings": "Ustawienia — {{family}}",
+    "collapse": "Zwiń",
+    "expand": "Rozwiń",
+    "margin": "Marża (0–1)",
+    "labor": "Robocizna (zł)",
+    "cut": "Cięcie (zł/mb)",
+    "pricing": "Cennik",
+    "height": "Wysokość (mm)",
+    "depth": "Głębokość (mm)",
+    "boardType": "Rodzaj płyty",
+    "frontType": "Rodzaj frontu",
+    "backPanel": "Plecy",
+    "legs": "Nóżki",
+    "offsetWall": "Odsunięcie od ściany (mm)",
+    "hanger": "Zawieszki",
+    "gapsTitle": "Szczeliny (mm)",
+    "gapLeft": "Szczelina lewa",
+    "gapRight": "Szczelina prawa",
+    "gapTop": "Szczelina górna",
+    "gapBottom": "Szczelina dolna",
+    "gapBetween": "Szczelina między frontami"
+  },
+  "configurator": {
+    "title": "Konfiguracja — {{variant}}",
+    "basic": "Podstawowe",
+    "advanced": "Zaawansowane",
+    "width": "Szerokość (mm)",
+    "insertCabinet": "Wstaw szafkę",
+    "height": "Wysokość (mm)",
+    "depth": "Głębokość (mm)",
+    "board": "Płyta",
+    "front": "Front",
+    "back": "Plecy",
+    "shelves": "Liczba półek",
+    "gapsTitle": "Szczeliny i wysokości frontów (ustawiaj graficznie)",
+    "backOptions": {
+      "full": "full",
+      "split": "split",
+      "none": "none"
+    },
+    "backToBasic": "← Podstawowe"
+  },
+  "forms": {
+    "width": "Szerokość",
+    "height": "Wysokość",
+    "depth": "Głębokość"
+  },
+  "costs": {
+    "title": "Koszty",
+    "table": {
+      "module": "Moduł",
+      "width": "Szer.(mm)",
+      "family": "Rodzaj",
+      "doors": "Drzwi",
+      "drawers": "Szufl.",
+      "total": "Razem (zł)"
+    },
+    "summary": {
+      "item": "Pozycja",
+      "amount": "Kwota (zł)",
+      "total": "Razem"
+    }
+  },
+  "cutlist": {
+    "validation": "Walidacja formatu {{width}}×{{height}}",
+    "sheets": "Arkusze: {{sheets}}",
+    "warning": "Uwaga: formatka nie mieści się",
+    "grainInfo": {
+      "with": "Materiał ma usłojenie: elementy wymagające słojów bez rotacji (h≤{{l}}, w≤{{w}}).",
+      "without": "Materiał bez usłojenia: rotacja dozwolona dla wszystkich elementów."
+    },
+    "title": "Formatki (rozkrój)",
+    "exportCsv": "Eksport CSV — szczegółowy",
+    "exportCsvAgg": "Eksport CSV — agregowany",
+    "exportPdf": "Eksport PDF",
+    "preview": "Podgląd (agregowany)",
+    "edge": "Okleina (ABS 1mm/2mm)",
+    "headers": {
+      "material": "Materiał",
+      "part": "Element",
+      "qty": "Ilość",
+      "w": "W (mm)",
+      "h": "H (mm)",
+      "length": "Długość (mm)",
+      "lengthMb": "Długość (mb)"
+    }
+  }
+}

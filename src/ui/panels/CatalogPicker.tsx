@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { FAMILY, FAMILY_LABELS, FAMILY_COLORS, KIND_SETS, Kind, Variant } from '../../core/catalog'
 export default function TypePicker({ family, setFamily }:{ family:FAMILY; setFamily:(f:FAMILY)=>void }){
   return (
@@ -26,6 +27,7 @@ export function KindTabs({ family, kind, setKind }:{ family:FAMILY; kind:Kind|nu
   )
 }
 export function VariantList({ kind, onPick }:{ kind:Kind|null; onPick:(v:Variant)=>void }){
+  const { t } = useTranslation()
   const variants = (kind?.variants||[])
   return (
     <div className="list">
@@ -33,7 +35,7 @@ export function VariantList({ kind, onPick }:{ kind:Kind|null; onPick:(v:Variant
         <div key={v.key} className="card">
           <div style={{fontWeight:700}}>{v.label}</div>
           <div className="row">
-            <button className="btn" onClick={()=>onPick(v)}>Wybierz</button>
+            <button className="btn" onClick={()=>onPick(v)}>{t('catalog.choose')}</button>
           </div>
         </div>
       ))}
