@@ -48,13 +48,12 @@ export default function GlobalSettings(){
                 options={Object.keys(store.prices.legs)}
               />
               <Field label="Wysokość nóżek (mm)" value={g.legsHeight||0} onChange={(v)=>set({legsHeight:v})} />
-            </>)}
-            {(fam===FAMILY.WALL || fam===FAMILY.PAWLACZ) && (
-              <Field label="Zawieszki" type="select" value={g.hangerType} onChange={(v)=>set({hangerType:v})} options={Object.keys(store.prices.hangers)} />
-            )}
-            {fam!==FAMILY.TALL && (
               <Field label="Odsunięcie od ściany (mm)" value={g.offsetWall||0} onChange={(v)=>set({offsetWall:v})} />
-            )}
+            </>)}
+            {(fam===FAMILY.WALL || fam===FAMILY.PAWLACZ) && (<>
+              <Field label="Zawieszki" type="select" value={g.hangerType} onChange={(v)=>set({hangerType:v})} options={Object.keys(store.prices.hangers)} />
+              <Field label="Odsunięcie od ściany (mm)" value={g.offsetWall||0} onChange={(v)=>set({offsetWall:v})} />
+            </>)}
           </div>
           <div style={{marginTop:8}}>
             <div className="h1" style={{fontSize:14, marginBottom:6}}>Szczeliny (mm)</div>
