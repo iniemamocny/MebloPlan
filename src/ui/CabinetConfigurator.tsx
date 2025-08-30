@@ -185,7 +185,7 @@ const CabinetConfigurator: React.FC<Props> = ({
               <div><div className="small">{t('configurator.depth')}</div><input className="input" type="number" value={gLocal.depth} onChange={e=>setAdv({...gLocal, depth:Number((e.target as HTMLInputElement).value)||0})} /></div>
               <div><div className="small">{t('configurator.board')}</div><select className="input" value={gLocal.boardType} onChange={e=>setAdv({...gLocal, boardType:(e.target as HTMLSelectElement).value})}>{Object.keys(store.prices.board).map(k=><option key={k} value={k}>{k}</option>)}</select></div>
               <div><div className="small">{t('configurator.front')}</div><select className="input" value={gLocal.frontType} onChange={e=>setAdv({...gLocal, frontType:(e.target as HTMLSelectElement).value})}>{Object.keys(store.prices.front).map(k=><option key={k} value={k}>{k}</option>)}</select></div>
-              <div><div className="small">{t('configurator.back')}</div><select className="input" value={gLocal.backPanel||'full'} onChange={e=>setAdv({...gLocal, backPanel:(e.target as HTMLSelectElement).value})}>
+              <div><div className="small">{t('configurator.back')}</div><select className="input" value={gLocal.backPanel||'full'} onChange={e=>setAdv({...gLocal, backPanel:(e.target as HTMLSelectElement).value as CabinetConfig['backPanel']})}>
                 <option value="full">{t('configurator.backOptions.full')}</option>
                 <option value="split">{t('configurator.backOptions.split')}</option>
                 <option value="none">{t('configurator.backOptions.none')}</option>
