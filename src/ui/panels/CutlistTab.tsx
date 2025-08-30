@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { usePlannerStore } from '../../state/store'
 import { cutlistForModule, aggregateCutlist, toCSV, aggregateEdgebanding } from '../../core/cutlist'
 import jsPDF from 'jspdf'
-import useLocalStorageState from '../hooks/useLocalStorageState'
+import SheetSettingsPanel from '../SheetSettingsPanel'
 
 interface BoardConfig {
   L: number
@@ -22,7 +22,27 @@ interface CutItem {
   requireGrain: boolean
 }
 
-export default function CutlistTab(){
+interface CutlistTabProps {
+  boardL: number
+  setBoardL: (v: number) => void
+  boardW: number
+  setBoardW: (v: number) => void
+  boardKerf: number
+  setBoardKerf: (v: number) => void
+  boardHasGrain: boolean
+  setBoardHasGrain: (v: boolean) => void
+}
+
+export default function CutlistTab({
+  boardL,
+  setBoardL,
+  boardW,
+  setBoardW,
+  boardKerf,
+  setBoardKerf,
+  boardHasGrain,
+  setBoardHasGrain
+}: CutlistTabProps){
   const store = usePlannerStore()
   const { t } = useTranslation()
   const detailedPack = useMemo(()=> store.modules.map(m=>cutlistForModule(m, store.globals)), [store.modules, store.globals])
@@ -60,12 +80,6 @@ export default function CutlistTab(){
   }
 
   
-  const [boardL] = useLocalStorageState<number>('boardL', 2800)
-  // Default board width changed from 2100 mm to 2070 mm to reflect updated sheet dimensions
-  const [boardW] = useLocalStorageState<number>('boardW', 2070)
-  const [boardKerf] = useLocalStorageState<number>('boardKerf', 3)
-  const [boardHasGrain] = useLocalStorageState<boolean>('boardHasGrain', true)
-
   const board: BoardConfig = {
     L: boardL,
     W: boardW,
@@ -90,6 +104,18 @@ export default function CutlistTab(){
   window.__lastPlan = plan
 
 return (
+<>
+  <SheetSettingsPanel
+    t={t}
+    boardL={boardL}
+    setBoardL={setBoardL}
+    boardW={boardW}
+    setBoardW={setBoardW}
+    boardKerf={boardKerf}
+    setBoardKerf={setBoardKerf}
+    boardHasGrain={boardHasGrain}
+    setBoardHasGrain={setBoardHasGrain}
+  />
 <div className="section">
       <div className={`card ${plan.ok ? '' : 'danger'}`} style={{ marginBottom: 8 }}>
         <div className="row" style={{ justifyContent:'space-between', alignItems:'baseline' }}>
@@ -129,5 +155,6 @@ return (
         </table>
       </div>
     </div>
+  </>
   )
 }

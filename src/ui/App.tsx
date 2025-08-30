@@ -7,7 +7,6 @@ import SceneViewer from './SceneViewer';
 import useCabinetConfig from './useCabinetConfig';
 import { CabinetConfig } from './types';
 import TopBar from './TopBar';
-import SheetSettingsPanel from './SheetSettingsPanel';
 import MainTabs from './MainTabs';
 import { createTranslator } from './i18n';
 
@@ -87,18 +86,6 @@ export default function App() {
         />
       </div>
       <aside className="sidebar">
-        <SheetSettingsPanel
-          t={t}
-          boardL={boardL}
-          setBoardL={setBoardL}
-          boardW={boardW}
-          setBoardW={setBoardW}
-          boardKerf={boardKerf}
-          setBoardKerf={setBoardKerf}
-          boardHasGrain={boardHasGrain}
-          setBoardHasGrain={setBoardHasGrain}
-        />
-
         <GlobalSettings />
 
         <MainTabs
@@ -119,6 +106,14 @@ export default function App() {
           setAdv={setAdv}
           onAdd={onAdd}
           threeRef={threeRef}
+          boardL={boardL}
+          setBoardL={setBoardL}
+          boardW={boardW}
+          setBoardW={setBoardW}
+          boardKerf={boardKerf}
+          setBoardKerf={setBoardKerf}
+          boardHasGrain={boardHasGrain}
+          setBoardHasGrain={setBoardHasGrain}
         />
       </aside>
     </div>

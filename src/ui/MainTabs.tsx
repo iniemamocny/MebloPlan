@@ -26,6 +26,14 @@ interface MainTabsProps {
   setAdv: (v: CabinetConfig) => void;
   onAdd: (width: number, adv: CabinetConfig) => void;
   threeRef: React.MutableRefObject<any>;
+  boardL: number;
+  setBoardL: (v: number) => void;
+  boardW: number;
+  setBoardW: (v: number) => void;
+  boardKerf: number;
+  setBoardKerf: (v: number) => void;
+  boardHasGrain: boolean;
+  setBoardHasGrain: (v: boolean) => void;
 }
 
 export default function MainTabs({
@@ -46,6 +54,14 @@ export default function MainTabs({
   setAdv,
   onAdd,
   threeRef,
+  boardL,
+  setBoardL,
+  boardW,
+  setBoardW,
+  boardKerf,
+  setBoardKerf,
+  boardHasGrain,
+  setBoardHasGrain,
 }: MainTabsProps) {
   return (
     <>
@@ -128,7 +144,18 @@ export default function MainTabs({
 
       {tab === 'room' && <RoomTab three={threeRef} />}
       {tab === 'costs' && <CostsTab />}
-      {tab === 'cut' && <CutlistTab />}
+      {tab === 'cut' && (
+        <CutlistTab
+          boardL={boardL}
+          setBoardL={setBoardL}
+          boardW={boardW}
+          setBoardW={setBoardW}
+          boardKerf={boardKerf}
+          setBoardKerf={setBoardKerf}
+          boardHasGrain={boardHasGrain}
+          setBoardHasGrain={setBoardHasGrain}
+        />
+      )}
     </>
   );
 }
