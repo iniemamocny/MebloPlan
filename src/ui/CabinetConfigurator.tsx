@@ -122,6 +122,7 @@ const CabinetConfigurator: React.FC<Props> = ({
               shelves={gLocal.shelves}
               backPanel={gLocal.backPanel}
               dividerPosition={gLocal.dividerPosition}
+              edgeBanding={gLocal.edgeBanding}
             />
           </div>
           <div className="grid2" style={{ marginTop: 8 }}>
@@ -256,6 +257,23 @@ const CabinetConfigurator: React.FC<Props> = ({
                   <option value="full">{t('configurator.backOptions.full')}</option>
                   <option value="split">{t('configurator.backOptions.split')}</option>
                   <option value="none">{t('configurator.backOptions.none')}</option>
+                </select>
+              </div>
+              <div>
+                <div className="small">Edge banding</div>
+                <select
+                  className="input"
+                  value={gLocal.edgeBanding || 'front'}
+                  onChange={(e) =>
+                    setAdv({
+                      ...gLocal,
+                      edgeBanding: (e.target as HTMLSelectElement).value as CabinetConfig['edgeBanding'],
+                    })
+                  }
+                >
+                  <option value="none">none</option>
+                  <option value="front">front</option>
+                  <option value="full">full</option>
                 </select>
               </div>
             </div>
