@@ -101,10 +101,11 @@
     "doorsCount": "Doors count",
     "drawersCount": "Drawers count",
     "sections": {
-      "dimensions": "Dimensions",
-      "fronts": "Fronts",
+      "korpus": "Carcass",
+      "fronty": "Fronts",
       "advanced": "Advanced",
-      "hardware": "Hardware"
+      "okucie": "Hardware",
+      "nozki": "Legs"
     }
   },
   "costs": {

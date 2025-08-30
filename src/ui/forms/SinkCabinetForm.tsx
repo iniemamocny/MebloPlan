@@ -5,15 +5,13 @@ import { CabinetFormValues, CabinetFormProps } from './CornerCabinetForm'
 
 export default function SinkCabinetForm({ values, onChange }: CabinetFormProps){
   const { t } = useTranslation()
-  const { width, height, depth, doorsCount = 0, drawersCount = 0, adv, hardware } = values
+  const { height, depth, hardware, legs } = values
   const update = (patch: Partial<CabinetFormValues>) => onChange({ ...values, ...patch })
   return (
     <div>
       <details open>
-        <summary>{t('configurator.sections.korpus')}</summary>
+        <summary>{t('forms.sections.korpus')}</summary>
         <div>
-          <div className="small">{t('forms.width')}</div>
-          <SingleMMInput value={width} onChange={w=>update({ width:w })} />
           <div className="small">{t('forms.height')}</div>
           <SingleMMInput value={height} onChange={h=>update({ height:h })} />
           <div className="small">{t('forms.depth')}</div>
@@ -21,22 +19,17 @@ export default function SinkCabinetForm({ values, onChange }: CabinetFormProps){
         </div>
       </details>
       <details>
-        <summary>{t('configurator.sections.fronty')}</summary>
-        <div>
-          <div className="small">{t('forms.doorsCount')}</div>
-          <SingleMMInput min={0} step={1} value={doorsCount} onChange={n=>update({ doorsCount:n })} />
-          <div className="small">{t('forms.drawersCount')}</div>
-          <SingleMMInput min={0} step={1} value={drawersCount} onChange={n=>update({ drawersCount:n })} />
-        </div>
+        <summary>{t('forms.sections.fronty')}</summary>
+        <div />
       </details>
       <details>
-        <summary>{t('configurator.sections.okucie')}</summary>
+        <summary>{t('forms.sections.okucie')}</summary>
         {/* Sink specific advanced settings may include bowl size or position. */}
-        {adv && <pre style={{ display:'none' }}>{JSON.stringify(adv)}</pre>}
+        {hardware && <pre style={{ display:'none' }}>{JSON.stringify(hardware)}</pre>}
       </details>
       <details>
-        <summary>{t('configurator.sections.nozki')}</summary>
-        {hardware && <pre style={{ display:'none' }}>{JSON.stringify(hardware)}</pre>}
+        <summary>{t('forms.sections.nozki')}</summary>
+        {legs && <pre style={{ display:'none' }}>{JSON.stringify(legs)}</pre>}
       </details>
     </div>
   )
