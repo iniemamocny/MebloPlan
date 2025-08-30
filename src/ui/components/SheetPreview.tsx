@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { packIntoSheets, type Part, type Board } from '../../core/format'
 
 type Agg = { w:number, h:number, part?:string, material?:string, qty?:number, requireGrain?:boolean }
@@ -8,6 +9,7 @@ type Props = {
 }
 
 export default function SheetPreview({ L, W, kerf, hasGrain, items }: Props){
+  const { t } = useTranslation()
   const board: Board = { L, W, kerf, hasGrain }
   const parts: Part[] = items.map((r, idx)=> ({
     w: Math.round(r.w||0),
@@ -21,15 +23,15 @@ export default function SheetPreview({ L, W, kerf, hasGrain, items }: Props){
   return (
     <div className="card" style={{padding:8}}>
       <div className="row" style={{justifyContent:'space-between', alignItems:'baseline'}}>
-        <div className="h2">Podgląd arkuszy {W}×{L} mm</div>
-        <div className="small">Liczba arkuszy: {sheets.length}</div>
+        <div className="h2">{t('cutlist.sheetPreview.title', { W, L })}</div>
+        <div className="small">{t('cutlist.sheetPreview.count', { count: sheets.length })}</div>
       </div>
       <div style={{display:'grid', gap:12}}>
         {sheets.map((s)=>{
           const vb = `0 0 ${W} ${L}`
           return (
             <div key={s.index} className="card" style={{padding:6}}>
-              <div className="small" style={{marginBottom:6}}>Arkusz {s.index}</div>
+              <div className="small" style={{marginBottom:6}}>{t('cutlist.sheetPreview.sheetLabel', { index: s.index })}</div>
               <svg viewBox={vb} width="100%" style={{maxHeight:360, border:'1px solid #e5e7eb', background:'#fff'}}>
                 <rect x={0} y={0} width={W} height={L} fill="#fafafa" stroke="#94a3b8" />
                 {s.placed.map((p,i)=> (
@@ -44,7 +46,7 @@ export default function SheetPreview({ L, W, kerf, hasGrain, items }: Props){
           )
         })}
       </div>
-      <div className="tiny muted" style={{marginTop:6}}>Rozmieszczenie poglądowe (strip nesting). Pełny optimizer wdrożymy później.</div>
+      <div className="tiny muted" style={{marginTop:6}}>{t('cutlist.sheetPreview.note')}</div>
     </div>
   )
 }

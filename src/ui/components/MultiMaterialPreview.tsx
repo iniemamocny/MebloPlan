@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { packByMaterial, type Part, type Board } from '../../core/format'
 
 type Agg = { w:number, h:number, part?:string, material?:string, qty?:number, requireGrain?:boolean }
@@ -8,6 +9,7 @@ type Props = {
 }
 
 export default function MultiMaterialPreview({ L, W, kerf, hasGrain, items }: Props){
+  const { t } = useTranslation()
   const board: Board = { L, W, kerf, hasGrain }
   // przygotuj listę części wraz z wymaganiem usłojenia
   const parts: (Part & {material?:string})[] = items.map((r, idx)=> ({
@@ -22,20 +24,20 @@ export default function MultiMaterialPreview({ L, W, kerf, hasGrain, items }: Pr
 
   return (
     <div className="card" style={{padding:8}}>
-      <div className="h2" style={{marginBottom:8}}>Podgląd rozkroju — grupowanie wg materiału</div>
+      <div className="h2" style={{marginBottom:8}}>{t('cutlist.multiMaterialPreview.title')}</div>
       <div style={{display:'grid', gap:16}}>
         {groups.map((g, gi)=> (
           <div key={gi} className="card" style={{padding:8}}>
             <div className="row" style={{justifyContent:'space-between', alignItems:'baseline'}}>
               <div className="h2">{g.material}</div>
-              <div className="small">Arkuszy: {g.sheets.length}</div>
+              <div className="small">{t('cutlist.multiMaterialPreview.count', { count: g.sheets.length })}</div>
             </div>
             <div style={{display:'grid', gap:12}}>
               {g.sheets.map((s:any)=>{
                 const vb = `0 0 ${W} ${L}`
                 return (
                   <div key={s.index} className="card" style={{padding:6}}>
-                    <div className="small" style={{marginBottom:6}}>Arkusz {s.index}</div>
+                    <div className="small" style={{marginBottom:6}}>{t('cutlist.multiMaterialPreview.sheetLabel', { index: s.index })}</div>
                     <svg viewBox={vb} width="100%" style={{maxHeight:380, border:'1px solid #e5e7eb', background:'#fff'}}>
                       {/* definicje wzorów do wizualizacji usłojenia */}
                       <defs>
@@ -72,7 +74,7 @@ export default function MultiMaterialPreview({ L, W, kerf, hasGrain, items }: Pr
                       })}
                     </svg>
                     <div className="tiny muted" style={{marginTop:6}}>
-                      Legenda:
+                      {t('cutlist.multiMaterialPreview.legend')}
                       <span> </span>
                       {s.placed.map((p:any,i:number)=> (
                         <span key={i} style={{marginRight:10}}>#{p.idx ?? (i+1)} {p.name}</span>
@@ -85,7 +87,7 @@ export default function MultiMaterialPreview({ L, W, kerf, hasGrain, items }: Pr
           </div>
         ))}
       </div>
-      <div className="tiny muted" style={{marginTop:6}}>Heurystyka „guillotine” (poglądowa). Dokładny nesting dodamy później.</div>
+      <div className="tiny muted" style={{marginTop:6}}>{t('cutlist.multiMaterialPreview.note')}</div>
     </div>
   )
 }

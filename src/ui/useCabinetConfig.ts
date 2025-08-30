@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FAMILY, Kind, Variant, KIND_SETS } from '../core/catalog';
 import { computeModuleCost } from '../core/pricing';
 import { usePlannerStore } from '../state/store';
@@ -18,6 +19,7 @@ export function useCabinetConfig(
   const [cfgTab, setCfgTab] = useState<'basic' | 'adv'>('basic');
   const [widthMM, setWidthMM] = useState(600);
   const [adv, setAdvState] = useState<CabinetConfig | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const g = store.globals[family];
@@ -213,7 +215,7 @@ export function useCabinetConfig(
 
   const doAutoOnSelectedWall = () => {
     const segs = getWallSegments();
-    if (segs.length === 0) return alert('Brak ścian');
+    if (segs.length === 0) return alert(t('room.noWalls'));
     const seg = segs[0 + (selWall % segs.length)];
     const len = seg.length;
     const widths = autoWidthsForRun(len);
@@ -244,7 +246,7 @@ export function useCabinetConfig(
       );
       let mod: Module3D = {
         id,
-        label: 'Auto',
+        label: t('app.auto'),
         family,
         kind: KIND_SETS[family][0]?.key || 'doors',
         size: { w, h, d },

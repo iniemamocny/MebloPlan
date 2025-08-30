@@ -11,6 +11,7 @@
     "clear": "Clear",
     "wallLabel": "Wall {{num}} ({{len}} mm)",
     "autoWall": "Auto for wall",
+    "auto": "Auto",
     "material": {
       "title": "Material (sheet)",
       "boardHeight": "Sheet height L (mm)",
@@ -39,7 +40,8 @@
     "angle": "Angle (°)",
     "addWall": "Add wall",
     "addWindow": "Add window",
-    "addDoor": "Add door"
+    "addDoor": "Add door",
+    "noWalls": "No walls"
   },
   "global": {
     "title": "Global settings",
@@ -104,7 +106,8 @@
       "item": "Item",
       "amount": "Amount (PLN)",
       "total": "Total"
-    }
+    },
+    "currency": "PLN"
   },
   "cutlist": {
     "validation": "Validation for sheet {{width}}×{{height}}",
@@ -128,6 +131,19 @@
       "h": "H (mm)",
       "length": "Length (mm)",
       "lengthMb": "Length (m)"
+    },
+    "sheetPreview": {
+      "title": "Sheet preview {{W}}×{{L}} mm",
+      "count": "Number of sheets: {{count}}",
+      "sheetLabel": "Sheet {{index}}",
+      "note": "Preview arrangement (strip nesting). Full optimizer to be added later."
+    },
+    "multiMaterialPreview": {
+      "title": "Cut preview — grouped by material",
+      "count": "Sheets: {{count}}",
+      "sheetLabel": "Sheet {{index}}",
+      "legend": "Legend:",
+      "note": "\"Guillotine\" heuristic (preview). Full nesting will be added later."
     }
   }
 }

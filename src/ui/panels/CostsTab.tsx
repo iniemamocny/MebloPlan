@@ -36,7 +36,7 @@ export default function CostsTab(){
           <thead><tr><th>{t('costs.summary.item')}</th><th>{t('costs.summary.amount')}</th></tr></thead>
           <tbody>
             {Object.entries(totals).filter(([k])=>k!=='total').map(([k,v])=> <tr key={k}><td>{k}</td><td>{(v as number).toLocaleString('pl-PL')}</td></tr>)}
-            <tr><td><b>{t('costs.summary.total')}</b></td><td><b>{(totals.total||0).toLocaleString('pl-PL')} zł</b></td></tr>
+            <tr><td><b>{t('costs.summary.total')}</b></td><td><b>{(totals.total||0).toLocaleString('pl-PL')} {t('costs.currency')}</b></td></tr>
           </tbody>
         </table>
       </div>
