@@ -34,3 +34,6 @@
 .tiny{font-size:11px}
 .muted{color:#64748b}
 .card.danger{border-color:#ef4444;box-shadow:0 0 0 1px #ef4444 inset}
+.slidingPanelOverlay{position:fixed;inset:0;background:rgba(0,0,0,.3);display:flex;justify-content:flex-end;z-index:50}
+.slidingPanel{background:#fff;width:400px;max-width:100%;height:100%;box-shadow:-2px 0 8px rgba(0,0,0,.2);padding:16px;overflow-y:auto;position:relative}
+.slidingPanelClose{position:absolute;top:8px;right:12px;border:none;background:none;font-size:20px;cursor:pointer}

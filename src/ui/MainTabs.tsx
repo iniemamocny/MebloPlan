@@ -7,11 +7,12 @@ import RoomTab from './panels/RoomTab';
 import CostsTab from './panels/CostsTab';
 import CutlistTab from './panels/CutlistTab';
 import { CabinetConfig } from './types';
+import SlidingPanel from './components/SlidingPanel';
 
 interface MainTabsProps {
   t: (key: string, opts?: any) => string;
-  tab: 'cab' | 'room' | 'costs' | 'cut';
-  setTab: (t: 'cab' | 'room' | 'costs' | 'cut') => void;
+  tab: 'cab' | 'room' | 'costs' | 'cut' | null;
+  setTab: (t: 'cab' | 'room' | 'costs' | 'cut' | null) => void;
   family: FAMILY;
   setFamily: (f: FAMILY) => void;
   kind: Kind | null;
@@ -63,99 +64,105 @@ export default function MainTabs({
   boardHasGrain,
   setBoardHasGrain,
 }: MainTabsProps) {
+  const toggleTab = (name: 'cab' | 'room' | 'costs' | 'cut') => {
+    setTab(tab === name ? null : name);
+  };
+
   return (
     <>
       <div className="tabs">
-        <button className={`tabBtn ${tab === 'cab' ? 'active' : ''}`} onClick={() => setTab('cab')}>
+        <button className={`tabBtn ${tab === 'cab' ? 'active' : ''}`} onClick={() => toggleTab('cab')}>
           {t('app.tabs.cab')}
         </button>
-        <button className={`tabBtn ${tab === 'room' ? 'active' : ''}`} onClick={() => setTab('room')}>
+        <button className={`tabBtn ${tab === 'room' ? 'active' : ''}`} onClick={() => toggleTab('room')}>
           {t('app.tabs.room')}
         </button>
-        <button className={`tabBtn ${tab === 'costs' ? 'active' : ''}`} onClick={() => setTab('costs')}>
+        <button className={`tabBtn ${tab === 'costs' ? 'active' : ''}`} onClick={() => toggleTab('costs')}>
           {t('app.tabs.costs')}
         </button>
-        <button className={`tabBtn ${tab === 'cut' ? 'active' : ''}`} onClick={() => setTab('cut')}>
+        <button className={`tabBtn ${tab === 'cut' ? 'active' : ''}`} onClick={() => toggleTab('cut')}>
           {t('app.tabs.cut')}
         </button>
       </div>
 
-      {tab === 'cab' && (
-        <>
-          <div>
-            <div className="h1">{t('app.cabinetType')}</div>
-            <TypePicker
-              family={family}
-              setFamily={(f: FAMILY) => {
-                setFamily(f);
-                setKind(null);
-                setVariant(null);
-              }}
-            />
-          </div>
-
-          <div className="section">
-            <div className="hd">
-              <div>
-                <div className="h1">{t('app.subcategories', { family: FAMILY_LABELS[family] })}</div>
-              </div>
-            </div>
-            <div className="bd">
-              <KindTabs
+      <SlidingPanel isOpen={tab !== null} onClose={() => setTab(null)}>
+        {tab === 'cab' && (
+          <>
+            <div>
+              <div className="h1">{t('app.cabinetType')}</div>
+              <TypePicker
                 family={family}
-                kind={kind}
-                setKind={(k: Kind) => {
-                  setKind(k);
+                setFamily={(f: FAMILY) => {
+                  setFamily(f);
+                  setKind(null);
                   setVariant(null);
                 }}
               />
             </div>
-          </div>
 
-          {kind && (
             <div className="section">
               <div className="hd">
                 <div>
-                  <div className="h1">{t('app.variant')}</div>
+                  <div className="h1">{t('app.subcategories', { family: FAMILY_LABELS[family] })}</div>
                 </div>
               </div>
               <div className="bd">
-                <VariantList kind={kind} onPick={(v: Variant) => { setVariant(v); setCfgTab('basic'); }} />
+                <KindTabs
+                  family={family}
+                  kind={kind}
+                  setKind={(k: Kind) => {
+                    setKind(k);
+                    setVariant(null);
+                  }}
+                />
               </div>
             </div>
-          )}
 
-          {variant && (
-            <CabinetConfigurator
-              family={family}
-              kind={kind}
-              variant={variant}
-              cfgTab={cfgTab}
-              setCfgTab={setCfgTab}
-              widthMM={widthMM}
-              setWidthMM={setWidthMM}
-              gLocal={gLocal}
-              setAdv={setAdv}
-              onAdd={onAdd}
-            />
-          )}
-        </>
-      )}
+            {kind && (
+              <div className="section">
+                <div className="hd">
+                  <div>
+                    <div className="h1">{t('app.variant')}</div>
+                  </div>
+                </div>
+                <div className="bd">
+                  <VariantList kind={kind} onPick={(v: Variant) => { setVariant(v); setCfgTab('basic'); }} />
+                </div>
+              </div>
+            )}
 
-      {tab === 'room' && <RoomTab three={threeRef} />}
-      {tab === 'costs' && <CostsTab />}
-      {tab === 'cut' && (
-        <CutlistTab
-          boardL={boardL}
-          setBoardL={setBoardL}
-          boardW={boardW}
-          setBoardW={setBoardW}
-          boardKerf={boardKerf}
-          setBoardKerf={setBoardKerf}
-          boardHasGrain={boardHasGrain}
-          setBoardHasGrain={setBoardHasGrain}
-        />
-      )}
+            {variant && (
+              <CabinetConfigurator
+                family={family}
+                kind={kind}
+                variant={variant}
+                cfgTab={cfgTab}
+                setCfgTab={setCfgTab}
+                widthMM={widthMM}
+                setWidthMM={setWidthMM}
+                gLocal={gLocal}
+                setAdv={setAdv}
+                onAdd={onAdd}
+              />
+            )}
+          </>
+        )}
+
+        {tab === 'room' && <RoomTab three={threeRef} />}
+        {tab === 'costs' && <CostsTab />}
+        {tab === 'cut' && (
+          <CutlistTab
+            boardL={boardL}
+            setBoardL={setBoardL}
+            boardW={boardW}
+            setBoardW={setBoardW}
+            boardKerf={boardKerf}
+            setBoardKerf={setBoardKerf}
+            boardHasGrain={boardHasGrain}
+            setBoardHasGrain={setBoardHasGrain}
+          />
+        )}
+      </SlidingPanel>
     </>
   );
 }

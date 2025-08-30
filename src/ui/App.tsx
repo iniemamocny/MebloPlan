@@ -35,7 +35,7 @@ export default function App() {
     doAutoOnSelectedWall,
   } = useCabinetConfig(family, kind, variant, selWall, setVariant);
 
-  const [tab, setTab] = useState<'cab' | 'room' | 'costs' | 'cut'>('cab');
+  const [tab, setTab] = useState<'cab' | 'room' | 'costs' | 'cut' | null>(null);
   const [boardL, setBoardL] = useState(2800);
   const [boardW, setBoardW] = useState(2070);
   const [boardKerf, setBoardKerf] = useState(3);
