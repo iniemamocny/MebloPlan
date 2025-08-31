@@ -229,10 +229,11 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     if (tr.orientation === 'vertical') {
       const geo = new THREE.BoxGeometry(W - 2 * T, widthM, T);
       const mesh = new THREE.Mesh(geo, carcMat);
+      const z = zBase === 0 ? -T / 2 : -D + T / 2;
       mesh.position.set(
         W / 2,
         legHeight + H - tr.width / 2000 - tr.offset / 1000,
-        -D + T / 2,
+        z,
       );
       addEdges(mesh);
       group.add(mesh);
