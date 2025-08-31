@@ -142,7 +142,7 @@ describe('buildCabinetMesh', () => {
     expect(size.z).toBeCloseTo(depth + boardThickness + FRONT_OFFSET, 5);
   });
 
-  it('positions horizontal traverse by depth offset', () => {
+  it('positions horizontal traverse by width offset', () => {
     const offset = 100;
     const trWidth = 100;
     const g = buildCabinetMesh({
@@ -166,10 +166,10 @@ describe('buildCabinetMesh', () => {
         Math.abs((c as any).geometry.parameters.depth - trWidth / 1000) < 1e-6,
     ) as THREE.Mesh | undefined;
     expect(traverse).toBeTruthy();
-    expect(traverse!.position.z).toBeCloseTo(-(offset + trWidth / 2) / 1000, 5);
+    expect(traverse!.position.x).toBeCloseTo(0.5 + offset / 1000, 5);
   });
 
-  it('positions vertical traverse by offset', () => {
+  it('positions vertical traverse by depth offset', () => {
     const offset = 100;
     const trWidth = 100;
     const depth = 0.5;
@@ -199,8 +199,8 @@ describe('buildCabinetMesh', () => {
         Math.abs((c as any).geometry.parameters.depth - expectedDepth) < 1e-6,
     ) as THREE.Mesh | undefined;
     expect(traverse).toBeTruthy();
-    expect(traverse!.position.x).toBeCloseTo(boardThickness + offset / 1000, 5);
-    expect(traverse!.position.z).toBeCloseTo(-depth / 2, 5);
+    expect(traverse!.position.x).toBeCloseTo(0.5, 5);
+    expect(traverse!.position.z).toBeCloseTo(-depth / 2 - offset / 1000, 5);
     expect(traverse!.position.y).toBeCloseTo(0.9 - boardThickness / 2, 5);
 
     const frontBand = g.children.find(
@@ -210,7 +210,9 @@ describe('buildCabinetMesh', () => {
         Math.abs((c as any).geometry.parameters.height - boardThickness) <
           1e-6 &&
         Math.abs((c as any).geometry.parameters.depth - bandThickness) < 1e-6 &&
-        Math.abs(c.position.z - (-boardThickness + bandThickness / 2)) < 1e-6,
+        Math.abs(
+          c.position.z - (-boardThickness - offset / 1000 + bandThickness / 2),
+        ) < 1e-6,
     );
     const backBand = g.children.find(
       (c) =>
@@ -219,14 +221,15 @@ describe('buildCabinetMesh', () => {
         Math.abs((c as any).geometry.parameters.height - boardThickness) <
           1e-6 &&
         Math.abs((c as any).geometry.parameters.depth - bandThickness) < 1e-6 &&
-        Math.abs(c.position.z - (-depth + boardThickness - bandThickness / 2)) <
-          1e-6,
+        Math.abs(
+          c.position.z - (-depth + boardThickness - offset / 1000 - bandThickness / 2),
+        ) < 1e-6,
     );
     expect(frontBand).toBeTruthy();
     expect(backBand).toBeTruthy();
   });
 
-  it('positions back traverse by depth offset', () => {
+  it('positions back traverse by width offset', () => {
     const depth = 0.6;
     const offset = 80;
     const trWidth = 90;
@@ -252,10 +255,8 @@ describe('buildCabinetMesh', () => {
         Math.abs((c as any).geometry.parameters.depth - trWidth / 1000) < 1e-6,
     ) as THREE.Mesh | undefined;
     expect(traverse).toBeTruthy();
-    expect(traverse!.position.z).toBeCloseTo(
-      -depth + (offset + trWidth / 2) / 1000,
-      5,
-    );
+    expect(traverse!.position.x).toBeCloseTo(0.5 + offset / 1000, 5);
+    expect(traverse!.position.z).toBeCloseTo(-depth / 2, 5);
   });
 
   it('creates two traverses for topPanel.twoTraverses', () => {
@@ -286,14 +287,17 @@ describe('buildCabinetMesh', () => {
         Math.abs((c as any).geometry.parameters.depth - widthM) < 1e-6,
     ) as THREE.Mesh[];
     expect(traverses.length).toBe(2);
-    const frontExpected = -(20 + trWidth / 2) / 1000;
-    const backExpected = -depth + (30 + trWidth / 2) / 1000;
+    const frontExpected = 0.5 + 20 / 1000;
+    const backExpected = 0.5 + 30 / 1000;
     expect(
-      traverses.some((t) => Math.abs(t.position.z - frontExpected) < 1e-6),
+      traverses.some((t) => Math.abs(t.position.x - frontExpected) < 1e-6),
     ).toBe(true);
     expect(
-      traverses.some((t) => Math.abs(t.position.z - backExpected) < 1e-6),
+      traverses.some((t) => Math.abs(t.position.x - backExpected) < 1e-6),
     ).toBe(true);
+    traverses.forEach((t) =>
+      expect(t.position.z).toBeCloseTo(-depth / 2, 5),
+    );
   });
 
   it('omits bottom panel when bottomPanel is none', () => {
