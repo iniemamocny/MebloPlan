@@ -410,7 +410,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                     <div className="small" style={{ marginTop: 4 }}>
                       {t(
                         gLocal.topPanel.traverse.orientation === 'vertical'
-                          ? 'configurator.offsetWidth'
+                          ? 'configurator.offsetHeight'
                           : 'configurator.offsetDepth',
                       )}
                     </div>
@@ -420,7 +420,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                       min={0}
                       max={
                         gLocal.topPanel.traverse.orientation === 'vertical'
-                          ? widthMM
+                          ? gLocal.height - gLocal.topPanel.traverse.width
                           : gLocal.depth
                       }
                       value={gLocal.topPanel.traverse.offset}
@@ -500,7 +500,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                         <div className="small" style={{ marginTop: 4 }}>
                           {t(
                             gLocal.topPanel[pos].orientation === 'vertical'
-                              ? 'configurator.offsetWidth'
+                              ? 'configurator.offsetHeight'
                               : 'configurator.offsetDepth',
                           )}
                         </div>
@@ -510,7 +510,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                           min={0}
                           max={
                             gLocal.topPanel[pos].orientation === 'vertical'
-                              ? widthMM
+                              ? gLocal.height - gLocal.topPanel[pos].width
                               : gLocal.depth
                           }
                           value={gLocal.topPanel[pos].offset}
