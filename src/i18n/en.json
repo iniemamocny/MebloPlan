@@ -87,6 +87,8 @@
     "board": "Board",
     "front": "Front",
     "back": "Back",
+    "top": "Top",
+    "bottom": "Bottom",
     "carcassType": "Carcass type",
     "carcassTypes": {
       "type1": "Type 1",
@@ -99,7 +101,24 @@
       "full": "full",
       "split": "split",
       "none": "none"
-    }
+    },
+    "topOptions": {
+      "twoTraverses": "two traverses",
+      "frontTraverse": "front traverse",
+      "backTraverse": "back traverse",
+      "full": "full",
+      "none": "none"
+    },
+    "bottomOptions": {
+      "full": "full",
+      "none": "none"
+    },
+    "orientation": {
+      "label": "Orientation",
+      "horizontal": "horizontal",
+      "vertical": "vertical"
+    },
+    "offset": "Offset (mm)"
   },
   "forms": {
     "width": "Width",

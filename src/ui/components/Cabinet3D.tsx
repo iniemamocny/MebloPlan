@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { FAMILY } from '../../core/catalog';
 import { buildCabinetMesh } from '../../scene/cabinetBuilder';
 import { usePlannerStore } from '../../state/store';
+import { TopPanel, BottomPanel } from '../../types';
 
 export default function Cabinet3D({
   widthMM,
@@ -15,6 +16,8 @@ export default function Cabinet3D({
   family,
   shelves = 1,
   backPanel = 'full',
+  topPanel,
+  bottomPanel,
   dividerPosition,
   edgeBanding = 'front',
   carcassType = 'type1',
@@ -30,6 +33,8 @@ export default function Cabinet3D({
   family: FAMILY;
   shelves?: number;
   backPanel?: 'full' | 'split' | 'none';
+  topPanel?: TopPanel;
+  bottomPanel?: BottomPanel;
   dividerPosition?: 'left' | 'right' | 'center';
   edgeBanding?: 'none' | 'front' | 'full';
   carcassType?: 'type1' | 'type2' | 'type3';
@@ -72,6 +77,8 @@ export default function Cabinet3D({
       family,
       shelves,
       backPanel,
+      topPanel,
+      bottomPanel,
       legHeight,
       dividerPosition: drawersCount > 0 ? undefined : dividerPosition,
       showEdges,
@@ -95,6 +102,8 @@ export default function Cabinet3D({
     family,
     shelves,
     backPanel,
+    topPanel,
+    bottomPanel,
     dividerPosition,
     showEdges,
     edgeBanding,
@@ -114,4 +123,3 @@ export default function Cabinet3D({
     />
   );
 }
-

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { FAMILY, Kind, Variant } from '../core/catalog'
-import { usePlannerStore } from '../state/store'
-import TechDrawing from './components/TechDrawing'
-import Cabinet3D from './components/Cabinet3D'
-import { CabinetConfig } from './types'
-import { Gaps } from '../types'
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { FAMILY, Kind, Variant } from '../core/catalog';
+import { usePlannerStore } from '../state/store';
+import TechDrawing from './components/TechDrawing';
+import Cabinet3D from './components/Cabinet3D';
+import { CabinetConfig } from './types';
+import { Gaps } from '../types';
 import {
   CornerCabinetForm,
   SinkCabinetForm,
@@ -13,22 +13,22 @@ import {
   ApplianceCabinetForm,
   CabinetFormValues,
   CabinetFormProps,
-} from './forms'
+} from './forms';
 
 interface Props {
-  family: FAMILY
-  kind: Kind | null
-  variant: Variant
-  widthMM: number
-  setWidthMM: (n: number) => void
-  gLocal: CabinetConfig
-  setAdv: (v: CabinetConfig) => void
+  family: FAMILY;
+  kind: Kind | null;
+  variant: Variant;
+  widthMM: number;
+  setWidthMM: (n: number) => void;
+  gLocal: CabinetConfig;
+  setAdv: (v: CabinetConfig) => void;
   onAdd: (
     width: number,
     adv: CabinetConfig,
     doorsCount: number,
     drawersCount: number,
-  ) => void
+  ) => void;
 }
 
 const FORM_COMPONENTS: Record<string, React.ComponentType<CabinetFormProps>> = {
@@ -36,7 +36,7 @@ const FORM_COMPONENTS: Record<string, React.ComponentType<CabinetFormProps>> = {
   sink: SinkCabinetForm,
   cargo: CargoCabinetForm,
   appliance: ApplianceCabinetForm,
-}
+};
 
 const CabinetConfigurator: React.FC<Props> = ({
   family,
@@ -48,24 +48,24 @@ const CabinetConfigurator: React.FC<Props> = ({
   setAdv,
   onAdd,
 }) => {
-  const store = usePlannerStore()
-  const { t } = useTranslation()
-  const [doorsCount, setDoorsCount] = useState(1)
-  const [drawersCount, setDrawersCount] = useState(0)
+  const store = usePlannerStore();
+  const { t } = useTranslation();
+  const [doorsCount, setDoorsCount] = useState(1);
+  const [drawersCount, setDrawersCount] = useState(0);
   const [openSection, setOpenSection] = useState<
     'korpus' | 'fronty' | 'okucie' | 'nozki' | 'rysunki' | null
-  >(null)
-  const showFronts = openSection !== 'korpus'
+  >(null);
+  const showFronts = openSection !== 'korpus';
   useEffect(() => {
-    store.setShowFronts(showFronts)
-  }, [showFronts, store])
-  const FormComponent = kind ? FORM_COMPONENTS[kind.key] : null
+    store.setShowFronts(showFronts);
+  }, [showFronts, store]);
+  const FormComponent = kind ? FORM_COMPONENTS[kind.key] : null;
   const formValues: CabinetFormValues = {
     height: gLocal.height,
     depth: gLocal.depth,
     hardware: gLocal.hardware,
     legs: gLocal.legs,
-  }
+  };
   const handleFormChange = (vals: CabinetFormValues) => {
     setAdv({
       ...gLocal,
@@ -73,42 +73,46 @@ const CabinetConfigurator: React.FC<Props> = ({
       depth: vals.depth,
       hardware: vals.hardware,
       legs: vals.legs,
-    })
-  }
+    });
+  };
 
   useEffect(() => {
     if (kind?.key === 'doors') {
-      setDoorsCount(1)
-      setDrawersCount(0)
+      setDoorsCount(1);
+      setDrawersCount(0);
     } else if (kind?.key === 'drawers') {
-      setDoorsCount(0)
-      setDrawersCount(1)
+      setDoorsCount(0);
+      setDrawersCount(1);
     } else {
-      setDoorsCount(0)
-      setDrawersCount(0)
+      setDoorsCount(0);
+      setDrawersCount(0);
     }
-  }, [kind])
+  }, [kind]);
 
   useEffect(() => {
     if (drawersCount > 0) {
-      if (gLocal.dividerPosition) setAdv({ ...gLocal, dividerPosition: undefined })
-      return
+      if (gLocal.dividerPosition)
+        setAdv({ ...gLocal, dividerPosition: undefined });
+      return;
     }
-    const fronts = doorsCount
+    const fronts = doorsCount;
     if (fronts < 3) {
-      if (gLocal.dividerPosition) setAdv({ ...gLocal, dividerPosition: undefined })
+      if (gLocal.dividerPosition)
+        setAdv({ ...gLocal, dividerPosition: undefined });
     } else if (fronts === 4) {
       if (gLocal.dividerPosition !== 'center')
-        setAdv({ ...gLocal, dividerPosition: 'center' })
+        setAdv({ ...gLocal, dividerPosition: 'center' });
     } else if (fronts === 3 && !gLocal.dividerPosition) {
-      setAdv({ ...gLocal, dividerPosition: 'left' })
+      setAdv({ ...gLocal, dividerPosition: 'left' });
     }
-  }, [doorsCount, drawersCount, gLocal])
+  }, [doorsCount, drawersCount, gLocal]);
   return (
     <div className="section">
       <div className="hd">
         <div>
-          <div className="h1">{t('configurator.title', { variant: variant.label })}</div>
+          <div className="h1">
+            {t('configurator.title', { variant: variant.label })}
+          </div>
         </div>
       </div>
       <div className="bd">
@@ -125,6 +129,8 @@ const CabinetConfigurator: React.FC<Props> = ({
               drawerFronts={gLocal.drawerFronts}
               shelves={gLocal.shelves}
               backPanel={gLocal.backPanel}
+              topPanel={gLocal.topPanel}
+              bottomPanel={gLocal.bottomPanel}
               dividerPosition={gLocal.dividerPosition}
               edgeBanding={gLocal.edgeBanding}
               carcassType={gLocal.carcassType}
@@ -141,7 +147,9 @@ const CabinetConfigurator: React.FC<Props> = ({
                 max={2400}
                 step={1}
                 value={widthMM}
-                onChange={(e) => setWidthMM(Number((e.target as HTMLInputElement).value) || 0)}
+                onChange={(e) =>
+                  setWidthMM(Number((e.target as HTMLInputElement).value) || 0)
+                }
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     const v = Number((e.target as HTMLInputElement).value) || 0;
@@ -165,7 +173,9 @@ const CabinetConfigurator: React.FC<Props> = ({
               <select
                 className="input"
                 value={doorsCount}
-                onChange={(e) => setDoorsCount(Number((e.target as HTMLSelectElement).value))}
+                onChange={(e) =>
+                  setDoorsCount(Number((e.target as HTMLSelectElement).value))
+                }
               >
                 {[1, 2, 3, 4].map((n) => (
                   <option key={n} value={n}>
@@ -206,7 +216,10 @@ const CabinetConfigurator: React.FC<Props> = ({
           <div>
             {FormComponent && (
               <div style={{ marginBottom: 8 }}>
-                <FormComponent values={formValues} onChange={handleFormChange} />
+                <FormComponent
+                  values={formValues}
+                  onChange={handleFormChange}
+                />
               </div>
             )}
             <div style={{ marginBottom: 8 }}>
@@ -217,13 +230,20 @@ const CabinetConfigurator: React.FC<Props> = ({
                 onChange={(e) =>
                   setAdv({
                     ...gLocal,
-                    carcassType: (e.target as HTMLSelectElement).value as CabinetConfig['carcassType'],
+                    carcassType: (e.target as HTMLSelectElement)
+                      .value as CabinetConfig['carcassType'],
                   })
                 }
               >
-                <option value="type1">{t('configurator.carcassTypes.type1')}</option>
-                <option value="type2">{t('configurator.carcassTypes.type2')}</option>
-                <option value="type3">{t('configurator.carcassTypes.type3')}</option>
+                <option value="type1">
+                  {t('configurator.carcassTypes.type1')}
+                </option>
+                <option value="type2">
+                  {t('configurator.carcassTypes.type2')}
+                </option>
+                <option value="type3">
+                  {t('configurator.carcassTypes.type3')}
+                </option>
               </select>
             </div>
             <div className="grid4">
@@ -234,7 +254,10 @@ const CabinetConfigurator: React.FC<Props> = ({
                   type="number"
                   value={gLocal.height}
                   onChange={(e) =>
-                    setAdv({ ...gLocal, height: Number((e.target as HTMLInputElement).value) || 0 })
+                    setAdv({
+                      ...gLocal,
+                      height: Number((e.target as HTMLInputElement).value) || 0,
+                    })
                   }
                 />
               </div>
@@ -245,7 +268,10 @@ const CabinetConfigurator: React.FC<Props> = ({
                   type="number"
                   value={gLocal.depth}
                   onChange={(e) =>
-                    setAdv({ ...gLocal, depth: Number((e.target as HTMLInputElement).value) || 0 })
+                    setAdv({
+                      ...gLocal,
+                      depth: Number((e.target as HTMLInputElement).value) || 0,
+                    })
                   }
                 />
               </div>
@@ -255,7 +281,10 @@ const CabinetConfigurator: React.FC<Props> = ({
                   className="input"
                   value={gLocal.boardType}
                   onChange={(e) =>
-                    setAdv({ ...gLocal, boardType: (e.target as HTMLSelectElement).value })
+                    setAdv({
+                      ...gLocal,
+                      boardType: (e.target as HTMLSelectElement).value,
+                    })
                   }
                 >
                   {Object.keys(store.prices.board).map((k) => (
@@ -273,13 +302,210 @@ const CabinetConfigurator: React.FC<Props> = ({
                   onChange={(e) =>
                     setAdv({
                       ...gLocal,
-                      backPanel: (e.target as HTMLSelectElement).value as CabinetConfig['backPanel'],
+                      backPanel: (e.target as HTMLSelectElement)
+                        .value as CabinetConfig['backPanel'],
                     })
                   }
                 >
-                  <option value="full">{t('configurator.backOptions.full')}</option>
-                  <option value="split">{t('configurator.backOptions.split')}</option>
-                  <option value="none">{t('configurator.backOptions.none')}</option>
+                  <option value="full">
+                    {t('configurator.backOptions.full')}
+                  </option>
+                  <option value="split">
+                    {t('configurator.backOptions.split')}
+                  </option>
+                  <option value="none">
+                    {t('configurator.backOptions.none')}
+                  </option>
+                </select>
+              </div>
+              <div>
+                <div className="small">{t('configurator.top')}</div>
+                <select
+                  className="input"
+                  value={gLocal.topPanel?.type || 'full'}
+                  onChange={(e) => {
+                    const v = (e.target as HTMLSelectElement).value as any;
+                    if (v === 'twoTraverses')
+                      setAdv({
+                        ...gLocal,
+                        topPanel: {
+                          type: 'twoTraverses',
+                          front: { orientation: 'horizontal', offset: 0 },
+                          back: { orientation: 'horizontal', offset: 0 },
+                        },
+                      });
+                    else if (v === 'frontTraverse' || v === 'backTraverse')
+                      setAdv({
+                        ...gLocal,
+                        topPanel: {
+                          type: v,
+                          traverse: { orientation: 'horizontal', offset: 0 },
+                        },
+                      });
+                    else setAdv({ ...gLocal, topPanel: { type: v } });
+                  }}
+                >
+                  <option value="full">
+                    {t('configurator.topOptions.full')}
+                  </option>
+                  <option value="twoTraverses">
+                    {t('configurator.topOptions.twoTraverses')}
+                  </option>
+                  <option value="frontTraverse">
+                    {t('configurator.topOptions.frontTraverse')}
+                  </option>
+                  <option value="backTraverse">
+                    {t('configurator.topOptions.backTraverse')}
+                  </option>
+                  <option value="none">
+                    {t('configurator.topOptions.none')}
+                  </option>
+                </select>
+                {gLocal.topPanel?.type === 'frontTraverse' ||
+                gLocal.topPanel?.type === 'backTraverse' ? (
+                  <div style={{ marginTop: 4 }}>
+                    <div className="small">
+                      {t('configurator.orientation.label')}
+                    </div>
+                    <select
+                      className="input"
+                      value={gLocal.topPanel.traverse.orientation}
+                      onChange={(e) =>
+                        setAdv({
+                          ...gLocal,
+                          topPanel: {
+                            ...gLocal.topPanel,
+                            traverse: {
+                              ...gLocal.topPanel.traverse,
+                              orientation: (e.target as HTMLSelectElement)
+                                .value as any,
+                            },
+                          } as any,
+                        })
+                      }
+                    >
+                      <option value="horizontal">
+                        {t('configurator.orientation.horizontal')}
+                      </option>
+                      <option value="vertical">
+                        {t('configurator.orientation.vertical')}
+                      </option>
+                    </select>
+                    <div className="small" style={{ marginTop: 4 }}>
+                      {t('configurator.offset')}
+                    </div>
+                    <input
+                      className="input"
+                      type="number"
+                      min={0}
+                      max={
+                        gLocal.topPanel.traverse.orientation === 'horizontal'
+                          ? widthMM
+                          : gLocal.depth
+                      }
+                      value={gLocal.topPanel.traverse.offset}
+                      onChange={(e) =>
+                        setAdv({
+                          ...gLocal,
+                          topPanel: {
+                            ...gLocal.topPanel,
+                            traverse: {
+                              ...gLocal.topPanel.traverse,
+                              offset:
+                                Number((e.target as HTMLInputElement).value) ||
+                                0,
+                            },
+                          } as any,
+                        })
+                      }
+                    />
+                  </div>
+                ) : gLocal.topPanel?.type === 'twoTraverses' ? (
+                  <div style={{ marginTop: 4 }}>
+                    {(['front', 'back'] as const).map((pos) => (
+                      <div key={pos} style={{ marginBottom: 4 }}>
+                        <div className="small">
+                          {t(`configurator.topOptions.${pos}Traverse`)}
+                        </div>
+                        <div className="small">
+                          {t('configurator.orientation.label')}
+                        </div>
+                        <select
+                          className="input"
+                          value={gLocal.topPanel[pos].orientation}
+                          onChange={(e) =>
+                            setAdv({
+                              ...gLocal,
+                              topPanel: {
+                                ...gLocal.topPanel,
+                                [pos]: {
+                                  ...gLocal.topPanel[pos],
+                                  orientation: (e.target as HTMLSelectElement)
+                                    .value as any,
+                                },
+                              } as any,
+                            })
+                          }
+                        >
+                          <option value="horizontal">
+                            {t('configurator.orientation.horizontal')}
+                          </option>
+                          <option value="vertical">
+                            {t('configurator.orientation.vertical')}
+                          </option>
+                        </select>
+                        <div className="small" style={{ marginTop: 4 }}>
+                          {t('configurator.offset')}
+                        </div>
+                        <input
+                          className="input"
+                          type="number"
+                          min={0}
+                          max={
+                            gLocal.topPanel[pos].orientation === 'horizontal'
+                              ? widthMM
+                              : gLocal.depth
+                          }
+                          value={gLocal.topPanel[pos].offset}
+                          onChange={(e) =>
+                            setAdv({
+                              ...gLocal,
+                              topPanel: {
+                                ...gLocal.topPanel,
+                                [pos]: {
+                                  ...gLocal.topPanel[pos],
+                                  offset:
+                                    Number(
+                                      (e.target as HTMLInputElement).value,
+                                    ) || 0,
+                                },
+                              } as any,
+                            })
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+              <div>
+                <div className="small">{t('configurator.bottom')}</div>
+                <select
+                  className="input"
+                  value={gLocal.bottomPanel || 'full'}
+                  onChange={(e) =>
+                    setAdv({
+                      ...gLocal,
+                      bottomPanel: (e.target as HTMLSelectElement).value as any,
+                    })
+                  }
+                >
+                  <option value="full">
+                    {t('configurator.bottomOptions.full')}
+                  </option>
+                  <option value="none">
+                    {t('configurator.bottomOptions.none')}
+                  </option>
                 </select>
               </div>
               <div>
@@ -290,7 +516,8 @@ const CabinetConfigurator: React.FC<Props> = ({
                   onChange={(e) =>
                     setAdv({
                       ...gLocal,
-                      edgeBanding: (e.target as HTMLSelectElement).value as CabinetConfig['edgeBanding'],
+                      edgeBanding: (e.target as HTMLSelectElement)
+                        .value as CabinetConfig['edgeBanding'],
                     })
                   }
                 >
@@ -309,7 +536,11 @@ const CabinetConfigurator: React.FC<Props> = ({
                   min={0}
                   value={gLocal.shelves || 0}
                   onChange={(e) =>
-                    setAdv({ ...gLocal, shelves: Number((e.target as HTMLInputElement).value) || 0 })
+                    setAdv({
+                      ...gLocal,
+                      shelves:
+                        Number((e.target as HTMLInputElement).value) || 0,
+                    })
                   }
                 />
               </div>
@@ -333,7 +564,10 @@ const CabinetConfigurator: React.FC<Props> = ({
                   className="input"
                   value={gLocal.frontType}
                   onChange={(e) =>
-                    setAdv({ ...gLocal, frontType: (e.target as HTMLSelectElement).value })
+                    setAdv({
+                      ...gLocal,
+                      frontType: (e.target as HTMLSelectElement).value,
+                    })
                   }
                 >
                   {Object.keys(store.prices.front).map((k) => (
@@ -353,7 +587,9 @@ const CabinetConfigurator: React.FC<Props> = ({
                       <input
                         type="radio"
                         checked={gLocal.dividerPosition === 'left'}
-                        onChange={() => setAdv({ ...gLocal, dividerPosition: 'left' })}
+                        onChange={() =>
+                          setAdv({ ...gLocal, dividerPosition: 'left' })
+                        }
                       />
                       L
                     </label>
@@ -361,7 +597,9 @@ const CabinetConfigurator: React.FC<Props> = ({
                       <input
                         type="radio"
                         checked={gLocal.dividerPosition === 'right'}
-                        onChange={() => setAdv({ ...gLocal, dividerPosition: 'right' })}
+                        onChange={() =>
+                          setAdv({ ...gLocal, dividerPosition: 'right' })
+                        }
                       />
                       P
                     </label>
@@ -446,7 +684,7 @@ const CabinetConfigurator: React.FC<Props> = ({
         </details>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CabinetConfigurator
+export default CabinetConfigurator;

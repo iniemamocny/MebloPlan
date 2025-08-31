@@ -31,12 +31,12 @@ export function useCabinetConfig(
       gaps: { ...g.gaps },
       shelves: g.shelves ?? defaultShelves,
       backPanel: g.backPanel,
+      topPanel: g.topPanel,
+      bottomPanel: g.bottomPanel,
       edgeBanding: 'front',
       carcassType: g.carcassType,
     });
   }, [family, store.globals]);
-
-
 
   const snapToWalls = (
     mSize: { w: number; h: number; d: number },
@@ -140,6 +140,8 @@ export function useCabinetConfig(
           frontType: g.frontType,
           gaps: g.gaps,
           backPanel: g.backPanel,
+          topPanel: g.topPanel,
+          bottomPanel: g.bottomPanel,
           edgeBanding: g.edgeBanding,
           carcassType: g.carcassType,
         },
@@ -228,6 +230,8 @@ export function useCabinetConfig(
             frontType: g.frontType,
             gaps: g.gaps,
             backPanel: g.backPanel,
+            topPanel: g.topPanel,
+            bottomPanel: g.bottomPanel,
             edgeBanding: 'front',
             carcassType: g.carcassType,
           },

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { FAMILY, FAMILY_COLORS } from '../core/catalog';
+import { TopPanel, BottomPanel, Traverse } from '../types';
 
 export interface CabinetOptions {
   width: number;
@@ -12,6 +13,8 @@ export interface CabinetOptions {
   family: FAMILY;
   shelves?: number;
   backPanel?: 'full' | 'split' | 'none';
+  topPanel?: TopPanel;
+  bottomPanel?: BottomPanel;
   legHeight?: number;
   showHandles?: boolean;
   boardThickness?: number;
@@ -40,6 +43,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     family,
     shelves = 1,
     backPanel = 'full',
+    topPanel = { type: 'full' } as TopPanel,
+    bottomPanel = 'full' as BottomPanel,
     legHeight = 0,
     showHandles = true,
     boardThickness: T = 0.018,
@@ -113,18 +118,22 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   const edgeMat = new THREE.LineBasicMaterial({ color: 0x000000 });
   const addEdges = (mesh: THREE.Mesh) => {
     if (!showEdges) return;
-    const e = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), edgeMat);
+    const e = new THREE.LineSegments(
+      new THREE.EdgesGeometry(mesh.geometry),
+      edgeMat,
+    );
     mesh.add(e);
   };
 
   // Sides
-  const sideHeight = carcassType === 'type1' ? H : carcassType === 'type2' ? H - T : H - 2 * T;
+  const sideHeight =
+    carcassType === 'type1' ? H : carcassType === 'type2' ? H - T : H - 2 * T;
   const sideY =
     carcassType === 'type2'
       ? legHeight + T + (H - T) / 2
       : carcassType === 'type3'
-      ? legHeight + T + (H - 2 * T) / 2
-      : legHeight + H / 2;
+        ? legHeight + T + (H - 2 * T) / 2
+        : legHeight + H / 2;
   const sideGeo = new THREE.BoxGeometry(T, sideHeight, D);
   const leftSide = new THREE.Mesh(sideGeo, carcMat);
   leftSide.position.set(T / 2, sideY, -D / 2);
@@ -136,26 +145,19 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   group.add(rightSide);
   if (edgeBanding !== 'none') {
     addBand(T / 2, sideY, bandThickness / 2, T, sideHeight, bandThickness);
-    addBand(
-      W - T / 2,
-      sideY,
-      bandThickness / 2,
-      T,
-      sideHeight,
-      bandThickness,
-    );
+    addBand(W - T / 2, sideY, bandThickness / 2, T, sideHeight, bandThickness);
     if (edgeBanding === 'full') {
       const sideBottomY = sideY - sideHeight / 2;
       const sideTopY = sideY + sideHeight / 2;
-      addBand(T / 2, sideBottomY + bandThickness / 2, -D / 2, T, bandThickness, D);
       addBand(
         T / 2,
-        sideTopY - bandThickness / 2,
+        sideBottomY + bandThickness / 2,
         -D / 2,
         T,
         bandThickness,
         D,
       );
+      addBand(T / 2, sideTopY - bandThickness / 2, -D / 2, T, bandThickness, D);
       addBand(
         W - T / 2,
         sideBottomY + bandThickness / 2,
@@ -177,47 +179,112 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
 
   // Top and bottom
   const bottomWidth = carcassType === 'type1' ? W - 2 * T : W;
-  const topWidth = carcassType === 'type3' ? W : carcassType === 'type2' ? W - 2 * T : W - 2 * T;
-  const bottom = new THREE.Mesh(new THREE.BoxGeometry(bottomWidth, T, D), carcMat);
-  bottom.position.set(W / 2, legHeight + T / 2, -D / 2);
-  addEdges(bottom);
-  group.add(bottom);
-  const top = new THREE.Mesh(new THREE.BoxGeometry(topWidth, T, D), carcMat);
-  top.position.set(W / 2, legHeight + H - T / 2, -D / 2);
-  addEdges(top);
-  group.add(top);
-  if (edgeBanding !== 'none') {
-    addBand(W / 2, legHeight + T / 2, bandThickness / 2, bottomWidth, T, bandThickness);
-    addBand(W / 2, legHeight + H - T / 2, bandThickness / 2, topWidth, T, bandThickness);
-    if (edgeBanding === 'full') {
-      const bottomLeft = (W - bottomWidth) / 2;
-      const topLeft = (W - topWidth) / 2;
-      addBand(bottomLeft + bandThickness / 2, legHeight + T / 2, -D / 2, bandThickness, T, D);
+  const topWidth =
+    carcassType === 'type3'
+      ? W
+      : carcassType === 'type2'
+        ? W - 2 * T
+        : W - 2 * T;
+  if (bottomPanel !== 'none') {
+    const bottom = new THREE.Mesh(
+      new THREE.BoxGeometry(bottomWidth, T, D),
+      carcMat,
+    );
+    bottom.position.set(W / 2, legHeight + T / 2, -D / 2);
+    addEdges(bottom);
+    group.add(bottom);
+    if (edgeBanding !== 'none') {
       addBand(
-        W - bottomLeft - bandThickness / 2,
+        W / 2,
         legHeight + T / 2,
-        -D / 2,
-        bandThickness,
+        bandThickness / 2,
+        bottomWidth,
         T,
-        D,
-      );
-      addBand(
-        topLeft + bandThickness / 2,
-        legHeight + H - T / 2,
-        -D / 2,
         bandThickness,
-        T,
-        D,
       );
-      addBand(
-        W - topLeft - bandThickness / 2,
-        legHeight + H - T / 2,
-        -D / 2,
-        bandThickness,
-        T,
-        D,
-      );
+      if (edgeBanding === 'full') {
+        const bottomLeft = (W - bottomWidth) / 2;
+        addBand(
+          bottomLeft + bandThickness / 2,
+          legHeight + T / 2,
+          -D / 2,
+          bandThickness,
+          T,
+          D,
+        );
+        addBand(
+          W - bottomLeft - bandThickness / 2,
+          legHeight + T / 2,
+          -D / 2,
+          bandThickness,
+          T,
+          D,
+        );
+      }
     }
+  }
+  const addTraverseTop = (tr: Traverse, zBase: number) => {
+    if (tr.orientation === 'horizontal') {
+      const geo = new THREE.BoxGeometry(T, T, D);
+      const mesh = new THREE.Mesh(geo, carcMat);
+      mesh.position.set(
+        tr.offset / 1000 + T / 2,
+        legHeight + H - T / 2,
+        -D / 2,
+      );
+      addEdges(mesh);
+      group.add(mesh);
+    } else {
+      const geo = new THREE.BoxGeometry(W, T, T);
+      const mesh = new THREE.Mesh(geo, carcMat);
+      const z =
+        zBase === 0 ? -tr.offset / 1000 - T / 2 : -D + tr.offset / 1000 + T / 2;
+      mesh.position.set(W / 2, legHeight + H - T / 2, z);
+      addEdges(mesh);
+      group.add(mesh);
+    }
+  };
+  if (!topPanel || topPanel.type === 'full') {
+    const top = new THREE.Mesh(new THREE.BoxGeometry(topWidth, T, D), carcMat);
+    top.position.set(W / 2, legHeight + H - T / 2, -D / 2);
+    addEdges(top);
+    group.add(top);
+    if (edgeBanding !== 'none') {
+      addBand(
+        W / 2,
+        legHeight + H - T / 2,
+        bandThickness / 2,
+        topWidth,
+        T,
+        bandThickness,
+      );
+      if (edgeBanding === 'full') {
+        const topLeft = (W - topWidth) / 2;
+        addBand(
+          topLeft + bandThickness / 2,
+          legHeight + H - T / 2,
+          -D / 2,
+          bandThickness,
+          T,
+          D,
+        );
+        addBand(
+          W - topLeft - bandThickness / 2,
+          legHeight + H - T / 2,
+          -D / 2,
+          bandThickness,
+          T,
+          D,
+        );
+      }
+    }
+  } else if (topPanel.type === 'frontTraverse') {
+    addTraverseTop(topPanel.traverse, 0);
+  } else if (topPanel.type === 'backTraverse') {
+    addTraverseTop(topPanel.traverse, D);
+  } else if (topPanel.type === 'twoTraverses') {
+    addTraverseTop(topPanel.front, 0);
+    addTraverseTop(topPanel.back, D);
   }
 
   // Back panel styles
@@ -254,22 +321,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       if (edgeBanding !== 'none') {
         addBand(W / 2, y, bandThickness / 2, W - 2 * T, T, bandThickness);
         if (edgeBanding === 'full') {
-          addBand(
-            T + bandThickness / 2,
-            y,
-            -D / 2,
-            bandThickness,
-            T,
-            D,
-          );
-          addBand(
-            W - T - bandThickness / 2,
-            y,
-            -D / 2,
-            bandThickness,
-            T,
-            D,
-          );
+          addBand(T + bandThickness / 2, y, -D / 2, bandThickness, T, D);
+          addBand(W - T - bandThickness / 2, y, -D / 2, bandThickness, T, D);
         }
       }
     }

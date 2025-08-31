@@ -87,6 +87,8 @@
     "board": "Płyta",
     "front": "Front",
     "back": "Plecy",
+    "top": "Góra",
+    "bottom": "Dół",
     "carcassType": "Rodzaj korpusu",
     "carcassTypes": {
       "type1": "Typ 1",
@@ -99,7 +101,24 @@
       "full": "full",
       "split": "split",
       "none": "none"
-    }
+    },
+    "topOptions": {
+      "twoTraverses": "dwa trawersy",
+      "frontTraverse": "przedni trawers",
+      "backTraverse": "tylny trawers",
+      "full": "pełny",
+      "none": "brak"
+    },
+    "bottomOptions": {
+      "full": "pełny",
+      "none": "brak"
+    },
+    "orientation": {
+      "label": "Orientacja",
+      "horizontal": "pozioma",
+      "vertical": "pionowa"
+    },
+    "offset": "Przesunięcie (mm)"
   },
   "forms": {
     "width": "Szerokość",

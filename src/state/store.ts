@@ -22,6 +22,8 @@ export const defaultGlobal: Globals = {
     offsetWall: 30,
     shelves: 1,
     backPanel: 'full',
+    topPanel: { type: 'full' },
+    bottomPanel: 'full',
     carcassType: 'type1',
   },
   [FAMILY.WALL]: {
@@ -34,6 +36,8 @@ export const defaultGlobal: Globals = {
     offsetWall: 20,
     shelves: 1,
     backPanel: 'full',
+    topPanel: { type: 'full' },
+    bottomPanel: 'full',
     carcassType: 'type1',
   },
   [FAMILY.PAWLACZ]: {
@@ -46,6 +50,8 @@ export const defaultGlobal: Globals = {
     offsetWall: 30,
     shelves: 1,
     backPanel: 'full',
+    topPanel: { type: 'full' },
+    bottomPanel: 'full',
     carcassType: 'type1',
   },
   [FAMILY.TALL]: {
@@ -56,6 +62,8 @@ export const defaultGlobal: Globals = {
     gaps: { ...defaultGaps },
     shelves: 4,
     backPanel: 'full',
+    topPanel: { type: 'full' },
+    bottomPanel: 'full',
     carcassType: 'type1',
   },
 };
@@ -143,7 +151,11 @@ export const usePlannerStore = create<Store>((set, get) => ({
           newAdv.gaps = { ...(m.adv?.gaps || {}), ...patch.gaps };
         if (patch.shelves !== undefined) newAdv.shelves = patch.shelves;
         if (patch.backPanel !== undefined) newAdv.backPanel = patch.backPanel;
-        if (patch.carcassType !== undefined) newAdv.carcassType = patch.carcassType;
+        if (patch.topPanel !== undefined) newAdv.topPanel = patch.topPanel;
+        if (patch.bottomPanel !== undefined)
+          newAdv.bottomPanel = patch.bottomPanel;
+        if (patch.carcassType !== undefined)
+          newAdv.carcassType = patch.carcassType;
         const newSize = { ...m.size };
         if (patch.height !== undefined) newSize.h = patch.height / 1000;
         if (patch.depth !== undefined) newSize.d = patch.depth / 1000;
