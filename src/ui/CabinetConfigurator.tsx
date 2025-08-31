@@ -50,6 +50,7 @@ const CabinetConfigurator: React.FC<Props> = ({
 }) => {
   const setShowFronts = usePlannerStore((s) => s.setShowFronts);
   const currentShowFronts = usePlannerStore((s) => s.showFronts);
+  const prices = usePlannerStore((s) => s.prices);
   const { t } = useTranslation();
   const [doorsCount, setDoorsCount] = useState(1);
   const [drawersCount, setDrawersCount] = useState(0);
@@ -288,7 +289,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                     })
                   }
                 >
-                  {Object.keys(store.prices.board).map((k) => (
+                  {Object.keys(prices.board).map((k) => (
                     <option key={k} value={k}>
                       {k}
                     </option>
@@ -571,7 +572,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                     })
                   }
                 >
-                  {Object.keys(store.prices.front).map((k) => (
+                  {Object.keys(prices.front).map((k) => (
                     <option key={k} value={k}>
                       {k}
                     </option>
