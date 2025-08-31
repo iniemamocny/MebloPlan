@@ -406,7 +406,11 @@ const CabinetConfigurator: React.FC<Props> = ({
                       </option>
                     </select>
                     <div className="small" style={{ marginTop: 4 }}>
-                      {t('configurator.offset')}
+                      {t(
+                        gLocal.topPanel.traverse.orientation === 'vertical'
+                          ? 'configurator.offsetWidth'
+                          : 'configurator.offsetDepth',
+                      )}
                     </div>
                     <input
                       className="input"
@@ -414,8 +418,8 @@ const CabinetConfigurator: React.FC<Props> = ({
                       min={0}
                       max={
                         gLocal.topPanel.traverse.orientation === 'vertical'
-                          ? gLocal.depth
-                          : widthMM
+                          ? widthMM
+                          : gLocal.depth
                       }
                       value={gLocal.topPanel.traverse.offset}
                       onChange={(e) =>
@@ -492,7 +496,11 @@ const CabinetConfigurator: React.FC<Props> = ({
                           </option>
                         </select>
                         <div className="small" style={{ marginTop: 4 }}>
-                          {t('configurator.offset')}
+                          {t(
+                            gLocal.topPanel[pos].orientation === 'vertical'
+                              ? 'configurator.offsetWidth'
+                              : 'configurator.offsetDepth',
+                          )}
                         </div>
                         <input
                           className="input"
@@ -500,8 +508,8 @@ const CabinetConfigurator: React.FC<Props> = ({
                           min={0}
                           max={
                             gLocal.topPanel[pos].orientation === 'vertical'
-                              ? gLocal.depth
-                              : widthMM
+                              ? widthMM
+                              : gLocal.depth
                           }
                           value={gLocal.topPanel[pos].offset}
                           onChange={(e) =>

@@ -119,6 +119,8 @@
       "vertical": "pionowa"
     },
     "offset": "Przesunięcie (mm)",
+    "offsetWidth": "Przesunięcie (szerokość, mm)",
+    "offsetDepth": "Przesunięcie (głębokość, mm)",
     "traverseWidth": "Szerokość trawersu (mm)"
   },
   "forms": {

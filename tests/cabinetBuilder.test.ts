@@ -125,6 +125,62 @@ describe('buildCabinetMesh', () => {
     expect(size.z).toBeCloseTo(depth + boardThickness + FRONT_OFFSET, 5)
   })
 
+  it('positions horizontal traverse by depth offset', () => {
+    const offset = 100
+    const trWidth = 100
+    const g = buildCabinetMesh({
+      width: 1,
+      height: 0.9,
+      depth: 0.5,
+      drawers: 0,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      topPanel: {
+        type: 'frontTraverse',
+        traverse: { orientation: 'horizontal', offset, width: trWidth },
+      },
+    })
+    const traverse = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - 1) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - trWidth / 1000) < 1e-6,
+    ) as THREE.Mesh | undefined
+    expect(traverse).toBeTruthy()
+    expect(traverse!.position.z).toBeCloseTo(
+      -(offset + trWidth / 2) / 1000,
+      5,
+    )
+  })
+
+  it('positions vertical traverse by width offset', () => {
+    const offset = 100
+    const trWidth = 100
+    const g = buildCabinetMesh({
+      width: 1,
+      height: 0.9,
+      depth: 0.5,
+      drawers: 0,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      topPanel: {
+        type: 'frontTraverse',
+        traverse: { orientation: 'vertical', offset, width: trWidth },
+      },
+    })
+    const traverse = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.depth - 0.5) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.width - trWidth / 1000) < 1e-6,
+    ) as THREE.Mesh | undefined
+    expect(traverse).toBeTruthy()
+    expect(traverse!.position.x).toBeCloseTo(
+      (offset + trWidth / 2) / 1000,
+      5,
+    )
+  })
+
   it('adds edge outlines when showEdges is true', () => {
     const g = buildCabinetMesh({
       width: 1,
