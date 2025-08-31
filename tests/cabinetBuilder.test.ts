@@ -163,12 +163,14 @@ describe('buildCabinetMesh', () => {
       drawers: 0,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
+      edgeBanding: 'full',
       topPanel: {
         type: 'frontTraverse',
         traverse: { orientation: 'vertical', offset, width: trWidth },
       },
     });
     const boardThickness = 0.018;
+    const bandThickness = 0.002;
     const expectedDepth = depth - 2 * boardThickness;
     const widthM = trWidth / 1000;
     const traverse = g.children.find(
@@ -180,12 +182,31 @@ describe('buildCabinetMesh', () => {
         Math.abs((c as any).geometry.parameters.depth - expectedDepth) < 1e-6,
     ) as THREE.Mesh | undefined;
     expect(traverse).toBeTruthy();
-    expect(traverse!.position.x).toBeCloseTo(
-      boardThickness + offset / 1000 + widthM / 2,
-      5,
-    );
-    expect(traverse!.position.z).toBeCloseTo(-expectedDepth / 2, 5);
+    expect(traverse!.position.x).toBeCloseTo(boardThickness + offset / 1000, 5);
+    expect(traverse!.position.z).toBeCloseTo(-depth / 2, 5);
     expect(traverse!.position.y).toBeCloseTo(0.9 - boardThickness / 2, 5);
+
+    const frontBand = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - widthM) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - boardThickness) <
+          1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - bandThickness) < 1e-6 &&
+        Math.abs(c.position.z - (-boardThickness + bandThickness / 2)) < 1e-6,
+    );
+    const backBand = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - widthM) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - boardThickness) <
+          1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - bandThickness) < 1e-6 &&
+        Math.abs(c.position.z - (-depth + boardThickness - bandThickness / 2)) <
+          1e-6,
+    );
+    expect(frontBand).toBeTruthy();
+    expect(backBand).toBeTruthy();
   });
 
   it('adds edge outlines when showEdges is true', () => {
