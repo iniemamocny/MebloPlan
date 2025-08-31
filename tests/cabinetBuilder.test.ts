@@ -226,6 +226,102 @@ describe('buildCabinetMesh', () => {
     expect(backBand).toBeTruthy();
   });
 
+  it('positions back traverse by depth offset', () => {
+    const depth = 0.6;
+    const offset = 80;
+    const trWidth = 90;
+    const g = buildCabinetMesh({
+      width: 1,
+      height: 0.9,
+      depth,
+      drawers: 0,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      edgeBanding: 'none',
+      topPanel: {
+        type: 'backTraverse',
+        traverse: { orientation: 'horizontal', offset, width: trWidth },
+      },
+    });
+    const boardThickness = 0.018;
+    const expectedWidth = 1 - 2 * boardThickness;
+    const traverse = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - expectedWidth) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - trWidth / 1000) < 1e-6,
+    ) as THREE.Mesh | undefined;
+    expect(traverse).toBeTruthy();
+    expect(traverse!.position.z).toBeCloseTo(
+      -depth + (offset + trWidth / 2) / 1000,
+      5,
+    );
+  });
+
+  it('creates two traverses for topPanel.twoTraverses', () => {
+    const depth = 0.5;
+    const trWidth = 80;
+    const g = buildCabinetMesh({
+      width: 1,
+      height: 0.9,
+      depth,
+      drawers: 0,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      edgeBanding: 'none',
+      topPanel: {
+        type: 'twoTraverses',
+        front: { orientation: 'horizontal', offset: 20, width: trWidth },
+        back: { orientation: 'horizontal', offset: 30, width: trWidth },
+      },
+    });
+    const boardThickness = 0.018;
+    const expectedWidth = 1 - 2 * boardThickness;
+    const widthM = trWidth / 1000;
+    const traverses = g.children.filter(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - expectedWidth) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - boardThickness) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - widthM) < 1e-6,
+    ) as THREE.Mesh[];
+    expect(traverses.length).toBe(2);
+    const frontExpected = -(20 + trWidth / 2) / 1000;
+    const backExpected = -depth + (30 + trWidth / 2) / 1000;
+    expect(
+      traverses.some((t) => Math.abs(t.position.z - frontExpected) < 1e-6),
+    ).toBe(true);
+    expect(
+      traverses.some((t) => Math.abs(t.position.z - backExpected) < 1e-6),
+    ).toBe(true);
+  });
+
+  it('omits bottom panel when bottomPanel is none', () => {
+    const depth = 0.5;
+    const g = buildCabinetMesh({
+      width: 1,
+      height: 0.9,
+      depth,
+      drawers: 0,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      topPanel: { type: 'none' },
+      bottomPanel: 'none',
+      edgeBanding: 'none',
+    });
+    const boardThickness = 0.018;
+    const bottomWidth = 1 - 2 * boardThickness;
+    const bottom = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - bottomWidth) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - boardThickness) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - depth) < 1e-6 &&
+        Math.abs(c.position.y - boardThickness / 2) < 1e-6,
+    );
+    expect(bottom).toBeUndefined();
+  });
+
   it('adds edge outlines when showEdges is true', () => {
     const g = buildCabinetMesh({
       width: 1,
