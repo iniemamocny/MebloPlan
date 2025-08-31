@@ -1,113 +1,137 @@
-import { FAMILY } from './core/catalog'
+import { FAMILY } from './core/catalog';
 
-export type Gaps = { left:number; right:number; top:number; bottom:number; between:number }
+export type Gaps = {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+  between: number;
+};
 
-export interface GlobalsItem {
-  height:number
-  depth:number
-  boardType:string
-  frontType:string
-  gaps: Gaps
-  legsType?:string
-  legsHeight?:number
-  hangerType?:string
-  offsetWall?:number
-  shelves?:number
-  backPanel?:'full'|'split'|'none'
-  carcassType?: 'type1' | 'type2' | 'type3'
+export type TraverseOrientation = 'horizontal' | 'vertical';
+export interface Traverse {
+  orientation: TraverseOrientation;
+  /** offset in millimetres */
+  offset: number;
 }
 
-export type Globals = Record<FAMILY, GlobalsItem>
+export type TopPanel =
+  | { type: 'full' }
+  | { type: 'none' }
+  | { type: 'frontTraverse' | 'backTraverse'; traverse: Traverse }
+  | { type: 'twoTraverses'; front: Traverse; back: Traverse };
+
+export type BottomPanel = 'full' | 'none';
+
+export interface GlobalsItem {
+  height: number;
+  depth: number;
+  boardType: string;
+  frontType: string;
+  gaps: Gaps;
+  legsType?: string;
+  legsHeight?: number;
+  hangerType?: string;
+  offsetWall?: number;
+  shelves?: number;
+  backPanel?: 'full' | 'split' | 'none';
+  topPanel?: TopPanel;
+  bottomPanel?: BottomPanel;
+  carcassType?: 'type1' | 'type2' | 'type3';
+}
+
+export type Globals = Record<FAMILY, GlobalsItem>;
 
 export interface Prices {
-  board: Record<string, number>
-  front: Record<string, number>
-  edging: Record<string, number>
-  cut: number
-  legs: Record<string, number>
-  hangers: Record<string, number>
-  hinges: Record<string, number>
-  drawerSlide: Record<string, number>
-  aventos: Record<string, number>
-  cargo: Record<string, number>
-  hoodKit: number
-  sinkKit: number
-  dwKit: number
-  fridgeKit: number
-  mwKit: number
-  handle: Record<string, number>
-  labor: number
-  margin: number
+  board: Record<string, number>;
+  front: Record<string, number>;
+  edging: Record<string, number>;
+  cut: number;
+  legs: Record<string, number>;
+  hangers: Record<string, number>;
+  hinges: Record<string, number>;
+  drawerSlide: Record<string, number>;
+  aventos: Record<string, number>;
+  cargo: Record<string, number>;
+  hoodKit: number;
+  sinkKit: number;
+  dwKit: number;
+  fridgeKit: number;
+  mwKit: number;
+  handle: Record<string, number>;
+  labor: number;
+  margin: number;
 }
 
 export interface Parts {
-  board:number
-  front:number
-  edging:number
-  cut:number
-  hinges:number
-  slides:number
-  legs:number
-  hangers:number
-  aventos:number
-  cargo:number
-  kits:number
-  labor:number
+  board: number;
+  front: number;
+  edging: number;
+  cut: number;
+  hinges: number;
+  slides: number;
+  legs: number;
+  hangers: number;
+  aventos: number;
+  cargo: number;
+  kits: number;
+  labor: number;
 }
 
 export interface PriceCounts {
-  doors:number
-  drawers:number
-  legs:number
-  hangers:number
-  hinges:number
+  doors: number;
+  drawers: number;
+  legs: number;
+  hangers: number;
+  hinges: number;
 }
 
 export interface Price {
-  total:number
-  parts: Parts
-  counts: PriceCounts
+  total: number;
+  parts: Parts;
+  counts: PriceCounts;
 }
 
 export interface ModuleAdv {
-  height?:number
-  depth?:number
-  boardType?:string
-  frontType?:string
-  gaps?: Gaps
-  drawerFronts?: number[]
-  shelves?:number
-  backPanel?:'full'|'split'|'none'
-  dividerPosition?: 'left' | 'right' | 'center'
-  edgeBanding?: 'none' | 'front' | 'full'
-  carcassType?: 'type1' | 'type2' | 'type3'
+  height?: number;
+  depth?: number;
+  boardType?: string;
+  frontType?: string;
+  gaps?: Gaps;
+  drawerFronts?: number[];
+  shelves?: number;
+  backPanel?: 'full' | 'split' | 'none';
+  topPanel?: TopPanel;
+  bottomPanel?: BottomPanel;
+  dividerPosition?: 'left' | 'right' | 'center';
+  edgeBanding?: 'none' | 'front' | 'full';
+  carcassType?: 'type1' | 'type2' | 'type3';
 }
 
 export interface Module3D {
-  id:string
-  label:string
-  family:FAMILY
-  kind:string
-  size:{ w:number; h:number; d:number }
-  position:[number,number,number]
-  rotationY?:number
-  price?: Price
-  fittings?: Record<string, number>
-  segIndex?: number | null
-  adv?: ModuleAdv
-  openStates?: boolean[]
+  id: string;
+  label: string;
+  family: FAMILY;
+  kind: string;
+  size: { w: number; h: number; d: number };
+  position: [number, number, number];
+  rotationY?: number;
+  price?: Price;
+  fittings?: Record<string, number>;
+  segIndex?: number | null;
+  adv?: ModuleAdv;
+  openStates?: boolean[];
 }
 
-export type Opening = Record<string, number>
+export type Opening = Record<string, number>;
 
 export interface Room {
-  walls: { length:number; angle:number }[]
-  openings: Opening[]
-  height:number
+  walls: { length: number; angle: number }[];
+  openings: Opening[];
+  height: number;
 }
 
 export interface PricingData {
-  prices: Prices
-  globals: Globals
+  prices: Prices;
+  globals: Globals;
 }
-
