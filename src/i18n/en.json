@@ -121,7 +121,6 @@
     "offset": "Offset (mm)",
     "offsetWidth": "Offset (width mm)",
     "offsetDepth": "Offset (depth mm)",
-    "offsetHeight": "Offset (height mm)",
     "traverseWidth": "Traverse width (mm)"
   },
   "forms": {

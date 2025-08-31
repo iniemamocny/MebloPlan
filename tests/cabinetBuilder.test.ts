@@ -155,7 +155,7 @@ describe('buildCabinetMesh', () => {
     )
   })
 
-  it('positions vertical traverse by vertical offset', () => {
+  it('positions vertical traverse by width offset', () => {
     const offset = 100
     const trWidth = 100
     const g = buildCabinetMesh({
@@ -166,29 +166,25 @@ describe('buildCabinetMesh', () => {
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
       topPanel: {
-        type: 'backTraverse',
+        type: 'frontTraverse',
         traverse: { orientation: 'vertical', offset, width: trWidth },
       },
     })
-    const boardThickness = 0.018
-    const expectedWidth = 1 - 2 * boardThickness
     const traverse = g.children.find(
       (c) =>
         c instanceof THREE.Mesh &&
-        Math.abs((c as any).geometry.parameters.width - expectedWidth) < 1e-6 &&
-        Math.abs((c as any).geometry.parameters.height - trWidth / 1000) < 1e-6 &&
-        Math.abs((c as any).geometry.parameters.depth - boardThickness) < 1e-6,
+        Math.abs((c as any).geometry.parameters.depth - 0.5) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.width - trWidth / 1000) < 1e-6,
     ) as THREE.Mesh | undefined
     expect(traverse).toBeTruthy()
-    expect(traverse!.position.x).toBeCloseTo(0.5, 5)
-    expect(traverse!.position.z).toBeCloseTo(-0.5 + boardThickness / 2, 5)
-    expect(traverse!.position.y).toBeCloseTo(
-      0.9 - trWidth / 2000 - offset / 1000,
+    expect(traverse!.position.x).toBeCloseTo(
+      0.018 + (offset + trWidth / 2) / 1000,
       5,
     )
   })
 
-  it('adds edge banding on front of horizontal traverse', () => {
+  it('positions vertical traverse flush for carcass type3', () => {
+    const offset = 100
     const trWidth = 100
     const g = buildCabinetMesh({
       width: 1,
@@ -197,56 +193,21 @@ describe('buildCabinetMesh', () => {
       drawers: 0,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
+      carcassType: 'type3',
       topPanel: {
         type: 'frontTraverse',
-        traverse: { orientation: 'horizontal', offset: 0, width: trWidth },
+        traverse: { orientation: 'vertical', offset, width: trWidth },
       },
-      bottomPanel: 'none',
-      edgeBanding: 'front',
     })
-    const boardThickness = 0.018
-    const topWidth = 1 - 2 * boardThickness
-    const bandThickness = 0.001
-    const band = g.children.find(
+    const traverse = g.children.find(
       (c) =>
         c instanceof THREE.Mesh &&
-        Math.abs((c as any).geometry.parameters.width - topWidth) < 1e-6 &&
-        Math.abs((c as any).geometry.parameters.height - boardThickness) < 1e-6 &&
-        Math.abs((c as any).geometry.parameters.depth - bandThickness) < 1e-6 &&
-        Math.abs(c.position.z - bandThickness / 2) < 1e-6,
+        Math.abs((c as any).geometry.parameters.depth - 0.5) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.width - trWidth / 1000) < 1e-6,
     ) as THREE.Mesh | undefined
-    expect(band).toBeTruthy()
-  })
-
-  it('adds edge banding on bottom of vertical traverse', () => {
-    const trWidth = 100
-    const g = buildCabinetMesh({
-      width: 1,
-      height: 0.9,
-      depth: 0.5,
-      drawers: 0,
-      gaps: { top: 0, bottom: 0 },
-      family: FAMILY.BASE,
-      topPanel: {
-        type: 'backTraverse',
-        traverse: { orientation: 'vertical', offset: 0, width: trWidth },
-      },
-      bottomPanel: 'none',
-      edgeBanding: 'front',
-    })
-    const boardThickness = 0.018
-    const bandThickness = 0.001
-    const band = g.children.find(
-      (c) =>
-        c instanceof THREE.Mesh &&
-        Math.abs((c as any).geometry.parameters.width - (1 - 2 * boardThickness)) <
-          1e-6 &&
-        Math.abs((c as any).geometry.parameters.height - bandThickness) < 1e-6 &&
-        Math.abs((c as any).geometry.parameters.depth - boardThickness) < 1e-6,
-    ) as THREE.Mesh | undefined
-    expect(band).toBeTruthy()
-    expect(band!.position.y).toBeCloseTo(
-      0.9 - trWidth / 1000 - bandThickness / 2,
+    expect(traverse).toBeTruthy()
+    expect(traverse!.position.x).toBeCloseTo(
+      (offset + trWidth / 2) / 1000,
       5,
     )
   })

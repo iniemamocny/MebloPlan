@@ -227,40 +227,12 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   const addTraverseTop = (tr: Traverse, zBase: number, topWidth: number) => {
     const widthM = tr.width / 1000;
     if (tr.orientation === 'vertical') {
-      const geo = new THREE.BoxGeometry(W - 2 * T, widthM, T);
+      const geo = new THREE.BoxGeometry(widthM, T, D);
       const mesh = new THREE.Mesh(geo, carcMat);
-      const y = legHeight + H - tr.width / 2000 - tr.offset / 1000;
-      mesh.position.set(W / 2, y, -D + T / 2);
+      const x = sideInset + (tr.offset + tr.width / 2) / 1000;
+      mesh.position.set(x, legHeight + H - T / 2, -D / 2);
       addEdges(mesh);
       group.add(mesh);
-      if (edgeBanding !== 'none') {
-        addBand(
-          W / 2,
-          y - widthM / 2 - bandThickness / 2,
-          -D + T / 2,
-          W - 2 * T,
-          bandThickness,
-          T,
-        );
-        if (edgeBanding === 'full') {
-          addBand(
-            T + bandThickness / 2,
-            y,
-            -D + T / 2,
-            bandThickness,
-            widthM,
-            T,
-          );
-          addBand(
-            W - T - bandThickness / 2,
-            y,
-            -D + T / 2,
-            bandThickness,
-            widthM,
-            T,
-          );
-        }
-      }
     } else {
       const geo = new THREE.BoxGeometry(topWidth, T, widthM);
       const mesh = new THREE.Mesh(geo, carcMat);
@@ -269,39 +241,9 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
           ? -(tr.offset + tr.width / 2) / 1000
           : -D + (tr.offset + tr.width / 2) / 1000;
       const x = (W - topWidth) / 2 + topWidth / 2;
-      const y = legHeight + H - T / 2;
-      mesh.position.set(x, y, z);
+      mesh.position.set(x, legHeight + H - T / 2, z);
       addEdges(mesh);
       group.add(mesh);
-      if (edgeBanding !== 'none') {
-        addBand(
-          x,
-          y,
-          z + widthM / 2 + bandThickness / 2,
-          topWidth,
-          T,
-          bandThickness,
-        );
-        if (edgeBanding === 'full') {
-          const left = (W - topWidth) / 2;
-          addBand(
-            left + bandThickness / 2,
-            y,
-            z,
-            bandThickness,
-            T,
-            widthM,
-          );
-          addBand(
-            W - left - bandThickness / 2,
-            y,
-            z,
-            bandThickness,
-            T,
-            widthM,
-          );
-        }
-      }
     }
   };
   if (!topPanel || topPanel.type === 'full') {
