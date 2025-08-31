@@ -227,16 +227,35 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   const addTraverseTop = (tr: Traverse, zBase: number, topWidth: number) => {
     const widthM = tr.width / 1000;
     if (tr.orientation === 'vertical') {
-      const geo = new THREE.BoxGeometry(W - 2 * T, widthM, T);
+      const geo = new THREE.BoxGeometry(widthM, T, D - 2 * T);
       const mesh = new THREE.Mesh(geo, carcMat);
-      const z = zBase === 0 ? -T / 2 : -D + T / 2;
-      mesh.position.set(
-        W / 2,
-        legHeight + H - tr.width / 2000 - tr.offset / 1000,
-        z,
-      );
+      const x = T + tr.offset / 1000 + widthM / 2;
+      const z = zBase === 0 ? -(D - 2 * T) / 2 : -D + (D - 2 * T) / 2;
+      mesh.position.set(x, legHeight + H - T / 2, z);
       addEdges(mesh);
       group.add(mesh);
+      if (edgeBanding !== 'none') {
+        const zEdge = zBase === 0 ? bandThickness / 2 : -D + bandThickness / 2;
+        addBand(x, legHeight + H - T / 2, zEdge, widthM, T, bandThickness);
+        if (edgeBanding === 'full') {
+          addBand(
+            x - widthM / 2 + bandThickness / 2,
+            legHeight + H - T / 2,
+            z,
+            bandThickness,
+            T,
+            D - 2 * T,
+          );
+          addBand(
+            x + widthM / 2 - bandThickness / 2,
+            legHeight + H - T / 2,
+            z,
+            bandThickness,
+            T,
+            D - 2 * T,
+          );
+        }
+      }
     } else {
       const geo = new THREE.BoxGeometry(topWidth, T, widthM);
       const mesh = new THREE.Mesh(geo, carcMat);
