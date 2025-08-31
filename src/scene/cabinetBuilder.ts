@@ -227,6 +227,31 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   const addTraverseTop = (tr: Traverse, zBase: number, topWidth: number) => {
     const widthM = tr.width / 1000;
     if (tr.orientation === 'vertical') {
+      const geo = new THREE.BoxGeometry(widthM, T, D);
+      const mesh = new THREE.Mesh(geo, carcMat);
+      const x = W / 2 + tr.offset / 1000;
+      const z = -D / 2;
+      mesh.position.set(x, legHeight + H - T / 2, z);
+      addEdges(mesh);
+      group.add(mesh);
+      if (edgeBanding !== 'none') {
+        addBand(x, legHeight + H - T / 2, bandThickness / 2, widthM, T, bandThickness);
+        addBand(
+          x,
+          legHeight + H - T / 2,
+          -D + bandThickness / 2,
+          widthM,
+          T,
+          bandThickness,
+        );
+        if (edgeBanding === 'full') {
+          const xLeft = x - widthM / 2 + bandThickness / 2;
+          const xRight = x + widthM / 2 - bandThickness / 2;
+          addBand(xLeft, legHeight + H - T / 2, -D / 2, bandThickness, T, D);
+          addBand(xRight, legHeight + H - T / 2, -D / 2, bandThickness, T, D);
+        }
+      }
+    } else {
       const geo = new THREE.BoxGeometry(topWidth, T, widthM);
       const mesh = new THREE.Mesh(geo, carcMat);
       const isFront = zBase === 0;
@@ -269,14 +294,6 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
           );
         }
       }
-    } else {
-      const geo = new THREE.BoxGeometry(topWidth, T, widthM);
-      const mesh = new THREE.Mesh(geo, carcMat);
-      const x = W / 2 + tr.offset / 1000;
-      const z = -D / 2;
-      mesh.position.set(x, legHeight + H - T / 2, z);
-      addEdges(mesh);
-      group.add(mesh);
     }
   };
   if (!topPanel || topPanel.type === 'full') {
