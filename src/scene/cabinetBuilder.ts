@@ -227,46 +227,45 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   const addTraverseTop = (tr: Traverse, zBase: number, topWidth: number) => {
     const widthM = tr.width / 1000;
     if (tr.orientation === 'vertical') {
-      const geo = new THREE.BoxGeometry(topWidth, widthM, T);
+      const geo = new THREE.BoxGeometry(topWidth, T, widthM);
       const mesh = new THREE.Mesh(geo, carcMat);
       const isFront = zBase === 0;
       let frontEdge: number;
       let backEdge: number;
       if (isFront) {
         frontEdge = -tr.offset / 1000 + FRONT_OFFSET;
-        backEdge = frontEdge - T;
+        backEdge = frontEdge - widthM;
       } else {
         backEdge = -zBase + tr.offset / 1000;
-        frontEdge = backEdge + T;
+        frontEdge = backEdge + widthM;
       }
       const z = (frontEdge + backEdge) / 2;
       const x = W / 2;
-      const y = legHeight + H - widthM / 2;
-      mesh.position.set(x, y, z);
+      mesh.position.set(x, legHeight + H - T / 2, z);
       addEdges(mesh);
       group.add(mesh);
       if (edgeBanding !== 'none') {
         const zFront = frontEdge + bandThickness / 2;
         const zBack = backEdge - bandThickness / 2;
-        addBand(x, y, zFront, topWidth, widthM, bandThickness);
-        addBand(x, y, zBack, topWidth, widthM, bandThickness);
+        addBand(x, legHeight + H - T / 2, zFront, topWidth, T, bandThickness);
+        addBand(x, legHeight + H - T / 2, zBack, topWidth, T, bandThickness);
         if (edgeBanding === 'full') {
           const topLeft = (W - topWidth) / 2;
           addBand(
             topLeft + bandThickness / 2,
-            y,
+            legHeight + H - T / 2,
             z,
             bandThickness,
-            widthM,
             T,
+            widthM,
           );
           addBand(
             W - topLeft - bandThickness / 2,
-            y,
+            legHeight + H - T / 2,
             z,
             bandThickness,
-            widthM,
             T,
+            widthM,
           );
         }
       }
