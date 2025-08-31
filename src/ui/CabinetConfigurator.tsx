@@ -582,7 +582,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                 </select>
               </div>
               <div>
-                <div className="small">Edge banding</div>
+                <div className="small">{t('configurator.edgeBanding')}</div>
                 <select
                   className="input"
                   value={gLocal.edgeBanding || 'front'}
@@ -594,9 +594,15 @@ const CabinetConfigurator: React.FC<Props> = ({
                     })
                   }
                 >
-                  <option value="none">none</option>
-                  <option value="front">front</option>
-                  <option value="full">full</option>
+                  <option value="none">
+                    {t('configurator.edgeBandingOptions.none')}
+                  </option>
+                  <option value="front">
+                    {t('configurator.edgeBandingOptions.front')}
+                  </option>
+                  <option value="full">
+                    {t('configurator.edgeBandingOptions.full')}
+                  </option>
                 </select>
               </div>
             </div>

@@ -106,12 +106,18 @@
       "twoTraverses": "dwa trawersy",
       "frontTraverse": "przedni trawers",
       "backTraverse": "tylny trawers",
-      "full": "pełny",
+      "full": "pełny panel",
       "none": "brak"
     },
     "bottomOptions": {
-      "full": "pełny",
+      "full": "pełny panel",
       "none": "brak"
+    },
+    "edgeBanding": "Okleina",
+    "edgeBandingOptions": {
+      "none": "brak",
+      "front": "front",
+      "full": "pełna"
     },
     "orientation": {
       "label": "Orientacja",
