@@ -121,6 +121,7 @@
     "offset": "Przesunięcie (mm)",
     "offsetWidth": "Przesunięcie (szerokość, mm)",
     "offsetDepth": "Przesunięcie (głębokość, mm)",
+    "offsetHeight": "Przesunięcie (wysokość, mm)",
     "traverseWidth": "Szerokość trawersu (mm)"
   },
   "forms": {
