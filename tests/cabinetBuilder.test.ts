@@ -165,12 +165,12 @@ describe('buildCabinetMesh', () => {
       (c) =>
         c instanceof THREE.Mesh &&
         Math.abs((c as any).geometry.parameters.width - expectedWidth) < 1e-6 &&
-        Math.abs((c as any).geometry.parameters.height - boardThickness) < 1e-6 &&
-        Math.abs((c as any).geometry.parameters.depth - widthM) < 1e-6,
+        Math.abs((c as any).geometry.parameters.height - widthM) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - boardThickness) < 1e-6,
     ) as THREE.Mesh | undefined;
     expect(traverse).toBeTruthy();
     expect(traverse!.position.x).toBeCloseTo(0.5, 5);
-    const expectedZ = FRONT_OFFSET - offset / 1000 - widthM / 2;
+    const expectedZ = FRONT_OFFSET - offset / 1000 - boardThickness / 2;
     expect(traverse!.position.z).toBeCloseTo(expectedZ, 5);
   });
 
@@ -196,12 +196,15 @@ describe('buildCabinetMesh', () => {
       (c) =>
         c instanceof THREE.Mesh &&
         Math.abs((c as any).geometry.parameters.width - expectedWidth) < 1e-6 &&
-        Math.abs((c as any).geometry.parameters.height - boardThickness) < 1e-6 &&
-        Math.abs((c as any).geometry.parameters.depth - widthM) < 1e-6,
+        Math.abs((c as any).geometry.parameters.height - widthM) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - boardThickness) < 1e-6,
     ) as THREE.Mesh | undefined;
     expect(traverse).toBeTruthy();
     expect(traverse!.position.x).toBeCloseTo(0.5, 5);
-    expect(traverse!.position.z + widthM / 2).toBeCloseTo(FRONT_OFFSET, 5);
+    expect(traverse!.position.z + boardThickness / 2).toBeCloseTo(
+      FRONT_OFFSET,
+      5,
+    );
   });
 
   it('positions horizontal traverse by depth offset', () => {
