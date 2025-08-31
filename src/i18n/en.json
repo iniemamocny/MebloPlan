@@ -98,9 +98,9 @@
     "shelves": "Number of shelves",
     "gapsTitle": "Gaps and front heights (set graphically)",
     "backOptions": {
-      "full": "full",
-      "split": "split",
-      "none": "none"
+      "full": "full panel",
+      "split": "split panel",
+      "none": "no panel"
     },
     "topOptions": {
       "twoTraverses": "two traverses",

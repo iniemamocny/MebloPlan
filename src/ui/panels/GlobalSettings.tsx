@@ -11,11 +11,19 @@ export default function GlobalSettings(){
   const [open, setOpen] = useState(false)
   const [openFam, setOpenFam] = useState(FAMILY.BASE)
 
-  const Field = ({label, value, onChange, type='number', step='1', options}:{label:string; value:any; onChange:(v:any)=>void; type?:'number'|'select'; step?:string; options?:string[]}) => (
+  const Field = ({label, value, onChange, type='number', step='1', options}:{label:string; value:any; onChange:(v:any)=>void; type?:'number'|'select'; step?:string; options?:(string|{value:string; label:string})[]}) => (
     <div>
       <div className="small">{label}</div>
       {type==='select'
-        ? <select className="input" value={value} onChange={e=>onChange((e.target as HTMLSelectElement).value)}>{options!.map(k=><option key={k} value={k}>{k}</option>)}</select>
+        ? (
+          <select className="input" value={value} onChange={e=>onChange((e.target as HTMLSelectElement).value)}>
+            {options!.map(opt =>
+              typeof opt === 'string'
+                ? <option key={opt} value={opt}>{opt}</option>
+                : <option key={opt.value} value={opt.value}>{opt.label}</option>
+            )}
+          </select>
+        )
         : <input className="input" type="number" step={step} value={value} onChange={e=>onChange(Number((e.target as HTMLInputElement).value)||0)} />
       }
     </div>
@@ -37,7 +45,17 @@ export default function GlobalSettings(){
             <Field label={t('global.depth')} value={g.depth} onChange={(v)=>set({depth:v})} />
             <Field label={t('global.boardType')} type="select" value={g.boardType} onChange={(v)=>set({boardType:v})} options={Object.keys(store.prices.board)} />
             <Field label={t('global.frontType')} type="select" value={g.frontType} onChange={(v)=>set({frontType:v})} options={Object.keys(store.prices.front)} />
-            <Field label={t('global.backPanel')} type="select" value={g.backPanel||'full'} onChange={(v)=>set({backPanel:v})} options={['full','split','none']} />
+            <Field
+              label={t('global.backPanel')}
+              type="select"
+              value={g.backPanel||'full'}
+              onChange={(v)=>set({backPanel:v})}
+              options={[
+                { value: 'full', label: t('configurator.backOptions.full') },
+                { value: 'split', label: t('configurator.backOptions.split') },
+                { value: 'none', label: t('configurator.backOptions.none') }
+              ]}
+            />
             {fam===FAMILY.BASE && (<>
               <Field label={t('global.legs')} type="select" value={g.legsType} onChange={(v)=>set({legsType:v})} options={Object.keys(store.prices.legs)} />
               <Field label={t('global.legsHeight')} value={g.legsHeight||0} onChange={(v)=>set({legsHeight:v})} />
