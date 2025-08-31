@@ -41,6 +41,8 @@ export default function Cabinet3D({
   showFronts?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
   const role = usePlannerStore((s) => s.role);
   const showEdges = role === 'stolarz';
 
@@ -48,10 +50,30 @@ export default function Cabinet3D({
     if (!ref.current) return;
     const w = 260,
       h = 190;
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(w, h);
-    ref.current.innerHTML = '';
-    ref.current.appendChild(renderer.domElement);
+
+    let renderer = rendererRef.current;
+    if (!renderer) {
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(w, h);
+      ref.current.innerHTML = '';
+      ref.current.appendChild(renderer.domElement);
+      rendererRef.current = renderer;
+    }
+
+    if (sceneRef.current) {
+      sceneRef.current.traverse((obj) => {
+        if (obj instanceof THREE.Mesh) {
+          obj.geometry.dispose();
+          if (Array.isArray(obj.material)) {
+            obj.material.forEach((m) => m.dispose());
+          } else {
+            obj.material.dispose();
+          }
+        }
+      });
+      sceneRef.current = null;
+    }
+
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xffffff);
     const camera = new THREE.PerspectiveCamera(35, w / h, 0.01, 100);
@@ -88,8 +110,20 @@ export default function Cabinet3D({
     });
     scene.add(cabGroup);
     renderer.render(scene, camera);
+    sceneRef.current = scene;
+
     return () => {
-      renderer.dispose();
+      scene.traverse((obj) => {
+        if (obj instanceof THREE.Mesh) {
+          obj.geometry.dispose();
+          if (Array.isArray(obj.material)) {
+            obj.material.forEach((m) => m.dispose());
+          } else {
+            obj.material.dispose();
+          }
+        }
+      });
+      sceneRef.current = null;
     };
   }, [
     widthMM,
@@ -110,6 +144,17 @@ export default function Cabinet3D({
     carcassType,
     showFronts,
   ]);
+
+  useEffect(() => {
+    return () => {
+      const renderer = rendererRef.current;
+      if (renderer) {
+        renderer.forceContextLoss();
+        renderer.dispose();
+        renderer.domElement.remove();
+      }
+    };
+  }, []);
   return (
     <div
       ref={ref}
