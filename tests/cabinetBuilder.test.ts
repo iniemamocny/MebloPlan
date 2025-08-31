@@ -140,10 +140,12 @@ describe('buildCabinetMesh', () => {
         traverse: { orientation: 'horizontal', offset, width: trWidth },
       },
     })
+    const boardThickness = 0.018
+    const expectedWidth = 1 - 2 * boardThickness
     const traverse = g.children.find(
       (c) =>
         c instanceof THREE.Mesh &&
-        Math.abs((c as any).geometry.parameters.width - 1) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.width - expectedWidth) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.depth - trWidth / 1000) < 1e-6,
     ) as THREE.Mesh | undefined
     expect(traverse).toBeTruthy()

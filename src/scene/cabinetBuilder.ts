@@ -223,7 +223,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       }
     }
   }
-  const addTraverseTop = (tr: Traverse, zBase: number) => {
+  const addTraverseTop = (tr: Traverse, zBase: number, topWidth: number) => {
     const widthM = tr.width / 1000;
     if (tr.orientation === 'vertical') {
       const geo = new THREE.BoxGeometry(widthM, T, D);
@@ -233,13 +233,14 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       addEdges(mesh);
       group.add(mesh);
     } else {
-      const geo = new THREE.BoxGeometry(W, T, widthM);
+      const geo = new THREE.BoxGeometry(topWidth, T, widthM);
       const mesh = new THREE.Mesh(geo, carcMat);
       const z =
         zBase === 0
           ? -(tr.offset + tr.width / 2) / 1000
           : -D + (tr.offset + tr.width / 2) / 1000;
-      mesh.position.set(W / 2, legHeight + H - T / 2, z);
+      const x = (W - topWidth) / 2 + topWidth / 2;
+      mesh.position.set(x, legHeight + H - T / 2, z);
       addEdges(mesh);
       group.add(mesh);
     }
@@ -279,12 +280,12 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       }
     }
   } else if (topPanel.type === 'frontTraverse') {
-    addTraverseTop(topPanel.traverse, 0);
+    addTraverseTop(topPanel.traverse, 0, topWidth);
   } else if (topPanel.type === 'backTraverse') {
-    addTraverseTop(topPanel.traverse, D);
+    addTraverseTop(topPanel.traverse, D, topWidth);
   } else if (topPanel.type === 'twoTraverses') {
-    addTraverseTop(topPanel.front, 0);
-    addTraverseTop(topPanel.back, D);
+    addTraverseTop(topPanel.front, 0, topWidth);
+    addTraverseTop(topPanel.back, D, topWidth);
   }
 
   // Back panel styles
