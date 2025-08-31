@@ -1,9 +1,9 @@
-import { describe, it, expect } from 'vitest'
-import * as THREE from 'three'
-import { buildCabinetMesh } from '../src/scene/cabinetBuilder'
-import { FAMILY } from '../src/core/catalog'
+import { describe, it, expect } from 'vitest';
+import * as THREE from 'three';
+import { buildCabinetMesh } from '../src/scene/cabinetBuilder';
+import { FAMILY } from '../src/core/catalog';
 
-const FRONT_OFFSET = 0.002
+const FRONT_OFFSET = 0.002;
 
 describe('buildCabinetMesh', () => {
   it('returns group with expected children for drawers', () => {
@@ -14,10 +14,10 @@ describe('buildCabinetMesh', () => {
       drawers: 2,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
-    })
-    expect(g).toBeInstanceOf(THREE.Group)
-    expect(g.children.length).toBe(7)
-  })
+    });
+    expect(g).toBeInstanceOf(THREE.Group);
+    expect(g.children.length).toBe(7);
+  });
 
   it('creates provided number of drawer groups', () => {
     const g = buildCabinetMesh({
@@ -27,12 +27,12 @@ describe('buildCabinetMesh', () => {
       drawers: 3,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
-    })
+    });
     const drawers = g.children.filter(
-      (c) => c instanceof THREE.Group && (c as any).userData.type === 'drawer'
-    )
-    expect(drawers.length).toBe(3)
-  })
+      (c) => c instanceof THREE.Group && (c as any).userData.type === 'drawer',
+    );
+    expect(drawers.length).toBe(3);
+  });
 
   it('returns group with expected children for doors', () => {
     const g = buildCabinetMesh({
@@ -42,9 +42,9 @@ describe('buildCabinetMesh', () => {
       drawers: 0,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
-    })
-    expect(g.children.length).toBe(7)
-  })
+    });
+    expect(g.children.length).toBe(7);
+  });
 
   it('creates provided number of door groups', () => {
     const g = buildCabinetMesh({
@@ -55,12 +55,12 @@ describe('buildCabinetMesh', () => {
       doorCount: 2,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
-    })
+    });
     const doors = g.children.filter(
-      (c) => c instanceof THREE.Group && (c as any).userData.type === 'door'
-    )
-    expect(doors.length).toBe(2)
-  })
+      (c) => c instanceof THREE.Group && (c as any).userData.type === 'door',
+    );
+    expect(doors.length).toBe(2);
+  });
 
   it('adds divider when dividerPosition provided', () => {
     const g = buildCabinetMesh({
@@ -72,16 +72,16 @@ describe('buildCabinetMesh', () => {
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
       dividerPosition: 'left',
-    })
+    });
     const div = g.children.find(
       (c) =>
         c instanceof THREE.Mesh &&
         Math.abs(c.position.x - 1 / 3) < 0.001 &&
         (c as THREE.Mesh).geometry instanceof THREE.BoxGeometry &&
-        (c as any).geometry.parameters.width === 0.018
-    )
-    expect(div).toBeTruthy()
-  })
+        (c as any).geometry.parameters.width === 0.018,
+    );
+    expect(div).toBeTruthy();
+  });
 
   it('does not add divider when drawers present', () => {
     const g = buildCabinetMesh({
@@ -92,21 +92,21 @@ describe('buildCabinetMesh', () => {
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
       dividerPosition: 'left',
-    })
+    });
     const div = g.children.find(
       (c) =>
         c instanceof THREE.Mesh &&
         Math.abs(c.position.x - 1 / 3) < 0.001 &&
         (c as THREE.Mesh).geometry instanceof THREE.BoxGeometry &&
-        (c as any).geometry.parameters.width === 0.018
-    )
-    expect(div).toBeUndefined()
-  })
+        (c as any).geometry.parameters.width === 0.018,
+    );
+    expect(div).toBeUndefined();
+  });
 
   it('matches provided dimensions', () => {
-    const width = 0.8
-    const height = 0.7
-    const depth = 0.6
+    const width = 0.8;
+    const height = 0.7;
+    const depth = 0.6;
     const g = buildCabinetMesh({
       width,
       height,
@@ -115,19 +115,19 @@ describe('buildCabinetMesh', () => {
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
       showHandles: false,
-    })
-    g.updateMatrixWorld(true)
-    const box = new THREE.Box3().setFromObject(g)
-    const size = box.getSize(new THREE.Vector3())
-    expect(size.x).toBeCloseTo(width, 5)
-    expect(size.y).toBeCloseTo(height, 5)
-    const boardThickness = 0.018
-    expect(size.z).toBeCloseTo(depth + boardThickness + FRONT_OFFSET, 5)
-  })
+    });
+    g.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(g);
+    const size = box.getSize(new THREE.Vector3());
+    expect(size.x).toBeCloseTo(width, 5);
+    expect(size.y).toBeCloseTo(height, 5);
+    const boardThickness = 0.018;
+    expect(size.z).toBeCloseTo(depth + boardThickness + FRONT_OFFSET, 5);
+  });
 
   it('positions horizontal traverse by depth offset', () => {
-    const offset = 100
-    const trWidth = 100
+    const offset = 100;
+    const trWidth = 100;
     const g = buildCabinetMesh({
       width: 1,
       height: 0.9,
@@ -139,29 +139,27 @@ describe('buildCabinetMesh', () => {
         type: 'frontTraverse',
         traverse: { orientation: 'horizontal', offset, width: trWidth },
       },
-    })
-    const boardThickness = 0.018
-    const expectedWidth = 1 - 2 * boardThickness
+    });
+    const boardThickness = 0.018;
+    const expectedWidth = 1 - 2 * boardThickness;
     const traverse = g.children.find(
       (c) =>
         c instanceof THREE.Mesh &&
         Math.abs((c as any).geometry.parameters.width - expectedWidth) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.depth - trWidth / 1000) < 1e-6,
-    ) as THREE.Mesh | undefined
-    expect(traverse).toBeTruthy()
-    expect(traverse!.position.z).toBeCloseTo(
-      -(offset + trWidth / 2) / 1000,
-      5,
-    )
-  })
+    ) as THREE.Mesh | undefined;
+    expect(traverse).toBeTruthy();
+    expect(traverse!.position.z).toBeCloseTo(-(offset + trWidth / 2) / 1000, 5);
+  });
 
-  it('positions vertical traverse by vertical offset', () => {
-    const offset = 100
-    const trWidth = 100
+  it('positions vertical traverse by offset', () => {
+    const offset = 100;
+    const trWidth = 100;
+    const depth = 0.5;
     const g = buildCabinetMesh({
       width: 1,
       height: 0.9,
-      depth: 0.5,
+      depth,
       drawers: 0,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
@@ -169,24 +167,26 @@ describe('buildCabinetMesh', () => {
         type: 'frontTraverse',
         traverse: { orientation: 'vertical', offset, width: trWidth },
       },
-    })
-    const boardThickness = 0.018
-    const expectedWidth = 1 - 2 * boardThickness
+    });
+    const boardThickness = 0.018;
+    const expectedDepth = depth - 2 * boardThickness;
+    const widthM = trWidth / 1000;
     const traverse = g.children.find(
       (c) =>
         c instanceof THREE.Mesh &&
-        Math.abs((c as any).geometry.parameters.width - expectedWidth) < 1e-6 &&
-        Math.abs((c as any).geometry.parameters.height - trWidth / 1000) < 1e-6 &&
-        Math.abs((c as any).geometry.parameters.depth - boardThickness) < 1e-6,
-    ) as THREE.Mesh | undefined
-    expect(traverse).toBeTruthy()
-    expect(traverse!.position.x).toBeCloseTo(0.5, 5)
-    expect(traverse!.position.z).toBeCloseTo(-boardThickness / 2, 5)
-    expect(traverse!.position.y).toBeCloseTo(
-      0.9 - trWidth / 2000 - offset / 1000,
+        Math.abs((c as any).geometry.parameters.width - widthM) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - boardThickness) <
+          1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - expectedDepth) < 1e-6,
+    ) as THREE.Mesh | undefined;
+    expect(traverse).toBeTruthy();
+    expect(traverse!.position.x).toBeCloseTo(
+      boardThickness + offset / 1000 + widthM / 2,
       5,
-    )
-  })
+    );
+    expect(traverse!.position.z).toBeCloseTo(-depth / 2, 5);
+    expect(traverse!.position.y).toBeCloseTo(0.9 - boardThickness / 2, 5);
+  });
 
   it('adds edge outlines when showEdges is true', () => {
     const g = buildCabinetMesh({
@@ -197,11 +197,11 @@ describe('buildCabinetMesh', () => {
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
       showEdges: true,
-    })
-    let edgesCount = 0
+    });
+    let edgesCount = 0;
     g.traverse((obj) => {
-      if (obj instanceof THREE.LineSegments) edgesCount++
-    })
-    expect(edgesCount).toBeGreaterThan(0)
-  })
-})
+      if (obj instanceof THREE.LineSegments) edgesCount++;
+    });
+    expect(edgesCount).toBeGreaterThan(0);
+  });
+});
