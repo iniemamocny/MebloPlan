@@ -48,7 +48,8 @@ const CabinetConfigurator: React.FC<Props> = ({
   setAdv,
   onAdd,
 }) => {
-  const store = usePlannerStore();
+  const setShowFronts = usePlannerStore((s) => s.setShowFronts);
+  const currentShowFronts = usePlannerStore((s) => s.showFronts);
   const { t } = useTranslation();
   const [doorsCount, setDoorsCount] = useState(1);
   const [drawersCount, setDrawersCount] = useState(0);
@@ -57,8 +58,8 @@ const CabinetConfigurator: React.FC<Props> = ({
   >(null);
   const showFronts = openSection !== 'korpus';
   useEffect(() => {
-    store.setShowFronts(showFronts);
-  }, [showFronts, store]);
+    if (currentShowFronts !== showFronts) setShowFronts(showFronts);
+  }, [currentShowFronts, showFronts, setShowFronts]);
   const FormComponent = kind ? FORM_COMPONENTS[kind.key] : null;
   const formValues: CabinetFormValues = {
     height: gLocal.height,
