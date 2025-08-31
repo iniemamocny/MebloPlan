@@ -332,8 +332,16 @@ const CabinetConfigurator: React.FC<Props> = ({
                         ...gLocal,
                         topPanel: {
                           type: 'twoTraverses',
-                          front: { orientation: 'horizontal', offset: 0 },
-                          back: { orientation: 'horizontal', offset: 0 },
+                          front: {
+                            orientation: 'horizontal',
+                            offset: 0,
+                            width: 100,
+                          },
+                          back: {
+                            orientation: 'horizontal',
+                            offset: 0,
+                            width: 100,
+                          },
                         },
                       });
                     else if (v === 'frontTraverse' || v === 'backTraverse')
@@ -341,7 +349,11 @@ const CabinetConfigurator: React.FC<Props> = ({
                         ...gLocal,
                         topPanel: {
                           type: v,
-                          traverse: { orientation: 'horizontal', offset: 0 },
+                          traverse: {
+                            orientation: 'horizontal',
+                            offset: 0,
+                            width: 100,
+                          },
                         },
                       });
                     else setAdv({ ...gLocal, topPanel: { type: v } });
@@ -421,6 +433,29 @@ const CabinetConfigurator: React.FC<Props> = ({
                         })
                       }
                     />
+                    <div className="small" style={{ marginTop: 4 }}>
+                      {t('configurator.traverseWidth')}
+                    </div>
+                    <input
+                      className="input"
+                      type="number"
+                      min={0}
+                      value={gLocal.topPanel.traverse.width}
+                      onChange={(e) =>
+                        setAdv({
+                          ...gLocal,
+                          topPanel: {
+                            ...gLocal.topPanel,
+                            traverse: {
+                              ...gLocal.topPanel.traverse,
+                              width:
+                                Number((e.target as HTMLInputElement).value) ||
+                                0,
+                            },
+                          } as any,
+                        })
+                      }
+                    />
                   </div>
                 ) : gLocal.topPanel?.type === 'twoTraverses' ? (
                   <div style={{ marginTop: 4 }}>
@@ -477,6 +512,30 @@ const CabinetConfigurator: React.FC<Props> = ({
                                 [pos]: {
                                   ...gLocal.topPanel[pos],
                                   offset:
+                                    Number(
+                                      (e.target as HTMLInputElement).value,
+                                    ) || 0,
+                                },
+                              } as any,
+                            })
+                          }
+                        />
+                        <div className="small" style={{ marginTop: 4 }}>
+                          {t('configurator.traverseWidth')}
+                        </div>
+                        <input
+                          className="input"
+                          type="number"
+                          min={0}
+                          value={gLocal.topPanel[pos].width}
+                          onChange={(e) =>
+                            setAdv({
+                              ...gLocal,
+                              topPanel: {
+                                ...gLocal.topPanel,
+                                [pos]: {
+                                  ...gLocal.topPanel[pos],
+                                  width:
                                     Number(
                                       (e.target as HTMLInputElement).value,
                                     ) || 0,

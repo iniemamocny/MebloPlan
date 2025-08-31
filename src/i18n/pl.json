@@ -118,7 +118,8 @@
       "horizontal": "pozioma",
       "vertical": "pionowa"
     },
-    "offset": "Przesunięcie (mm)"
+    "offset": "Przesunięcie (mm)",
+    "traverseWidth": "Szerokość trawersu (mm)"
   },
   "forms": {
     "width": "Szerokość",
