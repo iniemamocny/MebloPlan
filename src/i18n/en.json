@@ -118,7 +118,8 @@
       "horizontal": "horizontal",
       "vertical": "vertical"
     },
-    "offset": "Offset (mm)"
+    "offset": "Offset (mm)",
+    "traverseWidth": "Traverse width (mm)"
   },
   "forms": {
     "width": "Width",

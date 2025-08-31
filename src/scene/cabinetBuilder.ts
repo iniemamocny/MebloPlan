@@ -224,21 +224,25 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     }
   }
   const addTraverseTop = (tr: Traverse, zBase: number) => {
+    const widthM = tr.width / 1000;
     if (tr.orientation === 'vertical') {
-      const geo = new THREE.BoxGeometry(T, T, D);
+      const geo = new THREE.BoxGeometry(widthM, T, D);
       const mesh = new THREE.Mesh(geo, carcMat);
       const z =
-        zBase === 0 ? -tr.offset / 1000 - T / 2 : -D + tr.offset / 1000 + T / 2;
+        zBase === 0
+          ? -(tr.offset + tr.width / 2) / 1000
+          : -D + (tr.offset + tr.width / 2) / 1000;
       mesh.position.set(W / 2, legHeight + H - T / 2, z);
       addEdges(mesh);
       group.add(mesh);
     } else {
-      const geo = new THREE.BoxGeometry(W, T, T);
+      const geo = new THREE.BoxGeometry(W, T, widthM);
       const mesh = new THREE.Mesh(geo, carcMat);
+      const z = zBase === 0 ? -widthM / 2 : -D + widthM / 2;
       mesh.position.set(
-        tr.offset / 1000 + T / 2,
+        (tr.offset + tr.width / 2) / 1000,
         legHeight + H - T / 2,
-        -D / 2,
+        z,
       );
       addEdges(mesh);
       group.add(mesh);

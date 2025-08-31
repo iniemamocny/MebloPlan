@@ -13,6 +13,8 @@ export interface Traverse {
   orientation: TraverseOrientation;
   /** offset in millimetres */
   offset: number;
+  /** width in millimetres */
+  width: number;
 }
 
 export type TopPanel =
