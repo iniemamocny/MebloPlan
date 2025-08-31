@@ -87,6 +87,12 @@
     "board": "Płyta",
     "front": "Front",
     "back": "Plecy",
+    "carcassType": "Rodzaj korpusu",
+    "carcassTypes": {
+      "type1": "Typ 1",
+      "type2": "Typ 2",
+      "type3": "Typ 3"
+    },
     "shelves": "Liczba półek",
     "gapsTitle": "Szczeliny i wysokości frontów (ustawiaj graficznie)",
     "backOptions": {

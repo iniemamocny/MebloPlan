@@ -32,6 +32,7 @@ export function useCabinetConfig(
       shelves: g.shelves ?? defaultShelves,
       backPanel: g.backPanel,
       edgeBanding: 'front',
+      carcassType: g.carcassType,
     });
   }, [family, store.globals]);
 
@@ -140,6 +141,7 @@ export function useCabinetConfig(
           gaps: g.gaps,
           backPanel: g.backPanel,
           edgeBanding: g.edgeBanding,
+          carcassType: g.carcassType,
         },
         doorsCount,
         drawersCount,
@@ -227,6 +229,7 @@ export function useCabinetConfig(
             gaps: g.gaps,
             backPanel: g.backPanel,
             edgeBanding: 'front',
+            carcassType: g.carcassType,
           },
           doorsCount: 1,
           drawersCount: 0,

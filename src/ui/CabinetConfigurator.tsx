@@ -127,6 +127,7 @@ const CabinetConfigurator: React.FC<Props> = ({
               backPanel={gLocal.backPanel}
               dividerPosition={gLocal.dividerPosition}
               edgeBanding={gLocal.edgeBanding}
+              carcassType={gLocal.carcassType}
               showFronts={showFronts}
             />
           </div>
@@ -208,6 +209,23 @@ const CabinetConfigurator: React.FC<Props> = ({
                 <FormComponent values={formValues} onChange={handleFormChange} />
               </div>
             )}
+            <div style={{ marginBottom: 8 }}>
+              <div className="small">{t('configurator.carcassType')}</div>
+              <select
+                className="input"
+                value={gLocal.carcassType || 'type1'}
+                onChange={(e) =>
+                  setAdv({
+                    ...gLocal,
+                    carcassType: (e.target as HTMLSelectElement).value as CabinetConfig['carcassType'],
+                  })
+                }
+              >
+                <option value="type1">{t('configurator.carcassTypes.type1')}</option>
+                <option value="type2">{t('configurator.carcassTypes.type2')}</option>
+                <option value="type3">{t('configurator.carcassTypes.type3')}</option>
+              </select>
+            </div>
             <div className="grid4">
               <div>
                 <div className="small">{t('configurator.height')}</div>

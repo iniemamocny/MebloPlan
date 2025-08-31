@@ -6,6 +6,7 @@ export interface CabinetConfig {
   boardType: string
   frontType: string
   gaps: Gaps
+  carcassType?: 'type1' | 'type2' | 'type3'
   shelves?: number
   backPanel?: 'full' | 'split' | 'none'
   drawerFronts?: number[]

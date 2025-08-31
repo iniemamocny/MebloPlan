@@ -71,6 +71,7 @@ export const getLegHeight = (mod: Module3D, globals: Globals): number => {
       dividerPosition,
       showEdges,
       edgeBanding: adv.edgeBanding,
+      carcassType: adv.carcassType,
       showFronts,
     })
     group.userData.kind = 'cab'

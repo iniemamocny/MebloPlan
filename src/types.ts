@@ -14,6 +14,7 @@ export interface GlobalsItem {
   offsetWall?:number
   shelves?:number
   backPanel?:'full'|'split'|'none'
+  carcassType?: 'type1' | 'type2' | 'type3'
 }
 
 export type Globals = Record<FAMILY, GlobalsItem>
@@ -79,6 +80,7 @@ export interface ModuleAdv {
   backPanel?:'full'|'split'|'none'
   dividerPosition?: 'left' | 'right' | 'center'
   edgeBanding?: 'none' | 'front' | 'full'
+  carcassType?: 'type1' | 'type2' | 'type3'
 }
 
 export interface Module3D {
