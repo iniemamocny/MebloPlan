@@ -93,6 +93,7 @@ type Store = {
   past: Module3D[][];
   future: Module3D[][];
   room: Room;
+  showFronts: boolean;
   setRole: (r: 'stolarz' | 'klient') => void;
   updateGlobals: (fam: FAMILY, patch: Partial<Globals[FAMILY]>) => void;
   updatePrices: (patch: Partial<Prices>) => void;
@@ -105,6 +106,7 @@ type Store = {
   setRoom: (patch: Partial<Room>) => void;
   addWall: (w: { length: number; angle: number }) => void;
   addOpening: (op: Opening) => void;
+  setShowFronts: (v: boolean) => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -115,6 +117,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   past: [],
   future: [],
   room: persisted?.room || { walls: [], openings: [], height: 2700 },
+  showFronts: true,
   setRole: (r) => set({ role: r }),
   updateGlobals: (fam, patch) =>
     set((s) => {
@@ -193,6 +196,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
     set((s) => ({ room: { ...s.room, walls: [...s.room.walls, w] } })),
   addOpening: (op) =>
     set((s) => ({ room: { ...s.room, openings: [...s.room.openings, op] } })),
+  setShowFronts: (v) => set({ showFronts: v }),
 }));
 
 usePlannerStore.subscribe((state) => {

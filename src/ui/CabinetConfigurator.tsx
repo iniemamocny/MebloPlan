@@ -55,6 +55,10 @@ const CabinetConfigurator: React.FC<Props> = ({
   const [openSection, setOpenSection] = useState<
     'korpus' | 'fronty' | 'okucie' | 'nozki' | 'rysunki' | null
   >(null)
+  const showFronts = openSection !== 'korpus'
+  useEffect(() => {
+    store.setShowFronts(showFronts)
+  }, [showFronts, store])
   const FormComponent = kind ? FORM_COMPONENTS[kind.key] : null
   const formValues: CabinetFormValues = {
     height: gLocal.height,
@@ -123,6 +127,7 @@ const CabinetConfigurator: React.FC<Props> = ({
               backPanel={gLocal.backPanel}
               dividerPosition={gLocal.dividerPosition}
               edgeBanding={gLocal.edgeBanding}
+              showFronts={showFronts}
             />
           </div>
           <div className="grid2" style={{ marginTop: 8 }}>
