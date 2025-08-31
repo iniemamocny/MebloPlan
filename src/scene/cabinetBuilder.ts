@@ -229,14 +229,16 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     if (tr.orientation === 'vertical') {
       const geo = new THREE.BoxGeometry(widthM, T, D - 2 * T);
       const mesh = new THREE.Mesh(geo, carcMat);
-      const x = T + tr.offset / 1000 + widthM / 2;
-      const z = zBase === 0 ? -(D - 2 * T) / 2 : -D + (D - 2 * T) / 2;
+      const x = T + tr.offset / 1000;
+      const z = -D / 2;
       mesh.position.set(x, legHeight + H - T / 2, z);
       addEdges(mesh);
       group.add(mesh);
       if (edgeBanding !== 'none') {
-        const zEdge = zBase === 0 ? bandThickness / 2 : -D + bandThickness / 2;
-        addBand(x, legHeight + H - T / 2, zEdge, widthM, T, bandThickness);
+        const zFront = -T + bandThickness / 2;
+        const zBack = -D + T - bandThickness / 2;
+        addBand(x, legHeight + H - T / 2, zFront, widthM, T, bandThickness);
+        addBand(x, legHeight + H - T / 2, zBack, widthM, T, bandThickness);
         if (edgeBanding === 'full') {
           addBand(
             x - widthM / 2 + bandThickness / 2,
