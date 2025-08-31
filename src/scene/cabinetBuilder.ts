@@ -231,7 +231,11 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       const mesh = new THREE.Mesh(geo, carcMat);
       const z = zBase === 0 ? -T / 2 : -D + T / 2;
       const y = legHeight + H - tr.width / 2000 - tr.offset / 1000;
-      mesh.position.set(W / 2, y, z);
+      mesh.position.set(
+        W / 2,
+        y,
+        z,
+      );
       addEdges(mesh);
       group.add(mesh);
       if (edgeBanding !== 'none') {
