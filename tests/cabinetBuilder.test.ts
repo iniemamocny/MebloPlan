@@ -62,6 +62,23 @@ describe('buildCabinetMesh', () => {
     expect(doors.length).toBe(2);
   });
 
+  it('omits front groups when showFronts is false', () => {
+    const g = buildCabinetMesh({
+      width: 1,
+      height: 0.9,
+      depth: 0.5,
+      drawers: 1,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      showFronts: false,
+    });
+    const fronts = g.children.filter(
+      (c) => c instanceof THREE.Group && (c as any).userData?.type,
+    );
+    expect(fronts.length).toBe(0);
+    expect((g.userData.frontGroups || []).length).toBe(0);
+  });
+
   it('adds divider when dividerPosition provided', () => {
     const g = buildCabinetMesh({
       width: 1,
