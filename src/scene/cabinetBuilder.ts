@@ -229,20 +229,15 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     if (tr.orientation === 'vertical') {
       const geo = new THREE.BoxGeometry(W - 2 * T, widthM, T);
       const mesh = new THREE.Mesh(geo, carcMat);
-      const z = zBase === 0 ? -T / 2 : -D + T / 2;
       const y = legHeight + H - tr.width / 2000 - tr.offset / 1000;
-      mesh.position.set(
-        W / 2,
-        y,
-        z,
-      );
+      mesh.position.set(W / 2, y, -D + T / 2);
       addEdges(mesh);
       group.add(mesh);
       if (edgeBanding !== 'none') {
         addBand(
           W / 2,
           y - widthM / 2 - bandThickness / 2,
-          z,
+          -D + T / 2,
           W - 2 * T,
           bandThickness,
           T,
@@ -251,7 +246,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
           addBand(
             T + bandThickness / 2,
             y,
-            z,
+            -D + T / 2,
             bandThickness,
             widthM,
             T,
@@ -259,7 +254,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
           addBand(
             W - T - bandThickness / 2,
             y,
-            z,
+            -D + T / 2,
             bandThickness,
             widthM,
             T,

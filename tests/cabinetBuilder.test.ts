@@ -166,7 +166,7 @@ describe('buildCabinetMesh', () => {
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
       topPanel: {
-        type: 'frontTraverse',
+        type: 'backTraverse',
         traverse: { orientation: 'vertical', offset, width: trWidth },
       },
     })
@@ -181,7 +181,7 @@ describe('buildCabinetMesh', () => {
     ) as THREE.Mesh | undefined
     expect(traverse).toBeTruthy()
     expect(traverse!.position.x).toBeCloseTo(0.5, 5)
-    expect(traverse!.position.z).toBeCloseTo(-boardThickness / 2, 5)
+    expect(traverse!.position.z).toBeCloseTo(-0.5 + boardThickness / 2, 5)
     expect(traverse!.position.y).toBeCloseTo(
       0.9 - trWidth / 2000 - offset / 1000,
       5,
@@ -228,7 +228,7 @@ describe('buildCabinetMesh', () => {
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
       topPanel: {
-        type: 'frontTraverse',
+        type: 'backTraverse',
         traverse: { orientation: 'vertical', offset: 0, width: trWidth },
       },
       bottomPanel: 'none',
