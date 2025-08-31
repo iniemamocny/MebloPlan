@@ -98,9 +98,9 @@
     "shelves": "Liczba półek",
     "gapsTitle": "Szczeliny i wysokości frontów (ustawiaj graficznie)",
     "backOptions": {
-      "full": "full",
-      "split": "split",
-      "none": "none"
+      "full": "pełne",
+      "split": "dzielone",
+      "none": "brak"
     },
     "topOptions": {
       "twoTraverses": "dwa trawersy",
