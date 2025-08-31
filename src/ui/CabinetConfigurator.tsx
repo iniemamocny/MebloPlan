@@ -401,9 +401,9 @@ const CabinetConfigurator: React.FC<Props> = ({
                       type="number"
                       min={0}
                       max={
-                        gLocal.topPanel.traverse.orientation === 'horizontal'
-                          ? widthMM
-                          : gLocal.depth
+                        gLocal.topPanel.traverse.orientation === 'vertical'
+                          ? gLocal.depth
+                          : widthMM
                       }
                       value={gLocal.topPanel.traverse.offset}
                       onChange={(e) =>
@@ -464,9 +464,9 @@ const CabinetConfigurator: React.FC<Props> = ({
                           type="number"
                           min={0}
                           max={
-                            gLocal.topPanel[pos].orientation === 'horizontal'
-                              ? widthMM
-                              : gLocal.depth
+                            gLocal.topPanel[pos].orientation === 'vertical'
+                              ? gLocal.depth
+                              : widthMM
                           }
                           value={gLocal.topPanel[pos].offset}
                           onChange={(e) =>
