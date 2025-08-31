@@ -188,41 +188,40 @@ describe('buildCabinetMesh', () => {
     });
     const boardThickness = 0.018;
     const bandThickness = 0.002;
-    const expectedDepth = depth - 2 * boardThickness;
+    const expectedWidth = 1 - 2 * boardThickness;
     const widthM = trWidth / 1000;
     const traverse = g.children.find(
       (c) =>
         c instanceof THREE.Mesh &&
-        Math.abs((c as any).geometry.parameters.width - widthM) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.width - expectedWidth) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.height - boardThickness) <
           1e-6 &&
-        Math.abs((c as any).geometry.parameters.depth - expectedDepth) < 1e-6,
+        Math.abs((c as any).geometry.parameters.depth - widthM) < 1e-6,
     ) as THREE.Mesh | undefined;
     expect(traverse).toBeTruthy();
     expect(traverse!.position.x).toBeCloseTo(0.5, 5);
-    expect(traverse!.position.z).toBeCloseTo(-depth / 2 - offset / 1000, 5);
+    const expectedZ = -(offset / 1000 + widthM / 2);
+    expect(traverse!.position.z).toBeCloseTo(expectedZ, 5);
     expect(traverse!.position.y).toBeCloseTo(0.9 - boardThickness / 2, 5);
 
     const frontBand = g.children.find(
       (c) =>
         c instanceof THREE.Mesh &&
-        Math.abs((c as any).geometry.parameters.width - widthM) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.width - expectedWidth) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.height - boardThickness) <
           1e-6 &&
         Math.abs((c as any).geometry.parameters.depth - bandThickness) < 1e-6 &&
-        Math.abs(
-          c.position.z - (-boardThickness - offset / 1000 + bandThickness / 2),
-        ) < 1e-6,
+        Math.abs(c.position.z - (-offset / 1000 + bandThickness / 2)) < 1e-6,
     );
     const backBand = g.children.find(
       (c) =>
         c instanceof THREE.Mesh &&
-        Math.abs((c as any).geometry.parameters.width - widthM) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.width - expectedWidth) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.height - boardThickness) <
           1e-6 &&
         Math.abs((c as any).geometry.parameters.depth - bandThickness) < 1e-6 &&
         Math.abs(
-          c.position.z - (-depth + boardThickness - offset / 1000 - bandThickness / 2),
+          c.position.z - (-offset / 1000 - widthM - bandThickness / 2),
         ) < 1e-6,
     );
     expect(frontBand).toBeTruthy();
