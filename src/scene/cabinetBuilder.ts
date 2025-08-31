@@ -227,28 +227,47 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   const addTraverseTop = (tr: Traverse, zBase: number, topWidth: number) => {
     const widthM = tr.width / 1000;
     if (tr.orientation === 'vertical') {
-      const geo = new THREE.BoxGeometry(widthM, T, D);
+      const geo = new THREE.BoxGeometry(topWidth, widthM, T);
       const mesh = new THREE.Mesh(geo, carcMat);
-      const x = W / 2 + tr.offset / 1000;
-      const z = -D / 2;
-      mesh.position.set(x, legHeight + H - T / 2, z);
+      const isFront = zBase === 0;
+      let frontEdge: number;
+      let backEdge: number;
+      if (isFront) {
+        frontEdge = -tr.offset / 1000 + FRONT_OFFSET;
+        backEdge = frontEdge - T;
+      } else {
+        backEdge = -zBase + tr.offset / 1000;
+        frontEdge = backEdge + T;
+      }
+      const z = (frontEdge + backEdge) / 2;
+      const x = W / 2;
+      const y = legHeight + H - widthM / 2;
+      mesh.position.set(x, y, z);
       addEdges(mesh);
       group.add(mesh);
       if (edgeBanding !== 'none') {
-        addBand(x, legHeight + H - T / 2, bandThickness / 2, widthM, T, bandThickness);
-        addBand(
-          x,
-          legHeight + H - T / 2,
-          -D + bandThickness / 2,
-          widthM,
-          T,
-          bandThickness,
-        );
+        const zFront = frontEdge + bandThickness / 2;
+        const zBack = backEdge - bandThickness / 2;
+        addBand(x, y, zFront, topWidth, widthM, bandThickness);
+        addBand(x, y, zBack, topWidth, widthM, bandThickness);
         if (edgeBanding === 'full') {
-          const xLeft = x - widthM / 2 + bandThickness / 2;
-          const xRight = x + widthM / 2 - bandThickness / 2;
-          addBand(xLeft, legHeight + H - T / 2, -D / 2, bandThickness, T, D);
-          addBand(xRight, legHeight + H - T / 2, -D / 2, bandThickness, T, D);
+          const topLeft = (W - topWidth) / 2;
+          addBand(
+            topLeft + bandThickness / 2,
+            y,
+            z,
+            bandThickness,
+            widthM,
+            T,
+          );
+          addBand(
+            W - topLeft - bandThickness / 2,
+            y,
+            z,
+            bandThickness,
+            widthM,
+            T,
+          );
         }
       }
     } else {
