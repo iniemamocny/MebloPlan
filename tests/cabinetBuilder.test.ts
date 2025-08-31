@@ -178,6 +178,35 @@ describe('buildCabinetMesh', () => {
     ) as THREE.Mesh | undefined
     expect(traverse).toBeTruthy()
     expect(traverse!.position.x).toBeCloseTo(
+      0.018 + (offset + trWidth / 2) / 1000,
+      5,
+    )
+  })
+
+  it('positions vertical traverse flush for carcass type3', () => {
+    const offset = 100
+    const trWidth = 100
+    const g = buildCabinetMesh({
+      width: 1,
+      height: 0.9,
+      depth: 0.5,
+      drawers: 0,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      carcassType: 'type3',
+      topPanel: {
+        type: 'frontTraverse',
+        traverse: { orientation: 'vertical', offset, width: trWidth },
+      },
+    })
+    const traverse = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.depth - 0.5) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.width - trWidth / 1000) < 1e-6,
+    ) as THREE.Mesh | undefined
+    expect(traverse).toBeTruthy()
+    expect(traverse!.position.x).toBeCloseTo(
       (offset + trWidth / 2) / 1000,
       5,
     )

@@ -185,6 +185,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       : carcassType === 'type2'
         ? W - 2 * T
         : W - 2 * T;
+  const sideInset = carcassType === 'type3' ? 0 : T;
   if (bottomPanel !== 'none') {
     const bottom = new THREE.Mesh(
       new THREE.BoxGeometry(bottomWidth, T, D),
@@ -228,7 +229,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     if (tr.orientation === 'vertical') {
       const geo = new THREE.BoxGeometry(widthM, T, D);
       const mesh = new THREE.Mesh(geo, carcMat);
-      const x = (tr.offset + tr.width / 2) / 1000;
+      const x = sideInset + (tr.offset + tr.width / 2) / 1000;
       mesh.position.set(x, legHeight + H - T / 2, -D / 2);
       addEdges(mesh);
       group.add(mesh);
