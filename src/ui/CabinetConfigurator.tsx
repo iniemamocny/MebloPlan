@@ -207,13 +207,15 @@ const CabinetConfigurator: React.FC<Props> = ({
           )}
         </div>
 
-        <details open={openSection === 'korpus'}>
+        <details
+          open={openSection === 'korpus'}
+          className={openSection === 'korpus' ? 'active' : ''}
+        >
           <summary
             onClick={(e) => {
               e.preventDefault();
               setOpenSection(openSection === 'korpus' ? null : 'korpus');
             }}
-            className={openSection === 'korpus' ? 'active' : ''}
           >
             {t('configurator.sections.korpus')}
           </summary>
@@ -619,13 +621,15 @@ const CabinetConfigurator: React.FC<Props> = ({
           </div>
         </details>
 
-        <details open={openSection === 'fronty'}>
+        <details
+          open={openSection === 'fronty'}
+          className={openSection === 'fronty' ? 'active' : ''}
+        >
           <summary
             onClick={(e) => {
               e.preventDefault();
               setOpenSection(openSection === 'fronty' ? null : 'fronty');
             }}
-            className={openSection === 'fronty' ? 'active' : ''}
           >
             {t('configurator.sections.fronty')}
           </summary>
@@ -685,13 +689,15 @@ const CabinetConfigurator: React.FC<Props> = ({
           </div>
         </details>
 
-        <details open={openSection === 'okucie'}>
+        <details
+          open={openSection === 'okucie'}
+          className={openSection === 'okucie' ? 'active' : ''}
+        >
           <summary
             onClick={(e) => {
               e.preventDefault();
               setOpenSection(openSection === 'okucie' ? null : 'okucie');
             }}
-            className={openSection === 'okucie' ? 'active' : ''}
           >
             {t('configurator.sections.okucie')}
           </summary>
@@ -709,13 +715,15 @@ const CabinetConfigurator: React.FC<Props> = ({
           </div>
         </details>
 
-        <details open={openSection === 'nozki'}>
+        <details
+          open={openSection === 'nozki'}
+          className={openSection === 'nozki' ? 'active' : ''}
+        >
           <summary
             onClick={(e) => {
               e.preventDefault();
               setOpenSection(openSection === 'nozki' ? null : 'nozki');
             }}
-            className={openSection === 'nozki' ? 'active' : ''}
           >
             {t('configurator.sections.nozki')}
           </summary>
@@ -732,13 +740,15 @@ const CabinetConfigurator: React.FC<Props> = ({
             </div>
           </div>
         </details>
-        <details open={openSection === 'rysunki'}>
+        <details
+          open={openSection === 'rysunki'}
+          className={openSection === 'rysunki' ? 'active' : ''}
+        >
           <summary
             onClick={(e) => {
               e.preventDefault();
               setOpenSection(openSection === 'rysunki' ? null : 'rysunki');
             }}
-            className={openSection === 'rysunki' ? 'active' : ''}
           >
             {t('configurator.sections.rysunki')}
           </summary>

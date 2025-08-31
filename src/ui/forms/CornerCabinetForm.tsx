@@ -22,13 +22,15 @@ export default function CornerCabinetForm({ values, onChange }: CabinetFormProps
     useState<'korpus' | 'fronty' | 'okucie' | 'nozki' | null>(null)
   return (
     <div>
-      <details open={openSection === 'korpus'}>
+      <details
+        open={openSection === 'korpus'}
+        className={openSection === 'korpus' ? 'active' : ''}
+      >
         <summary
           onClick={(e) => {
             e.preventDefault();
             setOpenSection(openSection === 'korpus' ? null : 'korpus');
           }}
-          className={openSection === 'korpus' ? 'active' : ''}
         >
           {t('forms.sections.korpus')}
         </summary>
@@ -39,37 +41,43 @@ export default function CornerCabinetForm({ values, onChange }: CabinetFormProps
           <SingleMMInput value={depth} onChange={d=>update({ depth:d })} />
         </div>
       </details>
-      <details open={openSection === 'fronty'}>
+      <details
+        open={openSection === 'fronty'}
+        className={openSection === 'fronty' ? 'active' : ''}
+      >
         <summary
           onClick={(e) => {
             e.preventDefault();
             setOpenSection(openSection === 'fronty' ? null : 'fronty');
           }}
-          className={openSection === 'fronty' ? 'active' : ''}
         >
           {t('forms.sections.fronty')}
         </summary>
         <div />
       </details>
-      <details open={openSection === 'okucie'}>
+      <details
+        open={openSection === 'okucie'}
+        className={openSection === 'okucie' ? 'active' : ''}
+      >
         <summary
           onClick={(e) => {
             e.preventDefault();
             setOpenSection(openSection === 'okucie' ? null : 'okucie');
           }}
-          className={openSection === 'okucie' ? 'active' : ''}
         >
           {t('forms.sections.okucie')}
         </summary>
         {hardware && <pre style={{ display:'none' }}>{JSON.stringify(hardware)}</pre>}
       </details>
-      <details open={openSection === 'nozki'}>
+      <details
+        open={openSection === 'nozki'}
+        className={openSection === 'nozki' ? 'active' : ''}
+      >
         <summary
           onClick={(e) => {
             e.preventDefault();
             setOpenSection(openSection === 'nozki' ? null : 'nozki');
           }}
-          className={openSection === 'nozki' ? 'active' : ''}
         >
           {t('forms.sections.nozki')}
         </summary>
