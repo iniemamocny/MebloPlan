@@ -4,7 +4,7 @@ import { FAMILY } from '../../core/catalog'
 import { buildCabinetMesh } from '../../scene/cabinetBuilder'
 import { usePlannerStore } from '../../state/store'
 
-export default function Cabinet3D({ widthMM, heightMM, depthMM, doorsCount, drawersCount, gaps, drawerFronts, family, shelves = 1, backPanel = 'full', dividerPosition, edgeBanding = 'front' }:{ widthMM:number;heightMM:number;depthMM:number;doorsCount:number;drawersCount:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number; backPanel?:'full'|'split'|'none'; dividerPosition?:'left'|'right'|'center'; edgeBanding?:'none'|'front'|'full' }){
+ export default function Cabinet3D({ widthMM, heightMM, depthMM, doorsCount, drawersCount, gaps, drawerFronts, family, shelves = 1, backPanel = 'full', dividerPosition, edgeBanding = 'front', showFronts = true }:{ widthMM:number;heightMM:number;depthMM:number;doorsCount:number;drawersCount:number;gaps:{top:number;bottom:number};drawerFronts?:number[];family:FAMILY; shelves?:number; backPanel?:'full'|'split'|'none'; dividerPosition?:'left'|'right'|'center'; edgeBanding?:'none'|'front'|'full'; showFronts?:boolean }){
   const ref = useRef<HTMLDivElement>(null)
   const role = usePlannerStore(s=>s.role)
   const showEdges = role === 'stolarz'
@@ -28,25 +28,26 @@ export default function Cabinet3D({ widthMM, heightMM, depthMM, doorsCount, draw
     const H = heightMM / 1000
     const D = depthMM / 1000
     const legHeight = (family === FAMILY.BASE || family === FAMILY.TALL) ? 0.04 : 0
-    const cabGroup = buildCabinetMesh({
-      width: W,
-      height: H,
-      depth: D,
-      drawers: drawersCount,
-      doorCount: doorsCount,
-      gaps,
-      drawerFronts,
-      family,
-      shelves,
-      backPanel,
-      legHeight,
-      dividerPosition: drawersCount > 0 ? undefined : dividerPosition,
-      showEdges,
-      edgeBanding
-    })
+      const cabGroup = buildCabinetMesh({
+        width: W,
+        height: H,
+        depth: D,
+        drawers: drawersCount,
+        doorCount: doorsCount,
+        gaps,
+        drawerFronts,
+        family,
+        shelves,
+        backPanel,
+        legHeight,
+        dividerPosition: drawersCount > 0 ? undefined : dividerPosition,
+        showEdges,
+        edgeBanding,
+        showFronts
+      })
     scene.add(cabGroup)
     renderer.render(scene, camera)
     return () => { renderer.dispose() }
-    }, [widthMM, heightMM, depthMM, doorsCount, drawersCount, gaps, drawerFronts, family, shelves, backPanel, dividerPosition, showEdges, edgeBanding])
+      }, [widthMM, heightMM, depthMM, doorsCount, drawersCount, gaps, drawerFronts, family, shelves, backPanel, dividerPosition, showEdges, edgeBanding, showFronts])
   return <div ref={ref} style={{ width: 260, height: 190, border: '1px solid #E5E7EB', borderRadius: 8, background: '#fff' }} />
 }

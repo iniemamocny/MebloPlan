@@ -32,6 +32,7 @@ export const getLegHeight = (mod: Module3D, globals: Globals): number => {
     const containerRef = useRef<HTMLDivElement>(null)
     const store = usePlannerStore()
     const showEdges = store.role === 'stolarz'
+    const showFronts = store.showFronts
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -70,12 +71,14 @@ export const getLegHeight = (mod: Module3D, globals: Globals): number => {
       dividerPosition,
       showEdges,
       edgeBanding: adv.edgeBanding,
+      showFronts,
     })
     group.userData.kind = 'cab'
     const fg = group.userData.frontGroups || []
     group.userData.openStates = mod.openStates?.slice(0, fg.length) || new Array(fg.length).fill(false)
     group.userData.openProgress = new Array(fg.length).fill(0)
     group.userData.animSpeed = (adv as any).animationSpeed ?? 0.15
+    fg.forEach((g: THREE.Object3D) => (g.visible = showFronts))
     return group
   }
 
@@ -96,6 +99,8 @@ export const getLegHeight = (mod: Module3D, globals: Globals): number => {
     })
     store.modules.forEach((m: Module3D) => {
       const cabMesh = createCabinetMesh(m)
+      const fgs: THREE.Object3D[] = cabMesh.userData.frontGroups || []
+      fgs.forEach((fg) => (fg.visible = showFronts))
       const legHeight = getLegHeight(m, store.globals)
       const baseY = m.family === FAMILY.BASE ? 0 : m.position[1]
       cabMesh.position.set(m.position[0], baseY, m.position[2])
@@ -115,7 +120,7 @@ export const getLegHeight = (mod: Module3D, globals: Globals): number => {
       }
     })
   }
-  useEffect(drawScene, [store.modules, addCountertop, showEdges])
+  useEffect(drawScene, [store.modules, addCountertop, showEdges, showFronts])
 
   useEffect(() => {
     const three = threeRef.current

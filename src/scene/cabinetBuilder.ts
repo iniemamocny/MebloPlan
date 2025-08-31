@@ -20,6 +20,7 @@ export interface CabinetOptions {
   dividerPosition?: 'left' | 'right' | 'center';
   showEdges?: boolean;
   edgeBanding?: 'none' | 'front' | 'full';
+  showFronts?: boolean;
 }
 
 /**
@@ -45,6 +46,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     dividerPosition,
     showEdges = false,
     edgeBanding = 'none',
+    showFronts = true,
   } = opts;
 
   const FRONT_OFFSET = 0.002;
@@ -311,6 +313,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       fg.userData.type = 'drawer';
       fg.userData.frontIndex = frontGroups.length;
       fg.userData.slideDist = -Math.min(0.45, D);
+      fg.visible = showFronts;
       frontGroups.push(fg);
       openStates.push(false);
       openProgress.push(0);
@@ -351,6 +354,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       fg.userData.type = 'door';
       fg.userData.frontIndex = frontGroups.length;
       fg.userData.hingeSide = hingeSide;
+      fg.visible = showFronts;
       frontGroups.push(fg);
       openStates.push(false);
       openProgress.push(0);
