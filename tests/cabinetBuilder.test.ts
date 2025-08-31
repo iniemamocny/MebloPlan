@@ -181,7 +181,7 @@ describe('buildCabinetMesh', () => {
     ) as THREE.Mesh | undefined;
     expect(traverse).toBeTruthy();
     expect(traverse!.position.x).toBeCloseTo(
-      boardThickness + offset / 1000 + widthM / 2,
+      boardThickness + offset / 1000,
       5,
     );
     expect(traverse!.position.z).toBeCloseTo(-depth / 2, 5);
