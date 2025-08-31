@@ -188,6 +188,51 @@ describe('buildCabinetMesh', () => {
     expect(traverse!.position.y).toBeCloseTo(0.9 - boardThickness / 2, 5);
   });
 
+  it('adds front and back banding to vertical traverse', () => {
+    const offset = 100;
+    const trWidth = 100;
+    const depth = 0.5;
+    const g = buildCabinetMesh({
+      width: 1,
+      height: 0.9,
+      depth,
+      drawers: 0,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      edgeBanding: 'front',
+      topPanel: {
+        type: 'frontTraverse',
+        traverse: { orientation: 'vertical', offset, width: trWidth },
+      },
+    });
+    const boardThickness = 0.018;
+    const bandThickness = 0.001;
+    const widthM = trWidth / 1000;
+    const xPos = boardThickness + offset / 1000;
+    const frontBand = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - widthM) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - boardThickness) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - bandThickness) < 1e-6 &&
+        Math.abs(c.position.x - xPos) < 1e-6 &&
+        Math.abs(c.position.z - (-boardThickness + bandThickness / 2)) < 1e-6,
+    ) as THREE.Mesh | undefined;
+    const backBand = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - widthM) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - boardThickness) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - bandThickness) < 1e-6 &&
+        Math.abs(c.position.x - xPos) < 1e-6 &&
+        Math.abs(
+          c.position.z - (-depth + boardThickness - bandThickness / 2),
+        ) < 1e-6,
+    ) as THREE.Mesh | undefined;
+    expect(frontBand).toBeTruthy();
+    expect(backBand).toBeTruthy();
+  });
+
   it('adds edge outlines when showEdges is true', () => {
     const g = buildCabinetMesh({
       width: 1,
