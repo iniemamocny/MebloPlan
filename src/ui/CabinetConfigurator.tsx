@@ -54,7 +54,7 @@ const CabinetConfigurator: React.FC<Props> = ({
   const [drawersCount, setDrawersCount] = useState(0)
   const [openSection, setOpenSection] = useState<
     'korpus' | 'fronty' | 'okucie' | 'nozki' | 'rysunki' | null
-  >('korpus')
+  >(null)
   const FormComponent = kind ? FORM_COMPONENTS[kind.key] : null
   const formValues: CabinetFormValues = {
     height: gLocal.height,
@@ -395,7 +395,11 @@ const CabinetConfigurator: React.FC<Props> = ({
           </div>
         </details>
         <details open={openSection === 'rysunki'}>
-          <summary onClick={() => setOpenSection('rysunki')}>
+          <summary
+            onClick={() =>
+              setOpenSection(openSection === 'rysunki' ? null : 'rysunki')
+            }
+          >
             {t('configurator.sections.rysunki')}
           </summary>
           <div>

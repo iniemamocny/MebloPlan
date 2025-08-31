@@ -7,11 +7,18 @@ export default function ApplianceCabinetForm({ values, onChange }: CabinetFormPr
   const { t } = useTranslation()
   const { height, depth, hardware, legs } = values
   const update = (patch: Partial<CabinetFormValues>) => onChange({ ...values, ...patch })
-  const [openSection, setOpenSection] = useState<'korpus' | 'fronty' | 'okucie' | 'nozki'>('korpus')
+  const [openSection, setOpenSection] =
+    useState<'korpus' | 'fronty' | 'okucie' | 'nozki' | null>(null)
   return (
     <div>
       <details open={openSection === 'korpus'}>
-        <summary onClick={() => setOpenSection('korpus')}>{t('forms.sections.korpus')}</summary>
+        <summary
+          onClick={() =>
+            setOpenSection(openSection === 'korpus' ? null : 'korpus')
+          }
+        >
+          {t('forms.sections.korpus')}
+        </summary>
         <div>
           <div className="small">{t('forms.height')}</div>
           <SingleMMInput value={height} onChange={h=>update({ height:h })} />
@@ -20,15 +27,33 @@ export default function ApplianceCabinetForm({ values, onChange }: CabinetFormPr
         </div>
       </details>
       <details open={openSection === 'fronty'}>
-        <summary onClick={() => setOpenSection('fronty')}>{t('forms.sections.fronty')}</summary>
+        <summary
+          onClick={() =>
+            setOpenSection(openSection === 'fronty' ? null : 'fronty')
+          }
+        >
+          {t('forms.sections.fronty')}
+        </summary>
         <div />
       </details>
       <details open={openSection === 'okucie'}>
-        <summary onClick={() => setOpenSection('okucie')}>{t('forms.sections.okucie')}</summary>
+        <summary
+          onClick={() =>
+            setOpenSection(openSection === 'okucie' ? null : 'okucie')
+          }
+        >
+          {t('forms.sections.okucie')}
+        </summary>
         {hardware && <pre style={{ display:'none' }}>{JSON.stringify(hardware)}</pre>}
       </details>
       <details open={openSection === 'nozki'}>
-        <summary onClick={() => setOpenSection('nozki')}>{t('forms.sections.nozki')}</summary>
+        <summary
+          onClick={() =>
+            setOpenSection(openSection === 'nozki' ? null : 'nozki')
+          }
+        >
+          {t('forms.sections.nozki')}
+        </summary>
         {legs && <pre style={{ display:'none' }}>{JSON.stringify(legs)}</pre>}
       </details>
     </div>
