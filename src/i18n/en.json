@@ -106,12 +106,18 @@
       "twoTraverses": "two traverses",
       "frontTraverse": "front traverse",
       "backTraverse": "back traverse",
-      "full": "full",
+      "full": "full panel",
       "none": "none"
     },
     "bottomOptions": {
-      "full": "full",
+      "full": "full panel",
       "none": "none"
+    },
+    "edgeBanding": "Edge banding",
+    "edgeBandingOptions": {
+      "none": "none",
+      "front": "front",
+      "full": "full"
     },
     "orientation": {
       "label": "Orientation",
