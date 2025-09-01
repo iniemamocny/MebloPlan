@@ -14,7 +14,12 @@ export interface CabinetConfig {
   bottomPanel?: BottomPanel;
   drawerFronts?: number[];
   dividerPosition?: 'left' | 'right' | 'center';
-  edgeBanding?: 'none' | 'front' | 'full';
+  edgeBanding?: {
+    front: boolean;
+    back: boolean;
+    left: boolean;
+    right: boolean;
+  };
   hardware?: any;
   legs?: any;
 }

@@ -116,9 +116,10 @@
     },
     "edgeBanding": "Okleina",
     "edgeBandingOptions": {
-      "none": "brak",
-      "front": "front",
-      "full": "pełna"
+      "front": "przód",
+      "back": "tył",
+      "left": "lewa",
+      "right": "prawa"
     },
     "orientation": {
       "label": "Orientacja",
