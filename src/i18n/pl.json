@@ -122,12 +122,8 @@
     },
     "edgeBanding": "Okleina",
     "edgeBandingOptions": {
-      "front": "przód",
-      "back": "tył",
-      "left": "lewa",
-      "right": "prawa",
-      "top": "górna",
-      "bottom": "dolna"
+      "length": "długość",
+      "width": "szerokość"
     },
     "shelfEdgeBanding": "Okleina półek",
     "traverseEdgeBanding": "Okleina trawersów",

@@ -20,32 +20,20 @@ export default function Cabinet3D({
   bottomPanel,
   dividerPosition,
   edgeBanding = {
-    front: true,
-    back: false,
-    left: false,
-    right: false,
-    top: false,
-    bottom: false,
+    length: true,
+    width: false,
   },
   traverseEdgeBanding = {
-    front: false,
-    back: false,
-    left: false,
-    right: false,
+    length: false,
+    width: false,
   },
   shelfEdgeBanding = {
-    front: false,
-    back: false,
-    left: false,
-    right: false,
-    top: false,
-    bottom: false,
+    length: false,
+    width: false,
   },
   backEdgeBanding = {
-    front: false,
-    back: false,
-    left: false,
-    right: false,
+    length: false,
+    width: false,
   },
   sidePanels,
   carcassType = 'type1',
@@ -65,32 +53,20 @@ export default function Cabinet3D({
   bottomPanel?: BottomPanel;
   dividerPosition?: 'left' | 'right' | 'center';
   edgeBanding?: {
-    front: boolean;
-    back: boolean;
-    left: boolean;
-    right: boolean;
-    top: boolean;
-    bottom: boolean;
+    length: boolean;
+    width: boolean;
   };
   traverseEdgeBanding?: {
-    front: boolean;
-    back: boolean;
-    left: boolean;
-    right: boolean;
+    length: boolean;
+    width: boolean;
   };
   shelfEdgeBanding?: {
-    front: boolean;
-    back: boolean;
-    left: boolean;
-    right: boolean;
-    top: boolean;
-    bottom: boolean;
+    length: boolean;
+    width: boolean;
   };
   backEdgeBanding?: {
-    front: boolean;
-    back: boolean;
-    left: boolean;
-    right: boolean;
+    length: boolean;
+    width: boolean;
   };
   sidePanels?: {
     left?: Record<string, any>;

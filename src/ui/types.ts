@@ -15,32 +15,20 @@ export interface CabinetConfig {
   drawerFronts?: number[];
   dividerPosition?: 'left' | 'right' | 'center';
   edgeBanding?: {
-    front: boolean;
-    back: boolean;
-    left: boolean;
-    right: boolean;
-    top: boolean;
-    bottom: boolean;
+    length: boolean;
+    width: boolean;
   };
   shelfEdgeBanding?: {
-    front: boolean;
-    back: boolean;
-    left: boolean;
-    right: boolean;
-    top: boolean;
-    bottom: boolean;
+    length: boolean;
+    width: boolean;
   };
   traverseEdgeBanding?: {
-    front: boolean;
-    back: boolean;
-    left: boolean;
-    right: boolean;
+    length: boolean;
+    width: boolean;
   };
   backEdgeBanding?: {
-    front: boolean;
-    back: boolean;
-    left: boolean;
-    right: boolean;
+    length: boolean;
+    width: boolean;
   };
   sidePanels?: {
     left?: Record<string, unknown>;

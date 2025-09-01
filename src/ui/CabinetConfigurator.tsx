@@ -549,7 +549,7 @@ const CabinetConfigurator: React.FC<Props> = ({
               <div style={{ marginTop: 8 }}>
                 <div className="small">{t('configurator.edgeBanding')}</div>
                 <div className="row" style={{ gap: 8 }}>
-                  {(['front', 'back'] as const).map((edge) => (
+                  {(['length', 'width'] as const).map((edge) => (
                     <label
                       key={edge}
                       style={{ display: 'flex', alignItems: 'center', gap: 4 }}
@@ -575,7 +575,7 @@ const CabinetConfigurator: React.FC<Props> = ({
               <div style={{ marginTop: 8 }}>
                 <div className="small">{t('configurator.traverseEdgeBanding')}</div>
                 <div className="row" style={{ gap: 8 }}>
-                  {(['front', 'back', 'left', 'right'] as const).map((edge) => (
+                  {(['length', 'width'] as const).map((edge) => (
                     <label
                       key={edge}
                       style={{ display: 'flex', alignItems: 'center', gap: 4 }}
@@ -661,7 +661,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                     }
                   />
                   <div className="small">{t('configurator.shelfEdgeBanding')}</div>
-                  {(['front', 'back', 'left', 'right'] as const).map((edge) => (
+                  {(['length', 'width'] as const).map((edge) => (
                     <label
                       key={edge}
                       style={{ display: 'flex', alignItems: 'center', gap: 4 }}
@@ -724,7 +724,7 @@ const CabinetConfigurator: React.FC<Props> = ({
               <div className="small" style={{ marginTop: 8 }}>
                 {t('configurator.backEdgeBanding')}
               </div>
-              {(['front', 'back', 'left', 'right'] as const).map((edge) => (
+              {(['length', 'width'] as const).map((edge) => (
                 <label
                   key={edge}
                   style={{ display: 'flex', alignItems: 'center', gap: 4 }}
@@ -759,7 +759,7 @@ const CabinetConfigurator: React.FC<Props> = ({
             </summary>
             <div>
               <div className="small">{t('configurator.rightSideEdgeBanding')}</div>
-              {(['right', 'top', 'bottom'] as const).map((edge) => (
+              {(['length', 'width'] as const).map((edge) => (
                 <label
                   key={edge}
                   style={{ display: 'flex', alignItems: 'center', gap: 4 }}
@@ -812,7 +812,7 @@ const CabinetConfigurator: React.FC<Props> = ({
             </summary>
             <div>
               <div className="small">{t('configurator.leftSideEdgeBanding')}</div>
-              {(['left', 'top', 'bottom'] as const).map((edge) => (
+              {(['length', 'width'] as const).map((edge) => (
                 <label
                   key={edge}
                   style={{ display: 'flex', alignItems: 'center', gap: 4 }}
