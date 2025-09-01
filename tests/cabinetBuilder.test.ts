@@ -713,4 +713,62 @@ describe('buildCabinetMesh', () => {
     });
     expect(edgesCount).toBeGreaterThan(0);
   });
+
+  it('bands each side panel edge once when all edge flags enabled', () => {
+    const g = buildCabinetMesh({
+      width: WIDTH,
+      height: HEIGHT,
+      depth: DEPTH,
+      drawers: 0,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      edgeBanding: {
+        front: true,
+        back: true,
+        left: true,
+        right: true,
+        top: true,
+        bottom: true,
+      },
+    });
+    const bands = g.children.filter(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        (c as any).material instanceof THREE.MeshStandardMaterial &&
+        (c as any).material.color.getHex() === 0xffaa00,
+    ) as THREE.Mesh[];
+    const bandT = 0.002;
+    const frontBands = bands.filter(
+      (b) =>
+        Math.abs(b.position.z - bandT / 2) < 1e-6 &&
+        Math.abs(((b.geometry as any).parameters.width ?? 0) - BOARD_THICKNESS) < 1e-6 &&
+        Math.abs(((b.geometry as any).parameters.height ?? 0) - HEIGHT) < 1e-6 &&
+        Math.abs(((b.geometry as any).parameters.depth ?? 0) - bandT) < 1e-6,
+    );
+    const backBands = bands.filter(
+      (b) =>
+        Math.abs(b.position.z - (-DEPTH + bandT / 2)) < 1e-6 &&
+        Math.abs(((b.geometry as any).parameters.width ?? 0) - BOARD_THICKNESS) < 1e-6 &&
+        Math.abs(((b.geometry as any).parameters.height ?? 0) - HEIGHT) < 1e-6 &&
+        Math.abs(((b.geometry as any).parameters.depth ?? 0) - bandT) < 1e-6,
+    );
+    const topBands = bands.filter(
+      (b) =>
+        Math.abs(b.position.y - (HEIGHT - bandT / 2)) < 1e-6 &&
+        Math.abs(((b.geometry as any).parameters.width ?? 0) - BOARD_THICKNESS) < 1e-6 &&
+        Math.abs(((b.geometry as any).parameters.height ?? 0) - bandT) < 1e-6 &&
+        Math.abs(((b.geometry as any).parameters.depth ?? 0) - DEPTH) < 1e-6,
+    );
+    const bottomBands = bands.filter(
+      (b) =>
+        Math.abs(b.position.y - bandT / 2) < 1e-6 &&
+        Math.abs(((b.geometry as any).parameters.width ?? 0) - BOARD_THICKNESS) < 1e-6 &&
+        Math.abs(((b.geometry as any).parameters.height ?? 0) - bandT) < 1e-6 &&
+        Math.abs(((b.geometry as any).parameters.depth ?? 0) - DEPTH) < 1e-6,
+    );
+    expect(frontBands.length).toBe(2);
+    expect(backBands.length).toBe(2);
+    expect(topBands.length).toBe(2);
+    expect(bottomBands.length).toBe(2);
+  });
 });

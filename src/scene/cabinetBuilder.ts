@@ -192,30 +192,14 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     addBand(W - T / 2, sideY, bandThickness / 2, T, sideHeight, bandThickness);
   }
   if (shouldBand(edgeBanding, 'vertical', 'back')) {
-    addBand(
-      T / 2,
-      sideBottomY + bandThickness / 2,
-      -D / 2,
-      T,
-      bandThickness,
-      D,
-    );
-    addBand(T / 2, sideTopY - bandThickness / 2, -D / 2, T, bandThickness, D);
+    addBand(T / 2, sideY, -D + bandThickness / 2, T, sideHeight, bandThickness);
     addBand(
       W - T / 2,
-      sideBottomY + bandThickness / 2,
-      -D / 2,
+      sideY,
+      -D + bandThickness / 2,
       T,
+      sideHeight,
       bandThickness,
-      D,
-    );
-    addBand(
-      W - T / 2,
-      sideTopY - bandThickness / 2,
-      -D / 2,
-      T,
-      bandThickness,
-      D,
     );
   }
   if (shouldBand(edgeBanding, 'vertical', 'left')) {
@@ -288,8 +272,14 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       addBand(-T / 2, sideY, bandThickness / 2, T, sideHeight, bandThickness);
     }
     if (shouldBand(edgeBanding, 'vertical', 'back')) {
-      addBand(-T / 2, sideBottomY + bandThickness / 2, -D / 2, T, bandThickness, D);
-      addBand(-T / 2, sideTopY - bandThickness / 2, -D / 2, T, bandThickness, D);
+      addBand(
+        -T / 2,
+        sideY,
+        -D + bandThickness / 2,
+        T,
+        sideHeight,
+        bandThickness,
+      );
     }
     if (shouldBand(edgeBanding, 'vertical', 'left')) {
       addBand(-T / 2, sideBottomY + bandThickness / 2, bandThickness / 2, T, bandThickness, bandThickness);
@@ -312,8 +302,14 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       addBand(W + T / 2, sideY, bandThickness / 2, T, sideHeight, bandThickness);
     }
     if (shouldBand(edgeBanding, 'vertical', 'back')) {
-      addBand(W + T / 2, sideBottomY + bandThickness / 2, -D / 2, T, bandThickness, D);
-      addBand(W + T / 2, sideTopY - bandThickness / 2, -D / 2, T, bandThickness, D);
+      addBand(
+        W + T / 2,
+        sideY,
+        -D + bandThickness / 2,
+        T,
+        sideHeight,
+        bandThickness,
+      );
     }
     if (shouldBand(edgeBanding, 'vertical', 'right')) {
       addBand(W + T / 2, sideTopY - bandThickness / 2, bandThickness / 2, T, bandThickness, bandThickness);
