@@ -122,8 +122,8 @@
     },
     "edgeBanding": "Okleina",
     "edgeBandingOptions": {
-      "length": "długość",
-      "width": "szerokość"
+      "length": "po długości",
+      "width": "po szerokości"
     },
     "shelfEdgeBanding": "Okleina półek",
     "traverseEdgeBanding": "Okleina trawersów",
