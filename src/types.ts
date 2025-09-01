@@ -113,6 +113,16 @@ export interface ModuleAdv {
     left: boolean;
     right: boolean;
   };
+  shelfEdgeBanding?: {
+    front: boolean;
+    back: boolean;
+    left: boolean;
+    right: boolean;
+  };
+  sidePanels?: {
+    left?: Record<string, any>;
+    right?: Record<string, any>;
+  };
   carcassType?: 'type1' | 'type2' | 'type3';
 }
 
