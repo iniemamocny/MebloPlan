@@ -251,6 +251,79 @@ describe('buildCabinetMesh', () => {
     );
   });
 
+  it('adds edge banding to vertical traverse on top and bottom', () => {
+    const trWidth = 100;
+    const g = buildCabinetMesh({
+      width: 1,
+      height: 0.9,
+      depth: 0.5,
+      drawers: 0,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      edgeBanding: 'full',
+      topPanel: {
+        type: 'frontTraverse',
+        traverse: { orientation: 'vertical', offset: 0, width: trWidth },
+      },
+    });
+    const boardThickness = 0.018;
+    const bandThickness = 0.002;
+    const topWidth = 1 - 2 * boardThickness;
+    const widthM = trWidth / 1000;
+    const traverseY = 0.9 - widthM / 2;
+    const traverseZ = FRONT_OFFSET - boardThickness / 2;
+    const topBand = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - topWidth) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - bandThickness) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - boardThickness) < 1e-6 &&
+        Math.abs(c.position.x - 0.5) < 1e-6 &&
+        Math.abs(
+          c.position.y - (traverseY + widthM / 2 - bandThickness / 2),
+        ) < 1e-6 &&
+        Math.abs(c.position.z - traverseZ) < 1e-6,
+    );
+    const bottomBand = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - topWidth) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - bandThickness) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - boardThickness) < 1e-6 &&
+        Math.abs(c.position.x - 0.5) < 1e-6 &&
+        Math.abs(
+          c.position.y - (traverseY - widthM / 2 + bandThickness / 2),
+        ) < 1e-6 &&
+        Math.abs(c.position.z - traverseZ) < 1e-6,
+    );
+    const leftBand = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - bandThickness) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - widthM) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - boardThickness) < 1e-6 &&
+        Math.abs(c.position.x - (boardThickness + bandThickness / 2)) < 1e-6 &&
+        Math.abs(c.position.y - traverseY) < 1e-6 &&
+        Math.abs(c.position.z - traverseZ) < 1e-6,
+    );
+    const rightBand = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - bandThickness) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - widthM) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - boardThickness) < 1e-6 &&
+        Math.abs(
+          c.position.x - (1 - boardThickness - bandThickness / 2),
+        ) < 1e-6 &&
+        Math.abs(c.position.y - traverseY) < 1e-6 &&
+        Math.abs(c.position.z - traverseZ) < 1e-6,
+    );
+    expect(topBand).toBeTruthy();
+    expect(bottomBand).toBeTruthy();
+    expect(leftBand).toBeTruthy();
+    expect(rightBand).toBeTruthy();
+  });
+
   it('positions horizontal traverse by depth offset', () => {
     const offset = 100;
     const trWidth = 100;

@@ -237,10 +237,10 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       addEdges(mesh);
       group.add(mesh);
       if (edgeBanding !== 'none') {
-        const zFront = z + T / 2 - bandThickness / 2;
-        const zBack = z - T / 2 + bandThickness / 2;
-        addBand(x, y, zFront, topWidth, widthM, bandThickness);
-        addBand(x, y, zBack, topWidth, widthM, bandThickness);
+        const yTop = y + widthM / 2 - bandThickness / 2;
+        const yBottom = y - widthM / 2 + bandThickness / 2;
+        addBand(x, yTop, z, topWidth, bandThickness, T);
+        addBand(x, yBottom, z, topWidth, bandThickness, T);
         if (edgeBanding === 'full') {
           const topLeft = (W - topWidth) / 2;
           addBand(
