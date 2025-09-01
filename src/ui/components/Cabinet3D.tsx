@@ -19,8 +19,22 @@ export default function Cabinet3D({
   topPanel,
   bottomPanel,
   dividerPosition,
-  edgeBanding = { front: true, back: false, left: false, right: false },
-  shelfEdgeBanding = { front: false, back: false, left: false, right: false },
+  edgeBanding = {
+    front: true,
+    back: false,
+    left: false,
+    right: false,
+    top: false,
+    bottom: false,
+  },
+  shelfEdgeBanding = {
+    front: false,
+    back: false,
+    left: false,
+    right: false,
+    top: false,
+    bottom: false,
+  },
   sidePanels,
   carcassType = 'type1',
   showFronts = true,
@@ -43,12 +57,16 @@ export default function Cabinet3D({
     back: boolean;
     left: boolean;
     right: boolean;
+    top: boolean;
+    bottom: boolean;
   };
   shelfEdgeBanding?: {
     front: boolean;
     back: boolean;
     left: boolean;
     right: boolean;
+    top: boolean;
+    bottom: boolean;
   };
   sidePanels?: {
     left?: Record<string, any>;

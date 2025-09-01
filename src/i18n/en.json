@@ -125,7 +125,9 @@
       "front": "front",
       "back": "back",
       "left": "left",
-      "right": "right"
+      "right": "right",
+      "top": "top",
+      "bottom": "bottom"
     },
     "shelfEdgeBanding": "Shelf edge banding",
     "rightSideEdgeBanding": "Right side - edge banding",

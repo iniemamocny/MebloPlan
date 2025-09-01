@@ -125,7 +125,9 @@
       "front": "przód",
       "back": "tył",
       "left": "lewa",
-      "right": "prawa"
+      "right": "prawa",
+      "top": "górna",
+      "bottom": "dolna"
     },
     "shelfEdgeBanding": "Okleina półek",
     "rightSideEdgeBanding": "Bok prawy – okleina",

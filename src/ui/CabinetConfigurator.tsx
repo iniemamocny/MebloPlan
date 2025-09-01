@@ -707,22 +707,27 @@ const CabinetConfigurator: React.FC<Props> = ({
             </summary>
             <div>
               <div className="small">{t('configurator.rightSideEdgeBanding')}</div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <input
-                  type="checkbox"
-                  checked={gLocal.edgeBanding?.right ?? false}
-                  onChange={(e) =>
-                    setAdv({
-                      ...gLocal,
-                      edgeBanding: {
-                        ...gLocal.edgeBanding,
-                        right: (e.target as HTMLInputElement).checked,
-                      },
-                    })
-                  }
-                />
-                {t('configurator.edgeBandingOptions.right')}
-              </label>
+              {(['right', 'top', 'bottom'] as const).map((edge) => (
+                <label
+                  key={edge}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={gLocal.edgeBanding?.[edge] ?? false}
+                    onChange={(e) =>
+                      setAdv({
+                        ...gLocal,
+                        edgeBanding: {
+                          ...gLocal.edgeBanding,
+                          [edge]: (e.target as HTMLInputElement).checked,
+                        },
+                      })
+                    }
+                  />
+                  {t(`configurator.edgeBandingOptions.${edge}`)}
+                </label>
+              ))}
               <div className="small" style={{ marginTop: 8 }}>{t('configurator.sidePanel')}</div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <input
@@ -755,22 +760,27 @@ const CabinetConfigurator: React.FC<Props> = ({
             </summary>
             <div>
               <div className="small">{t('configurator.leftSideEdgeBanding')}</div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <input
-                  type="checkbox"
-                  checked={gLocal.edgeBanding?.left ?? false}
-                  onChange={(e) =>
-                    setAdv({
-                      ...gLocal,
-                      edgeBanding: {
-                        ...gLocal.edgeBanding,
-                        left: (e.target as HTMLInputElement).checked,
-                      },
-                    })
-                  }
-                />
-                {t('configurator.edgeBandingOptions.left')}
-              </label>
+              {(['left', 'top', 'bottom'] as const).map((edge) => (
+                <label
+                  key={edge}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={gLocal.edgeBanding?.[edge] ?? false}
+                    onChange={(e) =>
+                      setAdv({
+                        ...gLocal,
+                        edgeBanding: {
+                          ...gLocal.edgeBanding,
+                          [edge]: (e.target as HTMLInputElement).checked,
+                        },
+                      })
+                    }
+                  />
+                  {t(`configurator.edgeBandingOptions.${edge}`)}
+                </label>
+              ))}
               <div className="small" style={{ marginTop: 8 }}>{t('configurator.sidePanel')}</div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <input

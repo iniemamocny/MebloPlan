@@ -25,6 +25,8 @@ type Props = {
     back: boolean;
     left: boolean;
     right: boolean;
+    top: boolean;
+    bottom: boolean;
   };
 };
 
@@ -249,7 +251,15 @@ export default function TechDrawing({
   const outerW = Math.round(widthMM);
   const innerClearW = Math.round(widthMM - (gaps.left + gaps.right));
   const outerH = Math.round(heightMM);
-  const eb = edgeBanding || { front: false, back: false, left: false, right: false };
+  const eb =
+    edgeBanding || {
+      front: false,
+      back: false,
+      left: false,
+      right: false,
+      top: false,
+      bottom: false,
+    };
 
   return (
     <div className="row" style={{ gap: 12, alignItems: 'flex-start' }}>

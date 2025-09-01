@@ -112,12 +112,16 @@ export interface ModuleAdv {
     back: boolean;
     left: boolean;
     right: boolean;
+    top: boolean;
+    bottom: boolean;
   };
   shelfEdgeBanding?: {
     front: boolean;
     back: boolean;
     left: boolean;
     right: boolean;
+    top: boolean;
+    bottom: boolean;
   };
   sidePanels?: {
     left?: Record<string, any>;
