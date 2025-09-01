@@ -48,16 +48,31 @@ export function cutlistForModule(
   const W = Math.round(m.size.w * 1000);
   const H = Math.round(m.size.h * 1000);
   const D = Math.round(m.size.d * 1000);
+  const boardMat = `Płyta ${t}mm`;
 
   const add = (it: CutItem) => {
     items.push(it);
   };
   const addEdge = (
-    material: 'ABS 1mm' | 'ABS 2mm',
-    length: number,
+    banding: { length?: boolean; width?: boolean } | undefined,
+    dir: 'length' | 'width',
+    edgeMat: 'ABS 1mm' | 'ABS 2mm',
+    len: number,
     part: string,
+    boardMat: string,
   ) => {
-    edges.push({ material, length: Math.max(0, Math.round(length)), part });
+    if (!banding?.[dir]) return;
+    const skip =
+      boardMat.startsWith('Front') ||
+      boardMat.includes('Blenda') ||
+      boardMat.includes('Cokół') ||
+      boardMat.includes('HDF');
+    if (skip) return;
+    edges.push({
+      material: edgeMat,
+      length: Math.max(0, Math.round(len)),
+      part,
+    });
   };
 
   // Box
@@ -65,33 +80,47 @@ export function cutlistForModule(
     add({
       moduleId: m.id,
       moduleLabel: m.label,
-      material: `Płyta ${t}mm`,
+      material: boardMat,
       part: 'Bok',
       qty: 2,
       w: clampPos(D),
       h: clampPos(H),
     });
-    addEdge('ABS 1mm', H * 2, 'Boki — krawędź frontowa');
+    addEdge(g.edgeBanding, 'length', 'ABS 1mm', H * 2, 'Boki — krawędź frontowa', boardMat);
     add({
       moduleId: m.id,
       moduleLabel: m.label,
-      material: `Płyta ${t}mm`,
+      material: boardMat,
       part: 'Wieniec górny',
       qty: 1,
       w: clampPos(W - 2 * t - tol.assembly),
       h: clampPos(D),
     });
-    addEdge('ABS 1mm', W - 2 * t - tol.assembly, 'Wieniec górny — przód');
+    addEdge(
+      g.edgeBanding,
+      'width',
+      'ABS 1mm',
+      W - 2 * t - tol.assembly,
+      'Wieniec górny — przód',
+      boardMat,
+    );
     add({
       moduleId: m.id,
       moduleLabel: m.label,
-      material: `Płyta ${t}mm`,
+      material: boardMat,
       part: 'Wieniec dolny',
       qty: 1,
       w: clampPos(W - 2 * t - tol.assembly),
       h: clampPos(D),
     });
-    addEdge('ABS 1mm', W - 2 * t - tol.assembly, 'Wieniec dolny — przód');
+    addEdge(
+      g.edgeBanding,
+      'width',
+      'ABS 1mm',
+      W - 2 * t - tol.assembly,
+      'Wieniec dolny — przód',
+      boardMat,
+    );
     if ((g.backPanel || 'full') !== 'none') {
       if ((g.backPanel || 'full') === 'split') {
         const hPiece = clampPos((H - tol.backGroove) / 2);
@@ -130,16 +159,19 @@ export function cutlistForModule(
       add({
         moduleId: m.id,
         moduleLabel: m.label,
-        material: `Płyta ${t}mm`,
+        material: boardMat,
         part: 'Półka',
         qty: shelfQty,
         w: shelfW,
         h: shelfD,
       });
       addEdge(
+        g.shelfEdgeBanding,
+        'width',
         'ABS 1mm',
         shelfW * shelfQty,
         shelfQty > 1 ? 'Półki — przód sumarycznie' : 'Półka — przód',
+        boardMat,
       );
     }
   };
@@ -149,13 +181,20 @@ export function cutlistForModule(
     add({
       moduleId: m.id,
       moduleLabel: m.label,
-      material: `Płyta ${t}mm`,
+      material: boardMat,
       part: 'Zaślepka narożna',
       qty: 1,
       w: clampPos(filler),
       h: clampPos(H),
     });
-    addEdge('ABS 1mm', H, 'Zaślepka narożna — krawędź frontowa');
+    addEdge(
+      g.edgeBanding,
+      'length',
+      'ABS 1mm',
+      H,
+      'Zaślepka narożna — krawędź frontowa',
+      boardMat,
+    );
     addStandardBox();
     addShelves();
   } else {
@@ -247,7 +286,7 @@ export function cutlistForModule(
       add({
         moduleId: m.id,
         moduleLabel: m.label,
-        material: `Płyta ${t}mm`,
+        material: boardMat,
         part: 'Szuflada bok',
         qty: 2,
         w: boxD,
@@ -256,7 +295,7 @@ export function cutlistForModule(
       add({
         moduleId: m.id,
         moduleLabel: m.label,
-        material: `Płyta ${t}mm`,
+        material: boardMat,
         part: 'Szuflada przód/tył',
         qty: 2,
         w: clampPos(boxW - 2 * t),
@@ -272,9 +311,12 @@ export function cutlistForModule(
         h: boxD,
       });
       addEdge(
+        g.edgeBanding,
+        'width',
         'ABS 1mm',
         (boxW - 2 * t) * 2,
         'Szuflada przód/tył — górna krawędź',
+        boardMat,
       );
     }
   }
