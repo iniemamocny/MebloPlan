@@ -55,6 +55,13 @@ export const KIND_SETS: Record<FAMILY, Kind[]> = {
         { key:'hob', label:'Pod płytę' },
         { key:'dishwasher', label:'Zmywarka' }
       ]
+    },
+    {
+      key:'countertop',
+      label:'Blaty',
+      variants:[
+        { key:'default', label:'Blat' }
+      ]
     }
   ],
   [FAMILY.TALL]: [
