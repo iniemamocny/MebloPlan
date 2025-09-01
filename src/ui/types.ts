@@ -19,6 +19,8 @@ export interface CabinetConfig {
   shelfEdgeBanding?: EdgeBanding;
   traverseEdgeBanding?: EdgeBanding;
   backEdgeBanding?: EdgeBanding;
+  topPanelEdgeBanding?: EdgeBanding;
+  bottomPanelEdgeBanding?: EdgeBanding;
   sidePanels?: {
     left?: Record<string, unknown>;
     right?: Record<string, unknown>;

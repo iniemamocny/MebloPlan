@@ -79,6 +79,8 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       traverseEdgeBanding: adv.traverseEdgeBanding,
       shelfEdgeBanding: adv.shelfEdgeBanding,
       backEdgeBanding: adv.backEdgeBanding,
+      topPanelEdgeBanding: adv.topPanelEdgeBanding,
+      bottomPanelEdgeBanding: adv.bottomPanelEdgeBanding,
       carcassType: adv.carcassType,
       showFronts,
     });

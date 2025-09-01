@@ -134,6 +134,8 @@
     "backEdgeBanding": "Back panel - edge banding",
     "rightSideEdgeBanding": "Right side - edge banding",
     "leftSideEdgeBanding": "Left side - edge banding",
+    "topPanelEdgeBanding": "Top panel - edge banding",
+    "bottomPanelEdgeBanding": "Bottom panel - edge banding",
     "sidePanel": "Side panel",
     "panel": "Panel",
     "orientation": {
