@@ -147,7 +147,8 @@
     "offsetWidth": "Przesunięcie (szerokość, mm)",
     "offsetDepth": "Przesunięcie (głębokość, mm)",
     "offsetHeight": "Przesunięcie (wysokość, mm)",
-    "traverseWidth": "Szerokość trawersu (mm)"
+    "traverseWidth": "Szerokość trawersu (mm)",
+    "hideCountertop": "Ukryj blat"
   },
   "forms": {
     "width": "Szerokość",
