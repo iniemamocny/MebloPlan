@@ -206,6 +206,39 @@ describe('buildCabinetMesh', () => {
     expect(traverse!.position.z + widthM / 2).toBeCloseTo(FRONT_OFFSET, 5);
   });
 
+  it('positions back vertical traverse taking back thickness into account', () => {
+    const depth = 0.5;
+    const trWidth = 100;
+    const g = buildCabinetMesh({
+      width: 1,
+      height: 0.9,
+      depth,
+      drawers: 0,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      topPanel: {
+        type: 'backTraverse',
+        traverse: { orientation: 'vertical', offset: 0, width: trWidth },
+      },
+    });
+    const boardThickness = 0.018;
+    const expectedWidth = 1 - 2 * boardThickness;
+    const widthM = trWidth / 1000;
+    const traverse = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - expectedWidth) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - boardThickness) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - widthM) < 1e-6,
+    ) as THREE.Mesh | undefined;
+    expect(traverse).toBeTruthy();
+    const backThickness = 0.003;
+    expect(traverse!.position.z - widthM / 2).toBeCloseTo(
+      -depth + backThickness,
+      5,
+    );
+  });
+
   it('positions horizontal traverse by depth offset', () => {
     const offset = 100;
     const trWidth = 100;
