@@ -107,7 +107,12 @@ export interface ModuleAdv {
   topPanel?: TopPanel;
   bottomPanel?: BottomPanel;
   dividerPosition?: 'left' | 'right' | 'center';
-  edgeBanding?: 'none' | 'front' | 'full';
+  edgeBanding?: {
+    front: boolean;
+    back: boolean;
+    left: boolean;
+    right: boolean;
+  };
   carcassType?: 'type1' | 'type2' | 'type3';
 }
 

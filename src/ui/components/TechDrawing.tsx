@@ -20,6 +20,12 @@ type Props = {
   dividerPosition?: 'left' | 'right' | 'center';
   onChangeGaps?: (g: Gaps) => void;
   onChangeDrawerFronts?: (arr: number[]) => void;
+  edgeBanding?: {
+    front: boolean;
+    back: boolean;
+    left: boolean;
+    right: boolean;
+  };
 };
 
 function parseThickness(boardType?: string) {
@@ -118,6 +124,7 @@ export default function TechDrawing({
   dividerPosition,
   onChangeGaps,
   onChangeDrawerFronts,
+  edgeBanding,
 }: Props) {
   const W = 360,
     H = 230;
@@ -242,6 +249,7 @@ export default function TechDrawing({
   const outerW = Math.round(widthMM);
   const innerClearW = Math.round(widthMM - (gaps.left + gaps.right));
   const outerH = Math.round(heightMM);
+  const eb = edgeBanding || { front: false, back: false, left: false, right: false };
 
   return (
     <div className="row" style={{ gap: 12, alignItems: 'flex-start' }}>
@@ -278,6 +286,32 @@ export default function TechDrawing({
           fill="url(#hatch)"
           stroke="#999"
         />
+        {eb.front && (
+          <>
+            <line x1={pad} y1={pad} x2={W - pad} y2={pad} stroke="#f00" strokeWidth={2} />
+            <line
+              x1={pad}
+              y1={H - pad}
+              x2={W - pad}
+              y2={H - pad}
+              stroke="#f00"
+              strokeWidth={2}
+            />
+          </>
+        )}
+        {eb.left && (
+          <line x1={pad} y1={pad} x2={pad} y2={H - pad} stroke="#f00" strokeWidth={2} />
+        )}
+        {eb.right && (
+          <line
+            x1={W - pad}
+            y1={pad}
+            x2={W - pad}
+            y2={H - pad}
+            stroke="#f00"
+            strokeWidth={2}
+          />
+        )}
         {/* front */}
         <rect
           x={front.x}
@@ -390,6 +424,19 @@ export default function TechDrawing({
         </defs>
         {/* puste tło */}
         <rect x={pad} y={pad} width={innerW} height={innerH} fill="#fff" />
+        {eb.back && (
+          <line x1={pad} y1={pad} x2={pad} y2={H - pad} stroke="#f00" strokeWidth={2} />
+        )}
+        {eb.front && (
+          <line
+            x1={W - pad}
+            y1={pad}
+            x2={W - pad}
+            y2={H - pad}
+            stroke="#f00"
+            strokeWidth={2}
+          />
+        )}
         {/* boki */}
         <rect
           x={pad}

@@ -34,7 +34,7 @@ export function useCabinetConfig(
       backPanel: g.backPanel,
       topPanel: g.topPanel,
       bottomPanel: g.bottomPanel,
-      edgeBanding: 'front',
+      edgeBanding: { front: true, back: false, left: false, right: false },
       carcassType: g.carcassType,
     });
   }, [family, store.globals]);
@@ -235,7 +235,7 @@ export function useCabinetConfig(
             backPanel: g.backPanel,
             topPanel: g.topPanel,
             bottomPanel: g.bottomPanel,
-            edgeBanding: 'front',
+            edgeBanding: { front: true, back: false, left: false, right: false },
             carcassType: g.carcassType,
           },
           doorsCount: 1,
@@ -253,7 +253,11 @@ export function useCabinetConfig(
         rotationY: pl.rot,
         segIndex: selWall,
         price,
-        adv: { ...g, doorCount: 1, edgeBanding: 'front' } as ModuleAdv,
+        adv: {
+          ...g,
+          doorCount: 1,
+          edgeBanding: { front: true, back: false, left: false, right: false },
+        } as ModuleAdv,
       };
       mod = resolveCollisions(mod);
       store.addModule(mod);

@@ -572,27 +572,29 @@ const CabinetConfigurator: React.FC<Props> = ({
               </div>
               <div>
                 <div className="small">{t('configurator.edgeBanding')}</div>
-                <select
-                  className="input"
-                  value={gLocal.edgeBanding || 'front'}
-                  onChange={(e) =>
-                    setAdv({
-                      ...gLocal,
-                      edgeBanding: (e.target as HTMLSelectElement)
-                        .value as CabinetConfig['edgeBanding'],
-                    })
-                  }
-                >
-                  <option value="none">
-                    {t('configurator.edgeBandingOptions.none')}
-                  </option>
-                  <option value="front">
-                    {t('configurator.edgeBandingOptions.front')}
-                  </option>
-                  <option value="full">
-                    {t('configurator.edgeBandingOptions.full')}
-                  </option>
-                </select>
+                <div className="row" style={{ gap: 8 }}>
+                  {(['front', 'back', 'left', 'right'] as const).map((edge) => (
+                    <label
+                      key={edge}
+                      style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={gLocal.edgeBanding?.[edge] ?? false}
+                        onChange={(e) =>
+                          setAdv({
+                            ...gLocal,
+                            edgeBanding: {
+                              ...gLocal.edgeBanding,
+                              [edge]: (e.target as HTMLInputElement).checked,
+                            },
+                          })
+                        }
+                      />
+                      {t(`configurator.edgeBandingOptions.${edge}`)}
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
             {drawersCount === 0 && (
@@ -766,6 +768,7 @@ const CabinetConfigurator: React.FC<Props> = ({
               drawersCount={drawersCount}
               drawerFronts={gLocal.drawerFronts}
               dividerPosition={gLocal.dividerPosition}
+              edgeBanding={gLocal.edgeBanding}
               onChangeGaps={(gg: Gaps) => setAdv({ ...gLocal, gaps: gg })}
               onChangeDrawerFronts={(arr: number[]) =>
                 setAdv({ ...gLocal, drawerFronts: arr })

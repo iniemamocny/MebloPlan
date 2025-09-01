@@ -116,9 +116,10 @@
     },
     "edgeBanding": "Edge banding",
     "edgeBandingOptions": {
-      "none": "none",
       "front": "front",
-      "full": "full"
+      "back": "back",
+      "left": "left",
+      "right": "right"
     },
     "orientation": {
       "label": "Orientation",
