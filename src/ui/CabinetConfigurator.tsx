@@ -218,67 +218,57 @@ const CabinetConfigurator: React.FC<Props> = ({
           >
             {t('configurator.sections.korpus')}
           </summary>
-          <div>
+        <div>
+          {FormComponent && (
             <div style={{ marginBottom: 8 }}>
-              <div className="small">{t('configurator.carcassType')}</div>
-              <select
+              <FormComponent
+                values={formValues}
+                onChange={handleFormChange}
+              />
+            </div>
+          )}
+          <div className="grid3">
+            <div>
+              <div className="small">{t('configurator.width')}</div>
+              <input
                 className="input"
-                value={gLocal.carcassType}
+                type="number"
+                min={200}
+                max={2400}
+                step={1}
+                value={widthMM}
+                onChange={(e) =>
+                  setWidthMM(Number((e.target as HTMLInputElement).value) || 0)
+                }
+              />
+            </div>
+            <div>
+              <div className="small">{t('configurator.height')}</div>
+              <input
+                className="input"
+                type="number"
+                value={gLocal.height}
                 onChange={(e) =>
                   setAdv({
                     ...gLocal,
-                    carcassType: (e.target as HTMLSelectElement)
-                      .value as CabinetConfig['carcassType'],
+                    height: Number((e.target as HTMLInputElement).value) || 0,
                   })
                 }
-              >
-                <option value="type1">
-                  {t('configurator.carcassTypes.type1')}
-                </option>
-                <option value="type2">
-                  {t('configurator.carcassTypes.type2')}
-                </option>
-                <option value="type3">
-                  {t('configurator.carcassTypes.type3')}
-                </option>
-              </select>
+              />
             </div>
-            {FormComponent && (
-              <div style={{ marginBottom: 8 }}>
-                <FormComponent
-                  values={formValues}
-                  onChange={handleFormChange}
-                />
-              </div>
-            )}
-            <div className="grid4">
-              <div>
-                <div className="small">{t('configurator.height')}</div>
-                <input
-                  className="input"
-                  type="number"
-                  value={gLocal.height}
-                  onChange={(e) =>
-                    setAdv({
-                      ...gLocal,
-                      height: Number((e.target as HTMLInputElement).value) || 0,
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <div className="small">{t('configurator.depth')}</div>
-                <input
-                  className="input"
-                  type="number"
-                  value={gLocal.depth}
-                  onChange={(e) =>
-                    setAdv({
-                      ...gLocal,
-                      depth: Number((e.target as HTMLInputElement).value) || 0,
-                    })
-                  }
-                />
+            <div>
+              <div className="small">{t('configurator.depth')}</div>
+              <input
+                className="input"
+                type="number"
+                value={gLocal.depth}
+                onChange={(e) =>
+                  setAdv({
+                    ...gLocal,
+                    depth: Number((e.target as HTMLInputElement).value) || 0,
+                  })
+                }
+              />
               </div>
               <div>
                 <div className="small">{t('configurator.board')}</div>
