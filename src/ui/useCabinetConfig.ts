@@ -35,6 +35,13 @@ export function useCabinetConfig(
       topPanel: g.topPanel,
       bottomPanel: g.bottomPanel,
       edgeBanding: { front: true, back: false, left: false, right: false },
+      shelfEdgeBanding: {
+        front: false,
+        back: false,
+        left: false,
+        right: false,
+      },
+      sidePanels: {},
       carcassType: g.carcassType,
     });
   }, [family, store.globals]);
@@ -236,6 +243,13 @@ export function useCabinetConfig(
             topPanel: g.topPanel,
             bottomPanel: g.bottomPanel,
             edgeBanding: { front: true, back: false, left: false, right: false },
+            shelfEdgeBanding: {
+              front: false,
+              back: false,
+              left: false,
+              right: false,
+            },
+            sidePanels: {},
             carcassType: g.carcassType,
           },
           doorsCount: 1,
@@ -257,6 +271,13 @@ export function useCabinetConfig(
           ...g,
           doorCount: 1,
           edgeBanding: { front: true, back: false, left: false, right: false },
+          shelfEdgeBanding: {
+            front: false,
+            back: false,
+            left: false,
+            right: false,
+          },
+          sidePanels: {},
         } as ModuleAdv,
       };
       mod = resolveCollisions(mod);

@@ -20,6 +20,16 @@ export interface CabinetConfig {
     left: boolean;
     right: boolean;
   };
+  shelfEdgeBanding?: {
+    front: boolean;
+    back: boolean;
+    left: boolean;
+    right: boolean;
+  };
+  sidePanels?: {
+    left?: Record<string, any>;
+    right?: Record<string, any>;
+  };
   hardware?: any;
   legs?: any;
 }

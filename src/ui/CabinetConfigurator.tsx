@@ -143,6 +143,8 @@ const CabinetConfigurator: React.FC<Props> = ({
               bottomPanel={gLocal.bottomPanel}
               dividerPosition={gLocal.dividerPosition}
               edgeBanding={gLocal.edgeBanding}
+              shelfEdgeBanding={gLocal.shelfEdgeBanding}
+              sidePanels={gLocal.sidePanels}
               carcassType={gLocal.carcassType}
               showFronts={showFronts}
             />
@@ -630,6 +632,28 @@ const CabinetConfigurator: React.FC<Props> = ({
                       })
                     }
                   />
+                  <div className="small">{t('configurator.edgeBanding')}</div>
+                  {(['front', 'back', 'left', 'right'] as const).map((edge) => (
+                    <label
+                      key={edge}
+                      style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={gLocal.shelfEdgeBanding?.[edge] ?? false}
+                        onChange={(e) =>
+                          setAdv({
+                            ...gLocal,
+                            shelfEdgeBanding: {
+                              ...gLocal.shelfEdgeBanding,
+                              [edge]: (e.target as HTMLInputElement).checked,
+                            },
+                          })
+                        }
+                      />
+                      {t(`configurator.edgeBandingOptions.${edge}`)}
+                    </label>
+                  ))}
                 </div>
               )}
             </div>
@@ -699,6 +723,24 @@ const CabinetConfigurator: React.FC<Props> = ({
                 />
                 {t('configurator.edgeBandingOptions.right')}
               </label>
+              <div className="small" style={{ marginTop: 8 }}>Panel boczny</div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <input
+                  type="checkbox"
+                  checked={!!gLocal.sidePanels?.right}
+                  onChange={(e) => {
+                    const checked = (e.target as HTMLInputElement).checked;
+                    setAdv({
+                      ...gLocal,
+                      sidePanels: {
+                        ...gLocal.sidePanels,
+                        right: checked ? { ...(gLocal.sidePanels?.right || {}) } : undefined,
+                      },
+                    });
+                  }}
+                />
+                Panel
+              </label>
             </div>
           </details>
 
@@ -728,6 +770,24 @@ const CabinetConfigurator: React.FC<Props> = ({
                   }
                 />
                 {t('configurator.edgeBandingOptions.left')}
+              </label>
+              <div className="small" style={{ marginTop: 8 }}>Panel boczny</div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <input
+                  type="checkbox"
+                  checked={!!gLocal.sidePanels?.left}
+                  onChange={(e) => {
+                    const checked = (e.target as HTMLInputElement).checked;
+                    setAdv({
+                      ...gLocal,
+                      sidePanels: {
+                        ...gLocal.sidePanels,
+                        left: checked ? { ...(gLocal.sidePanels?.left || {}) } : undefined,
+                      },
+                    });
+                  }}
+                />
+                Panel
               </label>
             </div>
           </details>
