@@ -306,7 +306,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                 setOpenTopFrame((v) => !v);
               }}
             >
-              {t('configurator.top')}
+              {t('configurator.sections.topFrame')}
             </summary>
             <div>
               <div>
@@ -580,7 +580,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                 setOpenBottomFrame((v) => !v);
               }}
             >
-              {t('configurator.bottom')}
+              {t('configurator.sections.bottomFrame')}
             </summary>
             <div>
               <div>
@@ -613,7 +613,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                 setOpenShelves((v) => !v);
               }}
             >
-              {t('configurator.shelves')}
+              {t('configurator.sections.shelves')}
             </summary>
             <div>
               {drawersCount === 0 && (
@@ -632,7 +632,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                       })
                     }
                   />
-                  <div className="small">{t('configurator.edgeBanding')}</div>
+                  <div className="small">{t('configurator.shelfEdgeBanding')}</div>
                   {(['front', 'back', 'left', 'right'] as const).map((edge) => (
                     <label
                       key={edge}
@@ -666,7 +666,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                 setOpenBack((v) => !v);
               }}
             >
-              {t('configurator.back')}
+              {t('configurator.sections.back')}
             </summary>
             <div>
               <div>
@@ -703,10 +703,10 @@ const CabinetConfigurator: React.FC<Props> = ({
                 setOpenRightSide((v) => !v);
               }}
             >
-              Bok prawy
+              {t('configurator.sections.rightSide')}
             </summary>
             <div>
-              <div className="small">{t('configurator.edgeBanding')}</div>
+              <div className="small">{t('configurator.rightSideEdgeBanding')}</div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <input
                   type="checkbox"
@@ -723,7 +723,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                 />
                 {t('configurator.edgeBandingOptions.right')}
               </label>
-              <div className="small" style={{ marginTop: 8 }}>Panel boczny</div>
+              <div className="small" style={{ marginTop: 8 }}>{t('configurator.sidePanel')}</div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <input
                   type="checkbox"
@@ -739,7 +739,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                     });
                   }}
                 />
-                Panel
+                {t('configurator.panel')}
               </label>
             </div>
           </details>
@@ -751,10 +751,10 @@ const CabinetConfigurator: React.FC<Props> = ({
                 setOpenLeftSide((v) => !v);
               }}
             >
-              Bok lewy
+              {t('configurator.sections.leftSide')}
             </summary>
             <div>
-              <div className="small">{t('configurator.edgeBanding')}</div>
+              <div className="small">{t('configurator.leftSideEdgeBanding')}</div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <input
                   type="checkbox"
@@ -771,7 +771,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                 />
                 {t('configurator.edgeBandingOptions.left')}
               </label>
-              <div className="small" style={{ marginTop: 8 }}>Panel boczny</div>
+              <div className="small" style={{ marginTop: 8 }}>{t('configurator.sidePanel')}</div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <input
                   type="checkbox"
@@ -787,7 +787,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                     });
                   }}
                 />
-                Panel
+                {t('configurator.panel')}
               </label>
             </div>
           </details>
