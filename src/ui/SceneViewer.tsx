@@ -33,8 +33,6 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
   const store = usePlannerStore();
   const showEdges = store.role === 'stolarz';
   const showFronts = store.showFronts;
-  const highlightPart = store.highlightPart;
-  const highlightedRef = useRef<THREE.Mesh | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -137,55 +135,6 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
   };
   useEffect(drawScene, [store.modules, addCountertop, showEdges, showFronts]);
 
-  useEffect(() => {
-    const three = threeRef.current;
-    if (!three || !three.group) return;
-    const group = three.group as THREE.Group;
-
-    if (highlightedRef.current) {
-      const prev = highlightedRef.current;
-      if (prev.userData.originalMaterial) {
-        const orig = prev.userData.originalMaterial as THREE.Material;
-        if (prev.material !== orig) {
-          (prev.material as THREE.Material).dispose?.();
-          prev.material = orig;
-        }
-      }
-      highlightedRef.current = null;
-    }
-
-    if (!highlightPart) return;
-    let target: THREE.Mesh | null = null;
-    group.traverse((obj) => {
-      if (!target && obj instanceof THREE.Mesh && obj.userData.part === highlightPart) {
-        target = obj;
-      }
-    });
-    if (target) {
-      highlightedRef.current = target;
-      if (!target.userData.originalMaterial) {
-        target.userData.originalMaterial = target.material;
-      }
-      const mat = (target.material as THREE.Material).clone() as THREE.MeshStandardMaterial;
-      if ('emissive' in mat) {
-        (mat as THREE.MeshStandardMaterial).emissive = new THREE.Color(0x4444ff);
-      } else if ((mat as any).color) {
-        (mat as any).color = new THREE.Color(0x4444ff);
-      }
-      target.material = mat;
-    }
-
-    if (highlightPart === 'back' && three.controls && three.camera) {
-      const vector = three.camera.position
-        .clone()
-        .sub(three.controls.target);
-      vector.applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
-      three.camera.position.copy(
-        three.controls.target.clone().add(vector),
-      );
-      three.controls.update();
-    }
-  }, [highlightPart, store.modules]);
 
   useEffect(() => {
     const three = threeRef.current;
