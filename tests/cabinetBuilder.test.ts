@@ -8,7 +8,7 @@ const WIDTH = 1;
 const HEIGHT = 0.9;
 const DEPTH = 0.5;
 const BOARD_THICKNESS = 0.018;
-const BAND_THICKNESS = 0.001;
+const BAND_THICKNESS = 0.0008;
 
 describe('buildCabinetMesh', () => {
   it('returns group with expected children for drawers', () => {
@@ -277,7 +277,7 @@ describe('buildCabinetMesh', () => {
       },
     });
     const boardThickness = 0.018;
-    const bandThickness = 0.001;
+    const bandThickness = 0.0008;
     const topWidth = 1 - 2 * boardThickness;
     const widthM = trWidth / 1000;
     const traverseY = 0.9 - widthM / 2;
@@ -290,7 +290,7 @@ describe('buildCabinetMesh', () => {
         Math.abs((c as any).geometry.parameters.depth - boardThickness) < 1e-6 &&
         Math.abs(c.position.x - 0.5) < 1e-6 &&
         Math.abs(
-          c.position.y - (traverseY + widthM / 2 - bandThickness / 2),
+          c.position.y - (traverseY + widthM / 2 + bandThickness / 2),
         ) < 1e-6 &&
         Math.abs(c.position.z - traverseZ) < 1e-6,
     );
@@ -302,7 +302,7 @@ describe('buildCabinetMesh', () => {
         Math.abs((c as any).geometry.parameters.depth - boardThickness) < 1e-6 &&
         Math.abs(c.position.x - 0.5) < 1e-6 &&
         Math.abs(
-          c.position.y - (traverseY - widthM / 2 + bandThickness / 2),
+          c.position.y - (traverseY - widthM / 2 - bandThickness / 2),
         ) < 1e-6 &&
         Math.abs(c.position.z - traverseZ) < 1e-6,
     );
@@ -312,7 +312,7 @@ describe('buildCabinetMesh', () => {
         Math.abs((c as any).geometry.parameters.width - bandThickness) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.height - widthM) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.depth - boardThickness) < 1e-6 &&
-        Math.abs(c.position.x - (boardThickness + bandThickness / 2)) < 1e-6 &&
+        Math.abs(c.position.x - (boardThickness - bandThickness / 2)) < 1e-6 &&
         Math.abs(c.position.y - traverseY) < 1e-6 &&
         Math.abs(c.position.z - traverseZ) < 1e-6,
     );
@@ -323,7 +323,7 @@ describe('buildCabinetMesh', () => {
         Math.abs((c as any).geometry.parameters.height - widthM) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.depth - boardThickness) < 1e-6 &&
         Math.abs(
-          c.position.x - (1 - boardThickness - bandThickness / 2),
+          c.position.x - (1 - boardThickness + bandThickness / 2),
         ) < 1e-6 &&
         Math.abs(c.position.y - traverseY) < 1e-6 &&
         Math.abs(c.position.z - traverseZ) < 1e-6,
@@ -351,11 +351,11 @@ describe('buildCabinetMesh', () => {
         bottom: true,
       },
     });
-    const bandThickness = 0.001;
+    const bandThickness = 0.0008;
     const boardThickness = 0.018;
     const depth = 0.5;
-    const bottomY = bandThickness / 2;
-    const topY = 0.9 - bandThickness / 2;
+    const bottomY = -bandThickness / 2;
+    const topY = 0.9 + bandThickness / 2;
     const bands = g.children.filter(
       (c) =>
         c instanceof THREE.Mesh &&
@@ -543,7 +543,7 @@ describe('buildCabinetMesh', () => {
         Math.abs(c.position.x - WIDTH / 2) < 1e-6 &&
         Math.abs(c.position.y - y) < 1e-6 &&
         Math.abs(
-          c.position.z - (-DEPTH + BAND_THICKNESS / 2),
+          c.position.z - (-DEPTH - BAND_THICKNESS / 2),
         ) < 1e-6,
     );
     expect(band.length).toBe(1);
@@ -567,7 +567,7 @@ describe('buildCabinetMesh', () => {
         Math.abs((c as any).geometry.parameters.width - BAND_THICKNESS) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.height - BOARD_THICKNESS) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.depth - DEPTH) < 1e-6 &&
-        Math.abs(c.position.x - (BOARD_THICKNESS + BAND_THICKNESS / 2)) < 1e-6 &&
+        Math.abs(c.position.x - (BOARD_THICKNESS - BAND_THICKNESS / 2)) < 1e-6 &&
         Math.abs(c.position.y - y) < 1e-6 &&
         Math.abs(c.position.z - -DEPTH / 2) < 1e-6,
     );
@@ -592,7 +592,7 @@ describe('buildCabinetMesh', () => {
         Math.abs((c as any).geometry.parameters.width - BAND_THICKNESS) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.height - BOARD_THICKNESS) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.depth - DEPTH) < 1e-6 &&
-        Math.abs(c.position.x - (WIDTH - BOARD_THICKNESS - BAND_THICKNESS / 2)) < 1e-6 &&
+        Math.abs(c.position.x - (WIDTH - BOARD_THICKNESS + BAND_THICKNESS / 2)) < 1e-6 &&
         Math.abs(c.position.y - y) < 1e-6 &&
         Math.abs(c.position.z - -DEPTH / 2) < 1e-6,
     );
@@ -619,7 +619,7 @@ describe('buildCabinetMesh', () => {
       rightSideEdgeBanding: {},
       leftSideEdgeBanding: {},
     });
-    const bandThickness = 0.001;
+    const bandThickness = 0.0008;
     const z = -0.5 + backT / 2;
     const topBand = g.children.find(
       (c) =>
@@ -628,7 +628,7 @@ describe('buildCabinetMesh', () => {
         Math.abs((c as any).geometry.parameters.height - bandThickness) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.depth - backT) < 1e-6 &&
         Math.abs(c.position.x - 0.5) < 1e-6 &&
-        Math.abs(c.position.y - (0.9 - bandThickness / 2)) < 1e-6 &&
+        Math.abs(c.position.y - (0.9 + bandThickness / 2)) < 1e-6 &&
         Math.abs(c.position.z - z) < 1e-6,
     );
     const bottomBand = g.children.find(
@@ -638,7 +638,7 @@ describe('buildCabinetMesh', () => {
         Math.abs((c as any).geometry.parameters.height - bandThickness) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.depth - backT) < 1e-6 &&
         Math.abs(c.position.x - 0.5) < 1e-6 &&
-        Math.abs(c.position.y - bandThickness / 2) < 1e-6 &&
+        Math.abs(c.position.y - -bandThickness / 2) < 1e-6 &&
         Math.abs(c.position.z - z) < 1e-6,
     );
     const leftBand = g.children.find(
@@ -647,7 +647,7 @@ describe('buildCabinetMesh', () => {
         Math.abs((c as any).geometry.parameters.width - bandThickness) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.height - 0.9) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.depth - backT) < 1e-6 &&
-        Math.abs(c.position.x - bandThickness / 2) < 1e-6 &&
+        Math.abs(c.position.x - -bandThickness / 2) < 1e-6 &&
         Math.abs(c.position.y - 0.45) < 1e-6 &&
         Math.abs(c.position.z - z) < 1e-6,
     );
@@ -657,7 +657,7 @@ describe('buildCabinetMesh', () => {
         Math.abs((c as any).geometry.parameters.width - bandThickness) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.height - 0.9) < 1e-6 &&
         Math.abs((c as any).geometry.parameters.depth - backT) < 1e-6 &&
-        Math.abs(c.position.x - (1 - bandThickness / 2)) < 1e-6 &&
+        Math.abs(c.position.x - (1 + bandThickness / 2)) < 1e-6 &&
         Math.abs(c.position.y - 0.45) < 1e-6 &&
         Math.abs(c.position.z - z) < 1e-6,
     );
@@ -690,7 +690,7 @@ describe('buildCabinetMesh', () => {
       },
     });
     const boardThickness = 0.018;
-    const bandThickness = 0.001;
+    const bandThickness = 0.0008;
     const expectedWidth = 1 - 2 * boardThickness;
     const widthM = trWidth / 1000;
     const traverse = g.children.find(
@@ -879,7 +879,7 @@ describe('buildCabinetMesh', () => {
         (c as any).material instanceof THREE.MeshStandardMaterial &&
         (c as any).material.color.getHex() === 0xffaa00,
     ) as THREE.Mesh[];
-    const bandT = 0.002;
+    const bandT = 0.0008;
     const frontBands = bands.filter(
       (b) =>
         Math.abs(b.position.z - bandT / 2) < 1e-6 &&
@@ -889,21 +889,21 @@ describe('buildCabinetMesh', () => {
     );
     const backBands = bands.filter(
       (b) =>
-        Math.abs(b.position.z - (-DEPTH + bandT / 2)) < 1e-6 &&
+        Math.abs(b.position.z - (-DEPTH - bandT / 2)) < 1e-6 &&
         Math.abs(((b.geometry as any).parameters.width ?? 0) - BOARD_THICKNESS) < 1e-6 &&
         Math.abs(((b.geometry as any).parameters.height ?? 0) - HEIGHT) < 1e-6 &&
         Math.abs(((b.geometry as any).parameters.depth ?? 0) - bandT) < 1e-6,
     );
     const topBands = bands.filter(
       (b) =>
-        Math.abs(b.position.y - (HEIGHT - bandT / 2)) < 1e-6 &&
+        Math.abs(b.position.y - (HEIGHT + bandT / 2)) < 1e-6 &&
         Math.abs(((b.geometry as any).parameters.width ?? 0) - BOARD_THICKNESS) < 1e-6 &&
         Math.abs(((b.geometry as any).parameters.height ?? 0) - bandT) < 1e-6 &&
         Math.abs(((b.geometry as any).parameters.depth ?? 0) - DEPTH) < 1e-6,
     );
     const bottomBands = bands.filter(
       (b) =>
-        Math.abs(b.position.y - bandT / 2) < 1e-6 &&
+        Math.abs(b.position.y - -bandT / 2) < 1e-6 &&
         Math.abs(((b.geometry as any).parameters.width ?? 0) - BOARD_THICKNESS) < 1e-6 &&
         Math.abs(((b.geometry as any).parameters.height ?? 0) - bandT) < 1e-6 &&
         Math.abs(((b.geometry as any).parameters.depth ?? 0) - DEPTH) < 1e-6,
