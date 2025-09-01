@@ -247,9 +247,11 @@ export default function TechDrawing({
   const outerW = Math.round(widthMM);
   const innerClearW = Math.round(widthMM - (gaps.left + gaps.right));
   const outerH = Math.round(heightMM);
-  const eb = edgeBanding || {
-    length: false,
-    width: false,
+  const eb = {
+    front: edgeBanding?.length ?? false,
+    back: edgeBanding?.length ?? false,
+    left: edgeBanding?.width ?? false,
+    right: edgeBanding?.width ?? false,
   };
 
   return (
