@@ -227,45 +227,37 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   const addTraverseTop = (tr: Traverse, zBase: number, topWidth: number) => {
     const widthM = tr.width / 1000;
     if (tr.orientation === 'vertical') {
-      const geo = new THREE.BoxGeometry(topWidth, T, widthM);
+      const geo = new THREE.BoxGeometry(topWidth, widthM, T);
       const mesh = new THREE.Mesh(geo, carcMat);
       const isFront = zBase === 0;
-      let frontEdge: number;
-      let backEdge: number;
-      if (isFront) {
-        frontEdge = -tr.offset / 1000 + FRONT_OFFSET;
-        backEdge = frontEdge - widthM;
-      } else {
-        backEdge = -zBase + tr.offset / 1000 + backT;
-        frontEdge = backEdge + widthM;
-      }
-      const z = (frontEdge + backEdge) / 2;
       const x = W / 2;
-      mesh.position.set(x, legHeight + H - T / 2, z);
+      const y = legHeight + H - widthM / 2 - tr.offset / 1000;
+      const z = isFront ? FRONT_OFFSET - T / 2 : -D + backT + T / 2;
+      mesh.position.set(x, y, z);
       addEdges(mesh);
       group.add(mesh);
       if (edgeBanding !== 'none') {
-        const zFront = frontEdge + bandThickness / 2;
-        const zBack = backEdge - bandThickness / 2;
-        addBand(x, legHeight + H - T / 2, zFront, topWidth, T, bandThickness);
-        addBand(x, legHeight + H - T / 2, zBack, topWidth, T, bandThickness);
+        const zFront = z + T / 2 - bandThickness / 2;
+        const zBack = z - T / 2 + bandThickness / 2;
+        addBand(x, y, zFront, topWidth, widthM, bandThickness);
+        addBand(x, y, zBack, topWidth, widthM, bandThickness);
         if (edgeBanding === 'full') {
           const topLeft = (W - topWidth) / 2;
           addBand(
             topLeft + bandThickness / 2,
-            legHeight + H - T / 2,
+            y,
             z,
             bandThickness,
-            T,
             widthM,
+            T,
           );
           addBand(
             W - topLeft - bandThickness / 2,
-            legHeight + H - T / 2,
+            y,
             z,
             bandThickness,
-            T,
             widthM,
+            T,
           );
         }
       }
