@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { FAMILY } from '../../core/catalog';
 import { buildCabinetMesh } from '../../scene/cabinetBuilder';
 import { usePlannerStore } from '../../state/store';
-import { TopPanel, BottomPanel } from '../../types';
+import { TopPanel, BottomPanel, EdgeBanding } from '../../types';
 
 export default function Cabinet3D({
   widthMM,
@@ -19,22 +19,10 @@ export default function Cabinet3D({
   topPanel,
   bottomPanel,
   dividerPosition,
-  edgeBanding = {
-    length: true,
-    width: false,
-  },
-  traverseEdgeBanding = {
-    length: false,
-    width: false,
-  },
-  shelfEdgeBanding = {
-    length: false,
-    width: false,
-  },
-  backEdgeBanding = {
-    length: false,
-    width: false,
-  },
+  edgeBanding = { front: true, back: true },
+  traverseEdgeBanding = {},
+  shelfEdgeBanding = {},
+  backEdgeBanding = {},
   sidePanels,
   carcassType = 'type1',
   showFronts = true,
@@ -52,22 +40,10 @@ export default function Cabinet3D({
   topPanel?: TopPanel;
   bottomPanel?: BottomPanel;
   dividerPosition?: 'left' | 'right' | 'center';
-  edgeBanding?: {
-    length: boolean;
-    width: boolean;
-  };
-  traverseEdgeBanding?: {
-    length: boolean;
-    width: boolean;
-  };
-  shelfEdgeBanding?: {
-    length: boolean;
-    width: boolean;
-  };
-  backEdgeBanding?: {
-    length: boolean;
-    width: boolean;
-  };
+  edgeBanding?: EdgeBanding;
+  traverseEdgeBanding?: EdgeBanding;
+  shelfEdgeBanding?: EdgeBanding;
+  backEdgeBanding?: EdgeBanding;
   sidePanels?: {
     left?: Record<string, any>;
     right?: Record<string, any>;

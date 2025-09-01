@@ -17,6 +17,15 @@ export interface Traverse {
   width: number;
 }
 
+export type EdgeBanding = {
+  front?: boolean;
+  back?: boolean;
+  left?: boolean;
+  right?: boolean;
+  top?: boolean;
+  bottom?: boolean;
+};
+
 export type TopPanel =
   | { type: 'full' }
   | { type: 'none' }
@@ -107,22 +116,10 @@ export interface ModuleAdv {
   topPanel?: TopPanel;
   bottomPanel?: BottomPanel;
   dividerPosition?: 'left' | 'right' | 'center';
-  edgeBanding?: {
-    length: boolean;
-    width: boolean;
-  };
-  shelfEdgeBanding?: {
-    length: boolean;
-    width: boolean;
-  };
-  traverseEdgeBanding?: {
-    length: boolean;
-    width: boolean;
-  };
-  backEdgeBanding?: {
-    length: boolean;
-    width: boolean;
-  };
+  edgeBanding?: EdgeBanding;
+  shelfEdgeBanding?: EdgeBanding;
+  traverseEdgeBanding?: EdgeBanding;
+  backEdgeBanding?: EdgeBanding;
   sidePanels?: {
     left?: Record<string, any>;
     right?: Record<string, any>;

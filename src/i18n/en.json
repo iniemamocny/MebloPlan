@@ -122,8 +122,12 @@
     },
     "edgeBanding": "Edge banding",
     "edgeBandingOptions": {
-      "length": "lengthwise",
-      "width": "widthwise"
+      "front": "front",
+      "back": "back",
+      "left": "left",
+      "right": "right",
+      "top": "top",
+      "bottom": "bottom"
     },
     "shelfEdgeBanding": "Shelf edge banding",
     "traverseEdgeBanding": "Traverse edge banding",

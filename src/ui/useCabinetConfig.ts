@@ -35,21 +35,12 @@ export function useCabinetConfig(
       topPanel: g.topPanel,
       bottomPanel: g.bottomPanel,
       edgeBanding: {
-        length: true,
-        width: false,
+        front: true,
+        back: true,
       },
-      shelfEdgeBanding: {
-        length: false,
-        width: false,
-      },
-      traverseEdgeBanding: {
-        length: false,
-        width: false,
-      },
-      backEdgeBanding: {
-        length: false,
-        width: false,
-      },
+      shelfEdgeBanding: {},
+      traverseEdgeBanding: {},
+      backEdgeBanding: {},
       sidePanels: {},
       carcassType: g.carcassType,
     });
@@ -254,13 +245,10 @@ export function useCabinetConfig(
             topPanel: g.topPanel,
             bottomPanel: g.bottomPanel,
             edgeBanding: {
-              length: true,
-              width: false,
+              front: true,
+              back: true,
             },
-            shelfEdgeBanding: {
-              length: false,
-              width: false,
-            },
+            shelfEdgeBanding: {},
             sidePanels: {},
             carcassType: g.carcassType,
           },
@@ -283,13 +271,10 @@ export function useCabinetConfig(
           ...g,
           doorCount: 1,
           edgeBanding: {
-            length: true,
-            width: false,
+            front: true,
+            back: true,
           },
-          shelfEdgeBanding: {
-            length: false,
-            width: false,
-          },
+          shelfEdgeBanding: {},
           sidePanels: {},
         } as ModuleAdv,
       };
