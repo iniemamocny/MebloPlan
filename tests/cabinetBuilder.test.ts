@@ -4,6 +4,11 @@ import { buildCabinetMesh } from '../src/scene/cabinetBuilder';
 import { FAMILY } from '../src/core/catalog';
 
 const FRONT_OFFSET = 0.002;
+const WIDTH = 1;
+const HEIGHT = 0.9;
+const DEPTH = 0.5;
+const BOARD_THICKNESS = 0.018;
+const BAND_THICKNESS = 0.001;
 
 describe('buildCabinetMesh', () => {
   it('returns group with expected children for drawers', () => {
@@ -331,9 +336,9 @@ describe('buildCabinetMesh', () => {
 
   it('adds edge banding to side panels on top and bottom edges', () => {
     const g = buildCabinetMesh({
-      width: 1,
-      height: 0.9,
-      depth: 0.5,
+      width: WIDTH,
+      height: HEIGHT,
+      depth: DEPTH,
       drawers: 0,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
@@ -362,6 +367,110 @@ describe('buildCabinetMesh', () => {
     const topBands = bands.filter((b) => Math.abs(b.position.y - topY) < 1e-6);
     expect(bottomBands.length).toBe(2);
     expect(topBands.length).toBe(2);
+  });
+
+  it('adds shelf edge banding on front edge', () => {
+    const g = buildCabinetMesh({
+      width: WIDTH,
+      height: HEIGHT,
+      depth: DEPTH,
+      drawers: 0,
+      shelves: 1,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      shelfEdgeBanding: { front: true },
+    });
+    const y = HEIGHT / 2;
+    const band = g.children.filter(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - (WIDTH - 2 * BOARD_THICKNESS)) <
+          1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - BOARD_THICKNESS) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - BAND_THICKNESS) < 1e-6 &&
+        Math.abs(c.position.x - WIDTH / 2) < 1e-6 &&
+        Math.abs(c.position.y - y) < 1e-6 &&
+        Math.abs(c.position.z - BAND_THICKNESS / 2) < 1e-6,
+    );
+    expect(band.length).toBe(1);
+  });
+
+  it('adds shelf edge banding on back edge', () => {
+    const g = buildCabinetMesh({
+      width: WIDTH,
+      height: HEIGHT,
+      depth: DEPTH,
+      drawers: 0,
+      shelves: 1,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      shelfEdgeBanding: { back: true },
+    });
+    const y = HEIGHT / 2;
+    const band = g.children.filter(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - (WIDTH - 2 * BOARD_THICKNESS)) <
+          1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - BOARD_THICKNESS) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - BAND_THICKNESS) < 1e-6 &&
+        Math.abs(c.position.x - WIDTH / 2) < 1e-6 &&
+        Math.abs(c.position.y - y) < 1e-6 &&
+        Math.abs(
+          c.position.z - (-DEPTH + BAND_THICKNESS / 2),
+        ) < 1e-6,
+    );
+    expect(band.length).toBe(1);
+  });
+
+  it('adds shelf edge banding on left edge', () => {
+    const g = buildCabinetMesh({
+      width: WIDTH,
+      height: HEIGHT,
+      depth: DEPTH,
+      drawers: 0,
+      shelves: 1,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      shelfEdgeBanding: { left: true },
+    });
+    const y = HEIGHT / 2;
+    const band = g.children.filter(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - BAND_THICKNESS) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - BOARD_THICKNESS) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - DEPTH) < 1e-6 &&
+        Math.abs(c.position.x - (BOARD_THICKNESS + BAND_THICKNESS / 2)) < 1e-6 &&
+        Math.abs(c.position.y - y) < 1e-6 &&
+        Math.abs(c.position.z - -DEPTH / 2) < 1e-6,
+    );
+    expect(band.length).toBe(1);
+  });
+
+  it('adds shelf edge banding on right edge', () => {
+    const g = buildCabinetMesh({
+      width: WIDTH,
+      height: HEIGHT,
+      depth: DEPTH,
+      drawers: 0,
+      shelves: 1,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      shelfEdgeBanding: { right: true },
+    });
+    const y = HEIGHT / 2;
+    const band = g.children.filter(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - BAND_THICKNESS) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - BOARD_THICKNESS) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - DEPTH) < 1e-6 &&
+        Math.abs(c.position.x - (WIDTH - BOARD_THICKNESS - BAND_THICKNESS / 2)) < 1e-6 &&
+        Math.abs(c.position.y - y) < 1e-6 &&
+        Math.abs(c.position.z - -DEPTH / 2) < 1e-6,
+    );
+    expect(band.length).toBe(1);
   });
 
   it('adds back panel edge banding on all edges', () => {
