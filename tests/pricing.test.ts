@@ -105,5 +105,24 @@ describe('computeModuleCost', () => {
     )
     expect(price.parts.kits).toBe(defaultPrices.dwKit + defaultPrices.mwKit)
   })
+
+  it('applies foldable front pricing when selected', () => {
+    const adv = { ...advFor(FAMILY.BASE), frontType: 'DALL·E', frontFoldable: true }
+    const price = computeModuleCost(
+      {
+        family: FAMILY.BASE,
+        kind: 'doors',
+        variant: 'doors',
+        width: 600,
+        adv,
+        doorsCount: 2,
+      },
+      { prices: defaultPrices, globals: defaultGlobal }
+    )
+    const frontArea = 0.6 * 0.8
+    expect(price.parts.front).toBe(
+      Math.round(frontArea * defaultPrices.front['DALL·E stowalna'])
+    )
+  })
 })
 

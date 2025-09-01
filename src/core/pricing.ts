@@ -21,7 +21,8 @@ export function computeModuleCost(
   const wMM = params.width
   const h = hMM/1000, d = dMM/1000, w = wMM/1000
   const boardPrice = P.board[g.boardType] || 0
-  const frontPrice = P.front[g.frontType] || 0
+  const frontKey = g.frontFoldable ? `${g.frontType} stowalna` : g.frontType
+  const frontPrice = P.front[frontKey] || 0
   const edgingPrice = P.edging['ABS 1mm'] || 0
   let doors = 0,
     drawers = 0,

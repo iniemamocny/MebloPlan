@@ -632,19 +632,38 @@ const CabinetConfigurator: React.FC<Props> = ({
                 <select
                   className="input"
                   value={gLocal.frontType}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const ft = (e.target as HTMLSelectElement).value;
                     setAdv({
                       ...gLocal,
-                      frontType: (e.target as HTMLSelectElement).value,
-                    })
-                  }
+                      frontType: ft,
+                      frontFoldable: ft === 'DALL·E' ? gLocal.frontFoldable : false,
+                    });
+                  }}
                 >
-                  {Object.keys(prices.front).map((k) => (
-                    <option key={k} value={k}>
-                      {k}
-                    </option>
-                  ))}
+                  {Object.keys(prices.front)
+                    .filter((k) => !k.includes('stowalna'))
+                    .map((k) => (
+                      <option key={k} value={k}>
+                        {k}
+                      </option>
+                    ))}
                 </select>
+                {gLocal.frontType === 'DALL·E' && (
+                  <label className="row" style={{ marginTop: 4, gap: 4 }}>
+                    <input
+                      type="checkbox"
+                      checked={!!gLocal.frontFoldable}
+                      onChange={(e) =>
+                        setAdv({
+                          ...gLocal,
+                          frontFoldable: (e.target as HTMLInputElement).checked,
+                        })
+                      }
+                    />
+                    {t('configurator.frontFoldable')}
+                  </label>
+                )}
               </div>
             </div>
             {doorsCount >= 3 && (

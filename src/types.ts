@@ -99,6 +99,7 @@ export interface ModuleAdv {
   depth?: number;
   boardType?: string;
   frontType?: string;
+  frontFoldable?: boolean;
   gaps?: Gaps;
   drawerFronts?: number[];
   shelves?: number;
