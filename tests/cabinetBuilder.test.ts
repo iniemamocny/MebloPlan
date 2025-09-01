@@ -266,10 +266,8 @@ describe('buildCabinetMesh', () => {
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
       traverseEdgeBanding: {
-        front: true,
-        back: true,
-        left: true,
-        right: true,
+        length: true,
+        width: true,
       },
       topPanel: {
         type: 'frontTraverse',
@@ -343,12 +341,8 @@ describe('buildCabinetMesh', () => {
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
       edgeBanding: {
-        front: false,
-        back: false,
-        left: false,
-        right: false,
-        top: true,
-        bottom: true,
+        length: false,
+        width: true,
       },
     });
     const bandThickness = 0.001;
@@ -378,7 +372,7 @@ describe('buildCabinetMesh', () => {
       shelves: 1,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
-      shelfEdgeBanding: { front: true },
+      shelfEdgeBanding: { width: true },
     });
     const y = HEIGHT / 2;
     const band = g.children.filter(
@@ -404,7 +398,7 @@ describe('buildCabinetMesh', () => {
       shelves: 1,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
-      shelfEdgeBanding: { back: true },
+      shelfEdgeBanding: { width: true },
     });
     const y = HEIGHT / 2;
     const band = g.children.filter(
@@ -432,7 +426,7 @@ describe('buildCabinetMesh', () => {
       shelves: 1,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
-      shelfEdgeBanding: { left: true },
+      shelfEdgeBanding: { length: true },
     });
     const y = HEIGHT / 2;
     const band = g.children.filter(
@@ -457,7 +451,7 @@ describe('buildCabinetMesh', () => {
       shelves: 1,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
-      shelfEdgeBanding: { right: true },
+      shelfEdgeBanding: { length: true },
     });
     const y = HEIGHT / 2;
     const band = g.children.filter(
@@ -485,18 +479,12 @@ describe('buildCabinetMesh', () => {
       shelves: 0,
       backThickness: backT,
       backEdgeBanding: {
-        front: true,
-        back: true,
-        left: true,
-        right: true,
+        length: true,
+        width: true,
       },
       edgeBanding: {
-        front: false,
-        back: false,
-        left: false,
-        right: false,
-        top: false,
-        bottom: false,
+        length: false,
+        width: false,
       },
     });
     const bandThickness = 0.001;
@@ -559,10 +547,8 @@ describe('buildCabinetMesh', () => {
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
       traverseEdgeBanding: {
-        front: true,
-        back: true,
-        left: true,
-        right: true,
+        length: true,
+        width: true,
       },
       topPanel: {
         type: 'frontTraverse',
@@ -623,12 +609,8 @@ describe('buildCabinetMesh', () => {
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
       edgeBanding: {
-        front: false,
-        back: false,
-        left: false,
-        right: false,
-        top: false,
-        bottom: false,
+        length: false,
+        width: false,
       },
       topPanel: {
         type: 'backTraverse',
@@ -661,12 +643,8 @@ describe('buildCabinetMesh', () => {
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
       edgeBanding: {
-        front: false,
-        back: false,
-        left: false,
-        right: false,
-        top: false,
-        bottom: false,
+        length: false,
+        width: false,
       },
       topPanel: {
         type: 'twoTraverses',
@@ -708,12 +686,8 @@ describe('buildCabinetMesh', () => {
       topPanel: { type: 'none' },
       bottomPanel: 'none',
       edgeBanding: {
-        front: false,
-        back: false,
-        left: false,
-        right: false,
-        top: false,
-        bottom: false,
+        length: false,
+        width: false,
       },
     });
     const boardThickness = 0.018;

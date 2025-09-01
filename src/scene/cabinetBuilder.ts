@@ -23,32 +23,20 @@ export interface CabinetOptions {
   dividerPosition?: 'left' | 'right' | 'center';
   showEdges?: boolean;
   edgeBanding?: {
-    front: boolean;
-    back: boolean;
-    left: boolean;
-    right: boolean;
-    top: boolean;
-    bottom: boolean;
+    length: boolean;
+    width: boolean;
   };
   shelfEdgeBanding?: {
-    front: boolean;
-    back: boolean;
-    left: boolean;
-    right: boolean;
-    top: boolean;
-    bottom: boolean;
+    length: boolean;
+    width: boolean;
   };
   traverseEdgeBanding?: {
-    front: boolean;
-    back: boolean;
-    left: boolean;
-    right: boolean;
+    length: boolean;
+    width: boolean;
   };
   backEdgeBanding?: {
-    front: boolean;
-    back: boolean;
-    left: boolean;
-    right: boolean;
+    length: boolean;
+    width: boolean;
   };
   sidePanels?: {
     left?: Record<string, any>;
@@ -82,38 +70,51 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     backThickness: backT = 0.003,
     dividerPosition,
     showEdges = false,
-    edgeBanding = {
-      front: false,
-      back: false,
-      left: false,
-      right: false,
-      top: false,
-      bottom: false,
+    edgeBanding: edgeBandingInput = { length: false, width: false },
+    traverseEdgeBanding: traverseEdgeBandingInput = {
+      length: false,
+      width: false,
     },
-    traverseEdgeBanding = {
-      front: false,
-      back: false,
-      left: false,
-      right: false,
+    shelfEdgeBanding: shelfEdgeBandingInput = {
+      length: false,
+      width: false,
     },
-    shelfEdgeBanding = {
-      front: false,
-      back: false,
-      left: false,
-      right: false,
-      top: false,
-      bottom: false,
-    },
-    backEdgeBanding = {
-      front: false,
-      back: false,
-      left: false,
-      right: false,
-    },
+    backEdgeBanding: backEdgeBandingInput = { length: false, width: false },
     sidePanels = {},
     carcassType = 'type1',
     showFronts = true,
   } = opts;
+
+  const expandBanding = (
+    b: { length?: boolean; width?: boolean },
+    orientation: 'vertical' | 'horizontal' | 'back',
+  ) => {
+    const length = b?.length ?? false;
+    const width = b?.width ?? false;
+    if (orientation === 'horizontal') {
+      return {
+        front: width,
+        back: width,
+        left: length,
+        right: length,
+        top: false,
+        bottom: false,
+      };
+    }
+    return {
+      front: length,
+      back: length,
+      left: width,
+      right: width,
+      top: width,
+      bottom: width,
+    };
+  };
+
+  const edgeBanding = expandBanding(edgeBandingInput, 'vertical');
+  const traverseEdgeBanding = expandBanding(traverseEdgeBandingInput, 'horizontal');
+  const shelfEdgeBanding = expandBanding(shelfEdgeBandingInput, 'horizontal');
+  const backEdgeBanding = expandBanding(backEdgeBandingInput, 'vertical');
 
   const FRONT_OFFSET = 0.002;
 
