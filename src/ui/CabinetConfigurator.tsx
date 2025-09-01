@@ -142,7 +142,8 @@ const CabinetConfigurator: React.FC<Props> = ({
               topPanel={gLocal.topPanel}
               bottomPanel={gLocal.bottomPanel}
               dividerPosition={gLocal.dividerPosition}
-              edgeBanding={gLocal.edgeBanding}
+              rightSideEdgeBanding={gLocal.rightSideEdgeBanding}
+              leftSideEdgeBanding={gLocal.leftSideEdgeBanding}
               traverseEdgeBanding={gLocal.traverseEdgeBanding}
               shelfEdgeBanding={gLocal.shelfEdgeBanding}
               backEdgeBanding={gLocal.backEdgeBanding}
@@ -547,32 +548,6 @@ const CabinetConfigurator: React.FC<Props> = ({
                 ) : null}
               </div>
               <div style={{ marginTop: 8 }}>
-                <div className="small">{t('configurator.edgeBanding')}</div>
-                <div className="row" style={{ gap: 8 }}>
-                  {(['front', 'back', 'left', 'right'] as const).map((edge) => (
-                    <label
-                      key={edge}
-                      style={{ display: 'flex', alignItems: 'center', gap: 4 }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={gLocal.edgeBanding?.[edge] ?? false}
-                        onChange={(e) =>
-                          setAdv({
-                            ...gLocal,
-                            edgeBanding: {
-                              ...gLocal.edgeBanding,
-                              [edge]: (e.target as HTMLInputElement).checked,
-                            },
-                          })
-                        }
-                      />
-                      {t(`configurator.edgeBandingOptions.${edge}`)}
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <div style={{ marginTop: 8 }}>
                 <div className="small">{t('configurator.traverseEdgeBanding')}</div>
                 <div className="row" style={{ gap: 8 }}>
                   {(['front', 'back', 'left', 'right'] as const).map((edge) => (
@@ -766,12 +741,12 @@ const CabinetConfigurator: React.FC<Props> = ({
                 >
                   <input
                     type="checkbox"
-                    checked={gLocal.edgeBanding?.[edge] ?? false}
+                    checked={gLocal.rightSideEdgeBanding?.[edge] ?? false}
                     onChange={(e) =>
                       setAdv({
                         ...gLocal,
-                        edgeBanding: {
-                          ...gLocal.edgeBanding,
+                        rightSideEdgeBanding: {
+                          ...gLocal.rightSideEdgeBanding,
                           [edge]: (e.target as HTMLInputElement).checked,
                         },
                       })
@@ -819,12 +794,12 @@ const CabinetConfigurator: React.FC<Props> = ({
                 >
                   <input
                     type="checkbox"
-                    checked={gLocal.edgeBanding?.[edge] ?? false}
+                    checked={gLocal.leftSideEdgeBanding?.[edge] ?? false}
                     onChange={(e) =>
                       setAdv({
                         ...gLocal,
-                        edgeBanding: {
-                          ...gLocal.edgeBanding,
+                        leftSideEdgeBanding: {
+                          ...gLocal.leftSideEdgeBanding,
                           [edge]: (e.target as HTMLInputElement).checked,
                         },
                       })
@@ -1006,7 +981,8 @@ const CabinetConfigurator: React.FC<Props> = ({
               drawersCount={drawersCount}
               drawerFronts={gLocal.drawerFronts}
               dividerPosition={gLocal.dividerPosition}
-              edgeBanding={gLocal.edgeBanding}
+              rightSideEdgeBanding={gLocal.rightSideEdgeBanding}
+              leftSideEdgeBanding={gLocal.leftSideEdgeBanding}
               onChangeGaps={(gg: Gaps) => setAdv({ ...gLocal, gaps: gg })}
               onChangeDrawerFronts={(arr: number[]) =>
                 setAdv({ ...gLocal, drawerFronts: arr })
