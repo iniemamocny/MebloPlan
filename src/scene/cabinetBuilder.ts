@@ -212,10 +212,14 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   const sideGeo = new THREE.BoxGeometry(T, sideHeight, D);
   const leftSide = new THREE.Mesh(sideGeo, carcMat);
   leftSide.position.set(T / 2, sideY, -D / 2);
+  leftSide.userData.part = 'leftSide';
+  leftSide.userData.originalMaterial = leftSide.material;
   addEdges(leftSide);
   group.add(leftSide);
   const rightSide = new THREE.Mesh(sideGeo.clone(), carcMat);
   rightSide.position.set(W - T / 2, sideY, -D / 2);
+  rightSide.userData.part = 'rightSide';
+  rightSide.userData.originalMaterial = rightSide.material;
   addEdges(rightSide);
   group.add(rightSide);
   const sideBottomY = sideY - sideHeight / 2;
@@ -281,6 +285,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   if (sidePanels.left) {
     const panel = new THREE.Mesh(sideGeo.clone(), carcMat);
     panel.position.set(-T / 2, sideY, -D / 2);
+    panel.userData.part = 'leftSide';
+    panel.userData.originalMaterial = panel.material;
     addEdges(panel);
     group.add(panel);
     bandSide(leftSideEdgeBanding, -T / 2);
@@ -288,6 +294,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   if (sidePanels.right) {
     const panel = new THREE.Mesh(sideGeo.clone(), carcMat);
     panel.position.set(W + T / 2, sideY, -D / 2);
+    panel.userData.part = 'rightSide';
+    panel.userData.originalMaterial = panel.material;
     addEdges(panel);
     group.add(panel);
     bandSide(rightSideEdgeBanding, W + T / 2);
@@ -308,6 +316,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       carcMat,
     );
     bottom.position.set(W / 2, legHeight + T / 2, -D / 2);
+    bottom.userData.part = 'bottom';
+    bottom.userData.originalMaterial = bottom.material;
     addEdges(bottom);
     group.add(bottom);
     if (shouldBand(bottomPanelEdgeBanding, 'horizontal', 'front')) {
@@ -457,6 +467,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   if (!topPanel || topPanel.type === 'full') {
     const top = new THREE.Mesh(new THREE.BoxGeometry(topWidth, T, D), carcMat);
     top.position.set(W / 2, legHeight + H - T / 2, -D / 2);
+    top.userData.part = 'top';
+    top.userData.originalMaterial = top.material;
     addEdges(top);
     group.add(top);
     if (shouldBand(topPanelEdgeBanding, 'horizontal', 'front')) {
@@ -519,6 +531,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     const backGeo = new THREE.BoxGeometry(W, H, backT);
     const back = new THREE.Mesh(backGeo, backMat);
     back.position.set(W / 2, legHeight + H / 2, -D + backT / 2);
+    back.userData.part = 'back';
+    back.userData.originalMaterial = back.material;
     addEdges(back);
     group.add(back);
   } else if (backPanel === 'split') {
@@ -527,10 +541,14 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     const backGeo = new THREE.BoxGeometry(W, halfH, backT);
     const bottomBack = new THREE.Mesh(backGeo, backMat);
     bottomBack.position.set(W / 2, legHeight + halfH / 2, -D + backT / 2);
+    bottomBack.userData.part = 'back';
+    bottomBack.userData.originalMaterial = bottomBack.material;
     addEdges(bottomBack);
     group.add(bottomBack);
     const topBack = new THREE.Mesh(backGeo.clone(), backMat);
     topBack.position.set(W / 2, legHeight + H - halfH / 2, -D + backT / 2);
+    topBack.userData.part = 'back';
+    topBack.userData.originalMaterial = topBack.material;
     addEdges(topBack);
     group.add(topBack);
   }
@@ -648,6 +666,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       const shelf = new THREE.Mesh(shelfGeo, carcMat);
       const y = legHeight + (H * (i + 1)) / (count + 1);
       shelf.position.set(W / 2, y, -D / 2);
+      shelf.userData.part = 'shelf';
+      shelf.userData.originalMaterial = shelf.material;
       addEdges(shelf);
       group.add(shelf);
       if (shouldBand(shelfEdgeBanding, 'horizontal', 'front')) {
