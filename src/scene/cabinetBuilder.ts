@@ -44,6 +44,12 @@ export interface CabinetOptions {
     left: boolean;
     right: boolean;
   };
+  backEdgeBanding?: {
+    front: boolean;
+    back: boolean;
+    left: boolean;
+    right: boolean;
+  };
   sidePanels?: {
     left?: Record<string, any>;
     right?: Record<string, any>;
@@ -97,6 +103,12 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       right: false,
       top: false,
       bottom: false,
+    },
+    backEdgeBanding = {
+      front: false,
+      back: false,
+      left: false,
+      right: false,
     },
     sidePanels = {},
     carcassType = 'type1',
@@ -572,6 +584,76 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     topBack.position.set(W / 2, legHeight + H - halfH / 2, -D + backT / 2);
     addEdges(topBack);
     group.add(topBack);
+  }
+
+  if (backPanel !== 'none' && backT >= 0.018) {
+    const z = -D + backT / 2;
+    if (backPanel === 'full') {
+      if (backEdgeBanding.front) {
+        addBand(W / 2, legHeight + H - bandThickness / 2, z, W, bandThickness, backT);
+      }
+      if (backEdgeBanding.back) {
+        addBand(W / 2, legHeight + bandThickness / 2, z, W, bandThickness, backT);
+      }
+      if (backEdgeBanding.left) {
+        addBand(bandThickness / 2, legHeight + H / 2, z, bandThickness, H, backT);
+      }
+      if (backEdgeBanding.right) {
+        addBand(
+          W - bandThickness / 2,
+          legHeight + H / 2,
+          z,
+          bandThickness,
+          H,
+          backT,
+        );
+      }
+    } else if (backPanel === 'split') {
+      const gap = 0.002;
+      const halfH = (H - gap) / 2;
+      if (backEdgeBanding.front) {
+        addBand(W / 2, legHeight + H - bandThickness / 2, z, W, bandThickness, backT);
+      }
+      if (backEdgeBanding.back) {
+        addBand(W / 2, legHeight + bandThickness / 2, z, W, bandThickness, backT);
+      }
+      if (backEdgeBanding.left) {
+        addBand(
+          bandThickness / 2,
+          legHeight + halfH / 2,
+          z,
+          bandThickness,
+          halfH,
+          backT,
+        );
+        addBand(
+          bandThickness / 2,
+          legHeight + H - halfH / 2,
+          z,
+          bandThickness,
+          halfH,
+          backT,
+        );
+      }
+      if (backEdgeBanding.right) {
+        addBand(
+          W - bandThickness / 2,
+          legHeight + halfH / 2,
+          z,
+          bandThickness,
+          halfH,
+          backT,
+        );
+        addBand(
+          W - bandThickness / 2,
+          legHeight + H - halfH / 2,
+          z,
+          bandThickness,
+          halfH,
+          backT,
+        );
+      }
+    }
   }
 
   // Shelves when there are no drawers

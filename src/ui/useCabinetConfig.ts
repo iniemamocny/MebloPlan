@@ -56,6 +56,12 @@ export function useCabinetConfig(
         left: false,
         right: false,
       },
+      backEdgeBanding: {
+        front: false,
+        back: false,
+        left: false,
+        right: false,
+      },
       sidePanels: {},
       carcassType: g.carcassType,
     });
@@ -168,6 +174,7 @@ export function useCabinetConfig(
           bottomPanel: g.bottomPanel,
           edgeBanding: g.edgeBanding,
           traverseEdgeBanding: g.traverseEdgeBanding,
+          backEdgeBanding: g.backEdgeBanding,
           carcassType: g.carcassType,
         },
         doorsCount,
