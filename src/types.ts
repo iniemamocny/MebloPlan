@@ -123,6 +123,12 @@ export interface ModuleAdv {
     top: boolean;
     bottom: boolean;
   };
+  traverseEdgeBanding?: {
+    front: boolean;
+    back: boolean;
+    left: boolean;
+    right: boolean;
+  };
   sidePanels?: {
     left?: Record<string, any>;
     right?: Record<string, any>;
