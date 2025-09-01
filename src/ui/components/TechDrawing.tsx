@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { EdgeBanding } from '../../types';
 
 type Gaps = {
   left: number;
@@ -20,14 +21,8 @@ type Props = {
   dividerPosition?: 'left' | 'right' | 'center';
   onChangeGaps?: (g: Gaps) => void;
   onChangeDrawerFronts?: (arr: number[]) => void;
-  edgeBanding?: {
-    front?: boolean;
-    back?: boolean;
-    left?: boolean;
-    right?: boolean;
-    top?: boolean;
-    bottom?: boolean;
-  };
+  rightSideEdgeBanding?: EdgeBanding;
+  leftSideEdgeBanding?: EdgeBanding;
 };
 
 function parseThickness(boardType?: string) {
@@ -126,7 +121,8 @@ export default function TechDrawing({
   dividerPosition,
   onChangeGaps,
   onChangeDrawerFronts,
-  edgeBanding,
+  rightSideEdgeBanding,
+  leftSideEdgeBanding,
 }: Props) {
   const W = 360,
     H = 230;
@@ -252,12 +248,17 @@ export default function TechDrawing({
   const innerClearW = Math.round(widthMM - (gaps.left + gaps.right));
   const outerH = Math.round(heightMM);
   const eb = {
-    front: edgeBanding?.front ?? false,
-    back: edgeBanding?.back ?? false,
-    left: edgeBanding?.left ?? false,
-    right: edgeBanding?.right ?? false,
-    top: edgeBanding?.top ?? false,
-    bottom: edgeBanding?.bottom ?? false,
+    front:
+      rightSideEdgeBanding?.front || leftSideEdgeBanding?.front || false,
+    back:
+      rightSideEdgeBanding?.back || leftSideEdgeBanding?.back || false,
+    left:
+      rightSideEdgeBanding?.left || leftSideEdgeBanding?.left || false,
+    right:
+      rightSideEdgeBanding?.right || leftSideEdgeBanding?.right || false,
+    top: rightSideEdgeBanding?.top || leftSideEdgeBanding?.top || false,
+    bottom:
+      rightSideEdgeBanding?.bottom || leftSideEdgeBanding?.bottom || false,
   };
 
   return (

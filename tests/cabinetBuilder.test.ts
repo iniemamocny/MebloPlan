@@ -342,7 +342,11 @@ describe('buildCabinetMesh', () => {
       drawers: 0,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
-      edgeBanding: {
+      rightSideEdgeBanding: {
+        top: true,
+        bottom: true,
+      },
+      leftSideEdgeBanding: {
         top: true,
         bottom: true,
       },
@@ -363,6 +367,60 @@ describe('buildCabinetMesh', () => {
     const topBands = bands.filter((b) => Math.abs(b.position.y - topY) < 1e-6);
     expect(bottomBands.length).toBe(2);
     expect(topBands.length).toBe(2);
+  });
+
+  it('bands only right side when rightSideEdgeBanding is set', () => {
+    const g = buildCabinetMesh({
+      width: WIDTH,
+      height: HEIGHT,
+      depth: DEPTH,
+      drawers: 0,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      rightSideEdgeBanding: { front: true },
+      leftSideEdgeBanding: {},
+    });
+    const bands = g.children.filter(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - BOARD_THICKNESS) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - HEIGHT) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - BAND_THICKNESS) < 1e-6 &&
+        Math.abs(c.position.z - BAND_THICKNESS / 2) < 1e-6,
+    ) as THREE.Mesh[];
+    const leftBand = bands.find((b) => Math.abs(b.position.x - BOARD_THICKNESS / 2) < 1e-6);
+    const rightBand = bands.find(
+      (b) => Math.abs(b.position.x - (WIDTH - BOARD_THICKNESS / 2)) < 1e-6,
+    );
+    expect(rightBand).toBeTruthy();
+    expect(leftBand).toBeFalsy();
+  });
+
+  it('bands only left side when leftSideEdgeBanding is set', () => {
+    const g = buildCabinetMesh({
+      width: WIDTH,
+      height: HEIGHT,
+      depth: DEPTH,
+      drawers: 0,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      rightSideEdgeBanding: {},
+      leftSideEdgeBanding: { front: true },
+    });
+    const bands = g.children.filter(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - BOARD_THICKNESS) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - HEIGHT) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - BAND_THICKNESS) < 1e-6 &&
+        Math.abs(c.position.z - BAND_THICKNESS / 2) < 1e-6,
+    ) as THREE.Mesh[];
+    const leftBand = bands.find((b) => Math.abs(b.position.x - BOARD_THICKNESS / 2) < 1e-6);
+    const rightBand = bands.find(
+      (b) => Math.abs(b.position.x - (WIDTH - BOARD_THICKNESS / 2)) < 1e-6,
+    );
+    expect(leftBand).toBeTruthy();
+    expect(rightBand).toBeFalsy();
   });
 
   it('adds shelf edge banding on front edge', () => {
@@ -486,7 +544,8 @@ describe('buildCabinetMesh', () => {
         top: true,
         bottom: true,
       },
-      edgeBanding: {},
+      rightSideEdgeBanding: {},
+      leftSideEdgeBanding: {},
     });
     const bandThickness = 0.001;
     const z = -0.5 + backT / 2;
@@ -611,7 +670,8 @@ describe('buildCabinetMesh', () => {
       drawers: 0,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
-      edgeBanding: {},
+      rightSideEdgeBanding: {},
+      leftSideEdgeBanding: {},
       topPanel: {
         type: 'backTraverse',
         traverse: { orientation: 'horizontal', offset, width: trWidth },
@@ -642,7 +702,8 @@ describe('buildCabinetMesh', () => {
       drawers: 0,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
-      edgeBanding: {},
+      rightSideEdgeBanding: {},
+      leftSideEdgeBanding: {},
       topPanel: {
         type: 'twoTraverses',
         front: { orientation: 'horizontal', offset: 20, width: trWidth },
@@ -682,7 +743,8 @@ describe('buildCabinetMesh', () => {
       family: FAMILY.BASE,
       topPanel: { type: 'none' },
       bottomPanel: 'none',
-      edgeBanding: {},
+      rightSideEdgeBanding: {},
+      leftSideEdgeBanding: {},
     });
     const boardThickness = 0.018;
     const bottomWidth = 1 - 2 * boardThickness;
@@ -722,7 +784,15 @@ describe('buildCabinetMesh', () => {
       drawers: 0,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
-      edgeBanding: {
+      rightSideEdgeBanding: {
+        front: true,
+        back: true,
+        left: true,
+        right: true,
+        top: true,
+        bottom: true,
+      },
+      leftSideEdgeBanding: {
         front: true,
         back: true,
         left: true,

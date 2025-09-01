@@ -49,6 +49,16 @@ export function cutlistForModule(
   const H = Math.round(m.size.h * 1000);
   const D = Math.round(m.size.d * 1000);
   const boardMat = `Płyta ${t}mm`;
+  const leftBanding = g.leftSideEdgeBanding || {};
+  const rightBanding = g.rightSideEdgeBanding || {};
+  const edgeBanding: EdgeBanding = {
+    front: leftBanding.front || rightBanding.front,
+    back: leftBanding.back || rightBanding.back,
+    left: leftBanding.left || rightBanding.left,
+    right: leftBanding.right || rightBanding.right,
+    top: leftBanding.top || rightBanding.top,
+    bottom: leftBanding.bottom || rightBanding.bottom,
+  };
 
   const add = (it: CutItem) => {
     items.push(it);
@@ -86,10 +96,14 @@ export function cutlistForModule(
       w: clampPos(D),
       h: clampPos(H),
     });
-    addEdge(g.edgeBanding, 'front', 'ABS 1mm', H * 2, 'Boki — krawędź frontowa', boardMat);
-    addEdge(g.edgeBanding, 'back', 'ABS 1mm', H * 2, 'Boki — krawędź tylna', boardMat);
-    addEdge(g.edgeBanding, 'top', 'ABS 1mm', D * 2, 'Boki — krawędź górna', boardMat);
-    addEdge(g.edgeBanding, 'bottom', 'ABS 1mm', D * 2, 'Boki — krawędź dolna', boardMat);
+    addEdge(leftBanding, 'front', 'ABS 1mm', H, 'Bok lewy — krawędź frontowa', boardMat);
+    addEdge(rightBanding, 'front', 'ABS 1mm', H, 'Bok prawy — krawędź frontowa', boardMat);
+    addEdge(leftBanding, 'back', 'ABS 1mm', H, 'Bok lewy — krawędź tylna', boardMat);
+    addEdge(rightBanding, 'back', 'ABS 1mm', H, 'Bok prawy — krawędź tylna', boardMat);
+    addEdge(leftBanding, 'top', 'ABS 1mm', D, 'Bok lewy — krawędź górna', boardMat);
+    addEdge(rightBanding, 'top', 'ABS 1mm', D, 'Bok prawy — krawędź górna', boardMat);
+    addEdge(leftBanding, 'bottom', 'ABS 1mm', D, 'Bok lewy — krawędź dolna', boardMat);
+    addEdge(rightBanding, 'bottom', 'ABS 1mm', D, 'Bok prawy — krawędź dolna', boardMat);
     add({
       moduleId: m.id,
       moduleLabel: m.label,
@@ -100,7 +114,7 @@ export function cutlistForModule(
       h: clampPos(D),
     });
     addEdge(
-      g.edgeBanding,
+      edgeBanding,
       'front',
       'ABS 1mm',
       W - 2 * t - tol.assembly,
@@ -108,15 +122,15 @@ export function cutlistForModule(
       boardMat,
     );
     addEdge(
-      g.edgeBanding,
+      edgeBanding,
       'back',
       'ABS 1mm',
       W - 2 * t - tol.assembly,
       'Wieniec górny — tył',
       boardMat,
     );
-    addEdge(g.edgeBanding, 'left', 'ABS 1mm', D, 'Wieniec górny — lewa', boardMat);
-    addEdge(g.edgeBanding, 'right', 'ABS 1mm', D, 'Wieniec górny — prawa', boardMat);
+    addEdge(edgeBanding, 'left', 'ABS 1mm', D, 'Wieniec górny — lewa', boardMat);
+    addEdge(edgeBanding, 'right', 'ABS 1mm', D, 'Wieniec górny — prawa', boardMat);
     add({
       moduleId: m.id,
       moduleLabel: m.label,
@@ -127,7 +141,7 @@ export function cutlistForModule(
       h: clampPos(D),
     });
     addEdge(
-      g.edgeBanding,
+      edgeBanding,
       'front',
       'ABS 1mm',
       W - 2 * t - tol.assembly,
@@ -135,15 +149,15 @@ export function cutlistForModule(
       boardMat,
     );
     addEdge(
-      g.edgeBanding,
+      edgeBanding,
       'back',
       'ABS 1mm',
       W - 2 * t - tol.assembly,
       'Wieniec dolny — tył',
       boardMat,
     );
-    addEdge(g.edgeBanding, 'left', 'ABS 1mm', D, 'Wieniec dolny — lewa', boardMat);
-    addEdge(g.edgeBanding, 'right', 'ABS 1mm', D, 'Wieniec dolny — prawa', boardMat);
+    addEdge(edgeBanding, 'left', 'ABS 1mm', D, 'Wieniec dolny — lewa', boardMat);
+    addEdge(edgeBanding, 'right', 'ABS 1mm', D, 'Wieniec dolny — prawa', boardMat);
     if ((g.backPanel || 'full') !== 'none') {
       if ((g.backPanel || 'full') === 'split') {
         const hPiece = clampPos((H - tol.backGroove) / 2);
@@ -235,7 +249,7 @@ export function cutlistForModule(
       h: clampPos(H),
     });
     addEdge(
-      g.edgeBanding,
+      edgeBanding,
       'front',
       'ABS 1mm',
       H,
@@ -243,15 +257,15 @@ export function cutlistForModule(
       boardMat,
     );
     addEdge(
-      g.edgeBanding,
+      edgeBanding,
       'back',
       'ABS 1mm',
       H,
       'Zaślepka narożna — krawędź tylna',
       boardMat,
     );
-    addEdge(g.edgeBanding, 'top', 'ABS 1mm', filler, 'Zaślepka narożna — krawędź górna', boardMat);
-    addEdge(g.edgeBanding, 'bottom', 'ABS 1mm', filler, 'Zaślepka narożna — krawędź dolna', boardMat);
+    addEdge(edgeBanding, 'top', 'ABS 1mm', filler, 'Zaślepka narożna — krawędź górna', boardMat);
+    addEdge(edgeBanding, 'bottom', 'ABS 1mm', filler, 'Zaślepka narożna — krawędź dolna', boardMat);
     addStandardBox();
     addShelves();
   } else {
@@ -368,7 +382,7 @@ export function cutlistForModule(
         h: boxD,
       });
       addEdge(
-        g.edgeBanding,
+        edgeBanding,
         'top',
         'ABS 1mm',
         (boxW - 2 * t) * 2,

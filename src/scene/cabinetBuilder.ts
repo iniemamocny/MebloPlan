@@ -36,7 +36,8 @@ export interface CabinetOptions {
   hinge?: 'left' | 'right';
   dividerPosition?: 'left' | 'right' | 'center';
   showEdges?: boolean;
-  edgeBanding?: EdgeBanding;
+  rightSideEdgeBanding?: EdgeBanding;
+  leftSideEdgeBanding?: EdgeBanding;
   shelfEdgeBanding?: EdgeBanding;
   traverseEdgeBanding?: EdgeBanding;
   backEdgeBanding?: EdgeBanding;
@@ -72,7 +73,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     backThickness: backT = 0.003,
     dividerPosition,
     showEdges = false,
-    edgeBanding: edgeBandingInput = {},
+    rightSideEdgeBanding: rightSideEdgeBandingInput = {},
+    leftSideEdgeBanding: leftSideEdgeBandingInput = {},
     traverseEdgeBanding: traverseEdgeBandingInput = {},
     shelfEdgeBanding: shelfEdgeBandingInput = {},
     backEdgeBanding: backEdgeBandingInput = {},
@@ -89,8 +91,16 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     return banding?.[edge] ?? false;
   };
 
-
-  const edgeBanding = edgeBandingInput;
+  const rightSideEdgeBanding = rightSideEdgeBandingInput;
+  const leftSideEdgeBanding = leftSideEdgeBandingInput;
+  const edgeBanding: EdgeBanding = {
+    front: rightSideEdgeBanding.front || leftSideEdgeBanding.front,
+    back: rightSideEdgeBanding.back || leftSideEdgeBanding.back,
+    left: rightSideEdgeBanding.left || leftSideEdgeBanding.left,
+    right: rightSideEdgeBanding.right || leftSideEdgeBanding.right,
+    top: rightSideEdgeBanding.top || leftSideEdgeBanding.top,
+    bottom: rightSideEdgeBanding.bottom || leftSideEdgeBanding.bottom,
+  };
   const traverseEdgeBanding = traverseEdgeBandingInput;
   const shelfEdgeBanding = shelfEdgeBandingInput;
   const backEdgeBanding = backEdgeBandingInput;
@@ -187,139 +197,56 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   group.add(rightSide);
   const sideBottomY = sideY - sideHeight / 2;
   const sideTopY = sideY + sideHeight / 2;
-  if (shouldBand(edgeBanding, 'vertical', 'front')) {
-    addBand(T / 2, sideY, bandThickness / 2, T, sideHeight, bandThickness);
-    addBand(W - T / 2, sideY, bandThickness / 2, T, sideHeight, bandThickness);
-  }
-  if (shouldBand(edgeBanding, 'vertical', 'back')) {
-    addBand(T / 2, sideY, -D + bandThickness / 2, T, sideHeight, bandThickness);
-    addBand(
-      W - T / 2,
-      sideY,
-      -D + bandThickness / 2,
-      T,
-      sideHeight,
-      bandThickness,
-    );
-  }
-  if (shouldBand(edgeBanding, 'vertical', 'left')) {
-    addBand(
-      T / 2,
-      sideBottomY + bandThickness / 2,
-      bandThickness / 2,
-      T,
-      bandThickness,
-      bandThickness,
-    );
-    addBand(
-      W - T / 2,
-      sideBottomY + bandThickness / 2,
-      bandThickness / 2,
-      T,
-      bandThickness,
-      bandThickness,
-    );
-  }
-  if (shouldBand(edgeBanding, 'vertical', 'right')) {
-    addBand(
-      T / 2,
-      sideTopY - bandThickness / 2,
-      bandThickness / 2,
-      T,
-      bandThickness,
-      bandThickness,
-    );
-    addBand(
-      W - T / 2,
-      sideTopY - bandThickness / 2,
-      bandThickness / 2,
-      T,
-      bandThickness,
-      bandThickness,
-    );
-  }
-  if (shouldBand(edgeBanding, 'vertical', 'bottom')) {
-    addBand(T / 2, sideBottomY + bandThickness / 2, -D / 2, T, bandThickness, D);
-    addBand(
-      W - T / 2,
-      sideBottomY + bandThickness / 2,
-      -D / 2,
-      T,
-      bandThickness,
-      D,
-    );
-  }
-  if (shouldBand(edgeBanding, 'vertical', 'top')) {
-    addBand(T / 2, sideTopY - bandThickness / 2, -D / 2, T, bandThickness, D);
-    addBand(
-      W - T / 2,
-      sideTopY - bandThickness / 2,
-      -D / 2,
-      T,
-      bandThickness,
-      D,
-    );
-  }
+  const bandSide = (banding: EdgeBanding | undefined, x: number) => {
+    if (shouldBand(banding, 'vertical', 'front')) {
+      addBand(x, sideY, bandThickness / 2, T, sideHeight, bandThickness);
+    }
+    if (shouldBand(banding, 'vertical', 'back')) {
+      addBand(x, sideY, -D + bandThickness / 2, T, sideHeight, bandThickness);
+    }
+    if (shouldBand(banding, 'vertical', 'left')) {
+      addBand(
+        x,
+        sideBottomY + bandThickness / 2,
+        bandThickness / 2,
+        T,
+        bandThickness,
+        bandThickness,
+      );
+    }
+    if (shouldBand(banding, 'vertical', 'right')) {
+      addBand(
+        x,
+        sideTopY - bandThickness / 2,
+        bandThickness / 2,
+        T,
+        bandThickness,
+        bandThickness,
+      );
+    }
+    if (shouldBand(banding, 'vertical', 'bottom')) {
+      addBand(x, sideBottomY + bandThickness / 2, -D / 2, T, bandThickness, D);
+    }
+    if (shouldBand(banding, 'vertical', 'top')) {
+      addBand(x, sideTopY - bandThickness / 2, -D / 2, T, bandThickness, D);
+    }
+  };
+  bandSide(leftSideEdgeBanding, T / 2);
+  bandSide(rightSideEdgeBanding, W - T / 2);
 
   if (sidePanels.left) {
     const panel = new THREE.Mesh(sideGeo.clone(), carcMat);
     panel.position.set(-T / 2, sideY, -D / 2);
     addEdges(panel);
     group.add(panel);
-    const sideBottomY = sideY - sideHeight / 2;
-    const sideTopY = sideY + sideHeight / 2;
-    if (shouldBand(edgeBanding, 'vertical', 'front')) {
-      addBand(-T / 2, sideY, bandThickness / 2, T, sideHeight, bandThickness);
-    }
-    if (shouldBand(edgeBanding, 'vertical', 'back')) {
-      addBand(
-        -T / 2,
-        sideY,
-        -D + bandThickness / 2,
-        T,
-        sideHeight,
-        bandThickness,
-      );
-    }
-    if (shouldBand(edgeBanding, 'vertical', 'left')) {
-      addBand(-T / 2, sideBottomY + bandThickness / 2, bandThickness / 2, T, bandThickness, bandThickness);
-    }
-    if (shouldBand(edgeBanding, 'vertical', 'bottom')) {
-      addBand(-T / 2, sideBottomY + bandThickness / 2, -D / 2, T, bandThickness, D);
-    }
-    if (shouldBand(edgeBanding, 'vertical', 'top')) {
-      addBand(-T / 2, sideTopY - bandThickness / 2, -D / 2, T, bandThickness, D);
-    }
+    bandSide(leftSideEdgeBanding, -T / 2);
   }
   if (sidePanels.right) {
     const panel = new THREE.Mesh(sideGeo.clone(), carcMat);
     panel.position.set(W + T / 2, sideY, -D / 2);
     addEdges(panel);
     group.add(panel);
-    const sideBottomY = sideY - sideHeight / 2;
-    const sideTopY = sideY + sideHeight / 2;
-    if (shouldBand(edgeBanding, 'vertical', 'front')) {
-      addBand(W + T / 2, sideY, bandThickness / 2, T, sideHeight, bandThickness);
-    }
-    if (shouldBand(edgeBanding, 'vertical', 'back')) {
-      addBand(
-        W + T / 2,
-        sideY,
-        -D + bandThickness / 2,
-        T,
-        sideHeight,
-        bandThickness,
-      );
-    }
-    if (shouldBand(edgeBanding, 'vertical', 'right')) {
-      addBand(W + T / 2, sideTopY - bandThickness / 2, bandThickness / 2, T, bandThickness, bandThickness);
-    }
-    if (shouldBand(edgeBanding, 'vertical', 'bottom')) {
-      addBand(W + T / 2, sideBottomY + bandThickness / 2, -D / 2, T, bandThickness, D);
-    }
-    if (shouldBand(edgeBanding, 'vertical', 'top')) {
-      addBand(W + T / 2, sideTopY - bandThickness / 2, -D / 2, T, bandThickness, D);
-    }
+    bandSide(rightSideEdgeBanding, W + T / 2);
   }
 
   // Top and bottom

@@ -116,7 +116,8 @@ export interface ModuleAdv {
   topPanel?: TopPanel;
   bottomPanel?: BottomPanel;
   dividerPosition?: 'left' | 'right' | 'center';
-  edgeBanding?: EdgeBanding;
+  rightSideEdgeBanding?: EdgeBanding;
+  leftSideEdgeBanding?: EdgeBanding;
   shelfEdgeBanding?: EdgeBanding;
   traverseEdgeBanding?: EdgeBanding;
   backEdgeBanding?: EdgeBanding;

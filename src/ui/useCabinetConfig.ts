@@ -34,7 +34,11 @@ export function useCabinetConfig(
       backPanel: g.backPanel,
       topPanel: g.topPanel,
       bottomPanel: g.bottomPanel,
-      edgeBanding: {
+      rightSideEdgeBanding: {
+        front: true,
+        back: true,
+      },
+      leftSideEdgeBanding: {
         front: true,
         back: true,
       },
@@ -151,7 +155,8 @@ export function useCabinetConfig(
           backPanel: g.backPanel,
           topPanel: g.topPanel,
           bottomPanel: g.bottomPanel,
-          edgeBanding: g.edgeBanding,
+          rightSideEdgeBanding: g.rightSideEdgeBanding,
+          leftSideEdgeBanding: g.leftSideEdgeBanding,
           traverseEdgeBanding: g.traverseEdgeBanding,
           backEdgeBanding: g.backEdgeBanding,
           carcassType: g.carcassType,
@@ -244,7 +249,11 @@ export function useCabinetConfig(
             backPanel: g.backPanel,
             topPanel: g.topPanel,
             bottomPanel: g.bottomPanel,
-            edgeBanding: {
+            rightSideEdgeBanding: {
+              front: true,
+              back: true,
+            },
+            leftSideEdgeBanding: {
               front: true,
               back: true,
             },
@@ -270,7 +279,11 @@ export function useCabinetConfig(
         adv: {
           ...g,
           doorCount: 1,
-          edgeBanding: {
+          rightSideEdgeBanding: {
+            front: true,
+            back: true,
+          },
+          leftSideEdgeBanding: {
             front: true,
             back: true,
           },

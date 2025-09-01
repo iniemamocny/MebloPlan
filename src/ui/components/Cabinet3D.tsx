@@ -19,7 +19,8 @@ export default function Cabinet3D({
   topPanel,
   bottomPanel,
   dividerPosition,
-  edgeBanding = { front: true, back: true },
+  rightSideEdgeBanding = { front: true, back: true },
+  leftSideEdgeBanding = { front: true, back: true },
   traverseEdgeBanding = {},
   shelfEdgeBanding = {},
   backEdgeBanding = {},
@@ -40,7 +41,8 @@ export default function Cabinet3D({
   topPanel?: TopPanel;
   bottomPanel?: BottomPanel;
   dividerPosition?: 'left' | 'right' | 'center';
-  edgeBanding?: EdgeBanding;
+  rightSideEdgeBanding?: EdgeBanding;
+  leftSideEdgeBanding?: EdgeBanding;
   traverseEdgeBanding?: EdgeBanding;
   shelfEdgeBanding?: EdgeBanding;
   backEdgeBanding?: EdgeBanding;
@@ -115,7 +117,8 @@ export default function Cabinet3D({
       legHeight,
       dividerPosition: drawersCount > 0 ? undefined : dividerPosition,
       showEdges,
-      edgeBanding,
+      rightSideEdgeBanding,
+      leftSideEdgeBanding,
       traverseEdgeBanding,
       shelfEdgeBanding,
       backEdgeBanding,
@@ -155,7 +158,8 @@ export default function Cabinet3D({
     bottomPanel,
     dividerPosition,
     showEdges,
-    edgeBanding,
+    rightSideEdgeBanding,
+    leftSideEdgeBanding,
     traverseEdgeBanding,
     shelfEdgeBanding,
     backEdgeBanding,
