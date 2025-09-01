@@ -148,7 +148,7 @@
     "offsetDepth": "Offset (depth mm)",
     "offsetHeight": "Offset (height mm)",
     "traverseWidth": "Traverse width (mm)",
-    "hideCountertop": "Hide countertop"
+    "hideCountertop": "Hide countertops"
   },
   "forms": {
     "width": "Width",
