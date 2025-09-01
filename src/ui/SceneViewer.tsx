@@ -175,8 +175,14 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       target.material = mat;
     }
 
-    if (highlightPart === 'back' && three.controls) {
-      three.controls.rotateLeft(Math.PI);
+    if (highlightPart === 'back' && three.controls && three.camera) {
+      const vector = three.camera.position
+        .clone()
+        .sub(three.controls.target);
+      vector.applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+      three.camera.position.copy(
+        three.controls.target.clone().add(vector),
+      );
       three.controls.update();
     }
   }, [highlightPart, store.modules]);
