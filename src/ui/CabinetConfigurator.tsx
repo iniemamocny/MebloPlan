@@ -145,6 +145,7 @@ const CabinetConfigurator: React.FC<Props> = ({
               edgeBanding={gLocal.edgeBanding}
               traverseEdgeBanding={gLocal.traverseEdgeBanding}
               shelfEdgeBanding={gLocal.shelfEdgeBanding}
+              backEdgeBanding={gLocal.backEdgeBanding}
               sidePanels={gLocal.sidePanels}
               carcassType={gLocal.carcassType}
               showFronts={showFronts}
@@ -720,6 +721,30 @@ const CabinetConfigurator: React.FC<Props> = ({
                   </option>
                 </select>
               </div>
+              <div className="small" style={{ marginTop: 8 }}>
+                {t('configurator.backEdgeBanding')}
+              </div>
+              {(['front', 'back', 'left', 'right'] as const).map((edge) => (
+                <label
+                  key={edge}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={gLocal.backEdgeBanding?.[edge] ?? false}
+                    onChange={(e) =>
+                      setAdv({
+                        ...gLocal,
+                        backEdgeBanding: {
+                          ...gLocal.backEdgeBanding,
+                          [edge]: (e.target as HTMLInputElement).checked,
+                        },
+                      })
+                    }
+                  />
+                  {t(`configurator.edgeBandingOptions.${edge}`)}
+                </label>
+              ))}
             </div>
           </details>
 
