@@ -62,6 +62,13 @@ export default function Cabinet3D({
   const ref = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
+  const groupRef = useRef<THREE.Group | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const highlightedRef = useRef<{
+    mesh: THREE.Mesh;
+    material: THREE.Material;
+  } | null>(null);
+  const rotatedRef = useRef(false);
   const role = usePlannerStore((s) => s.role);
   const showEdges = role === 'stolarz';
 
@@ -134,22 +141,11 @@ export default function Cabinet3D({
       carcassType,
       showFronts,
     });
-    if (highlightPart) {
-      cabGroup.traverse((obj) => {
-        if (obj instanceof THREE.Mesh && obj.userData.part === highlightPart) {
-          const mat = (obj.material as THREE.Material).clone();
-          if ('emissive' in mat) {
-            (mat as THREE.MeshStandardMaterial).emissive = new THREE.Color(0x4444ff);
-          } else if ((mat as any).color) {
-            (mat as any).color = new THREE.Color(0x4444ff);
-          }
-          obj.material = mat;
-        }
-      });
-    }
     scene.add(cabGroup);
     renderer.render(scene, camera);
     sceneRef.current = scene;
+    groupRef.current = cabGroup;
+    cameraRef.current = camera;
 
     return () => {
       scene.traverse((obj) => {
@@ -162,6 +158,10 @@ export default function Cabinet3D({
           }
         }
       });
+      if (highlightedRef.current) {
+        highlightedRef.current.material.dispose();
+        highlightedRef.current = null;
+      }
       sceneRef.current = null;
     };
   }, [
@@ -189,7 +189,6 @@ export default function Cabinet3D({
     sidePanels,
     carcassType,
     showFronts,
-    highlightPart,
   ]);
 
   useEffect(() => {
@@ -202,6 +201,52 @@ export default function Cabinet3D({
       }
     };
   }, []);
+
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    const scene = sceneRef.current;
+    const camera = cameraRef.current;
+    const group = groupRef.current;
+    if (!renderer || !scene || !camera || !group) return;
+
+    if (highlightedRef.current) {
+      const { mesh, material } = highlightedRef.current;
+      (mesh.material as THREE.Material).dispose();
+      mesh.material = material;
+      highlightedRef.current = null;
+    }
+
+    if (rotatedRef.current) {
+      group.rotation.y -= Math.PI;
+      rotatedRef.current = false;
+    }
+
+    if (highlightPart) {
+      let target: THREE.Mesh | null = null;
+      group.traverse((obj) => {
+        if (!target && obj instanceof THREE.Mesh && obj.userData.part === highlightPart) {
+          target = obj;
+        }
+      });
+      if (target) {
+        const originalMat = target.material as THREE.Material;
+        const mat = originalMat.clone();
+        if ('emissive' in mat) {
+          (mat as THREE.MeshStandardMaterial).emissive = new THREE.Color(0x4444ff);
+        } else if ((mat as any).color) {
+          (mat as any).color = new THREE.Color(0x4444ff);
+        }
+        target.material = mat;
+        highlightedRef.current = { mesh: target, material: originalMat };
+      }
+      if (highlightPart === 'back') {
+        group.rotation.y += Math.PI;
+        rotatedRef.current = true;
+      }
+    }
+
+    renderer.render(scene, camera);
+  }, [highlightPart]);
   return (
     <div
       ref={ref}
