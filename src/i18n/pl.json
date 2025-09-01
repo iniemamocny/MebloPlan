@@ -130,6 +130,7 @@
       "bottom": "dolna"
     },
     "shelfEdgeBanding": "Okleina półek",
+    "traverseEdgeBanding": "Okleina trawersów",
     "rightSideEdgeBanding": "Bok prawy – okleina",
     "leftSideEdgeBanding": "Bok lewy – okleina",
     "sidePanel": "Panel boczny",

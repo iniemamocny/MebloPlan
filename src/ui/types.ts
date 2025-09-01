@@ -30,6 +30,12 @@ export interface CabinetConfig {
     top: boolean;
     bottom: boolean;
   };
+  traverseEdgeBanding?: {
+    front: boolean;
+    back: boolean;
+    left: boolean;
+    right: boolean;
+  };
   sidePanels?: {
     left?: Record<string, unknown>;
     right?: Record<string, unknown>;

@@ -251,7 +251,7 @@ describe('buildCabinetMesh', () => {
     );
   });
 
-  it('adds edge banding to vertical traverse on top and bottom', () => {
+  it('adds traverse edge banding to vertical traverse on all edges', () => {
     const trWidth = 100;
     const g = buildCabinetMesh({
       width: 1,
@@ -260,13 +260,11 @@ describe('buildCabinetMesh', () => {
       drawers: 0,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
-      edgeBanding: {
+      traverseEdgeBanding: {
         front: true,
         back: true,
         left: true,
         right: true,
-        top: true,
-        bottom: true,
       },
       topPanel: {
         type: 'frontTraverse',
@@ -274,7 +272,7 @@ describe('buildCabinetMesh', () => {
       },
     });
     const boardThickness = 0.018;
-    const bandThickness = 0.002;
+    const bandThickness = 0.001;
     const topWidth = 1 - 2 * boardThickness;
     const widthM = trWidth / 1000;
     const traverseY = 0.9 - widthM / 2;
@@ -377,13 +375,11 @@ describe('buildCabinetMesh', () => {
       drawers: 0,
       gaps: { top: 0, bottom: 0 },
       family: FAMILY.BASE,
-      edgeBanding: {
+      traverseEdgeBanding: {
         front: true,
         back: true,
         left: true,
         right: true,
-        top: true,
-        bottom: true,
       },
       topPanel: {
         type: 'frontTraverse',
@@ -391,7 +387,7 @@ describe('buildCabinetMesh', () => {
       },
     });
     const boardThickness = 0.018;
-    const bandThickness = 0.002;
+    const bandThickness = 0.001;
     const expectedWidth = 1 - 2 * boardThickness;
     const widthM = trWidth / 1000;
     const traverse = g.children.find(

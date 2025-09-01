@@ -27,6 +27,12 @@ export default function Cabinet3D({
     top: false,
     bottom: false,
   },
+  traverseEdgeBanding = {
+    front: false,
+    back: false,
+    left: false,
+    right: false,
+  },
   shelfEdgeBanding = {
     front: false,
     back: false,
@@ -59,6 +65,12 @@ export default function Cabinet3D({
     right: boolean;
     top: boolean;
     bottom: boolean;
+  };
+  traverseEdgeBanding?: {
+    front: boolean;
+    back: boolean;
+    left: boolean;
+    right: boolean;
   };
   shelfEdgeBanding?: {
     front: boolean;
@@ -140,6 +152,7 @@ export default function Cabinet3D({
       dividerPosition: drawersCount > 0 ? undefined : dividerPosition,
       showEdges,
       edgeBanding,
+      traverseEdgeBanding,
       shelfEdgeBanding,
       sidePanels,
       carcassType,
@@ -178,6 +191,7 @@ export default function Cabinet3D({
     dividerPosition,
     showEdges,
     edgeBanding,
+    traverseEdgeBanding,
     shelfEdgeBanding,
     sidePanels,
     carcassType,

@@ -130,6 +130,7 @@
       "bottom": "bottom"
     },
     "shelfEdgeBanding": "Shelf edge banding",
+    "traverseEdgeBanding": "Traverse edge banding",
     "rightSideEdgeBanding": "Right side - edge banding",
     "leftSideEdgeBanding": "Left side - edge banding",
     "sidePanel": "Side panel",

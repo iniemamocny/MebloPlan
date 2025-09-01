@@ -143,6 +143,7 @@ const CabinetConfigurator: React.FC<Props> = ({
               bottomPanel={gLocal.bottomPanel}
               dividerPosition={gLocal.dividerPosition}
               edgeBanding={gLocal.edgeBanding}
+              traverseEdgeBanding={gLocal.traverseEdgeBanding}
               shelfEdgeBanding={gLocal.shelfEdgeBanding}
               sidePanels={gLocal.sidePanels}
               carcassType={gLocal.carcassType}
@@ -560,6 +561,32 @@ const CabinetConfigurator: React.FC<Props> = ({
                             ...gLocal,
                             edgeBanding: {
                               ...gLocal.edgeBanding,
+                              [edge]: (e.target as HTMLInputElement).checked,
+                            },
+                          })
+                        }
+                      />
+                      {t(`configurator.edgeBandingOptions.${edge}`)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div style={{ marginTop: 8 }}>
+                <div className="small">{t('configurator.traverseEdgeBanding')}</div>
+                <div className="row" style={{ gap: 8 }}>
+                  {(['front', 'back', 'left', 'right'] as const).map((edge) => (
+                    <label
+                      key={edge}
+                      style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={gLocal.traverseEdgeBanding?.[edge] ?? false}
+                        onChange={(e) =>
+                          setAdv({
+                            ...gLocal,
+                            traverseEdgeBanding: {
+                              ...gLocal.traverseEdgeBanding,
                               [edge]: (e.target as HTMLInputElement).checked,
                             },
                           })
