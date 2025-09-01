@@ -27,8 +27,8 @@ export interface CabinetConfig {
     right: boolean;
   };
   sidePanels?: {
-    left?: Record<string, any>;
-    right?: Record<string, any>;
+    left?: Record<string, unknown>;
+    right?: Record<string, unknown>;
   };
   hardware?: any;
   legs?: any;

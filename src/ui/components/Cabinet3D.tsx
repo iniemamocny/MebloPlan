@@ -122,6 +122,8 @@ export default function Cabinet3D({
       dividerPosition: drawersCount > 0 ? undefined : dividerPosition,
       showEdges,
       edgeBanding,
+      shelfEdgeBanding,
+      sidePanels,
       carcassType,
       showFronts,
     });
@@ -158,6 +160,8 @@ export default function Cabinet3D({
     dividerPosition,
     showEdges,
     edgeBanding,
+    shelfEdgeBanding,
+    sidePanels,
     carcassType,
     showFronts,
   ]);
