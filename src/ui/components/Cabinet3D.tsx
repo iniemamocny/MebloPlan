@@ -29,6 +29,7 @@ export default function Cabinet3D({
   sidePanels,
   carcassType = 'type1',
   showFronts = true,
+  highlightPart = null,
 }: {
   widthMM: number;
   heightMM: number;
@@ -56,6 +57,7 @@ export default function Cabinet3D({
   };
   carcassType?: 'type1' | 'type2' | 'type3';
   showFronts?: boolean;
+  highlightPart?: 'top' | 'bottom' | 'shelf' | 'back' | 'leftSide' | 'rightSide' | null;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -132,6 +134,19 @@ export default function Cabinet3D({
       carcassType,
       showFronts,
     });
+    if (highlightPart) {
+      cabGroup.traverse((obj) => {
+        if (obj instanceof THREE.Mesh && obj.userData.part === highlightPart) {
+          const mat = (obj.material as THREE.Material).clone();
+          if ('emissive' in mat) {
+            (mat as THREE.MeshStandardMaterial).emissive = new THREE.Color(0x4444ff);
+          } else if ((mat as any).color) {
+            (mat as any).color = new THREE.Color(0x4444ff);
+          }
+          obj.material = mat;
+        }
+      });
+    }
     scene.add(cabGroup);
     renderer.render(scene, camera);
     sceneRef.current = scene;
@@ -174,6 +189,7 @@ export default function Cabinet3D({
     sidePanels,
     carcassType,
     showFronts,
+    highlightPart,
   ]);
 
   useEffect(() => {

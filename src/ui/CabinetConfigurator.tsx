@@ -48,10 +48,7 @@ const CabinetConfigurator: React.FC<Props> = ({
   setAdv,
   onAdd,
 }) => {
-  const setShowFronts = usePlannerStore((s) => s.setShowFronts);
-  const currentShowFronts = usePlannerStore((s) => s.showFronts);
   const prices = usePlannerStore((s) => s.prices);
-  const setHighlightPart = usePlannerStore((s) => s.setHighlightPart);
   const { t } = useTranslation();
   const [doorsCount, setDoorsCount] = useState(1);
   const [drawersCount, setDrawersCount] = useState(0);
@@ -66,10 +63,10 @@ const CabinetConfigurator: React.FC<Props> = ({
   const [openBack, setOpenBack] = useState(false);
   const [openRightSide, setOpenRightSide] = useState(false);
   const [openLeftSide, setOpenLeftSide] = useState(false);
+  const [highlightPart, setHighlightPart] = useState<
+    'top' | 'bottom' | 'shelf' | 'back' | 'leftSide' | 'rightSide' | null
+  >(null);
   const showFronts = !openKorpus;
-  useEffect(() => {
-    if (currentShowFronts !== showFronts) setShowFronts(showFronts);
-  }, [currentShowFronts, showFronts, setShowFronts]);
   const FormComponent = kind ? FORM_COMPONENTS[kind.key] : null;
   const formValues: CabinetFormValues = {
     height: gLocal.height,
@@ -153,6 +150,7 @@ const CabinetConfigurator: React.FC<Props> = ({
               sidePanels={gLocal.sidePanels}
               carcassType={gLocal.carcassType}
               showFronts={showFronts}
+              highlightPart={highlightPart}
             />
           </div>
           <div className="grid2" style={{ marginTop: 8 }}>
