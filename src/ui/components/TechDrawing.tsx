@@ -21,8 +21,12 @@ type Props = {
   onChangeGaps?: (g: Gaps) => void;
   onChangeDrawerFronts?: (arr: number[]) => void;
   edgeBanding?: {
-    length: boolean;
-    width: boolean;
+    front?: boolean;
+    back?: boolean;
+    left?: boolean;
+    right?: boolean;
+    top?: boolean;
+    bottom?: boolean;
   };
 };
 
@@ -248,10 +252,12 @@ export default function TechDrawing({
   const innerClearW = Math.round(widthMM - (gaps.left + gaps.right));
   const outerH = Math.round(heightMM);
   const eb = {
-    front: edgeBanding?.length ?? false,
-    back: edgeBanding?.length ?? false,
-    left: edgeBanding?.width ?? false,
-    right: edgeBanding?.width ?? false,
+    front: edgeBanding?.front ?? false,
+    back: edgeBanding?.back ?? false,
+    left: edgeBanding?.left ?? false,
+    right: edgeBanding?.right ?? false,
+    top: edgeBanding?.top ?? false,
+    bottom: edgeBanding?.bottom ?? false,
   };
 
   return (

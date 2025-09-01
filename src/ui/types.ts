@@ -1,4 +1,4 @@
-import { Gaps, TopPanel, BottomPanel } from '../types';
+import { Gaps, TopPanel, BottomPanel, EdgeBanding } from '../types';
 
 export interface CabinetConfig {
   height: number;
@@ -14,22 +14,10 @@ export interface CabinetConfig {
   bottomPanel?: BottomPanel;
   drawerFronts?: number[];
   dividerPosition?: 'left' | 'right' | 'center';
-  edgeBanding?: {
-    length: boolean;
-    width: boolean;
-  };
-  shelfEdgeBanding?: {
-    length: boolean;
-    width: boolean;
-  };
-  traverseEdgeBanding?: {
-    length: boolean;
-    width: boolean;
-  };
-  backEdgeBanding?: {
-    length: boolean;
-    width: boolean;
-  };
+  edgeBanding?: EdgeBanding;
+  shelfEdgeBanding?: EdgeBanding;
+  traverseEdgeBanding?: EdgeBanding;
+  backEdgeBanding?: EdgeBanding;
   sidePanels?: {
     left?: Record<string, unknown>;
     right?: Record<string, unknown>;
