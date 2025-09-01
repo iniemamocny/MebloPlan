@@ -131,7 +131,7 @@ export default function MainTabs({
               </div>
             </div>
 
-            {kind && !variant && (
+            {kind && kind.key !== 'countertop' && !variant && (
               <div className="section">
                 <div className="hd">
                   <div>
@@ -144,34 +144,35 @@ export default function MainTabs({
               </div>
             )}
 
-            {variant && (
-              <>
-                <CabinetConfigurator
-                  family={family}
-                  kind={kind}
-                  variant={variant}
-                  widthMM={widthMM}
-                  setWidthMM={setWidthMM}
-                  gLocal={gLocal}
-                  setAdv={setAdv}
-                  onAdd={onAdd}
-                />
-                {kind?.key === 'countertop' && (
-                  <label
-                    className="small"
-                    style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8 }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={!addCountertop}
-                      onChange={(e) =>
-                        setAddCountertop(!(e.target as HTMLInputElement).checked)
-                      }
-                    />
-                    {t('configurator.hideCountertop')}
-                  </label>
-                )}
-              </>
+            {variant && kind?.key !== 'countertop' && (
+              <CabinetConfigurator
+                family={family}
+                kind={kind}
+                variant={variant}
+                widthMM={widthMM}
+                setWidthMM={setWidthMM}
+                gLocal={gLocal}
+                setAdv={setAdv}
+                onAdd={onAdd}
+              />
+            )}
+
+            {kind?.key === 'countertop' && (
+              <div className="section">
+                <label
+                  className="small"
+                  style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8 }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={!addCountertop}
+                    onChange={(e) =>
+                      setAddCountertop(!(e.target as HTMLInputElement).checked)
+                    }
+                  />
+                  {t('configurator.hideCountertop')}
+                </label>
+              </div>
             )}
           </>
         )}

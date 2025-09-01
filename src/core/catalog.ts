@@ -59,9 +59,7 @@ export const KIND_SETS: Record<FAMILY, Kind[]> = {
     {
       key:'countertop',
       label:'Blaty',
-      variants:[
-        { key:'default', label:'Blat' }
-      ]
+      variants:[]
     }
   ],
   [FAMILY.TALL]: [
