@@ -51,6 +51,7 @@ const CabinetConfigurator: React.FC<Props> = ({
   const setShowFronts = usePlannerStore((s) => s.setShowFronts);
   const currentShowFronts = usePlannerStore((s) => s.showFronts);
   const prices = usePlannerStore((s) => s.prices);
+  const setHighlightPart = usePlannerStore((s) => s.setHighlightPart);
   const { t } = useTranslation();
   const [doorsCount, setDoorsCount] = useState(1);
   const [drawersCount, setDrawersCount] = useState(0);
@@ -308,7 +309,11 @@ const CabinetConfigurator: React.FC<Props> = ({
             <summary
               onClick={(e) => {
                 e.preventDefault();
-                setOpenTopFrame((v) => !v);
+                setOpenTopFrame((v) => {
+                  const next = !v;
+                  setHighlightPart(next ? 'top' : null);
+                  return next;
+                });
               }}
             >
               {t('configurator.sections.topFrame')}
@@ -622,7 +627,11 @@ const CabinetConfigurator: React.FC<Props> = ({
             <summary
               onClick={(e) => {
                 e.preventDefault();
-                setOpenBottomFrame((v) => !v);
+                setOpenBottomFrame((v) => {
+                  const next = !v;
+                  setHighlightPart(next ? 'bottom' : null);
+                  return next;
+                });
               }}
             >
               {t('configurator.sections.bottomFrame')}
@@ -695,7 +704,11 @@ const CabinetConfigurator: React.FC<Props> = ({
             <summary
               onClick={(e) => {
                 e.preventDefault();
-                setOpenShelves((v) => !v);
+                setOpenShelves((v) => {
+                  const next = !v;
+                  setHighlightPart(next ? 'shelf' : null);
+                  return next;
+                });
               }}
             >
               {t('configurator.sections.shelves')}
@@ -748,7 +761,11 @@ const CabinetConfigurator: React.FC<Props> = ({
             <summary
               onClick={(e) => {
                 e.preventDefault();
-                setOpenBack((v) => !v);
+                setOpenBack((v) => {
+                  const next = !v;
+                  setHighlightPart(next ? 'back' : null);
+                  return next;
+                });
               }}
             >
               {t('configurator.sections.back')}
@@ -809,7 +826,11 @@ const CabinetConfigurator: React.FC<Props> = ({
             <summary
               onClick={(e) => {
                 e.preventDefault();
-                setOpenRightSide((v) => !v);
+                setOpenRightSide((v) => {
+                  const next = !v;
+                  setHighlightPart(next ? 'rightSide' : null);
+                  return next;
+                });
               }}
             >
               {t('configurator.sections.rightSide')}
@@ -862,7 +883,11 @@ const CabinetConfigurator: React.FC<Props> = ({
             <summary
               onClick={(e) => {
                 e.preventDefault();
-                setOpenLeftSide((v) => !v);
+                setOpenLeftSide((v) => {
+                  const next = !v;
+                  setHighlightPart(next ? 'leftSide' : null);
+                  return next;
+                });
               }}
             >
               {t('configurator.sections.leftSide')}
