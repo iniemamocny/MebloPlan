@@ -13,7 +13,7 @@ export default function App() {
   const [kind, setKind] = useState<Kind | null>(null);
   const [variant, setVariant] = useState<Variant | null>(null);
   const [selWall, setSelWall] = useState(0);
-  const [addCountertop] = useState(true);
+  const [addCountertop, setAddCountertop] = useState(true);
   const threeRef = useRef<any>({});
 
   const { t, i18n } = createTranslator();
@@ -82,6 +82,8 @@ export default function App() {
           setBoardKerf={setBoardKerf}
           boardHasGrain={boardHasGrain}
           setBoardHasGrain={setBoardHasGrain}
+          addCountertop={addCountertop}
+          setAddCountertop={setAddCountertop}
         />
       </div>
       <div className="canvasWrap">

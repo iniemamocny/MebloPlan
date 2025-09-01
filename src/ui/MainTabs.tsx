@@ -39,6 +39,8 @@ interface MainTabsProps {
   setBoardKerf: (v: number) => void;
   boardHasGrain: boolean;
   setBoardHasGrain: (v: boolean) => void;
+  addCountertop: boolean;
+  setAddCountertop: (v: boolean) => void;
 }
 
 export default function MainTabs({
@@ -65,6 +67,8 @@ export default function MainTabs({
   setBoardKerf,
   boardHasGrain,
   setBoardHasGrain,
+  addCountertop,
+  setAddCountertop,
 }: MainTabsProps) {
   const toggleTab = (name: 'cab' | 'room' | 'costs' | 'cut' | 'global') => {
     setTab(tab === name ? null : name);
@@ -141,16 +145,33 @@ export default function MainTabs({
             )}
 
             {variant && (
-              <CabinetConfigurator
-                family={family}
-                kind={kind}
-                variant={variant}
-                widthMM={widthMM}
-                setWidthMM={setWidthMM}
-                gLocal={gLocal}
-                setAdv={setAdv}
-                onAdd={onAdd}
-              />
+              <>
+                <CabinetConfigurator
+                  family={family}
+                  kind={kind}
+                  variant={variant}
+                  widthMM={widthMM}
+                  setWidthMM={setWidthMM}
+                  gLocal={gLocal}
+                  setAdv={setAdv}
+                  onAdd={onAdd}
+                />
+                {kind?.key === 'countertop' && (
+                  <label
+                    className="small"
+                    style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8 }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={!addCountertop}
+                      onChange={(e) =>
+                        setAddCountertop(!(e.target as HTMLInputElement).checked)
+                      }
+                    />
+                    {t('configurator.hideCountertop')}
+                  </label>
+                )}
+              </>
             )}
           </>
         )}
