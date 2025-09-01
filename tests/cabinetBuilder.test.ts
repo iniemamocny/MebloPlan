@@ -369,6 +369,78 @@ describe('buildCabinetMesh', () => {
     expect(topBands.length).toBe(2);
   });
 
+  it('does not band top or bottom panels when side front banding selected', () => {
+    const g = buildCabinetMesh({
+      width: WIDTH,
+      height: HEIGHT,
+      depth: DEPTH,
+      drawers: 0,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      leftSideEdgeBanding: { front: true },
+    });
+    const bottomWidth = WIDTH - 2 * BOARD_THICKNESS;
+    const topWidth = WIDTH - 2 * BOARD_THICKNESS;
+    const bottomBand = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - bottomWidth) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - BOARD_THICKNESS) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - BAND_THICKNESS) < 1e-6 &&
+        Math.abs(c.position.x - WIDTH / 2) < 1e-6 &&
+        Math.abs(c.position.y - BOARD_THICKNESS / 2) < 1e-6 &&
+        Math.abs(c.position.z - BAND_THICKNESS / 2) < 1e-6,
+    );
+    const topBand = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - topWidth) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - BOARD_THICKNESS) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - BAND_THICKNESS) < 1e-6 &&
+        Math.abs(c.position.x - WIDTH / 2) < 1e-6 &&
+        Math.abs(c.position.y - (HEIGHT - BOARD_THICKNESS / 2)) < 1e-6 &&
+        Math.abs(c.position.z - BAND_THICKNESS / 2) < 1e-6,
+    );
+    expect(bottomBand).toBeUndefined();
+    expect(topBand).toBeUndefined();
+  });
+
+  it('bands top and bottom panels when edge flags set', () => {
+    const g = buildCabinetMesh({
+      width: WIDTH,
+      height: HEIGHT,
+      depth: DEPTH,
+      drawers: 0,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      topPanelEdgeBanding: { front: true },
+      bottomPanelEdgeBanding: { front: true },
+    });
+    const panelWidth = WIDTH - 2 * BOARD_THICKNESS;
+    const bottomBand = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - panelWidth) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - BOARD_THICKNESS) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - BAND_THICKNESS) < 1e-6 &&
+        Math.abs(c.position.x - WIDTH / 2) < 1e-6 &&
+        Math.abs(c.position.y - BOARD_THICKNESS / 2) < 1e-6 &&
+        Math.abs(c.position.z - BAND_THICKNESS / 2) < 1e-6,
+    );
+    const topBand = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - panelWidth) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - BOARD_THICKNESS) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - BAND_THICKNESS) < 1e-6 &&
+        Math.abs(c.position.x - WIDTH / 2) < 1e-6 &&
+        Math.abs(c.position.y - (HEIGHT - BOARD_THICKNESS / 2)) < 1e-6 &&
+        Math.abs(c.position.z - BAND_THICKNESS / 2) < 1e-6,
+    );
+    expect(bottomBand).toBeTruthy();
+    expect(topBand).toBeTruthy();
+  });
+
   it('bands only right side when rightSideEdgeBanding is set', () => {
     const g = buildCabinetMesh({
       width: WIDTH,

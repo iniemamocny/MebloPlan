@@ -147,6 +147,8 @@ const CabinetConfigurator: React.FC<Props> = ({
               traverseEdgeBanding={gLocal.traverseEdgeBanding}
               shelfEdgeBanding={gLocal.shelfEdgeBanding}
               backEdgeBanding={gLocal.backEdgeBanding}
+              topPanelEdgeBanding={gLocal.topPanelEdgeBanding}
+              bottomPanelEdgeBanding={gLocal.bottomPanelEdgeBanding}
               sidePanels={gLocal.sidePanels}
               carcassType={gLocal.carcassType}
               showFronts={showFronts}
@@ -546,6 +548,46 @@ const CabinetConfigurator: React.FC<Props> = ({
                     ))}
                   </div>
                 ) : null}
+                {gLocal.topPanel?.type === 'full' && (
+                  <div style={{ marginTop: 8 }}>
+                    <div className="small">
+                      {t('configurator.topPanelEdgeBanding')}
+                    </div>
+                    <div className="row" style={{ gap: 8 }}>
+                      {(['front', 'back', 'left', 'right'] as const).map(
+                        (edge) => (
+                          <label
+                            key={edge}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 4,
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={
+                                gLocal.topPanelEdgeBanding?.[edge] ?? false
+                              }
+                              onChange={(e) =>
+                                setAdv({
+                                  ...gLocal,
+                                  topPanelEdgeBanding: {
+                                    ...gLocal.topPanelEdgeBanding,
+                                    [edge]: (
+                                      e.target as HTMLInputElement
+                                    ).checked,
+                                  },
+                                })
+                              }
+                            />
+                            {t(`configurator.edgeBandingOptions.${edge}`)}
+                          </label>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
               <div style={{ marginTop: 8 }}>
                 <div className="small">{t('configurator.traverseEdgeBanding')}</div>
@@ -606,6 +648,46 @@ const CabinetConfigurator: React.FC<Props> = ({
                   </option>
                 </select>
               </div>
+              {gLocal.bottomPanel !== 'none' && (
+                <div style={{ marginTop: 8 }}>
+                  <div className="small">
+                    {t('configurator.bottomPanelEdgeBanding')}
+                  </div>
+                  <div className="row" style={{ gap: 8 }}>
+                    {(['front', 'back', 'left', 'right'] as const).map(
+                      (edge) => (
+                        <label
+                          key={edge}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 4,
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              gLocal.bottomPanelEdgeBanding?.[edge] ?? false
+                            }
+                            onChange={(e) =>
+                              setAdv({
+                                ...gLocal,
+                                bottomPanelEdgeBanding: {
+                                  ...gLocal.bottomPanelEdgeBanding,
+                                  [edge]: (
+                                    e.target as HTMLInputElement
+                                  ).checked,
+                                },
+                              })
+                            }
+                          />
+                          {t(`configurator.edgeBandingOptions.${edge}`)}
+                        </label>
+                      ),
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </details>
 

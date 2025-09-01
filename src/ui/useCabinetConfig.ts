@@ -34,6 +34,8 @@ export function useCabinetConfig(
       backPanel: g.backPanel,
       topPanel: g.topPanel,
       bottomPanel: g.bottomPanel,
+      topPanelEdgeBanding: {},
+      bottomPanelEdgeBanding: {},
       rightSideEdgeBanding: {
         front: true,
         back: true,
@@ -249,6 +251,8 @@ export function useCabinetConfig(
             backPanel: g.backPanel,
             topPanel: g.topPanel,
             bottomPanel: g.bottomPanel,
+            topPanelEdgeBanding: {},
+            bottomPanelEdgeBanding: {},
             rightSideEdgeBanding: {
               front: true,
               back: true,
@@ -279,6 +283,8 @@ export function useCabinetConfig(
         adv: {
           ...g,
           doorCount: 1,
+          topPanelEdgeBanding: {},
+          bottomPanelEdgeBanding: {},
           rightSideEdgeBanding: {
             front: true,
             back: true,

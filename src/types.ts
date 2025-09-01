@@ -121,6 +121,8 @@ export interface ModuleAdv {
   shelfEdgeBanding?: EdgeBanding;
   traverseEdgeBanding?: EdgeBanding;
   backEdgeBanding?: EdgeBanding;
+  topPanelEdgeBanding?: EdgeBanding;
+  bottomPanelEdgeBanding?: EdgeBanding;
   sidePanels?: {
     left?: Record<string, any>;
     right?: Record<string, any>;

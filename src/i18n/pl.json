@@ -134,6 +134,8 @@
     "backEdgeBanding": "Plecy – okleina",
     "rightSideEdgeBanding": "Bok prawy – okleina",
     "leftSideEdgeBanding": "Bok lewy – okleina",
+    "topPanelEdgeBanding": "Wieniec górny – okleina",
+    "bottomPanelEdgeBanding": "Wieniec dolny – okleina",
     "sidePanel": "Panel boczny",
     "panel": "Panel",
     "orientation": {

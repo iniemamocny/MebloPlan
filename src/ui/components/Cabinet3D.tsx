@@ -24,6 +24,8 @@ export default function Cabinet3D({
   traverseEdgeBanding = {},
   shelfEdgeBanding = {},
   backEdgeBanding = {},
+  topPanelEdgeBanding = {},
+  bottomPanelEdgeBanding = {},
   sidePanels,
   carcassType = 'type1',
   showFronts = true,
@@ -46,6 +48,8 @@ export default function Cabinet3D({
   traverseEdgeBanding?: EdgeBanding;
   shelfEdgeBanding?: EdgeBanding;
   backEdgeBanding?: EdgeBanding;
+  topPanelEdgeBanding?: EdgeBanding;
+  bottomPanelEdgeBanding?: EdgeBanding;
   sidePanels?: {
     left?: Record<string, any>;
     right?: Record<string, any>;
@@ -122,6 +126,8 @@ export default function Cabinet3D({
       traverseEdgeBanding,
       shelfEdgeBanding,
       backEdgeBanding,
+      topPanelEdgeBanding,
+      bottomPanelEdgeBanding,
       sidePanels,
       carcassType,
       showFronts,
@@ -163,6 +169,8 @@ export default function Cabinet3D({
     traverseEdgeBanding,
     shelfEdgeBanding,
     backEdgeBanding,
+    topPanelEdgeBanding,
+    bottomPanelEdgeBanding,
     sidePanels,
     carcassType,
     showFronts,
