@@ -236,7 +236,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
         frontEdge = -tr.offset / 1000 + FRONT_OFFSET;
         backEdge = frontEdge - widthM;
       } else {
-        backEdge = -zBase + tr.offset / 1000;
+        backEdge = -zBase + tr.offset / 1000 + backT;
         frontEdge = backEdge + widthM;
       }
       const z = (frontEdge + backEdge) / 2;
