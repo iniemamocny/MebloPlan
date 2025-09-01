@@ -296,8 +296,9 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       applyOffset(mesh, name);
       group.add(mesh);
       if (edgeBanding !== 'none') {
-        const yTop = y + widthM / 2 - bandThickness / 2;
-        const yBottom = y - widthM / 2 + bandThickness / 2;
+        const halfHeight = widthM / 2;
+        const yTop = y + halfHeight - bandThickness / 2;
+        const yBottom = y - halfHeight + bandThickness / 2;
         addBand(x, yTop, z, topWidth, bandThickness, T, name);
         addBand(x, yBottom, z, topWidth, bandThickness, T, name);
         if (edgeBanding === 'full') {
