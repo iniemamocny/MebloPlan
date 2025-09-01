@@ -41,7 +41,7 @@ export function cutlistForModule(
     : base;
   const gaps = g.gaps || { left: 2, right: 2, top: 2, bottom: 2, between: 3 };
   const t = parseThickness(g.boardType || 'Płyta 18mm');
-  const frontMat = `Front ${g.frontType || 'Laminat'}`;
+  const frontMat = `Front ${g.frontType || 'Laminat'}${g.frontFoldable ? ' stowalna' : ''}`;
   const backT = 3;
   const items: CutItem[] = [];
   const edges: EdgeItem[] = [];

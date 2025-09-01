@@ -70,7 +70,14 @@ export const defaultGlobal: Globals = {
 
 export const defaultPrices: Prices = {
   board: { 'Płyta 18mm': 120, 'Płyta 19mm': 140, 'Płyta 25mm': 200 },
-  front: { Laminat: 220, Lakier: 420, Fornir: 520 },
+  front: {
+    Laminat: 220,
+    Lakier: 420,
+    Fornir: 520,
+    HWLP: 620,
+    'DALL·E': 820,
+    'DALL·E stowalna': 920,
+  },
   edging: { 'ABS 1mm': 2.5, 'ABS 2mm': 3.2 },
   cut: 4.0,
   legs: { 'Standard 10cm': 6, 'Regulowane 12cm': 9, 'Metal 10cm': 12 },

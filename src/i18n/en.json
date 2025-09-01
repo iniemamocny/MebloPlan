@@ -86,6 +86,7 @@
     "depth": "Depth (mm)",
     "board": "Board",
     "front": "Front",
+    "frontFoldable": "Foldable",
     "back": "Back",
     "top": "Top",
     "bottom": "Bottom",

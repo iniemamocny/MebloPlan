@@ -44,7 +44,13 @@ export default function GlobalSettings(){
             <Field label={t('global.height')} value={g.height} onChange={(v)=>set({height:v})} />
             <Field label={t('global.depth')} value={g.depth} onChange={(v)=>set({depth:v})} />
             <Field label={t('global.boardType')} type="select" value={g.boardType} onChange={(v)=>set({boardType:v})} options={Object.keys(store.prices.board)} />
-            <Field label={t('global.frontType')} type="select" value={g.frontType} onChange={(v)=>set({frontType:v})} options={Object.keys(store.prices.front)} />
+            <Field
+              label={t('global.frontType')}
+              type="select"
+              value={g.frontType}
+              onChange={(v)=>set({frontType:v})}
+              options={Object.keys(store.prices.front).filter(k => !k.includes('stowalna'))}
+            />
             <Field
               label={t('global.backPanel')}
               type="select"

@@ -5,6 +5,7 @@ export interface CabinetConfig {
   depth: number;
   boardType: string;
   frontType: string;
+  frontFoldable?: boolean;
   gaps: Gaps;
   carcassType: 'type1' | 'type2' | 'type3';
   shelves?: number;

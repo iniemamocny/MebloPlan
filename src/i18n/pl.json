@@ -86,6 +86,7 @@
     "depth": "Głębokość (mm)",
     "board": "Płyta",
     "front": "Front",
+    "frontFoldable": "Stowalna",
     "back": "Plecy",
     "top": "Góra",
     "bottom": "Dół",
