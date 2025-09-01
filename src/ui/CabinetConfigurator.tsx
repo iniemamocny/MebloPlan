@@ -59,6 +59,12 @@ const CabinetConfigurator: React.FC<Props> = ({
   const [openOkucie, setOpenOkucie] = useState(false);
   const [openNozki, setOpenNozki] = useState(false);
   const [openRysunki, setOpenRysunki] = useState(false);
+  const [openTopFrame, setOpenTopFrame] = useState(false);
+  const [openBottomFrame, setOpenBottomFrame] = useState(false);
+  const [openShelves, setOpenShelves] = useState(false);
+  const [openBack, setOpenBack] = useState(false);
+  const [openRightSide, setOpenRightSide] = useState(false);
+  const [openLeftSide, setOpenLeftSide] = useState(false);
   const showFronts = !openKorpus;
   useEffect(() => {
     if (currentShowFronts !== showFronts) setShowFronts(showFronts);
@@ -269,50 +275,38 @@ const CabinetConfigurator: React.FC<Props> = ({
                   })
                 }
               />
-              </div>
-              <div>
-                <div className="small">{t('configurator.board')}</div>
-                <select
-                  className="input"
-                  value={gLocal.boardType}
-                  onChange={(e) =>
-                    setAdv({
-                      ...gLocal,
-                      boardType: (e.target as HTMLSelectElement).value,
-                    })
-                  }
-                >
-                  {Object.keys(prices.board).map((k) => (
-                    <option key={k} value={k}>
-                      {k}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <div className="small">{t('configurator.back')}</div>
-                <select
-                  className="input"
-                  value={gLocal.backPanel || 'full'}
-                  onChange={(e) =>
-                    setAdv({
-                      ...gLocal,
-                      backPanel: (e.target as HTMLSelectElement)
-                        .value as CabinetConfig['backPanel'],
-                    })
-                  }
-                >
-                  <option value="full">
-                    {t('configurator.backOptions.full')}
+            </div>
+            <div>
+              <div className="small">{t('configurator.board')}</div>
+              <select
+                className="input"
+                value={gLocal.boardType}
+                onChange={(e) =>
+                  setAdv({
+                    ...gLocal,
+                    boardType: (e.target as HTMLSelectElement).value,
+                  })
+                }
+              >
+                {Object.keys(prices.board).map((k) => (
+                  <option key={k} value={k}>
+                    {k}
                   </option>
-                  <option value="split">
-                    {t('configurator.backOptions.split')}
-                  </option>
-                  <option value="none">
-                    {t('configurator.backOptions.none')}
-                  </option>
-                </select>
-              </div>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <details open={openTopFrame} className={openTopFrame ? 'active' : ''}>
+            <summary
+              onClick={(e) => {
+                e.preventDefault();
+                setOpenTopFrame((v) => !v);
+              }}
+            >
+              {t('configurator.top')}
+            </summary>
+            <div>
               <div>
                 <div className="small">{t('configurator.top')}</div>
                 <select
@@ -364,9 +358,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                   <option value="backTraverse">
                     {t('configurator.topOptions.backTraverse')}
                   </option>
-                  <option value="none">
-                    {t('configurator.topOptions.none')}
-                  </option>
+                  <option value="none">{t('configurator.topOptions.none')}</option>
                 </select>
                 {gLocal.topPanel?.type === 'frontTraverse' ||
                 gLocal.topPanel?.type === 'backTraverse' ? (
@@ -550,30 +542,10 @@ const CabinetConfigurator: React.FC<Props> = ({
                   </div>
                 ) : null}
               </div>
-              <div>
-                <div className="small">{t('configurator.bottom')}</div>
-                <select
-                  className="input"
-                  value={gLocal.bottomPanel || 'full'}
-                  onChange={(e) =>
-                    setAdv({
-                      ...gLocal,
-                      bottomPanel: (e.target as HTMLSelectElement).value as any,
-                    })
-                  }
-                >
-                  <option value="full">
-                    {t('configurator.bottomOptions.full')}
-                  </option>
-                  <option value="none">
-                    {t('configurator.bottomOptions.none')}
-                  </option>
-                </select>
-              </div>
-              <div>
+              <div style={{ marginTop: 8 }}>
                 <div className="small">{t('configurator.edgeBanding')}</div>
                 <div className="row" style={{ gap: 8 }}>
-                  {(['front', 'back', 'left', 'right'] as const).map((edge) => (
+                  {(['front', 'back'] as const).map((edge) => (
                     <label
                       key={edge}
                       style={{ display: 'flex', alignItems: 'center', gap: 4 }}
@@ -597,26 +569,170 @@ const CabinetConfigurator: React.FC<Props> = ({
                 </div>
               </div>
             </div>
-            {drawersCount === 0 && (
-              <div style={{ marginTop: 8 }}>
-                <div className="small">{t('configurator.shelves')}</div>
-                <input
+          </details>
+
+          <details open={openBottomFrame} className={openBottomFrame ? 'active' : ''}>
+            <summary
+              onClick={(e) => {
+                e.preventDefault();
+                setOpenBottomFrame((v) => !v);
+              }}
+            >
+              {t('configurator.bottom')}
+            </summary>
+            <div>
+              <div>
+                <div className="small">{t('configurator.bottom')}</div>
+                <select
                   className="input"
-                  type="number"
-                  min={0}
-                  value={gLocal.shelves || 0}
+                  value={gLocal.bottomPanel || 'full'}
                   onChange={(e) =>
                     setAdv({
                       ...gLocal,
-                      shelves:
-                        Number((e.target as HTMLInputElement).value) || 0,
+                      bottomPanel: (e.target as HTMLSelectElement).value as any,
+                    })
+                  }
+                >
+                  <option value="full">
+                    {t('configurator.bottomOptions.full')}
+                  </option>
+                  <option value="none">
+                    {t('configurator.bottomOptions.none')}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </details>
+
+          <details open={openShelves} className={openShelves ? 'active' : ''}>
+            <summary
+              onClick={(e) => {
+                e.preventDefault();
+                setOpenShelves((v) => !v);
+              }}
+            >
+              {t('configurator.shelves')}
+            </summary>
+            <div>
+              {drawersCount === 0 && (
+                <div>
+                  <div className="small">{t('configurator.shelves')}</div>
+                  <input
+                    className="input"
+                    type="number"
+                    min={0}
+                    value={gLocal.shelves || 0}
+                    onChange={(e) =>
+                      setAdv({
+                        ...gLocal,
+                        shelves:
+                          Number((e.target as HTMLInputElement).value) || 0,
+                      })
+                    }
+                  />
+                </div>
+              )}
+            </div>
+          </details>
+
+          <details open={openBack} className={openBack ? 'active' : ''}>
+            <summary
+              onClick={(e) => {
+                e.preventDefault();
+                setOpenBack((v) => !v);
+              }}
+            >
+              {t('configurator.back')}
+            </summary>
+            <div>
+              <div>
+                <div className="small">{t('configurator.back')}</div>
+                <select
+                  className="input"
+                  value={gLocal.backPanel || 'full'}
+                  onChange={(e) =>
+                    setAdv({
+                      ...gLocal,
+                      backPanel: (e.target as HTMLSelectElement)
+                        .value as CabinetConfig['backPanel'],
+                    })
+                  }
+                >
+                  <option value="full">
+                    {t('configurator.backOptions.full')}
+                  </option>
+                  <option value="split">
+                    {t('configurator.backOptions.split')}
+                  </option>
+                  <option value="none">
+                    {t('configurator.backOptions.none')}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </details>
+
+          <details open={openRightSide} className={openRightSide ? 'active' : ''}>
+            <summary
+              onClick={(e) => {
+                e.preventDefault();
+                setOpenRightSide((v) => !v);
+              }}
+            >
+              Bok prawy
+            </summary>
+            <div>
+              <div className="small">{t('configurator.edgeBanding')}</div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <input
+                  type="checkbox"
+                  checked={gLocal.edgeBanding?.right ?? false}
+                  onChange={(e) =>
+                    setAdv({
+                      ...gLocal,
+                      edgeBanding: {
+                        ...gLocal.edgeBanding,
+                        right: (e.target as HTMLInputElement).checked,
+                      },
                     })
                   }
                 />
-              </div>
-            )}
-          </div>
-        </details>
+                {t('configurator.edgeBandingOptions.right')}
+              </label>
+            </div>
+          </details>
+
+          <details open={openLeftSide} className={openLeftSide ? 'active' : ''}>
+            <summary
+              onClick={(e) => {
+                e.preventDefault();
+                setOpenLeftSide((v) => !v);
+              }}
+            >
+              Bok lewy
+            </summary>
+            <div>
+              <div className="small">{t('configurator.edgeBanding')}</div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <input
+                  type="checkbox"
+                  checked={gLocal.edgeBanding?.left ?? false}
+                  onChange={(e) =>
+                    setAdv({
+                      ...gLocal,
+                      edgeBanding: {
+                        ...gLocal.edgeBanding,
+                        left: (e.target as HTMLInputElement).checked,
+                      },
+                    })
+                  }
+                />
+                {t('configurator.edgeBandingOptions.left')}
+              </label>
+            </div>
+          </details>
+        </div>
+      </details>
 
         <details open={openFronty} className={openFronty ? 'active' : ''}>
           <summary
