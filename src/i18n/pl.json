@@ -76,7 +76,13 @@
       "fronty": "Fronty",
       "okucie": "Okucie",
       "nozki": "Nóżki",
-      "rysunki": "Rysunki techniczne"
+      "rysunki": "Rysunki techniczne",
+      "topFrame": "Góra",
+      "bottomFrame": "Dół",
+      "shelves": "Półki",
+      "back": "Plecy",
+      "rightSide": "Bok prawy",
+      "leftSide": "Bok lewy"
     },
     "width": "Szerokość (mm)",
     "insertCabinet": "Wstaw szafkę",
@@ -121,6 +127,11 @@
       "left": "lewa",
       "right": "prawa"
     },
+    "shelfEdgeBanding": "Okleina półek",
+    "rightSideEdgeBanding": "Bok prawy – okleina",
+    "leftSideEdgeBanding": "Bok lewy – okleina",
+    "sidePanel": "Panel boczny",
+    "panel": "Panel",
     "orientation": {
       "label": "Orientacja",
       "horizontal": "pozioma",

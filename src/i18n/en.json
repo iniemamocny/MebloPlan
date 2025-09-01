@@ -76,7 +76,13 @@
       "fronty": "Fronts",
       "okucie": "Hardware",
       "nozki": "Legs",
-      "rysunki": "Technical drawings"
+      "rysunki": "Technical drawings",
+      "topFrame": "Top",
+      "bottomFrame": "Bottom",
+      "shelves": "Shelves",
+      "back": "Back",
+      "rightSide": "Right side",
+      "leftSide": "Left side"
     },
     "width": "Width (mm)",
     "insertCabinet": "Insert cabinet",
@@ -121,6 +127,11 @@
       "left": "left",
       "right": "right"
     },
+    "shelfEdgeBanding": "Shelf edge banding",
+    "rightSideEdgeBanding": "Right side - edge banding",
+    "leftSideEdgeBanding": "Left side - edge banding",
+    "sidePanel": "Side panel",
+    "panel": "Panel",
     "orientation": {
       "label": "Orientation",
       "horizontal": "horizontal",
