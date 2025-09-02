@@ -78,8 +78,8 @@ export default function Cabinet3D({
 
   useEffect(() => {
     if (!ref.current) return;
-    const w = 260,
-      h = 190;
+    const w = 390,
+      h = 285;
 
     let renderer = rendererRef.current;
     if (!renderer) {
@@ -434,7 +434,7 @@ export default function Cabinet3D({
   };
 
   return (
-    <div style={{ position: 'relative', width: 260, height: 190 }}>
+    <div style={{ position: 'relative', width: 390, height: 285 }}>
       <div
         ref={ref}
         style={{
