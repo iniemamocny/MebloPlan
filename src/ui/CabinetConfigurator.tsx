@@ -125,7 +125,7 @@ const CabinetConfigurator: React.FC<Props> = ({
       </div>
       <div className="bd">
         <div className="configuratorHeader">
-          <div className="preview">
+          <div>
             <Cabinet3D
               family={family}
               widthMM={widthMM}
