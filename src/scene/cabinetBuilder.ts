@@ -722,14 +722,16 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
         const frontGeo = new THREE.BoxGeometry(W, h, T);
         const frontMesh = new THREE.Mesh(frontGeo, frontMat);
         const fg = new THREE.Group();
+        const frontIndex = frontGroups.length;
         // Start each drawer front completely in front of the carcass with a 2 mm gap
         fg.position.set(W / 2, currentY + h / 2, FRONT_OFFSET + T / 2);
         fg.userData.closedZ = FRONT_OFFSET + T / 2;
         frontMesh.position.set(0, 0, 0);
         addEdges(frontMesh);
+        frontMesh.userData.frontIndex = frontIndex;
         fg.add(frontMesh);
         fg.userData.type = 'drawer';
-        fg.userData.frontIndex = frontGroups.length;
+        fg.userData.frontIndex = frontIndex;
         fg.userData.slideDist = -Math.min(0.45, D);
         frontGroups.push(fg);
         openStates.push(false);
@@ -745,6 +747,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
           );
           const handle = new THREE.Mesh(handleGeo, handleMat);
           handle.position.set(0, h / 2 - handleHeight * 1.5, T / 2 + 0.01);
+          handle.userData.frontIndex = frontIndex;
           frontMesh.add(handle);
         }
         group.add(fg);
@@ -758,6 +761,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
         const doorGeo = new THREE.BoxGeometry(doorW, H, T);
         const doorMesh = new THREE.Mesh(doorGeo, frontMat);
         const fg = new THREE.Group();
+        const frontIndex = frontGroups.length;
         const pivotX = hingeSide === 'left' ? i * doorW : (i + 1) * doorW;
         // Hinge pivot sits 2 mm in front of the carcass, door hangs entirely in front
         fg.position.set(pivotX, legHeight + H / 2, FRONT_OFFSET);
@@ -767,9 +771,10 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
           T / 2,
         );
         addEdges(doorMesh);
+        doorMesh.userData.frontIndex = frontIndex;
         fg.add(doorMesh);
         fg.userData.type = 'door';
-        fg.userData.frontIndex = frontGroups.length;
+        fg.userData.frontIndex = frontIndex;
         fg.userData.hingeSide = hingeSide;
         frontGroups.push(fg);
         openStates.push(false);
@@ -789,6 +794,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
               ? doorW / 2 - handleWidth / 2
               : -doorW / 2 + handleWidth / 2;
           handle.position.set(xPos, H * 0.2, T / 2 + 0.01);
+          handle.userData.frontIndex = frontIndex;
           doorMesh.add(handle);
         }
         group.add(fg);
