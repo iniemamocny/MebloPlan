@@ -24,7 +24,6 @@
 .card{border:1px solid var(--border);border-radius:12px;padding:10px;background:#fff;display:flex;flex-direction:column;gap:6px}
 .table{width:100%;border-collapse:collapse;font-size:12px}
 .table th,.table td{border:1px solid var(--border);padding:6px;text-align:left}
-.preview{border:1px dashed var(--border);border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;padding:8px;margin:0 auto}
 .tabs{display:flex;gap:6px}
 .tabBtn{padding:8px 10px;border-radius:999px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:600}
 .tabBtn.active{background:#111827;color:#fff}
