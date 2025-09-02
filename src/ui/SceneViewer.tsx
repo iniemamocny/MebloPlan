@@ -221,7 +221,35 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
     };
   }, []);
 
-  return <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />;
+  const handleZoomIn = () => {
+    const controls = threeRef.current?.controls;
+    if (controls) {
+      controls.dollyIn(0.95);
+      controls.update();
+    }
+  };
+
+  const handleZoomOut = () => {
+    const controls = threeRef.current?.controls;
+    if (controls) {
+      controls.dollyOut(0.95);
+      controls.update();
+    }
+  };
+
+  return (
+    <div style={{ position: 'absolute', inset: 0 }}>
+      <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
+      <div className="zoomControls">
+        <button className="btnGhost" onClick={handleZoomIn}>
+          +
+        </button>
+        <button className="btnGhost" onClick={handleZoomOut}>
+          −
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default SceneViewer;
