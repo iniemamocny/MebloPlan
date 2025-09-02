@@ -153,9 +153,9 @@ export default function Cabinet3D({
       controlsRef.current.dispose();
     }
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enabled = false;
+    controls.enabled = true; // allow manual update calls
     controls.enableRotate = false;
-    controls.enableZoom = false;
+    controls.enableZoom = false; // keep mouse wheel disabled
     controls.enablePan = false;
     controls.addEventListener('change', () => renderer.render(scene, camera));
     controls.target.copy(center);
@@ -388,7 +388,9 @@ export default function Cabinet3D({
     const scene = sceneRef.current;
     const camera = cameraRef.current;
     if (controls && renderer && scene && camera) {
+      controls.enableZoom = true;
       controls.dollyIn(1.1);
+      controls.enableZoom = false;
       controls.update();
       renderer.render(scene, camera);
     }
@@ -400,7 +402,9 @@ export default function Cabinet3D({
     const scene = sceneRef.current;
     const camera = cameraRef.current;
     if (controls && renderer && scene && camera) {
+      controls.enableZoom = true;
       controls.dollyOut(1.1);
+      controls.enableZoom = false;
       controls.update();
       renderer.render(scene, camera);
     }
@@ -410,7 +414,6 @@ export default function Cabinet3D({
     const controls = controlsRef.current;
     if (controls) {
       const newVal = !rotationEnabled;
-      controls.enabled = newVal;
       controls.enableRotate = newVal;
       setRotationEnabled(newVal);
       const renderer = rendererRef.current;
@@ -435,6 +438,7 @@ export default function Cabinet3D({
         }}
       />
       <div
+        className="cabinet3d-controls"
         style={{
           position: 'absolute',
           bottom: 8,
@@ -445,8 +449,12 @@ export default function Cabinet3D({
           gap: 8,
         }}
       >
-        <button onClick={handleZoomIn}>+</button>
-        <button onClick={handleZoomOut}>-</button>
+        <button id="cabinet3d-zoom-in" onClick={handleZoomIn}>
+          +
+        </button>
+        <button id="cabinet3d-zoom-out" onClick={handleZoomOut}>
+          -
+        </button>
         <button onClick={handleToggleRotate}>
           {rotationEnabled ? 'zatrzymaj' : 'obrót'}
         </button>
