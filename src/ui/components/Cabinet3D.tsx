@@ -225,22 +225,45 @@ export default function Cabinet3D({
       );
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects(group.children, true);
-      if (intersects.length === 0) return;
-      let obj: THREE.Object3D | null = intersects[0].object;
+      let obj: THREE.Object3D | null = intersects[0]?.object || null;
       while (obj && obj.userData.frontIndex === undefined) {
         obj = obj.parent;
       }
-      if (!obj || obj.userData.frontIndex === undefined) return;
-      const frontIndex = obj.userData.frontIndex as number;
+      const frontIndex =
+        obj && obj.userData.frontIndex !== undefined
+          ? (obj.userData.frontIndex as number)
+          : null;
       const openStates: boolean[] = group.userData.openStates || [];
-      if (frontIndex >= 0 && frontIndex < openStates.length) {
-        openStates[frontIndex] = !openStates[frontIndex];
+      let changed = false;
+      openStates.forEach((_, idx) => {
+        const shouldOpen = frontIndex === idx;
+        if (openStates[idx] !== shouldOpen) {
+          openStates[idx] = shouldOpen;
+          changed = true;
+        }
+      });
+      if (changed) {
         renderer.render(scene, camera);
       }
     };
-    renderer.domElement.addEventListener('pointerdown', handlePointer);
+    const handleLeave = () => {
+      const openStates: boolean[] = group.userData.openStates || [];
+      let changed = false;
+      openStates.forEach((state, idx) => {
+        if (state) {
+          openStates[idx] = false;
+          changed = true;
+        }
+      });
+      if (changed) {
+        renderer.render(scene, camera);
+      }
+    };
+    renderer.domElement.addEventListener('pointermove', handlePointer);
+    renderer.domElement.addEventListener('pointerleave', handleLeave);
     return () => {
-      renderer.domElement.removeEventListener('pointerdown', handlePointer);
+      renderer.domElement.removeEventListener('pointermove', handlePointer);
+      renderer.domElement.removeEventListener('pointerleave', handleLeave);
     };
   }, [
     widthMM,
