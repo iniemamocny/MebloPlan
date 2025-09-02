@@ -801,11 +801,9 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
           gapLeft / 1000 + i * (doorW + gapBetween / 1000);
         const pivotX = hingeSide === 'left' ? leftEdge : leftEdge + doorW;
         // Hinge pivot sits 2 mm in front of the carcass, door hangs entirely in front
-        fg.position.set(
-          pivotX,
-          legHeight + gapBottom / 1000 + doorH / 2,
-          frontProj - T,
-        );
+        const baseY =
+          legHeight + (carcassType === 'type4' ? T : 0) + gapBottom / 1000 + doorH / 2;
+        fg.position.set(pivotX, baseY, frontProj - T);
         doorMesh.position.set(
           hingeSide === 'left' ? doorW / 2 : -doorW / 2,
           0,
