@@ -166,13 +166,14 @@ export default function TechDrawing({
 
   const doorSplits = useMemo(() => {
     if (doorsCount <= 1) return [];
-    const step = front.w / doorsCount;
+    const totalBetween = gaps.between * (doorsCount - 1);
+    const leafW = (front.w - totalBetween) / doorsCount;
     const xs: number[] = [];
     for (let i = 1; i < doorsCount; i++) {
-      xs.push(front.x + step * i);
+      xs.push(front.x + i * leafW + gaps.between * (i - 0.5));
     }
     return xs;
-  }, [doorsCount, front.w, front.x]);
+  }, [doorsCount, front.w, front.x, gaps.between]);
 
   const dividerX = useMemo(() => {
     if (!dividerPosition || doorsCount < 3) return null
