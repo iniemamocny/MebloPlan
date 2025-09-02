@@ -304,11 +304,17 @@ export function useCabinetConfig(
 
   const gLocal: CabinetConfig = adv || (store.globals[family] as CabinetConfig);
 
+  const setAdv = (patch: Partial<CabinetConfig>) =>
+    setAdvState((prev) => ({
+      ...(prev || (store.globals[family] as CabinetConfig)),
+      ...patch,
+    }));
+
   return {
     widthMM,
     setWidthMM,
     adv,
-    setAdv: (v: CabinetConfig) => setAdvState(v),
+    setAdv,
     gLocal,
     onAdd,
     doAutoOnSelectedWall,

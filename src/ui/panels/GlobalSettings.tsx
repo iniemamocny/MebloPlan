@@ -52,6 +52,17 @@ export default function GlobalSettings(){
               options={Object.keys(store.prices.front).filter(k => !k.includes('stowalna'))}
             />
             <Field
+              label={t('configurator.carcassType')}
+              type="select"
+              value={g.carcassType}
+              onChange={(v)=>set({carcassType:v})}
+              options={[
+                { value: 'type1', label: t('configurator.carcassTypes.type1') },
+                { value: 'type2', label: t('configurator.carcassTypes.type2') },
+                { value: 'type3', label: t('configurator.carcassTypes.type3') }
+              ]}
+            />
+            <Field
               label={t('global.backPanel')}
               type="select"
               value={g.backPanel||'full'}
