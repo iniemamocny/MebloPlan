@@ -22,7 +22,13 @@ export interface CabinetOptions {
   depth: number;
   drawers: number;
   doorCount?: number;
-  gaps: { top: number; bottom: number };
+  gaps: {
+    top: number;
+    bottom: number;
+    left?: number;
+    right?: number;
+    between?: number;
+  };
   drawerFronts?: number[];
   family: FAMILY;
   shelves?: number;
@@ -725,14 +731,17 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
 
   // Fronts
   if (showFronts) {
+    const gapLeft = gaps.left ?? 0;
+    const gapRight = gaps.right ?? 0;
+    const gapTop = gaps.top ?? 0;
+    const gapBottom = gaps.bottom ?? 0;
+    const gapBetween = gaps.between ?? 0;
+    const availW = W - (gapLeft + gapRight) / 1000;
+    const availH =
+      (carcassType === 'type4' ? H - 2 * T : H) -
+      (gapTop + gapBottom) / 1000;
     if (drawers > 0) {
-      const totalFrontHeight = Math.max(
-        50,
-        Math.round(
-          (carcassType === 'type4' ? H - 2 * T : H) * 1000 -
-            (gaps.top + gaps.bottom),
-        ),
-      );
+      const totalFrontHeight = Math.max(50, Math.round(availH * 1000));
       const arr =
         drawerFronts && drawerFronts.length === drawers
           ? drawerFronts
@@ -740,15 +749,15 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
               Math.floor(totalFrontHeight / drawers),
             );
       let currentY =
-        legHeight + (carcassType === 'type4' ? T : 0) + gaps.bottom / 1000;
+        legHeight + (carcassType === 'type4' ? T : 0) + gapBottom / 1000;
       for (let i = 0; i < drawers; i++) {
         const h = arr[i] / 1000;
-        const frontGeo = new THREE.BoxGeometry(W, h, T);
+        const frontGeo = new THREE.BoxGeometry(availW, h, T);
         const frontMesh = new THREE.Mesh(frontGeo, frontMat);
         const fg = new THREE.Group();
         const frontIndex = frontGroups.length;
         // Start each drawer front completely in front of the carcass with a 2 mm gap
-        fg.position.set(W / 2, currentY + h / 2, frontProj - T / 2);
+        fg.position.set(gapLeft / 1000 + availW / 2, currentY + h / 2, frontProj - T / 2);
         fg.userData.closedZ = frontProj - T / 2;
         frontMesh.position.set(0, 0, 0);
         addEdges(frontMesh);
@@ -761,7 +770,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
         openStates.push(false);
         openProgress.push(0);
         if (showHandles) {
-          const handleWidth = Math.min(0.4, W * 0.5);
+          const handleWidth = Math.min(0.4, availW * 0.5);
           const handleHeight = 0.02;
           const handleDepth = 0.03;
           const handleGeo = new THREE.BoxGeometry(
@@ -779,17 +788,24 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       }
     } else {
       const doors = Math.max(1, doorCount);
-      const doorW = W / doors;
-      const doorH = carcassType === 'type4' ? H - 2 * T : H;
+      const doorW =
+        (availW - (doors - 1) * gapBetween / 1000) / doors;
+      const doorH = availH;
       for (let i = 0; i < doors; i++) {
         const hingeSide = i < doors / 2 ? 'left' : 'right';
         const doorGeo = new THREE.BoxGeometry(doorW, doorH, T);
         const doorMesh = new THREE.Mesh(doorGeo, frontMat);
         const fg = new THREE.Group();
         const frontIndex = frontGroups.length;
-        const pivotX = hingeSide === 'left' ? i * doorW : (i + 1) * doorW;
+        const leftEdge =
+          gapLeft / 1000 + i * (doorW + gapBetween / 1000);
+        const pivotX = hingeSide === 'left' ? leftEdge : leftEdge + doorW;
         // Hinge pivot sits 2 mm in front of the carcass, door hangs entirely in front
-        fg.position.set(pivotX, legHeight + H / 2, frontProj - T);
+        fg.position.set(
+          pivotX,
+          legHeight + gapBottom / 1000 + doorH / 2,
+          frontProj - T,
+        );
         doorMesh.position.set(
           hingeSide === 'left' ? doorW / 2 : -doorW / 2,
           0,
