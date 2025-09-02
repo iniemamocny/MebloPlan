@@ -72,7 +72,6 @@ export default function Cabinet3D({
   } | null>(null);
   const rotatedRef = useRef(false);
   const [rotationEnabled, setRotationEnabled] = useState(false);
-  const [isLocked, setIsLocked] = useState(false);
   const role = usePlannerStore((s) => s.role);
   const showEdges = role === 'stolarz';
 
@@ -154,7 +153,10 @@ export default function Cabinet3D({
       controlsRef.current.dispose();
     }
     const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled = false;
     controls.enableRotate = false;
+    controls.enableZoom = false;
+    controls.enablePan = false;
     controls.addEventListener('change', () => renderer.render(scene, camera));
     controls.target.copy(center);
     camera.lookAt(center);
@@ -385,7 +387,7 @@ export default function Cabinet3D({
     const renderer = rendererRef.current;
     const scene = sceneRef.current;
     const camera = cameraRef.current;
-    if (controls && renderer && scene && camera && !isLocked) {
+    if (controls && renderer && scene && camera) {
       controls.dollyIn(1.1);
       controls.update();
       renderer.render(scene, camera);
@@ -397,7 +399,7 @@ export default function Cabinet3D({
     const renderer = rendererRef.current;
     const scene = sceneRef.current;
     const camera = cameraRef.current;
-    if (controls && renderer && scene && camera && !isLocked) {
+    if (controls && renderer && scene && camera) {
       controls.dollyOut(1.1);
       controls.update();
       renderer.render(scene, camera);
@@ -406,29 +408,11 @@ export default function Cabinet3D({
 
   const handleToggleRotate = () => {
     const controls = controlsRef.current;
-    if (controls && !isLocked) {
+    if (controls) {
       const newVal = !rotationEnabled;
+      controls.enabled = newVal;
       controls.enableRotate = newVal;
       setRotationEnabled(newVal);
-      const renderer = rendererRef.current;
-      const scene = sceneRef.current;
-      const camera = cameraRef.current;
-      if (renderer && scene && camera) {
-        renderer.render(scene, camera);
-      }
-    }
-  };
-
-  const handleToggleLock = () => {
-    const controls = controlsRef.current;
-    if (controls) {
-      const newVal = !isLocked;
-      controls.enableZoom = !newVal;
-      controls.enableRotate = newVal ? false : rotationEnabled;
-      if (newVal) {
-        setRotationEnabled(false);
-      }
-      setIsLocked(newVal);
       const renderer = rendererRef.current;
       const scene = sceneRef.current;
       const camera = cameraRef.current;
@@ -465,9 +449,6 @@ export default function Cabinet3D({
         <button onClick={handleZoomOut}>-</button>
         <button onClick={handleToggleRotate}>
           {rotationEnabled ? 'zatrzymaj' : 'obrót'}
-        </button>
-        <button onClick={handleToggleLock}>
-          {isLocked ? 'odblokuj' : 'zablokuj'}
         </button>
       </div>
     </div>
