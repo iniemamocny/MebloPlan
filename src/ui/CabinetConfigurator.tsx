@@ -311,11 +311,12 @@ const CabinetConfigurator: React.FC<Props> = ({
                     carcassType: (e.target as HTMLSelectElement).value as
                       | 'type1'
                       | 'type2'
-                      | 'type3',
+                      | 'type3'
+                      | 'type4',
                   })
                 }
               >
-                {(['type1', 'type2', 'type3'] as const).map((type) => (
+                {(['type1', 'type2', 'type3', 'type4'] as const).map((type) => (
                   <option key={type} value={type}>
                     {t(`configurator.carcassTypes.${type}`)}
                   </option>

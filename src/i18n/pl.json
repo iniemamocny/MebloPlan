@@ -96,12 +96,13 @@
     "back": "Plecy",
     "top": "Góra",
     "bottom": "Dół",
-    "carcassType": "Rodzaj korpusu",
-    "carcassTypes": {
-      "type1": "Typ 1",
-      "type2": "Typ 2",
-      "type3": "Typ 3"
-    },
+      "carcassType": "Rodzaj korpusu",
+      "carcassTypes": {
+        "type1": "Typ 1",
+        "type2": "Typ 2",
+        "type3": "Typ 3",
+        "type4": "Typ 4"
+      },
     "shelves": "Liczba półek",
     "gapsTitle": "Szczeliny i wysokości frontów (ustawiaj graficznie)",
     "backOptions": {

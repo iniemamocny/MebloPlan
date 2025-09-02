@@ -7,7 +7,7 @@ export interface CabinetConfig {
   frontType: string;
   frontFoldable?: boolean;
   gaps: Gaps;
-  carcassType: 'type1' | 'type2' | 'type3';
+  carcassType: 'type1' | 'type2' | 'type3' | 'type4';
   shelves?: number;
   backPanel?: 'full' | 'split' | 'none';
   topPanel?: TopPanel;
