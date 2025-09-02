@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { FAMILY } from '../../core/catalog';
 import { buildCabinetMesh } from '../../scene/cabinetBuilder';
 import { usePlannerStore } from '../../state/store';
@@ -64,11 +65,13 @@ export default function Cabinet3D({
   const sceneRef = useRef<THREE.Scene | null>(null);
   const groupRef = useRef<THREE.Group | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const controlsRef = useRef<OrbitControls | null>(null);
   const highlightedRef = useRef<{
     mesh: THREE.Mesh;
     material: THREE.Material;
   } | null>(null);
   const rotatedRef = useRef(false);
+  const [rotationEnabled, setRotationEnabled] = useState(false);
   const role = usePlannerStore((s) => s.role);
   const showEdges = role === 'stolarz';
 
@@ -143,6 +146,15 @@ export default function Cabinet3D({
     });
     scene.add(cabGroup);
     renderer.render(scene, camera);
+
+    if (controlsRef.current) {
+      controlsRef.current.dispose();
+    }
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableRotate = false;
+    controls.addEventListener('change', () => renderer.render(scene, camera));
+    controlsRef.current = controls;
+
     sceneRef.current = scene;
     groupRef.current = cabGroup;
     cameraRef.current = camera;
@@ -161,6 +173,11 @@ export default function Cabinet3D({
       if (highlightedRef.current) {
         highlightedRef.current.material.dispose();
         highlightedRef.current = null;
+      }
+      const controls = controlsRef.current;
+      if (controls) {
+        controls.dispose();
+        controlsRef.current = null;
       }
       sceneRef.current = null;
     };
@@ -247,16 +264,72 @@ export default function Cabinet3D({
 
     renderer.render(scene, camera);
   }, [highlightPart]);
+
+  const handleZoomIn = () => {
+    const controls = controlsRef.current;
+    const renderer = rendererRef.current;
+    const scene = sceneRef.current;
+    const camera = cameraRef.current;
+    if (controls && renderer && scene && camera) {
+      controls.dollyIn(1.1);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+  };
+
+  const handleZoomOut = () => {
+    const controls = controlsRef.current;
+    const renderer = rendererRef.current;
+    const scene = sceneRef.current;
+    const camera = cameraRef.current;
+    if (controls && renderer && scene && camera) {
+      controls.dollyOut(1.1);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+  };
+
+  const handleToggleRotate = () => {
+    const controls = controlsRef.current;
+    if (controls) {
+      const newVal = !rotationEnabled;
+      controls.enableRotate = newVal;
+      setRotationEnabled(newVal);
+      const renderer = rendererRef.current;
+      const scene = sceneRef.current;
+      const camera = cameraRef.current;
+      if (renderer && scene && camera) {
+        renderer.render(scene, camera);
+      }
+    }
+  };
+
   return (
-    <div
-      ref={ref}
-      style={{
-        width: 260,
-        height: 190,
-        border: '1px solid #E5E7EB',
-        borderRadius: 8,
-        background: '#fff',
-      }}
-    />
+    <div style={{ position: 'relative', width: 260, height: 190 }}>
+      <div
+        ref={ref}
+        style={{
+          width: '100%',
+          height: '100%',
+          border: '1px solid #E5E7EB',
+          borderRadius: 8,
+          background: '#fff',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          top: 8,
+          right: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 4,
+        }}
+      >
+        <button onClick={handleZoomIn}>+</button>
+        <button onClick={handleZoomOut}>-</button>
+        <button onClick={handleToggleRotate}>obrót</button>
+      </div>
+    </div>
   );
 }
