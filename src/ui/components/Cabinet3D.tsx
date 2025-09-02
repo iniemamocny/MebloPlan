@@ -147,6 +147,7 @@ export default function Cabinet3D({
     });
     cabGroup.userData.animSpeed = 0.15;
     scene.add(cabGroup);
+    const center = new THREE.Vector3(W / 2, legHeight + H / 2, -D / 2);
     renderer.render(scene, camera);
 
     if (controlsRef.current) {
@@ -155,7 +156,11 @@ export default function Cabinet3D({
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableRotate = false;
     controls.addEventListener('change', () => renderer.render(scene, camera));
+    controls.target.copy(center);
+    camera.lookAt(center);
+    controls.update();
     controlsRef.current = controls;
+    renderer.render(scene, camera);
 
     sceneRef.current = scene;
     groupRef.current = cabGroup;
