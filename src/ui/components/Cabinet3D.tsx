@@ -144,6 +144,7 @@ export default function Cabinet3D({
       carcassType,
       showFronts,
     });
+    cabGroup.userData.animSpeed = 0.15;
     scene.add(cabGroup);
     renderer.render(scene, camera);
 
@@ -207,6 +208,106 @@ export default function Cabinet3D({
     carcassType,
     showFronts,
   ]);
+
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    const camera = cameraRef.current;
+    const group = groupRef.current;
+    const scene = sceneRef.current;
+    if (!renderer || !camera || !group || !scene) return;
+    const raycaster = new THREE.Raycaster();
+    const handlePointer = (event: PointerEvent) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      const mouse = new THREE.Vector2(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        -((event.clientY - rect.top) / rect.height) * 2 + 1,
+      );
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(group.children, true);
+      if (intersects.length === 0) return;
+      let obj: THREE.Object3D | null = intersects[0].object;
+      while (obj && obj.userData.frontIndex === undefined) {
+        obj = obj.parent;
+      }
+      if (!obj || obj.userData.frontIndex === undefined) return;
+      const frontIndex = obj.userData.frontIndex as number;
+      const openStates: boolean[] = group.userData.openStates || [];
+      if (frontIndex >= 0 && frontIndex < openStates.length) {
+        openStates[frontIndex] = !openStates[frontIndex];
+        renderer.render(scene, camera);
+      }
+    };
+    renderer.domElement.addEventListener('pointerdown', handlePointer);
+    return () => {
+      renderer.domElement.removeEventListener('pointerdown', handlePointer);
+    };
+  }, [
+    widthMM,
+    heightMM,
+    depthMM,
+    doorsCount,
+    drawersCount,
+    gaps,
+    drawerFronts,
+    family,
+    shelves,
+    backPanel,
+    topPanel,
+    bottomPanel,
+    dividerPosition,
+    showEdges,
+    rightSideEdgeBanding,
+    leftSideEdgeBanding,
+    traverseEdgeBanding,
+    shelfEdgeBanding,
+    backEdgeBanding,
+    topPanelEdgeBanding,
+    bottomPanelEdgeBanding,
+    sidePanels,
+    carcassType,
+    showFronts,
+  ]);
+
+  useEffect(() => {
+    let animId: number;
+    const animate = () => {
+      const renderer = rendererRef.current;
+      const scene = sceneRef.current;
+      const camera = cameraRef.current;
+      const group = groupRef.current;
+      if (renderer && scene && camera && group) {
+        const openStates: boolean[] = group.userData.openStates || [];
+        const openProgress: number[] = group.userData.openProgress || [];
+        const frontGroups: THREE.Object3D[] = group.userData.frontGroups || [];
+        openStates.forEach((target, idx) => {
+          let prog = openProgress[idx] ?? 0;
+          const dest = target ? 1 : 0;
+          const diff = dest - prog;
+          if (Math.abs(diff) > 0.001) {
+            const speed = group.userData.animSpeed || 0.15;
+            prog += diff * speed;
+            if (Math.abs(dest - prog) < 0.02) prog = dest;
+            openProgress[idx] = prog;
+            const fg = frontGroups[idx];
+            if (fg) {
+              if (fg.userData.type === 'door') {
+                const hingeSide = fg.userData.hingeSide || 'left';
+                const sign = hingeSide === 'left' ? -1 : 1;
+                fg.rotation.y = ((sign * Math.PI) / 2) * prog;
+              } else if (fg.userData.type === 'drawer') {
+                const slide = fg.userData.slideDist || 0.45;
+                fg.position.z = (fg.userData.closedZ ?? 0) - slide * prog;
+              }
+            }
+          }
+        });
+        renderer.render(scene, camera);
+      }
+      animId = requestAnimationFrame(animate);
+    };
+    animId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animId);
+  }, []);
 
   useEffect(() => {
     return () => {
