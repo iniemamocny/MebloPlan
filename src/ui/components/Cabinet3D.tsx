@@ -71,6 +71,11 @@ export default function Cabinet3D({
     material: THREE.Material;
   } | null>(null);
   const rotatedRef = useRef(false);
+  const baseDistance = useRef(0);
+  const minDistance = useRef(0);
+  const maxDistance = useRef(0);
+  const [zoom, setZoom] = useState(50);
+  const [zoomLocked, setZoomLocked] = useState(false);
   const [rotationEnabled, setRotationEnabled] = useState(false);
   const role = usePlannerStore((s) => s.role);
   const showEdges = role === 'stolarz';
@@ -161,6 +166,10 @@ export default function Cabinet3D({
     controls.target.copy(center);
     camera.lookAt(center);
     controls.update();
+    baseDistance.current = camera.position.distanceTo(center);
+    minDistance.current = baseDistance.current * 0.5;
+    maxDistance.current = baseDistance.current * 1.5;
+    setZoom(50);
     controlsRef.current = controls;
     renderer.render(scene, camera);
 
@@ -382,29 +391,23 @@ export default function Cabinet3D({
     renderer.render(scene, camera);
   }, [highlightPart]);
 
-  const handleZoomIn = () => {
+  const handleZoomChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const controls = controlsRef.current;
     const renderer = rendererRef.current;
     const scene = sceneRef.current;
     const camera = cameraRef.current;
+    const min = minDistance.current;
+    const max = maxDistance.current;
     if (controls && renderer && scene && camera) {
-      controls.enableZoom = true;
-      controls.dollyIn(1.1);
-      controls.enableZoom = false;
-      controls.update();
-      renderer.render(scene, camera);
-    }
-  };
-
-  const handleZoomOut = () => {
-    const controls = controlsRef.current;
-    const renderer = rendererRef.current;
-    const scene = sceneRef.current;
-    const camera = cameraRef.current;
-    if (controls && renderer && scene && camera) {
-      controls.enableZoom = true;
-      controls.dollyOut(1.1);
-      controls.enableZoom = false;
+      const value = +e.target.value;
+      setZoom(value);
+      const distance = THREE.MathUtils.lerp(max, min, value / 100);
+      const dir = camera.position.clone().sub(controls.target).normalize();
+      camera.position
+        .copy(controls.target)
+        .addScaledVector(dir, distance);
       controls.update();
       renderer.render(scene, camera);
     }
@@ -449,11 +452,16 @@ export default function Cabinet3D({
           gap: 8,
         }}
       >
-        <button id="cabinet3d-zoom-in" onClick={handleZoomIn}>
-          +
-        </button>
-        <button id="cabinet3d-zoom-out" onClick={handleZoomOut}>
-          -
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={zoom}
+          disabled={zoomLocked}
+          onChange={handleZoomChange}
+        />
+        <button onClick={() => setZoomLocked((z) => !z)}>
+          {zoomLocked ? 'odblokuj' : 'zablokuj'}
         </button>
         <button onClick={handleToggleRotate}>
           {rotationEnabled ? 'zatrzymaj' : 'obrót'}
