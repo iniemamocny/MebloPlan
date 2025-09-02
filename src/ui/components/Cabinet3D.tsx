@@ -229,10 +229,10 @@ export default function Cabinet3D({
       while (obj && obj.userData.frontIndex === undefined) {
         obj = obj.parent;
       }
-      const frontIndex =
-        obj && obj.userData.frontIndex !== undefined
-          ? (obj.userData.frontIndex as number)
-          : null;
+      if (!obj || obj.userData.isHandle !== true) {
+        return;
+      }
+      const frontIndex = obj.userData.frontIndex as number;
       const openStates: boolean[] = group.userData.openStates || [];
       let changed = false;
       openStates.forEach((_, idx) => {
@@ -246,24 +246,9 @@ export default function Cabinet3D({
         renderer.render(scene, camera);
       }
     };
-    const handleLeave = () => {
-      const openStates: boolean[] = group.userData.openStates || [];
-      let changed = false;
-      openStates.forEach((state, idx) => {
-        if (state) {
-          openStates[idx] = false;
-          changed = true;
-        }
-      });
-      if (changed) {
-        renderer.render(scene, camera);
-      }
-    };
-    renderer.domElement.addEventListener('pointermove', handlePointer);
-    renderer.domElement.addEventListener('pointerleave', handleLeave);
+    renderer.domElement.addEventListener('pointerdown', handlePointer);
     return () => {
-      renderer.domElement.removeEventListener('pointermove', handlePointer);
-      renderer.domElement.removeEventListener('pointerleave', handleLeave);
+      renderer.domElement.removeEventListener('pointerdown', handlePointer);
     };
   }, [
     widthMM,

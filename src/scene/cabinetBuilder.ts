@@ -747,7 +747,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
           );
           const handle = new THREE.Mesh(handleGeo, handleMat);
           handle.position.set(0, h / 2 - handleHeight * 1.5, T / 2 + 0.01);
-          handle.userData.frontIndex = frontIndex;
+          handle.userData = { frontIndex, isHandle: true };
           frontMesh.add(handle);
         }
         group.add(fg);
@@ -794,7 +794,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
               ? doorW / 2 - handleWidth / 2
               : -doorW / 2 + handleWidth / 2;
           handle.position.set(xPos, H * 0.2, T / 2 + 0.01);
-          handle.userData.frontIndex = frontIndex;
+          handle.userData = { frontIndex, isHandle: true };
           doorMesh.add(handle);
         }
         group.add(fg);
