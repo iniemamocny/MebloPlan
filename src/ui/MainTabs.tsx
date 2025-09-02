@@ -23,7 +23,7 @@ interface MainTabsProps {
   widthMM: number;
   setWidthMM: (n: number) => void;
   gLocal: CabinetConfig;
-  setAdv: (v: CabinetConfig) => void;
+  setAdv: (v: Partial<CabinetConfig>) => void;
   onAdd: (
     width: number,
     adv: CabinetConfig,

@@ -22,7 +22,7 @@ interface Props {
   widthMM: number;
   setWidthMM: (n: number) => void;
   gLocal: CabinetConfig;
-  setAdv: (v: CabinetConfig) => void;
+  setAdv: (v: Partial<CabinetConfig>) => void;
   onAdd: (
     width: number,
     adv: CabinetConfig,
@@ -297,6 +297,27 @@ const CabinetConfigurator: React.FC<Props> = ({
                 {Object.keys(prices.board).map((k) => (
                   <option key={k} value={k}>
                     {k}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <div className="small">{t('configurator.carcassType')}</div>
+              <select
+                className="input"
+                value={gLocal.carcassType}
+                onChange={(e) =>
+                  setAdv({
+                    carcassType: (e.target as HTMLSelectElement).value as
+                      | 'type1'
+                      | 'type2'
+                      | 'type3',
+                  })
+                }
+              >
+                {(['type1', 'type2', 'type3'] as const).map((type) => (
+                  <option key={type} value={type}>
+                    {t(`configurator.carcassTypes.${type}`)}
                   </option>
                 ))}
               </select>
