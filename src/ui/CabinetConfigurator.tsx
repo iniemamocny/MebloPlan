@@ -57,7 +57,9 @@ const CabinetConfigurator: React.FC<Props> = ({
   const [openOkucie, setOpenOkucie] = useState(false);
   const [openNozki, setOpenNozki] = useState(false);
   const [openRysunki, setOpenRysunki] = useState(false);
-  const [openTopFrame, setOpenTopFrame] = useState(false);
+  const [openTopFrame, setOpenTopFrame] = useState(
+    gLocal.topPanel?.type === 'full',
+  );
   const [openBottomFrame, setOpenBottomFrame] = useState(false);
   const [openShelves, setOpenShelves] = useState(false);
   const [openBack, setOpenBack] = useState(false);
@@ -114,6 +116,10 @@ const CabinetConfigurator: React.FC<Props> = ({
       setAdv({ ...gLocal, dividerPosition: 'left' });
     }
   }, [doorsCount, drawersCount, gLocal]);
+
+  useEffect(() => {
+    if (gLocal.topPanel?.type === 'full') setOpenTopFrame(true);
+  }, [gLocal.topPanel?.type]);
   return (
     <div className="section">
       <div className="hd">
