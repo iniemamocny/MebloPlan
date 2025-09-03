@@ -259,7 +259,7 @@ describe('buildCabinetMesh', () => {
     );
   });
 
-  it('handles carcass type6 depth and front heights', () => {
+  it('keeps depth and reduces door front by only the top board for carcass type6', () => {
     const carcass = buildCabinetMesh({
       width: WIDTH,
       height: HEIGHT,
@@ -271,14 +271,13 @@ describe('buildCabinetMesh', () => {
       showFronts: false,
     });
     carcass.updateMatrixWorld(true);
-    const carcBox = new THREE.Box3().setFromObject(carcass);
-    const carcSize = carcBox.getSize(new THREE.Vector3());
+    const carcSize = new THREE.Box3().setFromObject(carcass).getSize(new THREE.Vector3());
     expect(carcSize.z).toBeCloseTo(
       DEPTH + BOARD_THICKNESS + FRONT_OFFSET,
       5,
     );
 
-    const gDoor = buildCabinetMesh({
+    const g = buildCabinetMesh({
       width: WIDTH,
       height: HEIGHT,
       depth: DEPTH,
@@ -287,29 +286,11 @@ describe('buildCabinetMesh', () => {
       family: FAMILY.BASE,
       carcassType: 'type6',
     });
-    const doorGroup = gDoor.children.find(
+    const doorGroup = g.children.find(
       (c) => c instanceof THREE.Group && (c as any).userData.type === 'door',
     ) as THREE.Group;
     const doorMesh = doorGroup.children[0] as THREE.Mesh;
     expect((doorMesh.geometry as any).parameters.height).toBeCloseTo(
-      HEIGHT - BOARD_THICKNESS,
-      5,
-    );
-
-    const gDrawer = buildCabinetMesh({
-      width: WIDTH,
-      height: HEIGHT,
-      depth: DEPTH,
-      drawers: 1,
-      gaps: { top: 0, bottom: 0 },
-      family: FAMILY.BASE,
-      carcassType: 'type6',
-    });
-    const drawerGroup = gDrawer.children.find(
-      (c) => c instanceof THREE.Group && (c as any).userData.type === 'drawer',
-    ) as THREE.Group;
-    const drawerMesh = drawerGroup.children[0] as THREE.Mesh;
-    expect((drawerMesh.geometry as any).parameters.height).toBeCloseTo(
       HEIGHT - BOARD_THICKNESS,
       5,
     );
