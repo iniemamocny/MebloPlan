@@ -222,6 +222,21 @@ describe('buildCabinetMesh', () => {
       5,
     );
 
+    const sideMesh = carcass.children.find(
+      (c) => c instanceof THREE.Mesh && (c as any).userData.part === 'leftSide',
+    ) as THREE.Mesh;
+    expect((sideMesh.geometry as any).parameters.height).toBeCloseTo(
+      HEIGHT - 2 * BOARD_THICKNESS,
+      5,
+    );
+    const rightSide = carcass.children.find(
+      (c) => c instanceof THREE.Mesh && (c as any).userData.part === 'rightSide',
+    ) as THREE.Mesh;
+    expect((rightSide.geometry as any).parameters.height).toBeCloseTo(
+      HEIGHT - 2 * BOARD_THICKNESS,
+      5,
+    );
+
     const gDoor = buildCabinetMesh({
       width: WIDTH,
       height: HEIGHT,
