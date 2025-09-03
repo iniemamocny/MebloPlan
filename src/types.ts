@@ -48,7 +48,7 @@ export interface GlobalsItem {
   backPanel?: 'full' | 'split' | 'none';
   topPanel?: TopPanel;
   bottomPanel?: BottomPanel;
-  carcassType?: 'type1' | 'type2' | 'type3' | 'type4' | 'type5';
+  carcassType?: 'type1' | 'type2' | 'type3' | 'type4' | 'type5' | 'type6';
 }
 
 export type Globals = Record<FAMILY, GlobalsItem>;
@@ -127,7 +127,7 @@ export interface ModuleAdv {
     left?: Record<string, any>;
     right?: Record<string, any>;
   };
-  carcassType?: 'type1' | 'type2' | 'type3' | 'type4' | 'type5';
+  carcassType?: 'type1' | 'type2' | 'type3' | 'type4' | 'type5' | 'type6';
 }
 
 export interface Module3D {
