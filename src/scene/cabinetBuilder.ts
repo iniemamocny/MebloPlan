@@ -53,7 +53,7 @@ export interface CabinetOptions {
     left?: Record<string, any>;
     right?: Record<string, any>;
   };
-  carcassType?: 'type1' | 'type2' | 'type3' | 'type4';
+  carcassType?: 'type1' | 'type2' | 'type3' | 'type4' | 'type5';
   showFronts?: boolean;
 }
 
