@@ -315,7 +315,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   }
 
   // Top and bottom
-  const bottomWidth = carcassType === 'type1' ? W - 2 * T : W;
+  const bottomWidth =
+    carcassType === 'type1' || carcassType === 'type6' ? W - 2 * T : W;
   const topWidth =
     carcassType === 'type3' || carcassType === 'type4' || carcassType === 'type5' || carcassType === 'type6'
       ? W
