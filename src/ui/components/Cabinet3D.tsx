@@ -244,13 +244,20 @@ export default function Cabinet3D({
       let obj: THREE.Object3D | null = null;
       for (const hit of intersects) {
         obj = hit.object;
-        while (obj && obj.userData.frontIndex === undefined) {
+        let ignore = false;
+        while (obj) {
+          if (obj.userData?.ignoreRaycast) {
+            ignore = true;
+            break;
+          }
+          if (obj.userData.frontIndex !== undefined) break;
           obj = obj.parent;
         }
-        if (obj && obj.userData.frontIndex !== undefined) {
-          break;
+        if (ignore || !obj || obj.userData.frontIndex === undefined) {
+          obj = null;
+          continue;
         }
-        obj = null;
+        break;
       }
       if (!obj) {
         return;

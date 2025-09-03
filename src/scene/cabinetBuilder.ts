@@ -195,6 +195,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     const geo = new THREE.BoxGeometry(w, h, d);
     const mesh = new THREE.Mesh(geo, bandMat);
     mesh.position.set(x, y, z);
+    mesh.userData.ignoreRaycast = true;
     group.add(mesh);
   };
 
