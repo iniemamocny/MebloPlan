@@ -211,15 +211,15 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   const sideHeight =
     carcassType === 'type1'
       ? H
-      : carcassType === 'type2' || carcassType === 'type5' || carcassType === 'type6'
+      : carcassType === 'type2' || carcassType === 'type6'
         ? H - T
         : H - 2 * T;
   const sideY =
     carcassType === 'type2'
       ? legHeight + T + (H - T) / 2
-      : carcassType === 'type3' || carcassType === 'type4'
+      : carcassType === 'type3' || carcassType === 'type4' || carcassType === 'type5'
         ? legHeight + T + (H - 2 * T) / 2
-        : carcassType === 'type5' || carcassType === 'type6'
+        : carcassType === 'type6'
           ? legHeight + (H - T) / 2
           : legHeight + H / 2;
   const sideGeo = new THREE.BoxGeometry(T, sideHeight, D);
