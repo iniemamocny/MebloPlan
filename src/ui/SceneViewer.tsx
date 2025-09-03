@@ -152,13 +152,26 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects(group.children, true);
       if (intersects.length === 0) return;
-      let obj: THREE.Object3D | null = intersects[0].object;
-      while (obj && !obj.userData?.type) {
-        obj = obj.parent;
+      let obj: THREE.Object3D | null = null;
+      for (const inter of intersects) {
+        obj = inter.object;
+        let ignore = false;
+        while (obj) {
+          if (obj.userData?.ignoreRaycast) {
+            ignore = true;
+            break;
+          }
+          if (obj.userData?.frontIndex !== undefined) break;
+          obj = obj.parent;
+        }
+        if (ignore || !obj || obj.userData?.frontIndex === undefined) {
+          obj = null;
+          continue;
+        }
+        break;
       }
-      if (!obj || !obj.userData) return;
+      if (!obj || obj.userData?.frontIndex === undefined) return;
       const { frontIndex } = obj.userData as { frontIndex?: number };
-      if (frontIndex === undefined) return;
       let cab: THREE.Object3D | null = obj;
       while (cab && cab.userData?.kind !== 'cab') {
         cab = cab.parent;
