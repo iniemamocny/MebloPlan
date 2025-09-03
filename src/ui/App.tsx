@@ -30,6 +30,7 @@ export default function App() {
     setAdv,
     onAdd,
     doAutoOnSelectedWall,
+    initBlenda,
   } = useCabinetConfig(family, kind, variant, selWall, setVariant);
 
   const [tab, setTab] = useState<'cab' | 'room' | 'costs' | 'cut' | 'global' | null>(null);
@@ -73,6 +74,7 @@ export default function App() {
           gLocal={gLocal}
           setAdv={setAdv}
           onAdd={onAdd}
+          initBlenda={initBlenda}
           threeRef={threeRef}
           boardL={boardL}
           setBoardL={setBoardL}

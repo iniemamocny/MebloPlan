@@ -1,4 +1,10 @@
-import { Gaps, TopPanel, BottomPanel, EdgeBanding } from '../types';
+import {
+  Gaps,
+  TopPanel,
+  BottomPanel,
+  EdgeBanding,
+  SidePanelSpec,
+} from '../types';
 
 export interface CabinetConfig {
   height: number;
@@ -22,8 +28,8 @@ export interface CabinetConfig {
   topPanelEdgeBanding?: EdgeBanding;
   bottomPanelEdgeBanding?: EdgeBanding;
   sidePanels?: {
-    left?: Record<string, unknown>;
-    right?: Record<string, unknown>;
+    left?: SidePanelSpec;
+    right?: SidePanelSpec;
   };
   hardware?: any;
   legs?: any;
