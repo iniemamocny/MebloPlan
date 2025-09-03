@@ -211,6 +211,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       new THREE.EdgesGeometry(mesh.geometry),
       edgeMat,
     );
+    e.userData.ignoreRaycast = true;
     mesh.add(e);
   };
 
