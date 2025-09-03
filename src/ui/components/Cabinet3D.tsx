@@ -257,6 +257,15 @@ export default function Cabinet3D({
           obj = null;
           continue;
         }
+        if (obj.userData.isHandle) {
+          obj = obj.parent;
+          if (!obj || obj.userData.frontIndex === undefined) {
+            obj = null;
+          } else {
+            obj = null;
+          }
+          break;
+        }
         break;
       }
       if (!obj) {

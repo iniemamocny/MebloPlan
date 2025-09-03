@@ -20,6 +20,15 @@ const selectFront = (group: THREE.Group, raycaster: THREE.Raycaster) => {
       obj = null;
       continue;
     }
+    if (obj.userData.isHandle) {
+      obj = obj.parent as THREE.Object3D | null;
+      if (!obj || obj.userData.frontIndex === undefined) {
+        obj = null;
+      } else {
+        obj = null;
+      }
+      break;
+    }
     break;
   }
   return obj?.userData.frontIndex;
@@ -51,5 +60,32 @@ describe('handlePointer raycast ignoring', () => {
       openStates[frontIndex] = !openStates[frontIndex];
     }
     expect(openStates[0]).toBe(true);
+  });
+
+  it('does not toggle when clicking handle', () => {
+    const group = new THREE.Group();
+    const door = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 1, 0.02),
+      new THREE.MeshBasicMaterial(),
+    );
+    door.userData.frontIndex = 0;
+    const handle = new THREE.Mesh(
+      new THREE.BoxGeometry(0.1, 0.02, 0.03),
+      new THREE.MeshBasicMaterial(),
+    );
+    handle.position.set(1.2, 0.4, 0.02);
+    handle.userData = { frontIndex: 0, isHandle: true };
+    group.add(door);
+    group.add(handle);
+    const raycaster = new THREE.Raycaster(
+      new THREE.Vector3(1.2, 0.4, 1),
+      new THREE.Vector3(0, 0, -1),
+    );
+    const frontIndex = selectFront(group, raycaster);
+    const openStates = [false];
+    if (frontIndex !== undefined && frontIndex >= 0) {
+      openStates[frontIndex] = !openStates[frontIndex];
+    }
+    expect(openStates[0]).toBe(false);
   });
 });

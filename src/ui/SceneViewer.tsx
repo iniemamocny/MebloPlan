@@ -168,6 +168,15 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
           obj = null;
           continue;
         }
+        if (obj.userData.isHandle) {
+          obj = obj.parent;
+          if (!obj || obj.userData?.frontIndex === undefined) {
+            obj = null;
+          } else {
+            obj = null;
+          }
+          break;
+        }
         break;
       }
       if (!obj || obj.userData?.frontIndex === undefined) return;
