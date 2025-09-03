@@ -57,14 +57,15 @@ const CabinetConfigurator: React.FC<Props> = ({
   const [openOkucie, setOpenOkucie] = useState(false);
   const [openNozki, setOpenNozki] = useState(false);
   const [openRysunki, setOpenRysunki] = useState(false);
-  const [openTopFrame, setOpenTopFrame] = useState(
-    gLocal.topPanel?.type === 'full',
-  );
-  const [openBottomFrame, setOpenBottomFrame] = useState(false);
-  const [openShelves, setOpenShelves] = useState(false);
-  const [openBack, setOpenBack] = useState(false);
-  const [openRightSide, setOpenRightSide] = useState(false);
-  const [openLeftSide, setOpenLeftSide] = useState(false);
+  const [openKorpusSection, setOpenKorpusSection] = useState<
+    | 'topFrame'
+    | 'bottomFrame'
+    | 'shelves'
+    | 'back'
+    | 'rightSide'
+    | 'leftSide'
+    | null
+  >(null);
   const [highlightPart, setHighlightPart] = useState<
     'top' | 'bottom' | 'shelf' | 'back' | 'leftSide' | 'rightSide' | null
   >(null);
@@ -117,9 +118,6 @@ const CabinetConfigurator: React.FC<Props> = ({
     }
   }, [doorsCount, drawersCount, gLocal]);
 
-  useEffect(() => {
-    if (gLocal.topPanel?.type === 'full') setOpenTopFrame(true);
-  }, [gLocal.topPanel?.type]);
   return (
     <div className="section">
       <div className="hd">
@@ -231,7 +229,12 @@ const CabinetConfigurator: React.FC<Props> = ({
           <summary
             onClick={(e) => {
               e.preventDefault();
-              setOpenKorpus((v) => !v);
+              setOpenKorpus((v) => {
+                const next = !v;
+                setOpenKorpusSection(null);
+                setHighlightPart(null);
+                return next;
+              });
             }}
           >
             {t('configurator.sections.korpus')}
@@ -333,15 +336,16 @@ const CabinetConfigurator: React.FC<Props> = ({
             </div>
           </div>
 
-          <details open={openTopFrame} className={openTopFrame ? 'active' : ''}>
+          <details
+            open={openKorpusSection === 'topFrame'}
+            className={openKorpusSection === 'topFrame' ? 'active' : ''}
+          >
             <summary
               onClick={(e) => {
                 e.preventDefault();
-                setOpenTopFrame((v) => {
-                  const next = !v;
-                  setHighlightPart(next ? 'top' : null);
-                  return next;
-                });
+                const isOpen = openKorpusSection === 'topFrame';
+                setOpenKorpusSection(isOpen ? null : 'topFrame');
+                setHighlightPart(isOpen ? null : 'top');
               }}
             >
               {t('configurator.sections.topFrame')}
@@ -657,15 +661,16 @@ const CabinetConfigurator: React.FC<Props> = ({
             </div>
           </details>
 
-          <details open={openBottomFrame} className={openBottomFrame ? 'active' : ''}>
+          <details
+            open={openKorpusSection === 'bottomFrame'}
+            className={openKorpusSection === 'bottomFrame' ? 'active' : ''}
+          >
             <summary
               onClick={(e) => {
                 e.preventDefault();
-                setOpenBottomFrame((v) => {
-                  const next = !v;
-                  setHighlightPart(next ? 'bottom' : null);
-                  return next;
-                });
+                const isOpen = openKorpusSection === 'bottomFrame';
+                setOpenKorpusSection(isOpen ? null : 'bottomFrame');
+                setHighlightPart(isOpen ? null : 'bottom');
               }}
             >
               {t('configurator.sections.bottomFrame')}
@@ -734,15 +739,16 @@ const CabinetConfigurator: React.FC<Props> = ({
             </div>
           </details>
 
-          <details open={openShelves} className={openShelves ? 'active' : ''}>
+          <details
+            open={openKorpusSection === 'shelves'}
+            className={openKorpusSection === 'shelves' ? 'active' : ''}
+          >
             <summary
               onClick={(e) => {
                 e.preventDefault();
-                setOpenShelves((v) => {
-                  const next = !v;
-                  setHighlightPart(next ? 'shelf' : null);
-                  return next;
-                });
+                const isOpen = openKorpusSection === 'shelves';
+                setOpenKorpusSection(isOpen ? null : 'shelves');
+                setHighlightPart(isOpen ? null : 'shelf');
               }}
             >
               {t('configurator.sections.shelves')}
@@ -791,15 +797,16 @@ const CabinetConfigurator: React.FC<Props> = ({
             </div>
           </details>
 
-          <details open={openBack} className={openBack ? 'active' : ''}>
+          <details
+            open={openKorpusSection === 'back'}
+            className={openKorpusSection === 'back' ? 'active' : ''}
+          >
             <summary
               onClick={(e) => {
                 e.preventDefault();
-                setOpenBack((v) => {
-                  const next = !v;
-                  setHighlightPart(next ? 'back' : null);
-                  return next;
-                });
+                const isOpen = openKorpusSection === 'back';
+                setOpenKorpusSection(isOpen ? null : 'back');
+                setHighlightPart(isOpen ? null : 'back');
               }}
             >
               {t('configurator.sections.back')}
@@ -856,15 +863,16 @@ const CabinetConfigurator: React.FC<Props> = ({
             </div>
           </details>
 
-          <details open={openRightSide} className={openRightSide ? 'active' : ''}>
+          <details
+            open={openKorpusSection === 'rightSide'}
+            className={openKorpusSection === 'rightSide' ? 'active' : ''}
+          >
             <summary
               onClick={(e) => {
                 e.preventDefault();
-                setOpenRightSide((v) => {
-                  const next = !v;
-                  setHighlightPart(next ? 'rightSide' : null);
-                  return next;
-                });
+                const isOpen = openKorpusSection === 'rightSide';
+                setOpenKorpusSection(isOpen ? null : 'rightSide');
+                setHighlightPart(isOpen ? null : 'rightSide');
               }}
             >
               {t('configurator.sections.rightSide')}
@@ -913,15 +921,16 @@ const CabinetConfigurator: React.FC<Props> = ({
             </div>
           </details>
 
-          <details open={openLeftSide} className={openLeftSide ? 'active' : ''}>
+          <details
+            open={openKorpusSection === 'leftSide'}
+            className={openKorpusSection === 'leftSide' ? 'active' : ''}
+          >
             <summary
               onClick={(e) => {
                 e.preventDefault();
-                setOpenLeftSide((v) => {
-                  const next = !v;
-                  setHighlightPart(next ? 'leftSide' : null);
-                  return next;
-                });
+                const isOpen = openKorpusSection === 'leftSide';
+                setOpenKorpusSection(isOpen ? null : 'leftSide');
+                setHighlightPart(isOpen ? null : 'leftSide');
               }}
             >
               {t('configurator.sections.leftSide')}
