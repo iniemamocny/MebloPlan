@@ -60,7 +60,8 @@ export default function GlobalSettings(){
                 { value: 'type1', label: t('configurator.carcassTypes.type1') },
                 { value: 'type2', label: t('configurator.carcassTypes.type2') },
                 { value: 'type3', label: t('configurator.carcassTypes.type3') },
-                { value: 'type4', label: t('configurator.carcassTypes.type4') }
+                { value: 'type4', label: t('configurator.carcassTypes.type4') },
+                { value: 'type5', label: t('configurator.carcassTypes.type5') }
               ]}
             />
             <Field
