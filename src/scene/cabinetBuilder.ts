@@ -211,7 +211,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   const sideHeight =
     carcassType === 'type1'
       ? H
-      : carcassType === 'type2'
+      : carcassType === 'type2' || carcassType === 'type5'
         ? H - T
         : H - 2 * T;
   const sideY =
@@ -219,7 +219,9 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       ? legHeight + T + (H - T) / 2
       : carcassType === 'type3' || carcassType === 'type4'
         ? legHeight + T + (H - 2 * T) / 2
-        : legHeight + H / 2;
+        : carcassType === 'type5'
+          ? legHeight + (H - T) / 2
+          : legHeight + H / 2;
   const sideGeo = new THREE.BoxGeometry(T, sideHeight, D);
   const leftSide = new THREE.Mesh(sideGeo, carcMat);
   leftSide.position.set(T / 2, sideY, -D / 2);
@@ -315,8 +317,13 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   // Top and bottom
   const bottomWidth = carcassType === 'type1' ? W - 2 * T : W;
   const topWidth =
-    carcassType === 'type3' || carcassType === 'type4' ? W : W - 2 * T;
-  const sideInset = carcassType === 'type3' || carcassType === 'type4' ? 0 : T;
+    carcassType === 'type3' || carcassType === 'type4' || carcassType === 'type5'
+      ? W
+      : W - 2 * T;
+  const sideInset =
+    carcassType === 'type3' || carcassType === 'type4' || carcassType === 'type5'
+      ? 0
+      : T;
   if (bottomPanel !== 'none') {
     const bottomDepth = carcassType === 'type4' ? D + frontProj : D;
     const bottomZ = carcassType === 'type4' ? -D / 2 + frontProj / 2 : -D / 2;
@@ -394,7 +401,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       const x = W / 2;
       const y = legHeight + H - widthM / 2 - tr.offset / 1000;
       const z = isFront
-        ? carcassType === 'type4'
+        ? carcassType === 'type4' || carcassType === 'type5'
           ? frontProj - T / 2
           : FRONT_OFFSET - T / 2
         : -D + backT + T / 2;
@@ -439,7 +446,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       let frontEdge: number;
       let backEdge: number;
       if (isFront) {
-        const frontBase = carcassType === 'type4' ? frontProj : 0;
+        const frontBase =
+          carcassType === 'type4' || carcassType === 'type5' ? frontProj : 0;
         frontEdge = frontBase - tr.offset / 1000;
         backEdge = frontEdge - widthM;
       } else {
@@ -484,8 +492,12 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     }
   };
   if (!topPanel || topPanel.type === 'full') {
-    const topDepth = carcassType === 'type4' ? D + frontProj : D;
-    const topZ = carcassType === 'type4' ? -D / 2 + frontProj / 2 : -D / 2;
+    const topDepth =
+      carcassType === 'type4' || carcassType === 'type5' ? D + frontProj : D;
+    const topZ =
+      carcassType === 'type4' || carcassType === 'type5'
+        ? -D / 2 + frontProj / 2
+        : -D / 2;
     const top = new THREE.Mesh(new THREE.BoxGeometry(topWidth, T, topDepth), carcMat);
     top.position.set(W / 2, legHeight + H - T / 2, topZ);
     top.userData.part = 'top';
@@ -493,9 +505,10 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     addEdges(top);
     group.add(top);
     if (shouldBand(topPanelEdgeBanding, 'horizontal', 'front')) {
-      const zFront = carcassType === 'type4'
-        ? frontProj + offsetForEdge('front')
-        : offsetForEdge('front');
+      const zFront =
+        carcassType === 'type4' || carcassType === 'type5'
+          ? frontProj + offsetForEdge('front')
+          : offsetForEdge('front');
       addBand(
         W / 2,
         legHeight + H - T / 2,
@@ -520,8 +533,14 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       shouldBand(topPanelEdgeBanding, 'horizontal', 'right')
     ) {
       const topLeft = (W - topWidth) / 2;
-      const zCenter = carcassType === 'type4' ? -D / 2 + frontProj / 2 : -D / 2;
-      const depth = carcassType === 'type4' ? D + frontProj : D;
+      const zCenter =
+        carcassType === 'type4' || carcassType === 'type5'
+          ? -D / 2 + frontProj / 2
+          : -D / 2;
+      const depth =
+        carcassType === 'type4' || carcassType === 'type5'
+          ? D + frontProj
+          : D;
       if (shouldBand(topPanelEdgeBanding, 'horizontal', 'left')) {
         addBand(
           topLeft + offsetForEdge('left'),
@@ -738,7 +757,11 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     const gapBetween = gaps.between ?? 0;
     const availW = W - (gapLeft + gapRight) / 1000;
     const availH =
-      (carcassType === 'type4' ? H - 2 * T : H) -
+      (carcassType === 'type4'
+        ? H - 2 * T
+        : carcassType === 'type5'
+          ? H - T
+          : H) -
       (gapTop + gapBottom) / 1000;
     if (drawers > 0) {
       const totalFrontHeight = Math.max(50, Math.round(availH * 1000));
@@ -748,8 +771,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
           : Array.from({ length: drawers }, () =>
               Math.floor(totalFrontHeight / drawers),
             );
-      let currentY =
-        legHeight + (carcassType === 'type4' ? T : 0) + gapBottom / 1000;
+      const bottomOffset = carcassType === 'type4' ? T : 0;
+      let currentY = legHeight + bottomOffset + gapBottom / 1000;
       for (let i = 0; i < drawers; i++) {
         const h = arr[i] / 1000;
         const frontGeo = new THREE.BoxGeometry(availW, h, T);
@@ -801,8 +824,9 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
           gapLeft / 1000 + i * (doorW + gapBetween / 1000);
         const pivotX = hingeSide === 'left' ? leftEdge : leftEdge + doorW;
         // Hinge pivot sits 2 mm in front of the carcass, door hangs entirely in front
+        const bottomOffset = carcassType === 'type4' ? T : 0;
         const baseY =
-          legHeight + (carcassType === 'type4' ? T : 0) + gapBottom / 1000 + doorH / 2;
+          legHeight + bottomOffset + gapBottom / 1000 + doorH / 2;
         fg.position.set(pivotX, baseY, frontProj - T);
         doorMesh.position.set(
           hingeSide === 'left' ? doorW / 2 : -doorW / 2,
