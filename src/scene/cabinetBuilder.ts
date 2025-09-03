@@ -53,7 +53,7 @@ export interface CabinetOptions {
     left?: Record<string, any>;
     right?: Record<string, any>;
   };
-  carcassType?: 'type1' | 'type2' | 'type3' | 'type4' | 'type5';
+  carcassType?: 'type1' | 'type2' | 'type3' | 'type4' | 'type5' | 'type6';
   showFronts?: boolean;
 }
 
@@ -211,7 +211,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   const sideHeight =
     carcassType === 'type1'
       ? H
-      : carcassType === 'type2' || carcassType === 'type5'
+      : carcassType === 'type2' || carcassType === 'type5' || carcassType === 'type6'
         ? H - T
         : H - 2 * T;
   const sideY =
@@ -219,7 +219,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       ? legHeight + T + (H - T) / 2
       : carcassType === 'type3' || carcassType === 'type4'
         ? legHeight + T + (H - 2 * T) / 2
-        : carcassType === 'type5'
+        : carcassType === 'type5' || carcassType === 'type6'
           ? legHeight + (H - T) / 2
           : legHeight + H / 2;
   const sideGeo = new THREE.BoxGeometry(T, sideHeight, D);
@@ -271,7 +271,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
         bandThickness,
       );
     }
-    if (carcassType !== 'type5' && shouldBand(banding, 'vertical', 'bottom')) {
+    if (carcassType !== 'type5' && carcassType !== 'type6' && shouldBand(banding, 'vertical', 'bottom')) {
       addBand(
         x,
         sideBottomY + offsetForEdge('bottom'),
@@ -317,11 +317,11 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   // Top and bottom
   const bottomWidth = carcassType === 'type1' ? W - 2 * T : W;
   const topWidth =
-    carcassType === 'type3' || carcassType === 'type4' || carcassType === 'type5'
+    carcassType === 'type3' || carcassType === 'type4' || carcassType === 'type5' || carcassType === 'type6'
       ? W
       : W - 2 * T;
   const sideInset =
-    carcassType === 'type3' || carcassType === 'type4' || carcassType === 'type5'
+    carcassType === 'type3' || carcassType === 'type4' || carcassType === 'type5' || carcassType === 'type6'
       ? 0
       : T;
   if (bottomPanel !== 'none') {
@@ -401,7 +401,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       const x = W / 2;
       const y = legHeight + H - widthM / 2 - tr.offset / 1000;
       const z = isFront
-        ? carcassType === 'type4' || carcassType === 'type5'
+        ? carcassType === 'type4' || carcassType === 'type5' || carcassType === 'type6'
           ? frontProj - T / 2
           : FRONT_OFFSET - T / 2
         : -D + backT + T / 2;
@@ -447,7 +447,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       let backEdge: number;
       if (isFront) {
         const frontBase =
-          carcassType === 'type4' || carcassType === 'type5' ? frontProj : 0;
+          carcassType === 'type4' || carcassType === 'type5' || carcassType === 'type6' ? frontProj : 0;
         frontEdge = frontBase - tr.offset / 1000;
         backEdge = frontEdge - widthM;
       } else {
@@ -493,9 +493,9 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   };
   if (!topPanel || topPanel.type === 'full') {
     const topDepth =
-      carcassType === 'type4' || carcassType === 'type5' ? D + frontProj : D;
+      carcassType === 'type4' || carcassType === 'type5' || carcassType === 'type6' ? D + frontProj : D;
     const topZ =
-      carcassType === 'type4' || carcassType === 'type5'
+      carcassType === 'type4' || carcassType === 'type5' || carcassType === 'type6'
         ? -D / 2 + frontProj / 2
         : -D / 2;
     const top = new THREE.Mesh(new THREE.BoxGeometry(topWidth, T, topDepth), carcMat);
@@ -506,7 +506,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     group.add(top);
     if (shouldBand(topPanelEdgeBanding, 'horizontal', 'front')) {
       const zFront =
-        carcassType === 'type4' || carcassType === 'type5'
+        carcassType === 'type4' || carcassType === 'type5' || carcassType === 'type6'
           ? frontProj + offsetForEdge('front')
           : offsetForEdge('front');
       addBand(
@@ -534,11 +534,11 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     ) {
       const topLeft = (W - topWidth) / 2;
       const zCenter =
-        carcassType === 'type4' || carcassType === 'type5'
+        carcassType === 'type4' || carcassType === 'type5' || carcassType === 'type6'
           ? -D / 2 + frontProj / 2
           : -D / 2;
       const depth =
-        carcassType === 'type4' || carcassType === 'type5'
+        carcassType === 'type4' || carcassType === 'type5' || carcassType === 'type6'
           ? D + frontProj
           : D;
       if (shouldBand(topPanelEdgeBanding, 'horizontal', 'left')) {
@@ -759,7 +759,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     const availH =
       (carcassType === 'type4'
         ? H - 2 * T
-        : carcassType === 'type5'
+        : carcassType === 'type5' || carcassType === 'type6'
           ? H - T
           : H) -
       (gapTop + gapBottom) / 1000;
