@@ -616,32 +616,38 @@ const CabinetConfigurator: React.FC<Props> = ({
                   </div>
                 )}
               </div>
-              <div style={{ marginTop: 8 }}>
-                <div className="small">{t('configurator.traverseEdgeBanding')}</div>
-                <div className="row" style={{ gap: 8 }}>
-                  {(['front', 'back', 'left', 'right'] as const).map((edge) => (
-                    <label
-                      key={edge}
-                      style={{ display: 'flex', alignItems: 'center', gap: 4 }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={gLocal.traverseEdgeBanding?.[edge] ?? false}
-                        onChange={(e) =>
-                          setAdv({
-                            ...gLocal,
-                            traverseEdgeBanding: {
-                              ...gLocal.traverseEdgeBanding,
-                              [edge]: (e.target as HTMLInputElement).checked,
-                            },
-                          })
-                        }
-                      />
-                      {t(`configurator.edgeBandingOptions.${edge}`)}
-                    </label>
-                  ))}
+              {['twoTraverses', 'frontTraverse', 'backTraverse'].includes(
+                gLocal.topPanel?.type ?? '',
+              ) && (
+                <div style={{ marginTop: 8 }}>
+                  <div className="small">
+                    {t('configurator.traverseEdgeBanding')}
+                  </div>
+                  <div className="row" style={{ gap: 8 }}>
+                    {(['front', 'back', 'left', 'right'] as const).map((edge) => (
+                      <label
+                        key={edge}
+                        style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={gLocal.traverseEdgeBanding?.[edge] ?? false}
+                          onChange={(e) =>
+                            setAdv({
+                              ...gLocal,
+                              traverseEdgeBanding: {
+                                ...gLocal.traverseEdgeBanding,
+                                [edge]: (e.target as HTMLInputElement).checked,
+                              },
+                            })
+                          }
+                        />
+                        {t(`configurator.edgeBandingOptions.${edge}`)}
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </details>
 
