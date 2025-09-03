@@ -241,26 +241,25 @@ export default function Cabinet3D({
       );
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects(group.children, true);
-      let obj: THREE.Object3D | null = intersects[0]?.object || null;
-      while (obj && obj.userData.frontIndex === undefined) {
-        obj = obj.parent;
+      let obj: THREE.Object3D | null = null;
+      for (const hit of intersects) {
+        obj = hit.object;
+        while (obj && obj.userData.frontIndex === undefined) {
+          obj = obj.parent;
+        }
+        if (obj && obj.userData.frontIndex !== undefined) {
+          break;
+        }
+        obj = null;
       }
-      if (!obj || obj.userData.isHandle !== true) {
+      if (!obj) {
         return;
       }
       const frontIndex = obj.userData.frontIndex as number;
       const openStates: boolean[] = group.userData.openStates || [];
-      let changed = false;
-      openStates.forEach((_, idx) => {
-        const shouldOpen = frontIndex === idx;
-        if (openStates[idx] !== shouldOpen) {
-          openStates[idx] = shouldOpen;
-          changed = true;
-        }
-      });
-      if (changed) {
-        renderer.render(scene, camera);
-      }
+      group.userData.openStates = openStates;
+      openStates[frontIndex] = !openStates[frontIndex];
+      renderer.render(scene, camera);
     };
     renderer.domElement.addEventListener('pointerdown', handlePointer);
     return () => {
