@@ -1,6 +1,12 @@
 import * as THREE from 'three';
 import { FAMILY, FAMILY_COLORS } from '../core/catalog';
-import { TopPanel, BottomPanel, Traverse, EdgeBanding } from '../types';
+import {
+  TopPanel,
+  BottomPanel,
+  Traverse,
+  EdgeBanding,
+  SidePanelSpec,
+} from '../types';
 
 export type Orientation = 'vertical' | 'horizontal' | 'back';
 export type EdgeName = 'front' | 'back' | 'left' | 'right' | 'top' | 'bottom';
@@ -50,8 +56,8 @@ export interface CabinetOptions {
   topPanelEdgeBanding?: EdgeBanding;
   bottomPanelEdgeBanding?: EdgeBanding;
   sidePanels?: {
-    left?: Record<string, any>;
-    right?: Record<string, any>;
+    left?: SidePanelSpec;
+    right?: SidePanelSpec;
   };
   carcassType?: 'type1' | 'type2' | 'type3' | 'type4' | 'type5' | 'type6';
   showFronts?: boolean;
@@ -295,7 +301,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   bandSide(leftSideEdgeBanding, T / 2);
   bandSide(rightSideEdgeBanding, W - T / 2);
 
-  if (sidePanels.left) {
+  if (sidePanels.left?.panel) {
     const panel = new THREE.Mesh(sideGeo.clone(), carcMat);
     panel.position.set(-T / 2, sideY, -D / 2);
     panel.userData.part = 'leftSide';
@@ -304,7 +310,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     group.add(panel);
     bandSide(leftSideEdgeBanding, -T / 2);
   }
-  if (sidePanels.right) {
+  if (sidePanels.right?.panel) {
     const panel = new THREE.Mesh(sideGeo.clone(), carcMat);
     panel.position.set(W + T / 2, sideY, -D / 2);
     panel.userData.part = 'rightSide';
@@ -312,6 +318,31 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     addEdges(panel);
     group.add(panel);
     bandSide(rightSideEdgeBanding, W + T / 2);
+  }
+
+  if (sidePanels.left?.blenda) {
+    const bl = sidePanels.left.blenda;
+    const w = bl.width / 1000;
+    const h = bl.height / 1000;
+    const geo = new THREE.BoxGeometry(w, h, T);
+    const mesh = new THREE.Mesh(geo, frontMat);
+    const baseX = sidePanels.left.panel ? -T : 0;
+    const y = legHeight + (gaps.bottom || 0) / 1000 + h / 2;
+    mesh.position.set(baseX - w / 2, y, frontProj - T / 2);
+    addEdges(mesh);
+    group.add(mesh);
+  }
+  if (sidePanels.right?.blenda) {
+    const bl = sidePanels.right.blenda;
+    const w = bl.width / 1000;
+    const h = bl.height / 1000;
+    const geo = new THREE.BoxGeometry(w, h, T);
+    const mesh = new THREE.Mesh(geo, frontMat);
+    const baseX = sidePanels.right.panel ? W + T : W;
+    const y = legHeight + (gaps.bottom || 0) / 1000 + h / 2;
+    mesh.position.set(baseX + w / 2, y, frontProj - T / 2);
+    addEdges(mesh);
+    group.add(mesh);
   }
 
   // Top and bottom

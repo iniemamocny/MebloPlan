@@ -29,6 +29,7 @@ interface Props {
     doorsCount: number,
     drawersCount: number,
   ) => void;
+  initBlenda: (side: 'left' | 'right') => void;
 }
 
 const FORM_COMPONENTS: Record<string, React.ComponentType<CabinetFormProps>> = {
@@ -47,6 +48,7 @@ const CabinetConfigurator: React.FC<Props> = ({
   gLocal,
   setAdv,
   onAdd,
+  initBlenda,
 }) => {
   const prices = usePlannerStore((s) => s.prices);
   const { t } = useTranslation();
@@ -904,20 +906,97 @@ const CabinetConfigurator: React.FC<Props> = ({
               <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <input
                   type="checkbox"
-                  checked={!!gLocal.sidePanels?.right}
+                  checked={!!gLocal.sidePanels?.right?.panel}
                   onChange={(e) => {
                     const checked = (e.target as HTMLInputElement).checked;
                     setAdv({
                       ...gLocal,
                       sidePanels: {
                         ...gLocal.sidePanels,
-                        right: checked ? { ...(gLocal.sidePanels?.right || {}) } : undefined,
+                        right: {
+                          ...(gLocal.sidePanels?.right || {}),
+                          panel: checked || undefined,
+                        },
                       },
                     });
                   }}
                 />
                 {t('configurator.panel')}
               </label>
+              <div className="small" style={{ marginTop: 8 }}>{t('configurator.blenda')}</div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <input
+                  type="checkbox"
+                  checked={!!gLocal.sidePanels?.right?.blenda}
+                  onChange={(e) => {
+                    const checked = (e.target as HTMLInputElement).checked;
+                    if (checked) {
+                      initBlenda('right');
+                    } else {
+                      setAdv({
+                        ...gLocal,
+                        sidePanels: {
+                          ...gLocal.sidePanels,
+                          right: { ...(gLocal.sidePanels?.right || {}), blenda: undefined },
+                        },
+                      });
+                    }
+                  }}
+                />
+                {t('configurator.blenda')}
+              </label>
+              {gLocal.sidePanels?.right?.blenda && (
+                <div style={{ marginLeft: 16, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <label className="row" style={{ gap: 4 }}>
+                    {t('configurator.width')}
+                    <input
+                      type="number"
+                      className="input"
+                      value={gLocal.sidePanels.right.blenda.width}
+                      onChange={(e) => {
+                        const width = parseFloat((e.target as HTMLInputElement).value);
+                        setAdv({
+                          ...gLocal,
+                          sidePanels: {
+                            ...gLocal.sidePanels,
+                            right: {
+                              ...(gLocal.sidePanels?.right || {}),
+                              blenda: {
+                                ...gLocal.sidePanels.right.blenda,
+                                width,
+                              },
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </label>
+                  <label className="row" style={{ gap: 4 }}>
+                    {t('configurator.height')}
+                    <input
+                      type="number"
+                      className="input"
+                      value={gLocal.sidePanels.right.blenda.height}
+                      onChange={(e) => {
+                        const height = parseFloat((e.target as HTMLInputElement).value);
+                        setAdv({
+                          ...gLocal,
+                          sidePanels: {
+                            ...gLocal.sidePanels,
+                            right: {
+                              ...(gLocal.sidePanels?.right || {}),
+                              blenda: {
+                                ...gLocal.sidePanels.right.blenda,
+                                height,
+                              },
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </label>
+                </div>
+              )}
             </div>
           </details>
 
@@ -962,20 +1041,97 @@ const CabinetConfigurator: React.FC<Props> = ({
               <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <input
                   type="checkbox"
-                  checked={!!gLocal.sidePanels?.left}
+                  checked={!!gLocal.sidePanels?.left?.panel}
                   onChange={(e) => {
                     const checked = (e.target as HTMLInputElement).checked;
                     setAdv({
                       ...gLocal,
                       sidePanels: {
                         ...gLocal.sidePanels,
-                        left: checked ? { ...(gLocal.sidePanels?.left || {}) } : undefined,
+                        left: {
+                          ...(gLocal.sidePanels?.left || {}),
+                          panel: checked || undefined,
+                        },
                       },
                     });
                   }}
                 />
                 {t('configurator.panel')}
               </label>
+              <div className="small" style={{ marginTop: 8 }}>{t('configurator.blenda')}</div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <input
+                  type="checkbox"
+                  checked={!!gLocal.sidePanels?.left?.blenda}
+                  onChange={(e) => {
+                    const checked = (e.target as HTMLInputElement).checked;
+                    if (checked) {
+                      initBlenda('left');
+                    } else {
+                      setAdv({
+                        ...gLocal,
+                        sidePanels: {
+                          ...gLocal.sidePanels,
+                          left: { ...(gLocal.sidePanels?.left || {}), blenda: undefined },
+                        },
+                      });
+                    }
+                  }}
+                />
+                {t('configurator.blenda')}
+              </label>
+              {gLocal.sidePanels?.left?.blenda && (
+                <div style={{ marginLeft: 16, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <label className="row" style={{ gap: 4 }}>
+                    {t('configurator.width')}
+                    <input
+                      type="number"
+                      className="input"
+                      value={gLocal.sidePanels.left.blenda.width}
+                      onChange={(e) => {
+                        const width = parseFloat((e.target as HTMLInputElement).value);
+                        setAdv({
+                          ...gLocal,
+                          sidePanels: {
+                            ...gLocal.sidePanels,
+                            left: {
+                              ...(gLocal.sidePanels?.left || {}),
+                              blenda: {
+                                ...gLocal.sidePanels.left.blenda,
+                                width,
+                              },
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </label>
+                  <label className="row" style={{ gap: 4 }}>
+                    {t('configurator.height')}
+                    <input
+                      type="number"
+                      className="input"
+                      value={gLocal.sidePanels.left.blenda.height}
+                      onChange={(e) => {
+                        const height = parseFloat((e.target as HTMLInputElement).value);
+                        setAdv({
+                          ...gLocal,
+                          sidePanels: {
+                            ...gLocal.sidePanels,
+                            left: {
+                              ...(gLocal.sidePanels?.left || {}),
+                              blenda: {
+                                ...gLocal.sidePanels.left.blenda,
+                                height,
+                              },
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </label>
+                </div>
+              )}
             </div>
           </details>
         </div>

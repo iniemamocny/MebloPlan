@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { FAMILY } from '../../core/catalog';
 import { buildCabinetMesh } from '../../scene/cabinetBuilder';
 import { usePlannerStore } from '../../state/store';
-import { TopPanel, BottomPanel, EdgeBanding } from '../../types';
+import { TopPanel, BottomPanel, EdgeBanding, SidePanelSpec } from '../../types';
 
 export default function Cabinet3D({
   widthMM,
@@ -53,8 +53,8 @@ export default function Cabinet3D({
   topPanelEdgeBanding?: EdgeBanding;
   bottomPanelEdgeBanding?: EdgeBanding;
   sidePanels?: {
-    left?: Record<string, any>;
-    right?: Record<string, any>;
+    left?: SidePanelSpec;
+    right?: SidePanelSpec;
   };
   carcassType?: 'type1' | 'type2' | 'type3' | 'type4' | 'type5' | 'type6';
   showFronts?: boolean;

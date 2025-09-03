@@ -26,6 +26,16 @@ export type EdgeBanding = {
   bottom?: boolean;
 };
 
+export interface Blenda {
+  width: number;
+  height: number;
+}
+
+export interface SidePanelSpec {
+  panel?: boolean;
+  blenda?: Blenda;
+}
+
 export type TopPanel =
   | { type: 'full' }
   | { type: 'none' }
@@ -124,8 +134,8 @@ export interface ModuleAdv {
   topPanelEdgeBanding?: EdgeBanding;
   bottomPanelEdgeBanding?: EdgeBanding;
   sidePanels?: {
-    left?: Record<string, any>;
-    right?: Record<string, any>;
+    left?: SidePanelSpec;
+    right?: SidePanelSpec;
   };
   carcassType?: 'type1' | 'type2' | 'type3' | 'type4' | 'type5' | 'type6';
 }

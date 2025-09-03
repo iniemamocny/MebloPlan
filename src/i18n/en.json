@@ -141,6 +141,7 @@
     "bottomPanelEdgeBanding": "Bottom panel - edge banding",
     "sidePanel": "Side panel",
     "panel": "Panel",
+    "blenda": "Filler",
     "orientation": {
       "label": "Orientation",
       "horizontal": "horizontal",

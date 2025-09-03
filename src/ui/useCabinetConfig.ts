@@ -310,6 +310,20 @@ export function useCabinetConfig(
       ...patch,
     }));
 
+  const initBlenda = (side: 'left' | 'right') => {
+    setAdvState((prev) => {
+      const cfg = prev || (store.globals[family] as CabinetConfig);
+      const h = cfg.height - (cfg.gaps.top || 0) - (cfg.gaps.bottom || 0);
+      const sidePanels = { ...(cfg.sidePanels || {}) } as CabinetConfig['sidePanels'];
+      const sideCfg = { ...(sidePanels?.[side] || {}) };
+      sidePanels![side] = {
+        ...sideCfg,
+        blenda: { width: 50, height: h },
+      };
+      return { ...cfg, sidePanels };
+    });
+  };
+
   return {
     widthMM,
     setWidthMM,
@@ -318,6 +332,7 @@ export function useCabinetConfig(
     gLocal,
     onAdd,
     doAutoOnSelectedWall,
+    initBlenda,
   };
 }
 
