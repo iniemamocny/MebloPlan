@@ -271,7 +271,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
         bandThickness,
       );
     }
-    if (carcassType !== 'type5' && carcassType !== 'type6' && shouldBand(banding, 'vertical', 'bottom')) {
+    if (carcassType !== 'type5' && shouldBand(banding, 'vertical', 'bottom')) {
       addBand(
         x,
         sideBottomY + offsetForEdge('bottom'),

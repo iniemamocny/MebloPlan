@@ -518,6 +518,39 @@ describe('buildCabinetMesh', () => {
     expect(topBands.length).toBe(2);
   });
 
+  it('skips bottom edge banding for carcass type5', () => {
+    const g = buildCabinetMesh({
+      width: WIDTH,
+      height: HEIGHT,
+      depth: DEPTH,
+      drawers: 0,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      carcassType: 'type5',
+      rightSideEdgeBanding: {
+        bottom: true,
+      },
+      leftSideEdgeBanding: {
+        bottom: true,
+      },
+    });
+    const bandThickness = BAND_THICKNESS;
+    const boardThickness = BOARD_THICKNESS;
+    const depth = DEPTH;
+    const bottomY = -bandThickness / 2;
+    const bands = g.children.filter(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        Math.abs((c as any).geometry.parameters.width - boardThickness) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.height - bandThickness) < 1e-6 &&
+        Math.abs((c as any).geometry.parameters.depth - depth) < 1e-6,
+    ) as THREE.Mesh[];
+    const bottomBands = bands.filter(
+      (b) => Math.abs(b.position.y - bottomY) < 1e-6,
+    );
+    expect(bottomBands.length).toBe(0);
+  });
+
   it('does not band top or bottom panels when side front banding selected', () => {
     const g = buildCabinetMesh({
       width: WIDTH,
