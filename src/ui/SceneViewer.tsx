@@ -4,7 +4,7 @@ import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js
 import { setupThree } from '../scene/engine';
 import { buildCabinetMesh } from '../scene/cabinetBuilder';
 import { FAMILY } from '../core/catalog';
-import { usePlannerStore } from '../state/store';
+import { usePlannerStore, legCategories } from '../state/store';
 import { Module3D, ModuleAdv, Globals } from '../types';
 
 interface ThreeContext {
@@ -58,6 +58,15 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
             | undefined);
     const legOffset =
       adv.legs?.legsOffset ?? store.globals[mod.family]?.legsOffset ?? 0;
+    const legCategory =
+      adv.legs?.category ??
+      (adv.legs?.type ? legCategories[adv.legs.type] : undefined);
+    const legCategoryToType: Record<string, 'standard' | 'reinforced' | 'decorative'> = {
+      standard: 'standard',
+      wzmocniona: 'reinforced',
+      ozdobna: 'decorative',
+    };
+    const legsType = legCategory ? legCategoryToType[legCategory] : undefined;
     const group = buildCabinetMesh({
       width: W,
       height: H,
@@ -72,6 +81,7 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       bottomPanel: adv.bottomPanel,
       legHeight,
       legsOffset: legOffset / 1000,
+      legsType,
       showHandles: true,
       hinge,
       dividerPosition,

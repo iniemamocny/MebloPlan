@@ -59,6 +59,12 @@ const CabinetConfigurator: React.FC<Props> = ({
   const legsHeight = gLocal.legs?.height ?? globalLegsHeight;
   const legType = gLocal.legs?.type ?? g.legsType;
   const legCategory = gLocal.legs?.category ?? legCategories[legType];
+  const legCategoryToType: Record<string, 'standard' | 'reinforced' | 'decorative'> = {
+    standard: 'standard',
+    wzmocniona: 'reinforced',
+    ozdobna: 'decorative',
+  };
+  const legsType = legCategoryToType[legCategory] ?? 'standard';
   const legsOffset = gLocal.legs?.legsOffset ?? g.legsOffset ?? 35;
   const baseOptions = [60, 100, 150];
   const legsBase = baseOptions.find((b) => Math.abs(legsHeight - b) <= 25) ?? 100;
@@ -173,6 +179,7 @@ const CabinetConfigurator: React.FC<Props> = ({
               highlightPart={highlightPart}
               legHeight={gLocal.legs?.height || globalLegsHeight}
               legsOffset={legsOffset}
+              legsType={legsType}
             />
           </div>
           <div className="grid2" style={{ marginTop: 8 }}>
