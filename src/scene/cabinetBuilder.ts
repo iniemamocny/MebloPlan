@@ -12,6 +12,8 @@ import {
 export type Orientation = 'vertical' | 'horizontal' | 'back';
 export type EdgeName = 'front' | 'back' | 'left' | 'right' | 'top' | 'bottom';
 
+const mm = (n: number): number => n / 1000;
+
 export const getOrientationAxes = (orientation: Orientation) => {
   switch (orientation) {
     case 'horizontal':
@@ -1019,12 +1021,12 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       let leg: THREE.Object3D;
       if (legsType === 'reinforced') {
         const legGroup = new THREE.Group();
-        const plateThickness = 6 / 1000;
-        const chamfer = 8 / 1000;
+        const plateThickness = mm(6);
+        const chamfer = mm(8);
         const halfPlate = baseSize / 2;
         const cylRadius = reinforcedCylRadius;
         const cylHeight = Math.max(legTotalHeight - plateThickness * 2, 0);
-        const screwRadius = 10 / 1000 / 2;
+        const screwRadius = mm(10) / 2;
 
         const plateShape = new THREE.Shape();
         plateShape.moveTo(-halfPlate, halfPlate);
@@ -1088,14 +1090,14 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
         const legGroup = new THREE.Group();
 
         // Dimensions in metres
-        const plateThickness = 3 / 1000;
-        const plateOuterR = 60 / 1000 / 2;
-        const plateInnerR = 50 / 1000 / 2;
-        const shaftHeight = 22 / 1000;
-        const shaftRadius = 22 / 1000 / 2;
-        const footRadius = 50 / 1000 / 2;
-        const footHeight = 10 / 1000;
-        const screwRadius = 10 / 1000 / 2;
+        const plateThickness = mm(3);
+        const plateOuterR = mm(60) / 2;
+        const plateInnerR = mm(50) / 2;
+        const shaftHeight = mm(22);
+        const shaftRadius = mm(22) / 2;
+        const footRadius = mm(50) / 2;
+        const footHeight = mm(10);
+        const screwRadius = mm(10) / 2;
         // footHeight + screwHeight + shaftHeight + plateThickness = legHeight
         const screwHeight = Math.max(
           legHeight - plateThickness - shaftHeight - footHeight,
@@ -1111,7 +1113,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
           notch.absarc(
             Math.cos(angle) * (footRadius - 0.007),
             Math.sin(angle) * (footRadius - 0.007),
-            3 / 1000,
+            mm(3),
             0,
             Math.PI * 2,
             true,
