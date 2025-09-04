@@ -52,6 +52,7 @@ export function useCabinetConfig(
         type: g.legsType,
         height: g.legsHeight,
         category: legCategories[g.legsType],
+        legsOffset: g.legsOffset,
       },
       carcassType: g.carcassType,
     });
@@ -186,7 +187,7 @@ export function useCabinetConfig(
       legsType: selectedLegsType,
       legs: {
         category: legCategories[selectedLegsType],
-        ...(g.legs || {}),
+        legsOffset: g.legsOffset,
         ...(advLocal.legs || {}),
       },
     };
@@ -326,6 +327,7 @@ export function useCabinetConfig(
         type: g.legsType,
         height: g.legsHeight,
         category: legCategories[g.legsType],
+        legsOffset: g.legsOffset,
       };
     return base;
   })();
@@ -341,6 +343,7 @@ export function useCabinetConfig(
                 type: g.legsType,
                 height: g.legsHeight,
                 category: legCategories[g.legsType],
+                legsOffset: g.legsOffset,
               },
           }
         : ({
@@ -349,6 +352,7 @@ export function useCabinetConfig(
               type: g.legsType,
               height: g.legsHeight,
               category: legCategories[g.legsType],
+              legsOffset: g.legsOffset,
             },
           } as CabinetConfig);
       return { ...base, ...patch };

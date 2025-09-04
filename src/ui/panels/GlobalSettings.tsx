@@ -142,6 +142,7 @@ export default function GlobalSettings(){
                 <div className="small">{t('global.legsCategory')}</div>
                 <input className="input" value={legCategory} readOnly />
               </div>
+              <Field label={t('global.legsOffset')} value={g.legsOffset ?? 35} onChange={(v)=>set({legsOffset:v})} />
               <Field label={t('global.offsetWall')} value={g.offsetWall||0} onChange={(v)=>set({offsetWall:v})} />
             </>)}
             {(fam===FAMILY.WALL || fam===FAMILY.PAWLACZ) && (<>

@@ -59,6 +59,7 @@ const CabinetConfigurator: React.FC<Props> = ({
   const legsHeight = gLocal.legs?.height ?? globalLegsHeight;
   const legType = gLocal.legs?.type ?? g.legsType;
   const legCategory = gLocal.legs?.category ?? legCategories[legType];
+  const legsOffset = gLocal.legs?.legsOffset ?? g.legsOffset ?? 35;
   const baseOptions = [60, 100, 150];
   const legsBase = baseOptions.find((b) => Math.abs(legsHeight - b) <= 25) ?? 100;
   const legsAdjustment = legsHeight - legsBase;
@@ -171,6 +172,7 @@ const CabinetConfigurator: React.FC<Props> = ({
               showFronts={showFronts}
               highlightPart={highlightPart}
               legHeight={gLocal.legs?.height || globalLegsHeight}
+              legsOffset={legsOffset}
             />
           </div>
           <div className="grid2" style={{ marginTop: 8 }}>
@@ -1451,6 +1453,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                         type,
                         height,
                         category: legCategories[type],
+                        legsOffset,
                       },
                     });
                   }}
@@ -1476,6 +1479,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                         type,
                         height,
                         category: legCategories[type],
+                        legsOffset,
                       },
                     });
                     floorRef.current?.focus();
@@ -1508,6 +1512,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                         type,
                         height,
                         category: legCategories[type],
+                        legsOffset,
                       },
                     });
                   }}
@@ -1532,6 +1537,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                         type,
                         height,
                         category: legCategories[type],
+                        legsOffset,
                       },
                     });
                   }}
@@ -1540,6 +1546,28 @@ const CabinetConfigurator: React.FC<Props> = ({
               <div>
                 <div className="small">{t('configurator.legsCategory')}</div>
                 <input className="input" value={legCategory} readOnly />
+              </div>
+              <div>
+                <div className="small">{t('configurator.legsOffset')}</div>
+                <input
+                  className="input"
+                  type="number"
+                  value={legsOffset}
+                  onChange={(e) => {
+                    let val = parseInt((e.target as HTMLInputElement).value, 10);
+                    if (Number.isNaN(val)) val = 0;
+                    const type = gLocal.legs?.type ?? g.legsType;
+                    const height = gLocal.legs?.height ?? g.legsHeight ?? 0;
+                    setAdv({
+                      legs: {
+                        type,
+                        height,
+                        category: legCategories[type],
+                        legsOffset: val,
+                      },
+                    });
+                  }}
+                />
               </div>
             </div>
           </div>

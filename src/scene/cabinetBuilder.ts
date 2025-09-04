@@ -43,6 +43,7 @@ export interface CabinetOptions {
   topPanel?: TopPanel;
   bottomPanel?: BottomPanel;
   legHeight?: number;
+  legsOffset?: number;
   showHandles?: boolean;
   boardThickness?: number;
   backThickness?: number;
@@ -83,6 +84,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     topPanel = { type: 'full' } as TopPanel,
     bottomPanel = 'full' as BottomPanel,
     legHeight = 0,
+    legsOffset,
     showHandles = true,
     boardThickness: T = 0.018,
     backThickness: backT = 0.003,
@@ -124,6 +126,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   const backColour = new THREE.Color(0xf0f0f0);
   const handleColour = new THREE.Color(0x333333);
   const footColour = new THREE.Color(0x444444);
+  const legOffset = typeof legsOffset === 'number' ? legsOffset : T;
 
   const carcMat = new THREE.MeshStandardMaterial({
     color: carcColour,
@@ -961,16 +964,16 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       16,
     );
     const fl = new THREE.Mesh(footGeo, footMat);
-    fl.position.set(T + footRadius, footHeight / 2, -T);
+    fl.position.set(T + footRadius, footHeight / 2, -legOffset);
     group.add(fl);
     const fr = new THREE.Mesh(footGeo.clone(), footMat);
-    fr.position.set(W - T - footRadius, footHeight / 2, -T);
+    fr.position.set(W - T - footRadius, footHeight / 2, -legOffset);
     group.add(fr);
     const bl = new THREE.Mesh(footGeo.clone(), footMat);
-    bl.position.set(T + footRadius, footHeight / 2, -D + T);
+    bl.position.set(T + footRadius, footHeight / 2, -D + legOffset);
     group.add(bl);
     const br = new THREE.Mesh(footGeo.clone(), footMat);
-    br.position.set(W - T - footRadius, footHeight / 2, -D + T);
+    br.position.set(W - T - footRadius, footHeight / 2, -D + legOffset);
     group.add(br);
   }
   group.userData.frontGroups = frontGroups;

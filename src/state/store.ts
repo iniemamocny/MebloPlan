@@ -26,6 +26,7 @@ export const defaultGlobal: Globals = {
     legsType: 'Nóżka kuchenna (standardowe)',
     legsCategory: 'standard',
     legsHeight: 100,
+    legsOffset: 35,
     offsetWall: 30,
     shelves: 1,
     backPanel: 'full',
@@ -179,7 +180,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
         if (
           patch.legsType !== undefined ||
           patch.legsHeight !== undefined ||
-          patch.legsCategory !== undefined
+          patch.legsCategory !== undefined ||
+          patch.legsOffset !== undefined
         ) {
           const legs = { ...(m.adv?.legs || {}) };
           const hadType = legs.type !== undefined;
@@ -193,6 +195,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
             else if (patch.legsType !== undefined)
               legs.category = legCategories[patch.legsType];
           }
+          if (patch.legsOffset !== undefined && legs.legsOffset === undefined)
+            legs.legsOffset = patch.legsOffset;
           newAdv.legs = legs;
         }
         const newSize = { ...m.size };

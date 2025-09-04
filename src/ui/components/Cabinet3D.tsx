@@ -32,6 +32,7 @@ export default function Cabinet3D({
   showFronts = true,
   highlightPart = null,
   legHeight: legHeightMM = 0,
+  legsOffset: legsOffsetMM = 0,
 }: {
   widthMM: number;
   heightMM: number;
@@ -61,6 +62,7 @@ export default function Cabinet3D({
   showFronts?: boolean;
   highlightPart?: 'top' | 'bottom' | 'shelf' | 'back' | 'leftSide' | 'rightSide' | null;
   legHeight?: number;
+  legsOffset?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -126,6 +128,7 @@ export default function Cabinet3D({
       family === FAMILY.BASE || family === FAMILY.TALL
         ? legHeightMM / 1000
         : 0;
+    const legOffset = legsOffsetMM / 1000;
     const cabGroup = buildCabinetMesh({
       width: W,
       height: H,
@@ -140,6 +143,7 @@ export default function Cabinet3D({
       topPanel,
       bottomPanel,
       legHeight,
+      legsOffset: legOffset,
       dividerPosition: drawersCount > 0 ? undefined : dividerPosition,
       showEdges,
       rightSideEdgeBanding,

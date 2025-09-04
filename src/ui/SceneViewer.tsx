@@ -56,6 +56,8 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
             | 'right'
             | 'center'
             | undefined);
+    const legOffset =
+      adv.legs?.legsOffset ?? store.globals[mod.family]?.legsOffset ?? 0;
     const group = buildCabinetMesh({
       width: W,
       height: H,
@@ -69,6 +71,7 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       topPanel: adv.topPanel,
       bottomPanel: adv.bottomPanel,
       legHeight,
+      legsOffset: legOffset / 1000,
       showHandles: true,
       hinge,
       dividerPosition,
