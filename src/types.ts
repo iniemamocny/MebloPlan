@@ -75,6 +75,7 @@ export interface GlobalsItem {
   gaps: Gaps;
   legsType?: string;
   legsHeight?: number;
+  legsCategory?: string;
   hangerType?: string;
   offsetWall?: number;
   shelves?: number;

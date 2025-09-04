@@ -10,6 +10,12 @@ export const defaultGaps: Gaps = {
   between: 3,
 };
 
+export const legCategories: Record<string, string> = {
+  'Zwykła czarne': 'standard',
+  'Multi-legi': 'wzmocniona',
+  Metalowe: 'ozdobne',
+};
+
 export const defaultGlobal: Globals = {
   [FAMILY.BASE]: {
     height: 800,
@@ -17,7 +23,8 @@ export const defaultGlobal: Globals = {
     boardType: 'Płyta 18mm',
     frontType: 'Laminat',
     gaps: { ...defaultGaps },
-    legsType: 'Standard 10cm',
+    legsType: 'Zwykła czarne',
+    legsCategory: 'standard',
     legsHeight: 100,
     offsetWall: 30,
     shelves: 1,
@@ -80,7 +87,7 @@ export const defaultPrices: Prices = {
   },
   edging: { 'ABS 1mm': 2.5, 'ABS 2mm': 3.2 },
   cut: 4.0,
-  legs: { 'Standard 10cm': 6, 'Regulowane 12cm': 9, 'Metal 10cm': 12 },
+  legs: { 'Zwykła czarne': 6, 'Multi-legi': 9, Metalowe: 12 },
   hangers: { Standard: 10, Wzmocnione: 18 },
   hinges: { 'Blum ClipTop': 16, GTV: 9 },
   drawerSlide: { 'BLUM LEGRABOX': 68, 'BLUM TANDEMBOX': 48, GTV: 22 },
