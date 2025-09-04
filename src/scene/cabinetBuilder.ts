@@ -303,23 +303,74 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   bandSide(leftSideEdgeBanding, T / 2);
   bandSide(rightSideEdgeBanding, W - T / 2);
 
+  const bandPanel = (
+    banding: EdgeBanding | undefined,
+    x: number,
+    h: number,
+    w: number,
+  ) => {
+    const centerY = sideBottomY + h / 2;
+    const bottomY = sideBottomY;
+    const topY = bottomY + h;
+    if (shouldBand(banding, 'vertical', 'front')) {
+      addBand(x, centerY, offsetForEdge('front'), T, h, bandThickness);
+    }
+    if (shouldBand(banding, 'vertical', 'back')) {
+      addBand(x, centerY, -w + offsetForEdge('back'), T, h, bandThickness);
+    }
+    if (shouldBand(banding, 'vertical', 'left')) {
+      addBand(
+        x,
+        bottomY + offsetForEdge('bottom'),
+        offsetForEdge('front'),
+        T,
+        bandThickness,
+        bandThickness,
+      );
+    }
+    if (shouldBand(banding, 'vertical', 'right')) {
+      addBand(
+        x,
+        topY + offsetForEdge('top'),
+        offsetForEdge('front'),
+        T,
+        bandThickness,
+        bandThickness,
+      );
+    }
+    if (carcassType !== 'type5' && shouldBand(banding, 'vertical', 'bottom')) {
+      addBand(x, bottomY + offsetForEdge('bottom'), -w / 2, T, bandThickness, w);
+    }
+    if (shouldBand(banding, 'vertical', 'top')) {
+      addBand(x, topY + offsetForEdge('top'), -w / 2, T, bandThickness, w);
+    }
+  };
+
   if (sidePanels.left?.panel) {
-    const panel = new THREE.Mesh(sideGeo.clone(), carcMat);
-    panel.position.set(-T / 2, sideY, -D / 2);
+    const pw = (sidePanels.left.width ?? D * 1000) / 1000;
+    const ph = (sidePanels.left.height ?? sideHeight * 1000) / 1000;
+    const geo = new THREE.BoxGeometry(T, ph, pw);
+    const panel = new THREE.Mesh(geo, carcMat);
+    const y = sideBottomY + ph / 2;
+    panel.position.set(-T / 2, y, -pw / 2);
     panel.userData.part = 'leftSide';
     panel.userData.originalMaterial = panel.material;
     addEdges(panel);
     group.add(panel);
-    bandSide(leftSideEdgeBanding, -T / 2);
+    bandPanel(leftSideEdgeBanding, -T / 2, ph, pw);
   }
   if (sidePanels.right?.panel) {
-    const panel = new THREE.Mesh(sideGeo.clone(), carcMat);
-    panel.position.set(W + T / 2, sideY, -D / 2);
+    const pw = (sidePanels.right.width ?? D * 1000) / 1000;
+    const ph = (sidePanels.right.height ?? sideHeight * 1000) / 1000;
+    const geo = new THREE.BoxGeometry(T, ph, pw);
+    const panel = new THREE.Mesh(geo, carcMat);
+    const y = sideBottomY + ph / 2;
+    panel.position.set(W + T / 2, y, -pw / 2);
     panel.userData.part = 'rightSide';
     panel.userData.originalMaterial = panel.material;
     addEdges(panel);
     group.add(panel);
-    bandSide(rightSideEdgeBanding, W + T / 2);
+    bandPanel(rightSideEdgeBanding, W + T / 2, ph, pw);
   }
 
   if (sidePanels.left?.blenda) {

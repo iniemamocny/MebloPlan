@@ -310,6 +310,22 @@ export function useCabinetConfig(
       ...patch,
     }));
 
+  const initSidePanel = (side: 'left' | 'right') => {
+    setAdvState((prev) => {
+      const cfg = prev || (store.globals[family] as CabinetConfig);
+      const height = cfg.height - (cfg.gaps.top || 0) - (cfg.gaps.bottom || 0);
+      const sidePanels = { ...(cfg.sidePanels || {}) } as CabinetConfig['sidePanels'];
+      const sideCfg = { ...(sidePanels?.[side] || {}) };
+      sidePanels![side] = {
+        ...sideCfg,
+        panel: true,
+        width: sideCfg.width ?? cfg.depth,
+        height: sideCfg.height ?? height,
+      };
+      return { ...cfg, sidePanels };
+    });
+  };
+
   const initBlenda = (side: 'left' | 'right') => {
     setAdvState((prev) => {
       const cfg = prev || (store.globals[family] as CabinetConfig);
@@ -332,6 +348,7 @@ export function useCabinetConfig(
     gLocal,
     onAdd,
     doAutoOnSelectedWall,
+    initSidePanel,
     initBlenda,
   };
 }

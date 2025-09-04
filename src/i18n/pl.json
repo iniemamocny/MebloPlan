@@ -141,6 +141,8 @@
     "bottomPanelEdgeBanding": "Wieniec dolny – okleina",
     "sidePanel": "Panel boczny",
     "panel": "Panel",
+    "panelWidth": "Szerokość panelu (mm)",
+    "panelHeight": "Wysokość panelu (mm)",
     "blenda": "Blenda",
     "orientation": {
       "label": "Orientacja",
