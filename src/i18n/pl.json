@@ -63,6 +63,7 @@
     "legsFloorHeight": "Wysokość od podłogi",
     "legsAdjustment": "Regulacja (±25 mm)",
     "legsCategory": "Kategoria",
+    "legsOffset": "Odsunięcie nóg (mm)",
     "offsetWall": "Odsunięcie od ściany (mm)",
     "hanger": "Zawieszki",
     "gapsTitle": "Szczeliny (mm)",
@@ -162,7 +163,8 @@
     "legsCategory": "Kategoria",
     "legsBaseHeight": "Wysokość bazowa",
     "legsFloorHeight": "Wysokość od podłogi",
-    "legsAdjustment": "Regulacja (±25 mm)"
+    "legsAdjustment": "Regulacja (±25 mm)",
+    "legsOffset": "Odsunięcie nóg (mm)"
   },
   "forms": {
     "width": "Szerokość",

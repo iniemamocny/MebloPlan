@@ -75,6 +75,7 @@ export interface GlobalsItem {
   gaps: Gaps;
   legsType?: string;
   legsHeight?: number;
+  legsOffset?: number;
   legsCategory?: string;
   hangerType?: string;
   offsetWall?: number;
@@ -164,7 +165,7 @@ export interface ModuleAdv {
   carcassType?: 'type1' | 'type2' | 'type3' | 'type4' | 'type5' | 'type6';
   category?: string;
   legsType?: string;
-  legs?: { type: string; height: number; category?: string };
+  legs?: { type: string; height: number; category?: string; legsOffset?: number };
 }
 
 export interface Module3D {
