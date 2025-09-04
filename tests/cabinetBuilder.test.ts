@@ -1111,6 +1111,49 @@ describe('buildCabinetMesh', () => {
     expect(bottomBands.length).toBe(2);
   });
 
+  it('ignores side panel dimensions for carcass sides', () => {
+    const g = buildCabinetMesh({
+      width: WIDTH,
+      height: HEIGHT,
+      depth: DEPTH,
+      drawers: 0,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      sidePanels: {
+        left: { panel: true, width: 100, height: 400 },
+        right: { panel: true, width: 150, height: 450 },
+      },
+    });
+    const leftCarcass = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        (c as any).userData.part === 'leftSide' &&
+        c.position.x > 0,
+    ) as THREE.Mesh;
+    const rightCarcass = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        (c as any).userData.part === 'rightSide' &&
+        c.position.x < WIDTH,
+    ) as THREE.Mesh;
+    expect((leftCarcass.geometry as any).parameters.height).toBeCloseTo(
+      HEIGHT,
+      5,
+    );
+    expect((leftCarcass.geometry as any).parameters.depth).toBeCloseTo(
+      DEPTH,
+      5,
+    );
+    expect((rightCarcass.geometry as any).parameters.height).toBeCloseTo(
+      HEIGHT,
+      5,
+    );
+    expect((rightCarcass.geometry as any).parameters.depth).toBeCloseTo(
+      DEPTH,
+      5,
+    );
+  });
+
   it('drops side panel to floor and extends height by leg height when configured', () => {
     const legHeight = 0.1;
     const panelHeight = 720;
