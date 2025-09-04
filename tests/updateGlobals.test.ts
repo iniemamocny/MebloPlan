@@ -24,14 +24,14 @@ describe('updateGlobals legs handling', () => {
     store.setState({ modules: [baseModule] });
     store.getState().updateGlobals(FAMILY.BASE, {
       legsType: 'MULTI LEG (wzmocniona)',
-      legsCategory: 'wzmocniona',
+      legsCategory: 'reinforced',
       legsHeight: 120,
     });
     const mod = store.getState().modules[0];
     expect(mod.adv?.legsType).toBe('MULTI LEG (wzmocniona)');
     expect(mod.adv?.legs?.type).toBe('MULTI LEG (wzmocniona)');
     expect(mod.adv?.legs?.height).toBe(120);
-    expect(mod.adv?.legs?.category).toBe('wzmocniona');
+    expect(mod.adv?.legs?.category).toBe('reinforced');
   });
 
   it('preserves custom leg settings while filling missing values', () => {
@@ -65,7 +65,7 @@ describe('updateGlobals legs handling', () => {
     store.setState({ modules });
     store.getState().updateGlobals(FAMILY.BASE, {
       legsType: 'MULTI LEG (wzmocniona)',
-      legsCategory: 'wzmocniona',
+      legsCategory: 'reinforced',
       legsHeight: 120,
     });
     const [modFull, modPartial] = store.getState().modules;

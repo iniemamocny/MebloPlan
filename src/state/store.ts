@@ -12,8 +12,8 @@ export const defaultGaps: Gaps = {
 
 export const legCategories: Record<string, string> = {
   'Nóżka kuchenna (standardowe)': 'standard',
-  'MULTI LEG (wzmocniona)': 'wzmocniona',
-  'Nóżka meblowa (ozdobna)': 'ozdobna',
+  'MULTI LEG (wzmocniona)': 'reinforced',
+  'Nóżka meblowa (ozdobna)': 'decorative',
 };
 
 export const defaultGlobal: Globals = {
