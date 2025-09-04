@@ -11,9 +11,9 @@ export const defaultGaps: Gaps = {
 };
 
 export const legCategories: Record<string, string> = {
-  'Zwykła czarne': 'standard',
-  'Multi-legi': 'wzmocniona',
-  Metalowe: 'ozdobne',
+  'Nóżka kuchenna (standardowe)': 'standard',
+  'MULTI LEG (wzmocniona)': 'wzmocniona',
+  'Nóżka meblowa (ozdobna)': 'ozdobna',
 };
 
 export const defaultGlobal: Globals = {
@@ -23,7 +23,7 @@ export const defaultGlobal: Globals = {
     boardType: 'Płyta 18mm',
     frontType: 'Laminat',
     gaps: { ...defaultGaps },
-    legsType: 'Zwykła czarne',
+    legsType: 'Nóżka kuchenna (standardowe)',
     legsCategory: 'standard',
     legsHeight: 100,
     offsetWall: 30,
@@ -87,7 +87,11 @@ export const defaultPrices: Prices = {
   },
   edging: { 'ABS 1mm': 2.5, 'ABS 2mm': 3.2 },
   cut: 4.0,
-  legs: { 'Zwykła czarne': 6, 'Multi-legi': 9, Metalowe: 12 },
+  legs: {
+    'Nóżka kuchenna (standardowe)': 6,
+    'MULTI LEG (wzmocniona)': 9,
+    'Nóżka meblowa (ozdobna)': 12,
+  },
   hangers: { Standard: 10, Wzmocnione: 18 },
   hinges: { 'Blum ClipTop': 16, GTV: 9 },
   drawerSlide: { 'BLUM LEGRABOX': 68, 'BLUM TANDEMBOX': 48, GTV: 22 },
