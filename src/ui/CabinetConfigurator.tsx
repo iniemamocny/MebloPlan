@@ -171,9 +171,10 @@ const CabinetConfigurator: React.FC<Props> = ({
                 max={2400}
                 step={1}
                 value={widthMM}
-                onChange={(e) =>
-                  setWidthMM(Number((e.target as HTMLInputElement).value) || 0)
-                }
+                onChange={(e) => {
+                  const val = parseFloat((e.target as HTMLInputElement).value);
+                  setWidthMM(Number.isFinite(val) && val > 0 ? val : 0);
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     const v = Number((e.target as HTMLInputElement).value) || 0;
@@ -262,9 +263,10 @@ const CabinetConfigurator: React.FC<Props> = ({
                 max={2400}
                 step={1}
                 value={widthMM}
-                onChange={(e) =>
-                  setWidthMM(Number((e.target as HTMLInputElement).value) || 0)
-                }
+                onChange={(e) => {
+                  const val = parseFloat((e.target as HTMLInputElement).value);
+                  setWidthMM(Number.isFinite(val) && val > 0 ? val : 0);
+                }}
               />
             </div>
             <div>
@@ -273,12 +275,13 @@ const CabinetConfigurator: React.FC<Props> = ({
                 className="input"
                 type="number"
                 value={gLocal.height}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const val = parseFloat((e.target as HTMLInputElement).value);
                   setAdv({
                     ...gLocal,
-                    height: Number((e.target as HTMLInputElement).value) || 0,
-                  })
-                }
+                    height: Number.isFinite(val) && val > 0 ? val : 0,
+                  });
+                }}
               />
             </div>
             <div>
@@ -938,9 +941,11 @@ const CabinetConfigurator: React.FC<Props> = ({
                     <input
                       type="number"
                       className="input"
-                      value={gLocal.sidePanels.right.width}
+                      min={1}
+                      value={gLocal.sidePanels.right.width ?? ''}
                       onChange={(e) => {
-                        const width = parseFloat((e.target as HTMLInputElement).value);
+                        const val = parseFloat((e.target as HTMLInputElement).value);
+                        const width = Number.isFinite(val) && val > 0 ? val : undefined;
                         setAdv({
                           ...gLocal,
                           sidePanels: {
@@ -956,9 +961,11 @@ const CabinetConfigurator: React.FC<Props> = ({
                     <input
                       type="number"
                       className="input"
-                      value={gLocal.sidePanels.right.height}
+                      min={1}
+                      value={gLocal.sidePanels.right.height ?? ''}
                       onChange={(e) => {
-                        const height = parseFloat((e.target as HTMLInputElement).value);
+                        const val = parseFloat((e.target as HTMLInputElement).value);
+                        const height = Number.isFinite(val) && val > 0 ? val : undefined;
                         setAdv({
                           ...gLocal,
                           sidePanels: {
@@ -1000,9 +1007,11 @@ const CabinetConfigurator: React.FC<Props> = ({
                     <input
                       type="number"
                       className="input"
-                      value={gLocal.sidePanels.right.blenda.width}
+                      min={1}
+                      value={gLocal.sidePanels.right.blenda.width ?? ''}
                       onChange={(e) => {
-                        const width = parseFloat((e.target as HTMLInputElement).value);
+                        const val = parseFloat((e.target as HTMLInputElement).value);
+                        const width = Number.isFinite(val) && val > 0 ? val : undefined;
                         setAdv({
                           ...gLocal,
                           sidePanels: {
@@ -1024,9 +1033,11 @@ const CabinetConfigurator: React.FC<Props> = ({
                     <input
                       type="number"
                       className="input"
-                      value={gLocal.sidePanels.right.blenda.height}
+                      min={1}
+                      value={gLocal.sidePanels.right.blenda.height ?? ''}
                       onChange={(e) => {
-                        const height = parseFloat((e.target as HTMLInputElement).value);
+                        const val = parseFloat((e.target as HTMLInputElement).value);
+                        const height = Number.isFinite(val) && val > 0 ? val : undefined;
                         setAdv({
                           ...gLocal,
                           sidePanels: {
@@ -1119,9 +1130,11 @@ const CabinetConfigurator: React.FC<Props> = ({
                     <input
                       type="number"
                       className="input"
-                      value={gLocal.sidePanels.left.width}
+                      min={1}
+                      value={gLocal.sidePanels.left.width ?? ''}
                       onChange={(e) => {
-                        const width = parseFloat((e.target as HTMLInputElement).value);
+                        const val = parseFloat((e.target as HTMLInputElement).value);
+                        const width = Number.isFinite(val) && val > 0 ? val : undefined;
                         setAdv({
                           ...gLocal,
                           sidePanels: {
@@ -1137,9 +1150,11 @@ const CabinetConfigurator: React.FC<Props> = ({
                     <input
                       type="number"
                       className="input"
-                      value={gLocal.sidePanels.left.height}
+                      min={1}
+                      value={gLocal.sidePanels.left.height ?? ''}
                       onChange={(e) => {
-                        const height = parseFloat((e.target as HTMLInputElement).value);
+                        const val = parseFloat((e.target as HTMLInputElement).value);
+                        const height = Number.isFinite(val) && val > 0 ? val : undefined;
                         setAdv({
                           ...gLocal,
                           sidePanels: {
@@ -1181,9 +1196,11 @@ const CabinetConfigurator: React.FC<Props> = ({
                     <input
                       type="number"
                       className="input"
-                      value={gLocal.sidePanels.left.blenda.width}
+                      min={1}
+                      value={gLocal.sidePanels.left.blenda.width ?? ''}
                       onChange={(e) => {
-                        const width = parseFloat((e.target as HTMLInputElement).value);
+                        const val = parseFloat((e.target as HTMLInputElement).value);
+                        const width = Number.isFinite(val) && val > 0 ? val : undefined;
                         setAdv({
                           ...gLocal,
                           sidePanels: {
@@ -1205,9 +1222,11 @@ const CabinetConfigurator: React.FC<Props> = ({
                     <input
                       type="number"
                       className="input"
-                      value={gLocal.sidePanels.left.blenda.height}
+                      min={1}
+                      value={gLocal.sidePanels.left.blenda.height ?? ''}
                       onChange={(e) => {
-                        const height = parseFloat((e.target as HTMLInputElement).value);
+                        const val = parseFloat((e.target as HTMLInputElement).value);
+                        const height = Number.isFinite(val) && val > 0 ? val : undefined;
                         setAdv({
                           ...gLocal,
                           sidePanels: {

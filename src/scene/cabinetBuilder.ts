@@ -6,6 +6,7 @@ import {
   Traverse,
   EdgeBanding,
   SidePanelSpec,
+  hasValidSidePanelDimensions,
 } from '../types';
 
 export type Orientation = 'vertical' | 'horizontal' | 'back';
@@ -231,9 +232,11 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
           ? legHeight + (H - T) / 2
           : legHeight + H / 2;
   const sideBottomY = sideY - sideHeight / 2;
-  const leftWidth = sidePanels.left?.width ? sidePanels.left.width / 1000 : D;
-  const leftHeight = sidePanels.left?.height ? sidePanels.left.height / 1000 : sideHeight;
-  const leftBottom = sidePanels.left?.width || sidePanels.left?.height
+  const leftSpec = sidePanels.left;
+  const leftValid = hasValidSidePanelDimensions(leftSpec);
+  const leftWidth = leftValid ? leftSpec.width / 1000 : D;
+  const leftHeight = leftValid ? leftSpec.height / 1000 : sideHeight;
+  const leftBottom = leftValid
     ? legHeight + (gaps.bottom || 0) / 1000
     : sideBottomY;
   const leftGeo = new THREE.BoxGeometry(T, leftHeight, leftWidth);
@@ -243,9 +246,11 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   leftSide.userData.originalMaterial = leftSide.material;
   addEdges(leftSide);
   group.add(leftSide);
-  const rightWidth = sidePanels.right?.width ? sidePanels.right.width / 1000 : D;
-  const rightHeight = sidePanels.right?.height ? sidePanels.right.height / 1000 : sideHeight;
-  const rightBottom = sidePanels.right?.width || sidePanels.right?.height
+  const rightSpec = sidePanels.right;
+  const rightValid = hasValidSidePanelDimensions(rightSpec);
+  const rightWidth = rightValid ? rightSpec.width / 1000 : D;
+  const rightHeight = rightValid ? rightSpec.height / 1000 : sideHeight;
+  const rightBottom = rightValid
     ? legHeight + (gaps.bottom || 0) / 1000
     : sideBottomY;
   const rightGeo = new THREE.BoxGeometry(T, rightHeight, rightWidth);
@@ -343,7 +348,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     }
   };
 
-  if (sidePanels.left?.panel && sidePanels.left.width && sidePanels.left.height) {
+  if (sidePanels.left?.panel && hasValidSidePanelDimensions(sidePanels.left)) {
     const pw = sidePanels.left.width / 1000;
     const ph = sidePanels.left.height / 1000;
     const geo = new THREE.BoxGeometry(T, ph, pw);
@@ -357,7 +362,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     group.add(panel);
     bandPanel(leftSideEdgeBanding, -T / 2, bottom, ph, pw);
   }
-  if (sidePanels.right?.panel && sidePanels.right.width && sidePanels.right.height) {
+  if (sidePanels.right?.panel && hasValidSidePanelDimensions(sidePanels.right)) {
     const pw = sidePanels.right.width / 1000;
     const ph = sidePanels.right.height / 1000;
     const geo = new THREE.BoxGeometry(T, ph, pw);
