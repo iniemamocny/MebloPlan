@@ -1000,14 +1000,14 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   if (legHeight > 0) {
     const footHeight = legHeight;
     const standardRadius = 0.02;
-    const reinforcedPlateSize = 0.08;
+    const baseSize = 0.08;
     const reinforcedCylRadius = 0.036 / 2;
     const decorativeSize = 0.04;
     const halfSize =
       legsType === 'decorative'
         ? decorativeSize / 2
         : legsType === 'reinforced'
-          ? reinforcedPlateSize / 2
+          ? baseSize / 2
           : standardRadius;
     const positions: [number, number][] = [
       [T + halfSize, -legOffset],
@@ -1021,7 +1021,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
         const legGroup = new THREE.Group();
         const plateThickness = 6 / 1000;
         const chamfer = 8 / 1000;
-        const halfPlate = reinforcedPlateSize / 2;
+        const halfPlate = baseSize / 2;
         const cylRadius = reinforcedCylRadius;
         const cylHeight = Math.max(footHeight - plateThickness * 2, 0);
         const screwRadius = 10 / 1000 / 2;
