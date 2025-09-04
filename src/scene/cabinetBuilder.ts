@@ -44,6 +44,7 @@ export interface CabinetOptions {
   bottomPanel?: BottomPanel;
   legHeight?: number;
   legsOffset?: number;
+  legsType?: 'standard' | 'reinforced' | 'decorative';
   showHandles?: boolean;
   boardThickness?: number;
   backThickness?: number;
@@ -85,6 +86,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     bottomPanel = 'full' as BottomPanel,
     legHeight = 0,
     legsOffset,
+    legsType = 'standard',
     showHandles = true,
     boardThickness: T = 0.018,
     backThickness: backT = 0.003,
@@ -126,6 +128,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   const backColour = new THREE.Color(0xf0f0f0);
   const handleColour = new THREE.Color(0x333333);
   const footColour = new THREE.Color(0x444444);
+  const decorativeColour = new THREE.Color(0x8b4513);
   const legOffset = typeof legsOffset === 'number' ? legsOffset : T;
 
   const carcMat = new THREE.MeshStandardMaterial({
@@ -152,6 +155,16 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     color: footColour,
     metalness: 0.3,
     roughness: 0.7,
+  });
+  const plateMat = new THREE.MeshStandardMaterial({
+    color: footColour,
+    metalness: 0.5,
+    roughness: 0.4,
+  });
+  const decorativeMat = new THREE.MeshStandardMaterial({
+    color: decorativeColour,
+    metalness: 0.2,
+    roughness: 0.8,
   });
   const hasFrontBack =
     rightSideEdgeBanding.front ||
@@ -955,26 +968,75 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
 
   // Feet (hardware)
   if (legHeight > 0) {
-    const footRadius = 0.02;
     const footHeight = legHeight;
-    const footGeo = new THREE.CylinderGeometry(
-      footRadius,
-      footRadius,
-      footHeight,
-      16,
-    );
-    const fl = new THREE.Mesh(footGeo, footMat);
-    fl.position.set(T + footRadius, footHeight / 2, -legOffset);
-    group.add(fl);
-    const fr = new THREE.Mesh(footGeo.clone(), footMat);
-    fr.position.set(W - T - footRadius, footHeight / 2, -legOffset);
-    group.add(fr);
-    const bl = new THREE.Mesh(footGeo.clone(), footMat);
-    bl.position.set(T + footRadius, footHeight / 2, -D + legOffset);
-    group.add(bl);
-    const br = new THREE.Mesh(footGeo.clone(), footMat);
-    br.position.set(W - T - footRadius, footHeight / 2, -D + legOffset);
-    group.add(br);
+    const standardRadius = 0.02;
+    const reinforcedRadius = 0.03;
+    const decorativeSize = 0.04;
+    const halfSize =
+      legsType === 'decorative'
+        ? decorativeSize / 2
+        : legsType === 'reinforced'
+          ? reinforcedRadius
+          : standardRadius;
+    const positions: [number, number][] = [
+      [T + halfSize, -legOffset],
+      [W - T - halfSize, -legOffset],
+      [T + halfSize, -D + legOffset],
+      [W - T - halfSize, -D + legOffset],
+    ];
+    positions.forEach(([x, z]) => {
+      let leg: THREE.Object3D;
+      if (legsType === 'reinforced') {
+        const legGroup = new THREE.Group();
+        const plateThickness = Math.min(0.01, footHeight * 0.2);
+        const cylHeight = Math.max(footHeight - plateThickness, 0);
+        const cylGeo = new THREE.CylinderGeometry(
+          reinforcedRadius,
+          reinforcedRadius,
+          cylHeight,
+          16,
+        );
+        const cyl = new THREE.Mesh(cylGeo, footMat);
+        cyl.position.y = cylHeight / 2;
+        legGroup.add(cyl);
+        const plateGeo = new THREE.BoxGeometry(
+          reinforcedRadius * 3,
+          plateThickness,
+          reinforcedRadius * 3,
+        );
+        const plate = new THREE.Mesh(plateGeo, plateMat);
+        plate.position.y = cylHeight + plateThickness / 2;
+        legGroup.add(plate);
+        legGroup.position.set(x, 0, z);
+        leg = legGroup;
+      } else if (legsType === 'decorative') {
+        const legGroup = new THREE.Group();
+        const decoGeo = new THREE.BoxGeometry(
+          decorativeSize,
+          footHeight,
+          decorativeSize,
+        );
+        const deco = new THREE.Mesh(decoGeo, decorativeMat);
+        deco.position.y = footHeight / 2;
+        legGroup.add(deco);
+        legGroup.position.set(x, 0, z);
+        leg = legGroup;
+      } else {
+        const legGroup = new THREE.Group();
+        const footGeo = new THREE.CylinderGeometry(
+          standardRadius,
+          standardRadius,
+          footHeight,
+          16,
+        );
+        const mesh = new THREE.Mesh(footGeo, footMat);
+        mesh.position.y = footHeight / 2;
+        legGroup.add(mesh);
+        legGroup.position.set(x, 0, z);
+        leg = legGroup;
+      }
+      group.add(leg);
+    });
   }
   group.userData.frontGroups = frontGroups;
   group.userData.openStates = openStates;
