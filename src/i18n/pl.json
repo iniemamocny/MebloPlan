@@ -59,9 +59,9 @@
     "frontType": "Rodzaj frontu",
     "backPanel": "Plecy",
     "legs": "Nóżki",
-    "legsHeight": "Wysokość nóżek (mm)",
-    "legsAdjustment": "Regulacja (mm)",
-    "legsCategory": "Kategoria nóżek",
+    "legsBaseHeight": "Wysokość bazowa",
+    "legsAdjustment": "Regulacja (±25 mm)",
+    "legsCategory": "Kategoria",
     "offsetWall": "Odsunięcie od ściany (mm)",
     "hanger": "Zawieszki",
     "gapsTitle": "Szczeliny (mm)",
@@ -157,7 +157,10 @@
     "offsetDepth": "Przesunięcie (głębokość, mm)",
     "offsetHeight": "Przesunięcie (wysokość, mm)",
     "traverseWidth": "Szerokość trawersu (mm)",
-    "hideCountertop": "Ukryj blaty"
+    "hideCountertop": "Ukryj blaty",
+    "legsCategory": "Kategoria",
+    "legsBaseHeight": "Wysokość bazowa",
+    "legsAdjustment": "Regulacja (±25 mm)"
   },
   "forms": {
     "width": "Szerokość",
