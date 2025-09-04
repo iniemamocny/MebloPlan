@@ -142,6 +142,7 @@ export function useCabinetConfig(
       d = g.depth / 1000,
       w = widthLocal / 1000;
     const id = `mod_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
+    const selectedLegsType = advLocal.legs?.type ?? store.globals[family].legsType;
     const price = computeModuleCost(
       {
         family,
@@ -163,6 +164,7 @@ export function useCabinetConfig(
           traverseEdgeBanding: g.traverseEdgeBanding,
           backEdgeBanding: g.backEdgeBanding,
           carcassType: g.carcassType,
+          legsType: selectedLegsType,
         },
         doorsCount,
         drawersCount,
@@ -175,7 +177,11 @@ export function useCabinetConfig(
       drawerSlide?: string;
       animationSpeed?: number;
       doorCount?: number;
-    } = { ...g, legs: { ...(g.legs || {}), ...(advLocal.legs || {}) } };
+    } = {
+      ...g,
+      legsType: selectedLegsType,
+      legs: { ...(g.legs || {}), ...(advLocal.legs || {}) },
+    };
     if (!advAugmented.hinge) advAugmented.hinge = 'left';
     if (!advAugmented.drawerSlide) advAugmented.drawerSlide = 'BLUM LEGRABOX';
     if (advAugmented.animationSpeed === undefined)
@@ -265,6 +271,7 @@ export function useCabinetConfig(
             shelfEdgeBanding: {},
             sidePanels: {},
             carcassType: g.carcassType,
+            legsType: g.legsType,
           },
           doorsCount: 1,
           drawersCount: 0,
