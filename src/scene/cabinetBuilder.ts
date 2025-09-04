@@ -1000,13 +1000,14 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   if (legHeight > 0) {
     const footHeight = legHeight;
     const standardRadius = 0.02;
-    const reinforcedRadius = 0.03;
+    const reinforcedPlateSize = 0.08;
+    const reinforcedCylRadius = 0.036 / 2;
     const decorativeSize = 0.04;
     const halfSize =
       legsType === 'decorative'
         ? decorativeSize / 2
         : legsType === 'reinforced'
-          ? reinforcedRadius
+          ? reinforcedPlateSize / 2
           : standardRadius;
     const positions: [number, number][] = [
       [T + halfSize, -legOffset],
@@ -1018,25 +1019,57 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       let leg: THREE.Object3D;
       if (legsType === 'reinforced') {
         const legGroup = new THREE.Group();
-        const plateThickness = Math.min(0.01, footHeight * 0.2);
-        const cylHeight = Math.max(footHeight - plateThickness, 0);
-        const cylGeo = new THREE.CylinderGeometry(
-          reinforcedRadius,
-          reinforcedRadius,
-          cylHeight,
-          16,
-        );
-        const cyl = new THREE.Mesh(cylGeo, footMat);
-        cyl.position.y = cylHeight / 2;
-        legGroup.add(cyl);
-        const plateGeo = new THREE.BoxGeometry(
-          reinforcedRadius * 3,
-          plateThickness,
-          reinforcedRadius * 3,
-        );
-        const plate = new THREE.Mesh(plateGeo, plateMat);
-        plate.position.y = cylHeight + plateThickness / 2;
-        legGroup.add(plate);
+        const plateThickness = 6 / 1000;
+        const chamfer = 8 / 1000;
+        const halfPlate = reinforcedPlateSize / 2;
+        const cylRadius = reinforcedCylRadius;
+        const cylHeight = Math.max(footHeight - plateThickness * 2, 0);
+        const screwRadius = 10 / 1000 / 2;
+
+        const plateShape = new THREE.Shape();
+        plateShape.moveTo(-halfPlate, halfPlate);
+        plateShape.lineTo(halfPlate, halfPlate);
+        plateShape.lineTo(halfPlate, -halfPlate + chamfer);
+        plateShape.lineTo(halfPlate - chamfer, -halfPlate);
+        plateShape.lineTo(-halfPlate + chamfer, -halfPlate);
+        plateShape.lineTo(-halfPlate, -halfPlate + chamfer);
+        plateShape.lineTo(-halfPlate, halfPlate);
+
+        const plateGeo = new THREE.ExtrudeGeometry(plateShape, {
+          depth: plateThickness,
+          bevelEnabled: false,
+        });
+        const bottomPlate = new THREE.Mesh(plateGeo, plateMat);
+        bottomPlate.rotation.x = -Math.PI / 2;
+        bottomPlate.position.y = 0;
+        legGroup.add(bottomPlate);
+
+        const topPlate = bottomPlate.clone();
+        topPlate.position.y = footHeight - plateThickness;
+        legGroup.add(topPlate);
+
+        if (cylHeight > 0) {
+          const cylGeo = new THREE.CylinderGeometry(
+            cylRadius,
+            cylRadius,
+            cylHeight,
+            16,
+          );
+          const cyl = new THREE.Mesh(cylGeo, footMat);
+          cyl.position.y = plateThickness + cylHeight / 2;
+          legGroup.add(cyl);
+
+          const screwGeo = new THREE.CylinderGeometry(
+            screwRadius,
+            screwRadius,
+            cylHeight,
+            16,
+          );
+          const screw = new THREE.Mesh(screwGeo, footMat);
+          screw.position.y = plateThickness + cylHeight / 2;
+          legGroup.add(screw);
+        }
+
         legGroup.position.set(x, 0, z);
         leg = legGroup;
       } else if (legsType === 'decorative') {
