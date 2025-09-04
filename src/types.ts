@@ -40,6 +40,24 @@ export interface SidePanelSpec {
   blenda?: Blenda;
 }
 
+/**
+ * Type guard ensuring side panel specifications include numeric dimensions.
+ * Used before attempting to build meshes that rely on width/height.
+ */
+export function hasValidSidePanelDimensions(
+  spec?: SidePanelSpec,
+): spec is SidePanelSpec & { width: number; height: number } {
+  return (
+    !!spec &&
+    typeof spec.width === 'number' &&
+    typeof spec.height === 'number' &&
+    Number.isFinite(spec.width) &&
+    Number.isFinite(spec.height) &&
+    spec.width > 0 &&
+    spec.height > 0
+  );
+}
+
 export type TopPanel =
   | { type: 'full' }
   | { type: 'none' }
