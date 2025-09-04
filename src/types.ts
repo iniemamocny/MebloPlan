@@ -33,6 +33,10 @@ export interface Blenda {
 
 export interface SidePanelSpec {
   panel?: boolean;
+  /** width in millimetres */
+  width?: number;
+  /** height in millimetres */
+  height?: number;
   blenda?: Blenda;
 }
 

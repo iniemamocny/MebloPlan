@@ -31,6 +31,7 @@ interface MainTabsProps {
     drawersCount: number,
   ) => void;
   initBlenda: (side: 'left' | 'right') => void;
+  initSidePanel: (side: 'left' | 'right') => void;
   threeRef: React.MutableRefObject<any>;
   boardL: number;
   setBoardL: (v: number) => void;
@@ -60,6 +61,7 @@ export default function MainTabs({
   setAdv,
   onAdd,
   initBlenda,
+  initSidePanel,
   threeRef,
   boardL,
   setBoardL,
@@ -157,6 +159,7 @@ export default function MainTabs({
                 setAdv={setAdv}
                 onAdd={onAdd}
                 initBlenda={initBlenda}
+                initSidePanel={initSidePanel}
               />
             )}
 
