@@ -53,6 +53,9 @@ const CabinetConfigurator: React.FC<Props> = ({
   initSidePanel,
 }) => {
   const prices = usePlannerStore((s) => s.prices);
+  const legsHeight = usePlannerStore(
+    (s) => s.globals[family].legsHeight || 0,
+  );
   const { t } = useTranslation();
   const [doorsCount, setDoorsCount] = useState(1);
   const [drawersCount, setDrawersCount] = useState(0);
@@ -983,11 +986,22 @@ const CabinetConfigurator: React.FC<Props> = ({
                       checked={gLocal.sidePanels.right.dropToFloor ?? false}
                       onChange={(e) => {
                         const dropToFloor = (e.target as HTMLInputElement).checked;
+                        const prevDrop = gLocal.sidePanels.right.dropToFloor ?? false;
+                        let height = gLocal.sidePanels.right.height ?? 0;
+                        if (dropToFloor !== prevDrop) {
+                          height = dropToFloor
+                            ? height + legsHeight
+                            : Math.max(0, height - legsHeight);
+                        }
                         setAdv({
                           ...gLocal,
                           sidePanels: {
                             ...gLocal.sidePanels,
-                            right: { ...(gLocal.sidePanels?.right || {}), dropToFloor },
+                            right: {
+                              ...(gLocal.sidePanels?.right || {}),
+                              dropToFloor,
+                              height,
+                            },
                           },
                         });
                       }}
@@ -1190,11 +1204,22 @@ const CabinetConfigurator: React.FC<Props> = ({
                       checked={gLocal.sidePanels.left.dropToFloor ?? false}
                       onChange={(e) => {
                         const dropToFloor = (e.target as HTMLInputElement).checked;
+                        const prevDrop = gLocal.sidePanels.left.dropToFloor ?? false;
+                        let height = gLocal.sidePanels.left.height ?? 0;
+                        if (dropToFloor !== prevDrop) {
+                          height = dropToFloor
+                            ? height + legsHeight
+                            : Math.max(0, height - legsHeight);
+                        }
                         setAdv({
                           ...gLocal,
                           sidePanels: {
                             ...gLocal.sidePanels,
-                            left: { ...(gLocal.sidePanels?.left || {}), dropToFloor },
+                            left: {
+                              ...(gLocal.sidePanels?.left || {}),
+                              dropToFloor,
+                              height,
+                            },
                           },
                         });
                       }}
