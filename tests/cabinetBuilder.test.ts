@@ -1110,4 +1110,39 @@ describe('buildCabinetMesh', () => {
     expect(topBands.length).toBe(2);
     expect(bottomBands.length).toBe(2);
   });
+
+  it('drops side panel to floor and extends height by leg height when configured', () => {
+    const legHeight = 0.1;
+    const panelHeight = 720;
+    const g = buildCabinetMesh({
+      width: WIDTH,
+      height: HEIGHT,
+      depth: DEPTH,
+      drawers: 0,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+      legHeight,
+      sidePanels: {
+        left: {
+          panel: true,
+          width: 100,
+          height: panelHeight,
+          dropToFloor: true,
+        },
+      },
+    });
+    const panel = g.children.find(
+      (c) =>
+        c instanceof THREE.Mesh &&
+        (c as any).userData.part === 'leftSide' &&
+        c.position.x < 0,
+    ) as THREE.Mesh;
+    const geometry = panel.geometry as THREE.BoxGeometry;
+    const bottom = panel.position.y - (geometry.parameters.height as number) / 2;
+    expect(bottom).toBeCloseTo(0, 5);
+    expect(geometry.parameters.height).toBeCloseTo(
+      (panelHeight + legHeight) / 1000,
+      5,
+    );
+  });
 });
