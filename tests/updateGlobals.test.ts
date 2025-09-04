@@ -23,13 +23,15 @@ describe('updateGlobals legs handling', () => {
     } as Module3D;
     store.setState({ modules: [baseModule] });
     store.getState().updateGlobals(FAMILY.BASE, {
-      legsType: 'Regulowane 12cm',
+      legsType: 'Multi-legi',
+      legsCategory: 'wzmocniona',
       legsHeight: 120,
     });
     const mod = store.getState().modules[0];
-    expect(mod.adv?.legsType).toBe('Regulowane 12cm');
-    expect(mod.adv?.legs?.type).toBe('Regulowane 12cm');
+    expect(mod.adv?.legsType).toBe('Multi-legi');
+    expect(mod.adv?.legs?.type).toBe('Multi-legi');
     expect(mod.adv?.legs?.height).toBe(120);
+    expect(mod.adv?.legs?.category).toBe('wzmocniona');
   });
 
   it('preserves custom leg settings while filling missing values', () => {
@@ -62,17 +64,20 @@ describe('updateGlobals legs handling', () => {
     ];
     store.setState({ modules });
     store.getState().updateGlobals(FAMILY.BASE, {
-      legsType: 'Regulowane 12cm',
+      legsType: 'Multi-legi',
+      legsCategory: 'wzmocniona',
       legsHeight: 120,
     });
     const [modFull, modPartial] = store.getState().modules;
     expect(modFull.adv?.legsType).toBe('Custom');
     expect(modFull.adv?.legs?.type).toBe('Custom');
     expect(modFull.adv?.legs?.height).toBe(150);
+    expect(modFull.adv?.legs?.category).toBeUndefined();
 
     expect(modPartial.adv?.legsType).toBe('Custom');
     expect(modPartial.adv?.legs?.type).toBe('Custom');
     expect(modPartial.adv?.legs?.height).toBe(120);
+    expect(modPartial.adv?.legs?.category).toBeUndefined();
   });
 });
 

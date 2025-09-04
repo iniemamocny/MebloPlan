@@ -172,12 +172,23 @@ export const usePlannerStore = create<Store>((set, get) => ({
           newAdv.carcassType = patch.carcassType;
         if (patch.legsType !== undefined && newAdv.legsType === undefined)
           newAdv.legsType = patch.legsType;
-        if (patch.legsType !== undefined || patch.legsHeight !== undefined) {
+        if (
+          patch.legsType !== undefined ||
+          patch.legsHeight !== undefined ||
+          patch.legsCategory !== undefined
+        ) {
           const legs = { ...(m.adv?.legs || {}) };
+          const hadType = legs.type !== undefined;
           if (patch.legsType !== undefined && legs.type === undefined)
             legs.type = patch.legsType;
           if (patch.legsHeight !== undefined && legs.height === undefined)
             legs.height = patch.legsHeight;
+          if (!hadType && legs.category === undefined) {
+            if (patch.legsCategory !== undefined)
+              legs.category = patch.legsCategory;
+            else if (patch.legsType !== undefined)
+              legs.category = legCategories[patch.legsType];
+          }
           newAdv.legs = legs;
         }
         const newSize = { ...m.size };
