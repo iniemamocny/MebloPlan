@@ -28,8 +28,8 @@ export interface CabinetConfig {
   topPanelEdgeBanding?: EdgeBanding;
   bottomPanelEdgeBanding?: EdgeBanding;
   sidePanels?: {
-    left?: SidePanelSpec;
-    right?: SidePanelSpec;
+    left?: SidePanelSpec & { dropToFloor?: boolean };
+    right?: SidePanelSpec & { dropToFloor?: boolean };
   };
   hardware?: any;
   legs?: any;
