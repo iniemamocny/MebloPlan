@@ -59,9 +59,9 @@
     "frontType": "Front type",
     "backPanel": "Back",
     "legs": "Legs",
-    "legsHeight": "Leg height (mm)",
-    "legsAdjustment": "Adjustment (mm)",
-    "legsCategory": "Leg category",
+    "legsBaseHeight": "Base height",
+    "legsAdjustment": "Adjustment (±25 mm)",
+    "legsCategory": "Category",
     "offsetWall": "Offset from wall (mm)",
     "hanger": "Hangers",
     "gapsTitle": "Gaps (mm)",
@@ -157,7 +157,10 @@
     "offsetDepth": "Offset (depth mm)",
     "offsetHeight": "Offset (height mm)",
     "traverseWidth": "Traverse width (mm)",
-    "hideCountertop": "Hide countertops"
+    "hideCountertop": "Hide countertops",
+    "legsCategory": "Category",
+    "legsBaseHeight": "Base height",
+    "legsAdjustment": "Adjustment (±25 mm)"
   },
   "forms": {
     "width": "Width",
