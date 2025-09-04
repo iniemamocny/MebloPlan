@@ -23,13 +23,13 @@ describe('updateGlobals legs handling', () => {
     } as Module3D;
     store.setState({ modules: [baseModule] });
     store.getState().updateGlobals(FAMILY.BASE, {
-      legsType: 'Multi-legi',
+      legsType: 'MULTI LEG (wzmocniona)',
       legsCategory: 'wzmocniona',
       legsHeight: 120,
     });
     const mod = store.getState().modules[0];
-    expect(mod.adv?.legsType).toBe('Multi-legi');
-    expect(mod.adv?.legs?.type).toBe('Multi-legi');
+    expect(mod.adv?.legsType).toBe('MULTI LEG (wzmocniona)');
+    expect(mod.adv?.legs?.type).toBe('MULTI LEG (wzmocniona)');
     expect(mod.adv?.legs?.height).toBe(120);
     expect(mod.adv?.legs?.category).toBe('wzmocniona');
   });
@@ -64,7 +64,7 @@ describe('updateGlobals legs handling', () => {
     ];
     store.setState({ modules });
     store.getState().updateGlobals(FAMILY.BASE, {
-      legsType: 'Multi-legi',
+      legsType: 'MULTI LEG (wzmocniona)',
       legsCategory: 'wzmocniona',
       legsHeight: 120,
     });
