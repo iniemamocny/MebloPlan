@@ -39,7 +39,6 @@ export interface SidePanelSpec {
   height?: number;
   dropToFloor?: boolean;
   blenda?: Blenda;
-  dropToFloor?: boolean;
 }
 
 /**
