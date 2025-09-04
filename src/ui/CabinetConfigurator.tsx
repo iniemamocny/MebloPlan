@@ -55,7 +55,8 @@ const CabinetConfigurator: React.FC<Props> = ({
   const prices = usePlannerStore((s) => s.prices);
   const legTypes = usePlannerStore((s) => s.prices.legs);
   const g = usePlannerStore((s) => s.globals[family]);
-  const legsHeight = gLocal.legs?.height ?? g.legsHeight ?? 0;
+  const globalLegsHeight = g.legsHeight ?? 0;
+  const legsHeight = gLocal.legs?.height ?? globalLegsHeight;
   const { t } = useTranslation();
   const [doorsCount, setDoorsCount] = useState(1);
   const [drawersCount, setDrawersCount] = useState(0);
@@ -162,6 +163,7 @@ const CabinetConfigurator: React.FC<Props> = ({
               carcassType={gLocal.carcassType}
               showFronts={showFronts}
               highlightPart={highlightPart}
+              legHeight={gLocal.legs?.height || globalLegsHeight}
             />
           </div>
           <div className="grid2" style={{ marginTop: 8 }}>
