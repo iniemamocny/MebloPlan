@@ -124,5 +124,22 @@ describe('computeModuleCost', () => {
       Math.round(frontArea * defaultPrices.front['DALL·E stowalna'])
     )
   })
+
+  it('uses custom legs type pricing when specified', () => {
+    const adv = { ...advFor(FAMILY.BASE), legsType: 'Metal 10cm' }
+    const price = computeModuleCost(
+      {
+        family: FAMILY.BASE,
+        kind: 'doors',
+        variant: 'doors',
+        width: 600,
+        adv,
+      },
+      { prices: defaultPrices, globals: defaultGlobal }
+    )
+    expect(price.parts.legs).toBe(
+      (defaultPrices.legs['Metal 10cm'] || 0) * price.counts.legs
+    )
+  })
 })
 

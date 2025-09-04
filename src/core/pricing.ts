@@ -45,7 +45,8 @@ export function computeModuleCost(
   const hingesCost = (P.hinges['Blum ClipTop']||0) * hingesPerDoor * doors
   const slidesCost = (P.drawerSlide['BLUM LEGRABOX']||0) * drawers
   const legsCount = params.family===FAMILY.BASE ? Math.max(4, Math.ceil(wMM/300)*2) : 0
-  const legsCost = legsCount * (P.legs['Standard 10cm']||0)
+  const legsType = params.adv.legsType ?? g.legsType
+  const legsCost = legsCount * (P.legs[legsType] || 0)
   const hangersCount = (params.family===FAMILY.WALL || params.family===FAMILY.PAWLACZ) ? 2 : 0
   const hangersCost = hangersCount * (P.hangers['Standard']||0)
   const aventosCost = aventosType ? (P.aventos[aventosType]||0) : 0
