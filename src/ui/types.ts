@@ -32,5 +32,5 @@ export interface CabinetConfig {
     right?: SidePanelSpec & { dropToFloor?: boolean };
   };
   hardware?: any;
-  legs?: any;
+  legs?: { type: string; height: number };
 }
