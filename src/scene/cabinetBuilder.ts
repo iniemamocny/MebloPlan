@@ -1000,7 +1000,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   if (legHeight > 0) {
     const footHeight = legHeight;
     // Use the largest base radius to calculate leg offset
-    const standardRadius = 60 / 1000 / 2;
+    const standardRadius = 0.03;
     const baseSize = 0.08;
     const reinforcedCylRadius = 0.036 / 2;
     const decorativeSize = 0.04;
