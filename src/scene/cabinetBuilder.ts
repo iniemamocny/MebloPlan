@@ -1096,10 +1096,9 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
         const footRadius = 50 / 1000 / 2;
         const footHeight = 10 / 1000;
         const screwRadius = 10 / 1000 / 2;
+        // footHeight + screwHeight + shaftHeight + plateThickness = legHeight
         const screwHeight = Math.max(
-          footHeight > legHeight
-            ? 0
-            : legHeight - plateThickness - shaftHeight - footHeight,
+          legHeight - plateThickness - shaftHeight - footHeight,
           0,
         );
 
