@@ -232,30 +232,16 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
           ? legHeight + (H - T) / 2
           : legHeight + H / 2;
   const sideBottomY = sideY - sideHeight / 2;
-  const leftSpec = sidePanels.left;
-  const leftValid = hasValidSidePanelDimensions(leftSpec);
-  const leftWidth = leftValid ? leftSpec.width / 1000 : D;
-  const leftHeight = leftValid ? leftSpec.height / 1000 : sideHeight;
-  const leftBottom = leftValid
-    ? legHeight + (gaps.bottom || 0) / 1000
-    : sideBottomY;
-  const leftGeo = new THREE.BoxGeometry(T, leftHeight, leftWidth);
+  const leftGeo = new THREE.BoxGeometry(T, sideHeight, D);
   const leftSide = new THREE.Mesh(leftGeo, carcMat);
-  leftSide.position.set(T / 2, leftBottom + leftHeight / 2, -leftWidth / 2);
+  leftSide.position.set(T / 2, sideBottomY + sideHeight / 2, -D / 2);
   leftSide.userData.part = 'leftSide';
   leftSide.userData.originalMaterial = leftSide.material;
   addEdges(leftSide);
   group.add(leftSide);
-  const rightSpec = sidePanels.right;
-  const rightValid = hasValidSidePanelDimensions(rightSpec);
-  const rightWidth = rightValid ? rightSpec.width / 1000 : D;
-  const rightHeight = rightValid ? rightSpec.height / 1000 : sideHeight;
-  const rightBottom = rightValid
-    ? legHeight + (gaps.bottom || 0) / 1000
-    : sideBottomY;
-  const rightGeo = new THREE.BoxGeometry(T, rightHeight, rightWidth);
+  const rightGeo = new THREE.BoxGeometry(T, sideHeight, D);
   const rightSide = new THREE.Mesh(rightGeo, carcMat);
-  rightSide.position.set(W - T / 2, rightBottom + rightHeight / 2, -rightWidth / 2);
+  rightSide.position.set(W - T / 2, sideBottomY + sideHeight / 2, -D / 2);
   rightSide.userData.part = 'rightSide';
   rightSide.userData.originalMaterial = rightSide.material;
   addEdges(rightSide);
@@ -302,8 +288,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       addBand(x, topY + offsetForEdge('top'), -w / 2, T, bandThickness, w);
     }
   };
-  bandSide(leftSideEdgeBanding, T / 2, leftBottom, leftHeight, leftWidth);
-  bandSide(rightSideEdgeBanding, W - T / 2, rightBottom, rightHeight, rightWidth);
+  bandSide(leftSideEdgeBanding, T / 2, sideBottomY, sideHeight, D);
+  bandSide(rightSideEdgeBanding, W - T / 2, sideBottomY, sideHeight, D);
 
   const bandPanel = (
     banding: EdgeBanding | undefined,
