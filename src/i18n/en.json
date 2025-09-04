@@ -143,6 +143,7 @@
     "panel": "Panel",
     "panelWidth": "Panel width (mm)",
     "panelHeight": "Panel height (mm)",
+    "dropToFloor": "Drop to floor",
     "blenda": "Filler",
     "orientation": {
       "label": "Orientation",

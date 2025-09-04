@@ -321,6 +321,7 @@ export function useCabinetConfig(
         panel: true,
         width: sideCfg.width ?? cfg.depth,
         height: sideCfg.height ?? height,
+        dropToFloor: false,
       };
       return { ...cfg, sidePanels };
     });

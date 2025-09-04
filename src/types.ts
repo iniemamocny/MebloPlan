@@ -38,6 +38,7 @@ export interface SidePanelSpec {
   /** height in millimetres */
   height?: number;
   blenda?: Blenda;
+  dropToFloor?: boolean;
 }
 
 /**
