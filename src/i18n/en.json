@@ -60,6 +60,8 @@
     "backPanel": "Back",
     "legs": "Legs",
     "legsHeight": "Leg height (mm)",
+    "legsAdjustment": "Adjustment (mm)",
+    "legsCategory": "Leg category",
     "offsetWall": "Offset from wall (mm)",
     "hanger": "Hangers",
     "gapsTitle": "Gaps (mm)",

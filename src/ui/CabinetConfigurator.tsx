@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FAMILY, Kind, Variant } from '../core/catalog';
-import { usePlannerStore } from '../state/store';
+import { usePlannerStore, legCategories } from '../state/store';
 import TechDrawing from './components/TechDrawing';
 import Cabinet3D from './components/Cabinet3D';
 import { CabinetConfig } from './types';
@@ -57,6 +57,11 @@ const CabinetConfigurator: React.FC<Props> = ({
   const g = usePlannerStore((s) => s.globals[family]);
   const globalLegsHeight = g.legsHeight ?? 0;
   const legsHeight = gLocal.legs?.height ?? globalLegsHeight;
+  const legType = gLocal.legs?.type ?? g.legsType;
+  const legCategory = gLocal.legs?.category ?? legCategories[legType];
+  const baseOptions = [150, 100, 60];
+  const legsBase = baseOptions.find((b) => Math.abs(legsHeight - b) <= 25) ?? 100;
+  const legsAdjustment = legsHeight - legsBase;
   const { t } = useTranslation();
   const [doorsCount, setDoorsCount] = useState(1);
   const [drawersCount, setDrawersCount] = useState(0);
@@ -1435,13 +1440,15 @@ const CabinetConfigurator: React.FC<Props> = ({
                 <div className="small">Typ</div>
                 <select
                   className="input"
-                  value={gLocal.legs?.type ?? g.legsType}
+                  value={legType}
                   onChange={(e) => {
+                    const type = (e.target as HTMLSelectElement).value;
                     const height = gLocal.legs?.height ?? g.legsHeight ?? 0;
                     setAdv({
                       legs: {
-                        type: (e.target as HTMLSelectElement).value,
+                        type,
                         height,
+                        category: legCategories[type],
                       },
                     });
                   }}
@@ -1455,21 +1462,56 @@ const CabinetConfigurator: React.FC<Props> = ({
               </div>
               <div>
                 <div className="small">Wysokość</div>
-                <input
+                <select
                   className="input"
-                  type="number"
-                  value={gLocal.legs?.height ?? g.legsHeight ?? 0}
+                  value={legsBase}
                   onChange={(e) => {
-                    const val = parseInt((e.target as HTMLInputElement).value, 10);
+                    const base = parseInt((e.target as HTMLSelectElement).value, 10);
                     const type = gLocal.legs?.type ?? g.legsType;
+                    const height = base + legsAdjustment;
                     setAdv({
                       legs: {
                         type,
-                        height: val,
+                        height,
+                        category: legCategories[type],
+                      },
+                    });
+                  }}
+                >
+                  {baseOptions.map((v) => (
+                    <option key={v} value={v}>
+                      {v}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <div className="small">Regulacja</div>
+                <input
+                  className="input"
+                  type="number"
+                  min={-25}
+                  max={25}
+                  value={legsAdjustment}
+                  onChange={(e) => {
+                    let val = parseInt((e.target as HTMLInputElement).value, 10);
+                    if (Number.isNaN(val)) val = 0;
+                    val = Math.max(-25, Math.min(25, val));
+                    const type = gLocal.legs?.type ?? g.legsType;
+                    const height = legsBase + val;
+                    setAdv({
+                      legs: {
+                        type,
+                        height,
+                        category: legCategories[type],
                       },
                     });
                   }}
                 />
+              </div>
+              <div>
+                <div className="small">Kategoria</div>
+                <input className="input" value={legCategory} readOnly />
               </div>
             </div>
           </div>

@@ -60,6 +60,8 @@
     "backPanel": "Plecy",
     "legs": "Nóżki",
     "legsHeight": "Wysokość nóżek (mm)",
+    "legsAdjustment": "Regulacja (mm)",
+    "legsCategory": "Kategoria nóżek",
     "offsetWall": "Odsunięcie od ściany (mm)",
     "hanger": "Zawieszki",
     "gapsTitle": "Szczeliny (mm)",

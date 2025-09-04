@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FAMILY, Kind, Variant, KIND_SETS } from '../core/catalog';
 import { computeModuleCost } from '../core/pricing';
-import { usePlannerStore } from '../state/store';
+import { usePlannerStore, legCategories } from '../state/store';
 import { getWallSegments, projectPointToSegment } from '../utils/walls';
 import { autoWidthsForRun, placeAlongWall } from '../utils/auto';
 import { Module3D, ModuleAdv } from '../types';
@@ -48,7 +48,11 @@ export function useCabinetConfig(
       traverseEdgeBanding: {},
       backEdgeBanding: {},
       sidePanels: {},
-      legs: { type: g.legsType, height: g.legsHeight },
+      legs: {
+        type: g.legsType,
+        height: g.legsHeight,
+        category: legCategories[g.legsType],
+      },
       carcassType: g.carcassType,
     });
   }, [family, store.globals]);
@@ -180,7 +184,11 @@ export function useCabinetConfig(
     } = {
       ...g,
       legsType: selectedLegsType,
-      legs: { ...(g.legs || {}), ...(advLocal.legs || {}) },
+      legs: {
+        category: legCategories[selectedLegsType],
+        ...(g.legs || {}),
+        ...(advLocal.legs || {}),
+      },
     };
     if (!advAugmented.hinge) advAugmented.hinge = 'left';
     if (!advAugmented.drawerSlide) advAugmented.drawerSlide = 'BLUM LEGRABOX';
@@ -313,7 +321,12 @@ export function useCabinetConfig(
   const gLocal: CabinetConfig = (() => {
     const g = store.globals[family];
     const base = adv ? { ...adv } : ({ ...g } as CabinetConfig);
-    if (!base.legs) base.legs = { type: g.legsType, height: g.legsHeight };
+    if (!base.legs)
+      base.legs = {
+        type: g.legsType,
+        height: g.legsHeight,
+        category: legCategories[g.legsType],
+      };
     return base;
   })();
 
@@ -321,8 +334,23 @@ export function useCabinetConfig(
     setAdvState((prev) => {
       const g = store.globals[family];
       const base = prev
-        ? { ...prev, legs: prev.legs || { type: g.legsType, height: g.legsHeight } }
-        : ({ ...g, legs: { type: g.legsType, height: g.legsHeight } } as CabinetConfig);
+        ? {
+            ...prev,
+            legs:
+              prev.legs || {
+                type: g.legsType,
+                height: g.legsHeight,
+                category: legCategories[g.legsType],
+              },
+          }
+        : ({
+            ...g,
+            legs: {
+              type: g.legsType,
+              height: g.legsHeight,
+              category: legCategories[g.legsType],
+            },
+          } as CabinetConfig);
       return { ...base, ...patch };
     });
 
