@@ -35,8 +35,19 @@ export default function GlobalSettings(){
     const set = (patch:any)=>store.updateGlobals(fam, patch)
     const legHeight = g.legsHeight ?? 0
     const baseOptions = [60,100,150]
-    const legsBase = baseOptions.find(b=>Math.abs(legHeight - b) <= 25) ?? 100
-    const legsAdjustment = legHeight - legsBase
+    const baseRanges: Record<number, [number, number]> = {
+      60: [60,80],
+      100: [88,125],
+      150: [135,180],
+    }
+    const legsBase = baseOptions.find(b=>{
+      const [min,max] = baseRanges[b]
+      return legHeight >= min && legHeight <= max
+    }) ?? 100
+    const [baseMin, baseMax] = baseRanges[legsBase]
+    const minAdjustment = baseMin - legsBase
+    const maxAdjustment = baseMax - legsBase
+    const legsAdjustment = Math.min(Math.max(legHeight - legsBase, minAdjustment), maxAdjustment)
     const floorHeight = legsBase + legsAdjustment
     const floorRef = useRef<HTMLInputElement>(null)
     const legCategory = g.legsCategory ?? legCategories[g.legsType]
@@ -98,7 +109,10 @@ export default function GlobalSettings(){
                   value={legsBase}
                   onChange={e=>{
                     const base = parseInt((e.target as HTMLSelectElement).value,10)
-                    set({legsHeight: base + legsAdjustment})
+                    const [minH, maxH] = baseRanges[base]
+                    let height = base + legsAdjustment
+                    height = Math.max(minH, Math.min(maxH, height))
+                    set({legsHeight: height})
                     floorRef.current?.focus()
                   }}
                 >
@@ -111,13 +125,13 @@ export default function GlobalSettings(){
                   ref={floorRef}
                   className="input"
                   type="number"
-                  min={legsBase-25}
-                  max={legsBase+25}
+                  min={baseMin}
+                  max={baseMax}
                   value={floorHeight}
                   onChange={e=>{
                     let val = parseInt((e.target as HTMLInputElement).value,10)
                     if (Number.isNaN(val)) val = legsBase
-                    val = Math.max(legsBase-25, Math.min(legsBase+25, val))
+                    val = Math.max(baseMin, Math.min(baseMax, val))
                     set({legsHeight: val})
                   }}
                 />
@@ -127,13 +141,13 @@ export default function GlobalSettings(){
                 <input
                   className="input"
                   type="number"
-                  min={-25}
-                  max={25}
+                  min={minAdjustment}
+                  max={maxAdjustment}
                   value={legsAdjustment}
                   onChange={e=>{
                     let val = parseInt((e.target as HTMLInputElement).value,10)
                     if (Number.isNaN(val)) val = 0
-                    val = Math.max(-25, Math.min(25, val))
+                    val = Math.max(minAdjustment, Math.min(maxAdjustment, val))
                     set({legsHeight: legsBase + val})
                   }}
                 />
