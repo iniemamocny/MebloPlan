@@ -61,8 +61,8 @@ const CabinetConfigurator: React.FC<Props> = ({
   const legCategory = gLocal.legs?.category ?? legCategories[legType];
   const legCategoryToType: Record<string, 'standard' | 'reinforced' | 'decorative'> = {
     standard: 'standard',
-    wzmocniona: 'reinforced',
-    ozdobna: 'decorative',
+    reinforced: 'reinforced',
+    decorative: 'decorative',
   };
   const legsType = legCategoryToType[legCategory] ?? 'standard';
   const legsOffset = gLocal.legs?.legsOffset ?? g.legsOffset ?? 35;

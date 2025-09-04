@@ -63,8 +63,8 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       (adv.legs?.type ? legCategories[adv.legs.type] : undefined);
     const legCategoryToType: Record<string, 'standard' | 'reinforced' | 'decorative'> = {
       standard: 'standard',
-      wzmocniona: 'reinforced',
-      ozdobna: 'decorative',
+      reinforced: 'reinforced',
+      decorative: 'decorative',
     };
     const legsType = legCategory ? legCategoryToType[legCategory] : undefined;
     const group = buildCabinetMesh({
