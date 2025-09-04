@@ -1017,163 +1017,179 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       [T + halfSize, -D + legOffset + halfSize],
       [W - T - halfSize, -D + legOffset + halfSize],
     ];
-    positions.forEach(([x, z]) => {
-      let leg: THREE.Object3D;
-      if (legsType === 'reinforced') {
-        const legGroup = new THREE.Group();
-        const plateThickness = mm(6);
-        const chamfer = mm(8);
-        const halfPlate = baseSize / 2;
-        const cylRadius = reinforcedCylRadius;
-        const cylHeight = Math.max(legTotalHeight - plateThickness * 2, 0);
-        const screwRadius = mm(10) / 2;
 
-        const plateShape = new THREE.Shape();
-        plateShape.moveTo(-halfPlate, halfPlate);
-        plateShape.lineTo(halfPlate, halfPlate);
-        plateShape.lineTo(halfPlate, -halfPlate + chamfer);
-        plateShape.lineTo(halfPlate - chamfer, -halfPlate);
-        plateShape.lineTo(-halfPlate + chamfer, -halfPlate);
-        plateShape.lineTo(-halfPlate, -halfPlate + chamfer);
-        plateShape.lineTo(-halfPlate, halfPlate);
+    const buildReinforcedLeg = (
+      position: THREE.Vector3,
+      height: number,
+    ): THREE.Object3D => {
+      const legGroup = new THREE.Group();
+      const plateThickness = mm(6);
+      const chamfer = mm(8);
+      const halfPlate = baseSize / 2;
+      const cylRadius = reinforcedCylRadius;
+      const cylHeight = Math.max(height - plateThickness * 2, 0);
+      const screwRadius = mm(10) / 2;
 
-        const plateGeo = new THREE.ExtrudeGeometry(plateShape, {
-          depth: plateThickness,
-          bevelEnabled: false,
-        });
-        const bottomPlate = new THREE.Mesh(plateGeo, plateMat);
-        bottomPlate.rotation.x = -Math.PI / 2;
-        bottomPlate.position.y = 0;
-        legGroup.add(bottomPlate);
+      const plateShape = new THREE.Shape();
+      plateShape.moveTo(-halfPlate, halfPlate);
+      plateShape.lineTo(halfPlate, halfPlate);
+      plateShape.lineTo(halfPlate, -halfPlate + chamfer);
+      plateShape.lineTo(halfPlate - chamfer, -halfPlate);
+      plateShape.lineTo(-halfPlate + chamfer, -halfPlate);
+      plateShape.lineTo(-halfPlate, -halfPlate + chamfer);
+      plateShape.lineTo(-halfPlate, halfPlate);
 
-        const topPlate = bottomPlate.clone();
-        topPlate.position.y = legTotalHeight - plateThickness;
-        legGroup.add(topPlate);
+      const plateGeo = new THREE.ExtrudeGeometry(plateShape, {
+        depth: plateThickness,
+        bevelEnabled: false,
+      });
+      const bottomPlate = new THREE.Mesh(plateGeo, plateMat);
+      bottomPlate.rotation.x = -Math.PI / 2;
+      bottomPlate.position.y = 0;
+      legGroup.add(bottomPlate);
 
-        if (cylHeight > 0) {
-          const cylGeo = new THREE.CylinderGeometry(
-            cylRadius,
-            cylRadius,
-            cylHeight,
-            16,
-          );
-          const cyl = new THREE.Mesh(cylGeo, footMat);
-          cyl.position.y = plateThickness + cylHeight / 2;
-          legGroup.add(cyl);
+      const topPlate = bottomPlate.clone();
+      topPlate.position.y = height - plateThickness;
+      legGroup.add(topPlate);
 
-          const screwGeo = new THREE.CylinderGeometry(
-            screwRadius,
-            screwRadius,
-            cylHeight,
-            16,
-          );
-          const screw = new THREE.Mesh(screwGeo, footMat);
-          screw.position.y = plateThickness + cylHeight / 2;
-          legGroup.add(screw);
-        }
-
-        legGroup.position.set(x, 0, z);
-        leg = legGroup;
-      } else if (legsType === 'decorative') {
-        const legGroup = new THREE.Group();
-        const decoGeo = new THREE.BoxGeometry(
-          decorativeSize,
-          legTotalHeight,
-          decorativeSize,
+      if (cylHeight > 0) {
+        const cylGeo = new THREE.CylinderGeometry(
+          cylRadius,
+          cylRadius,
+          cylHeight,
+          16,
         );
-        const deco = new THREE.Mesh(decoGeo, decorativeMat);
-        deco.position.y = legTotalHeight / 2;
-        legGroup.add(deco);
-        legGroup.position.set(x, 0, z);
-        leg = legGroup;
-      } else {
-        const legGroup = new THREE.Group();
+        const cyl = new THREE.Mesh(cylGeo, footMat);
+        cyl.position.y = plateThickness + cylHeight / 2;
+        legGroup.add(cyl);
 
-        // Dimensions in metres
-        const plateThickness = mm(3);
-        const plateOuterR = mm(60) / 2;
-        const plateInnerR = mm(50) / 2;
-        const shaftHeight = mm(22);
-        const shaftRadius = mm(22) / 2;
-        const footRadius = mm(50) / 2;
-        const footHeight = mm(10);
-        const screwRadius = mm(10) / 2;
-        // footHeight + screwHeight + shaftHeight + plateThickness = legHeight
-        const screwHeight = Math.max(
-          legHeight - plateThickness - shaftHeight - footHeight,
-          0,
-        );
-
-        // Bottom foot with notches
-        const footShape = new THREE.Shape();
-        footShape.absarc(0, 0, footRadius, 0, Math.PI * 2, false);
-        for (let i = 0; i < 6; i++) {
-          const angle = (i / 6) * Math.PI * 2;
-          const notch = new THREE.Path();
-          notch.absarc(
-            Math.cos(angle) * (footRadius - 0.007),
-            Math.sin(angle) * (footRadius - 0.007),
-            mm(3),
-            0,
-            Math.PI * 2,
-            true,
-          );
-          footShape.holes.push(notch);
-        }
-        const footGeo = new THREE.ExtrudeGeometry(footShape, {
-          depth: footHeight,
-          bevelEnabled: false,
-          curveSegments: 16,
-        });
-        footGeo.translate(0, 0, -footHeight / 2);
-        const foot = new THREE.Mesh(footGeo, footMat);
-        foot.rotation.x = -Math.PI / 2;
-        foot.position.y = footHeight / 2;
-        legGroup.add(foot);
-
-        // Threaded screw for adjustment
         const screwGeo = new THREE.CylinderGeometry(
           screwRadius,
           screwRadius,
-          screwHeight,
+          cylHeight,
           16,
         );
         const screw = new THREE.Mesh(screwGeo, footMat);
-        screw.position.y = footHeight + screwHeight / 2;
+        screw.position.y = plateThickness + cylHeight / 2;
         legGroup.add(screw);
-
-        // Main shaft
-        const shaftGeo = new THREE.CylinderGeometry(
-          shaftRadius,
-          shaftRadius,
-          shaftHeight,
-          16,
-        );
-        const shaft = new THREE.Mesh(shaftGeo, footMat);
-        shaft.position.y = footHeight + screwHeight + shaftHeight / 2;
-        legGroup.add(shaft);
-
-        // Top mounting plate with central hole
-        const plateShape = new THREE.Shape();
-        plateShape.absarc(0, 0, plateOuterR, 0, Math.PI * 2, false);
-        const plateHole = new THREE.Path();
-        plateHole.absarc(0, 0, plateInnerR, 0, Math.PI * 2, true);
-        plateShape.holes.push(plateHole);
-        const plateGeo = new THREE.ExtrudeGeometry(plateShape, {
-          depth: plateThickness,
-          bevelEnabled: false,
-          curveSegments: 32,
-        });
-        plateGeo.translate(0, 0, -plateThickness / 2);
-        const plate = new THREE.Mesh(plateGeo, plateMat);
-        plate.rotation.x = -Math.PI / 2;
-        plate.position.y =
-          footHeight + screwHeight + shaftHeight + plateThickness / 2;
-        legGroup.add(plate);
-
-        legGroup.position.set(x, 0, z);
-        leg = legGroup;
       }
+
+      legGroup.position.copy(position);
+      return legGroup;
+    };
+
+    const buildDecorativeLeg = (
+      position: THREE.Vector3,
+      height: number,
+    ): THREE.Object3D => {
+      const legGroup = new THREE.Group();
+      const decoGeo = new THREE.BoxGeometry(
+        decorativeSize,
+        height,
+        decorativeSize,
+      );
+      const deco = new THREE.Mesh(decoGeo, decorativeMat);
+      deco.position.y = height / 2;
+      legGroup.add(deco);
+      legGroup.position.copy(position);
+      return legGroup;
+    };
+
+    const buildStandardLeg = (
+      position: THREE.Vector3,
+      height: number,
+    ): THREE.Object3D => {
+      const legGroup = new THREE.Group();
+
+      // Dimensions in metres
+      const plateThickness = mm(3);
+      const plateOuterR = mm(60) / 2;
+      const plateInnerR = mm(50) / 2;
+      const shaftHeight = mm(22);
+      const shaftRadius = mm(22) / 2;
+      const footRadius = mm(50) / 2;
+      const footHeight = mm(10);
+      const screwRadius = mm(10) / 2;
+      const screwHeight = Math.max(
+        height - plateThickness - shaftHeight - footHeight,
+        0,
+      );
+
+      const footShape = new THREE.Shape();
+      footShape.absarc(0, 0, footRadius, 0, Math.PI * 2, false);
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        const notch = new THREE.Path();
+        notch.absarc(
+          Math.cos(angle) * (footRadius - 0.007),
+          Math.sin(angle) * (footRadius - 0.007),
+          mm(3),
+          0,
+          Math.PI * 2,
+          true,
+        );
+        footShape.holes.push(notch);
+      }
+      const footGeo = new THREE.ExtrudeGeometry(footShape, {
+        depth: footHeight,
+        bevelEnabled: false,
+        curveSegments: 16,
+      });
+      footGeo.translate(0, 0, -footHeight / 2);
+      const foot = new THREE.Mesh(footGeo, footMat);
+      foot.rotation.x = -Math.PI / 2;
+      foot.position.y = footHeight / 2;
+      legGroup.add(foot);
+
+      const screwGeo = new THREE.CylinderGeometry(
+        screwRadius,
+        screwRadius,
+        screwHeight,
+        16,
+      );
+      const screw = new THREE.Mesh(screwGeo, footMat);
+      screw.position.y = footHeight + screwHeight / 2;
+      legGroup.add(screw);
+
+      const shaftGeo = new THREE.CylinderGeometry(
+        shaftRadius,
+        shaftRadius,
+        shaftHeight,
+        16,
+      );
+      const shaft = new THREE.Mesh(shaftGeo, footMat);
+      shaft.position.y = footHeight + screwHeight + shaftHeight / 2;
+      legGroup.add(shaft);
+
+      const plateShape = new THREE.Shape();
+      plateShape.absarc(0, 0, plateOuterR, 0, Math.PI * 2, false);
+      const plateHole = new THREE.Path();
+      plateHole.absarc(0, 0, plateInnerR, 0, Math.PI * 2, true);
+      plateShape.holes.push(plateHole);
+      const plateGeo = new THREE.ExtrudeGeometry(plateShape, {
+        depth: plateThickness,
+        bevelEnabled: false,
+        curveSegments: 32,
+      });
+      plateGeo.translate(0, 0, -plateThickness / 2);
+      const plate = new THREE.Mesh(plateGeo, plateMat);
+      plate.rotation.x = -Math.PI / 2;
+      plate.position.y =
+        footHeight + screwHeight + shaftHeight + plateThickness / 2;
+      legGroup.add(plate);
+
+      legGroup.position.copy(position);
+      return legGroup;
+    };
+
+    positions.forEach(([x, z]) => {
+      const pos = new THREE.Vector3(x, 0, z);
+      const leg =
+        legsType === 'reinforced'
+          ? buildReinforcedLeg(pos, legTotalHeight)
+          : legsType === 'decorative'
+            ? buildDecorativeLeg(pos, legTotalHeight)
+            : buildStandardLeg(pos, legTotalHeight);
       group.add(leg);
     });
   }
