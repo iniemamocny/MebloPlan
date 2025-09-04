@@ -926,6 +926,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                             panel: undefined,
                             width: undefined,
                             height: undefined,
+                            dropToFloor: undefined,
                           },
                         },
                       });
@@ -975,6 +976,23 @@ const CabinetConfigurator: React.FC<Props> = ({
                         });
                       }}
                     />
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <input
+                      type="checkbox"
+                      checked={gLocal.sidePanels.right.dropToFloor ?? false}
+                      onChange={(e) => {
+                        const dropToFloor = (e.target as HTMLInputElement).checked;
+                        setAdv({
+                          ...gLocal,
+                          sidePanels: {
+                            ...gLocal.sidePanels,
+                            right: { ...(gLocal.sidePanels?.right || {}), dropToFloor },
+                          },
+                        });
+                      }}
+                    />
+                    {t('configurator.dropToFloor')}
                   </label>
                 </div>
               )}
@@ -1115,6 +1133,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                             panel: undefined,
                             width: undefined,
                             height: undefined,
+                            dropToFloor: undefined,
                           },
                         },
                       });
@@ -1164,6 +1183,23 @@ const CabinetConfigurator: React.FC<Props> = ({
                         });
                       }}
                     />
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <input
+                      type="checkbox"
+                      checked={gLocal.sidePanels.left.dropToFloor ?? false}
+                      onChange={(e) => {
+                        const dropToFloor = (e.target as HTMLInputElement).checked;
+                        setAdv({
+                          ...gLocal,
+                          sidePanels: {
+                            ...gLocal.sidePanels,
+                            left: { ...(gLocal.sidePanels?.left || {}), dropToFloor },
+                          },
+                        });
+                      }}
+                    />
+                    {t('configurator.dropToFloor')}
                   </label>
                 </div>
               )}

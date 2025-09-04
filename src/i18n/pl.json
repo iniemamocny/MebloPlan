@@ -143,6 +143,7 @@
     "panel": "Panel",
     "panelWidth": "Szerokość panelu (mm)",
     "panelHeight": "Wysokość panelu (mm)",
+    "dropToFloor": "Do podłogi",
     "blenda": "Blenda",
     "orientation": {
       "label": "Orientacja",
