@@ -67,8 +67,23 @@ const CabinetConfigurator: React.FC<Props> = ({
   const legsType = legCategoryToType[legCategory] ?? 'standard';
   const legsOffset = gLocal.legs?.legsOffset ?? g.legsOffset ?? 35;
   const baseOptions = [60, 100, 150];
-  const legsBase = baseOptions.find((b) => Math.abs(legsHeight - b) <= 25) ?? 100;
-  const legsAdjustment = legsHeight - legsBase;
+  const baseRanges: Record<number, [number, number]> = {
+    60: [60, 80],
+    100: [88, 125],
+    150: [135, 180],
+  };
+  const legsBase =
+    baseOptions.find((b) => {
+      const [min, max] = baseRanges[b];
+      return legsHeight >= min && legsHeight <= max;
+    }) ?? 100;
+  const [baseMin, baseMax] = baseRanges[legsBase];
+  const minAdjustment = baseMin - legsBase;
+  const maxAdjustment = baseMax - legsBase;
+  const legsAdjustment = Math.min(
+    Math.max(legsHeight - legsBase, minAdjustment),
+    maxAdjustment,
+  );
   const floorHeight = legsBase + legsAdjustment;
   const floorRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
@@ -1480,7 +1495,9 @@ const CabinetConfigurator: React.FC<Props> = ({
                   onChange={(e) => {
                     const base = parseInt((e.target as HTMLSelectElement).value, 10);
                     const type = gLocal.legs?.type ?? g.legsType;
-                    const height = base + legsAdjustment;
+                    const [minH, maxH] = baseRanges[base];
+                    let height = base + legsAdjustment;
+                    height = Math.max(minH, Math.min(maxH, height));
                     setAdv({
                       legs: {
                         type,
@@ -1505,13 +1522,13 @@ const CabinetConfigurator: React.FC<Props> = ({
                   ref={floorRef}
                   className="input"
                   type="number"
-                  min={legsBase - 25}
-                  max={legsBase + 25}
+                  min={baseMin}
+                  max={baseMax}
                   value={floorHeight}
                   onChange={(e) => {
                     let val = parseInt((e.target as HTMLInputElement).value, 10);
                     if (Number.isNaN(val)) val = legsBase;
-                    val = Math.max(legsBase - 25, Math.min(legsBase + 25, val));
+                    val = Math.max(baseMin, Math.min(baseMax, val));
                     const type = gLocal.legs?.type ?? g.legsType;
                     const height = val;
                     setAdv({
@@ -1530,13 +1547,13 @@ const CabinetConfigurator: React.FC<Props> = ({
                 <input
                   className="input"
                   type="number"
-                  min={-25}
-                  max={25}
+                  min={minAdjustment}
+                  max={maxAdjustment}
                   value={legsAdjustment}
                   onChange={(e) => {
                     let val = parseInt((e.target as HTMLInputElement).value, 10);
                     if (Number.isNaN(val)) val = 0;
-                    val = Math.max(-25, Math.min(25, val));
+                    val = Math.max(minAdjustment, Math.min(maxAdjustment, val));
                     const type = gLocal.legs?.type ?? g.legsType;
                     const height = legsBase + val;
                     setAdv({
