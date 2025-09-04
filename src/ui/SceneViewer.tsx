@@ -22,8 +22,8 @@ interface Props {
 
 export const getLegHeight = (mod: Module3D, globals: Globals): number => {
   if (mod.family !== FAMILY.BASE) return 0;
-  const famGlobal = globals[mod.family];
-  const h = famGlobal?.legsHeight;
+  const h =
+    mod.adv?.legs?.height ?? globals[mod.family]?.legsHeight;
   if (typeof h === 'number') return h / 1000;
   return 0.1;
 };
@@ -39,12 +39,11 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
     threeRef.current = setupThree(containerRef.current);
   }, [threeRef]);
 
-  const createCabinetMesh = (mod: Module3D) => {
+  const createCabinetMesh = (mod: Module3D, legHeight: number) => {
     const W = mod.size.w;
     const H = mod.size.h;
     const D = mod.size.d;
     const adv: ModuleAdv = mod.adv ?? {};
-    const legHeight = getLegHeight(mod, store.globals);
     const drawers = Array.isArray(adv.drawerFronts)
       ? adv.drawerFronts.length
       : 0;
@@ -111,10 +110,10 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       }
     });
     store.modules.forEach((m: Module3D) => {
-      const cabMesh = createCabinetMesh(m);
+      const legHeight = getLegHeight(m, store.globals);
+      const cabMesh = createCabinetMesh(m, legHeight);
       const fgs: THREE.Object3D[] = cabMesh.userData.frontGroups || [];
       fgs.forEach((fg) => (fg.visible = showFronts));
-      const legHeight = getLegHeight(m, store.globals);
       const baseY = m.family === FAMILY.BASE ? 0 : m.position[1];
       cabMesh.position.set(m.position[0], baseY, m.position[2]);
       cabMesh.rotation.y = m.rotationY || 0;

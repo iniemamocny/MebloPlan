@@ -31,6 +31,7 @@ export default function Cabinet3D({
   carcassType = 'type1',
   showFronts = true,
   highlightPart = null,
+  legHeight: legHeightMM = 0,
 }: {
   widthMM: number;
   heightMM: number;
@@ -59,6 +60,7 @@ export default function Cabinet3D({
   carcassType?: 'type1' | 'type2' | 'type3' | 'type4' | 'type5' | 'type6';
   showFronts?: boolean;
   highlightPart?: 'top' | 'bottom' | 'shelf' | 'back' | 'leftSide' | 'rightSide' | null;
+  legHeight?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -121,7 +123,9 @@ export default function Cabinet3D({
     const H = heightMM / 1000;
     const D = depthMM / 1000;
     const legHeight =
-      family === FAMILY.BASE || family === FAMILY.TALL ? 0.04 : 0;
+      family === FAMILY.BASE || family === FAMILY.TALL
+        ? legHeightMM / 1000
+        : 0;
     const cabGroup = buildCabinetMesh({
       width: W,
       height: H,
@@ -224,6 +228,7 @@ export default function Cabinet3D({
     sidePanels,
     carcassType,
     showFronts,
+    legHeightMM,
   ]);
 
   useEffect(() => {
@@ -306,6 +311,7 @@ export default function Cabinet3D({
     sidePanels,
     carcassType,
     showFronts,
+    legHeightMM,
   ]);
 
   useEffect(() => {
