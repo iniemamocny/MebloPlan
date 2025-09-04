@@ -126,7 +126,7 @@ describe('computeModuleCost', () => {
   })
 
   it('uses custom legs type pricing when specified', () => {
-    const adv = { ...advFor(FAMILY.BASE), legsType: 'Metal 10cm' }
+    const adv = { ...advFor(FAMILY.BASE), legsType: 'Metalowe' }
     const price = computeModuleCost(
       {
         family: FAMILY.BASE,
@@ -138,7 +138,7 @@ describe('computeModuleCost', () => {
       { prices: defaultPrices, globals: defaultGlobal }
     )
     expect(price.parts.legs).toBe(
-      (defaultPrices.legs['Metal 10cm'] || 0) * price.counts.legs
+      (defaultPrices.legs['Metalowe'] || 0) * price.counts.legs
     )
   })
 })
