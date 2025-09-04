@@ -1023,7 +1023,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       height: number,
     ): THREE.Object3D => {
       const legGroup = new THREE.Group();
-      const plateThickness = mm(6);
+      // Ensure both the base and top plates share the same 22 mm height
+      const plateThickness = mm(22);
       const chamfer = mm(8);
       const halfPlate = baseSize / 2;
       const cylRadius = reinforcedCylRadius;
@@ -1102,18 +1103,21 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       const legGroup = new THREE.Group();
 
       // Dimensions in metres
-      const plateThickness = mm(3);
+      // Match base and top plate heights to 22 mm
+      const plateThickness = mm(22);
       const plateOuterR = mm(60) / 2;
       const plateInnerR = mm(50) / 2;
-      const shaftHeight = mm(22);
-      const shaftRadius = mm(22) / 2;
+      const footHeight = mm(22); // base (foot) height
       const footRadius = mm(50) / 2;
-      const footHeight = mm(10);
+      const shaftRadius = mm(22) / 2;
       const screwRadius = mm(10) / 2;
-      const screwHeight = Math.max(
-        height - plateThickness - shaftHeight - footHeight,
+      const totalMiddleHeight = Math.max(
+        height - plateThickness - footHeight,
         0,
       );
+      // Split remaining height so the smaller cylinder is 1/5 and the larger 4/5
+      const screwHeight = totalMiddleHeight / 5;
+      const shaftHeight = (totalMiddleHeight * 4) / 5;
 
       const footShape = new THREE.Shape();
       footShape.absarc(0, 0, footRadius, 0, Math.PI * 2, false);
