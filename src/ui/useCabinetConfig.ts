@@ -175,7 +175,7 @@ export function useCabinetConfig(
       drawerSlide?: string;
       animationSpeed?: number;
       doorCount?: number;
-    } = { ...g };
+    } = { ...g, legs: { ...(g.legs || {}), ...(advLocal.legs || {}) } };
     if (!advAugmented.hinge) advAugmented.hinge = 'left';
     if (!advAugmented.drawerSlide) advAugmented.drawerSlide = 'BLUM LEGRABOX';
     if (advAugmented.animationSpeed === undefined)
