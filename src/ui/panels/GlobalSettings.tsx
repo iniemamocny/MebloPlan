@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { usePlannerStore, legCategories } from '../../state/store'
 import { FAMILY } from '../../core/catalog'
@@ -34,9 +34,11 @@ export default function GlobalSettings(){
     const isOpen = openFam===fam
     const set = (patch:any)=>store.updateGlobals(fam, patch)
     const legHeight = g.legsHeight ?? 0
-    const baseOptions = [150,100,60]
+    const baseOptions = [60,100,150]
     const legsBase = baseOptions.find(b=>Math.abs(legHeight - b) <= 25) ?? 100
     const legsAdjustment = legHeight - legsBase
+    const floorHeight = legsBase + legsAdjustment
+    const floorRef = useRef<HTMLInputElement>(null)
     const legCategory = g.legsCategory ?? legCategories[g.legsType]
     return (
       <div className="section" style={{marginTop:8}}>
@@ -90,17 +92,35 @@ export default function GlobalSettings(){
                 options={Object.keys(store.prices.legs)}
               />
               <div>
-                <div className="small">{t('global.legsHeight')}</div>
+                <div className="small">{t('global.legsBaseHeight')}</div>
                 <select
                   className="input"
                   value={legsBase}
                   onChange={e=>{
                     const base = parseInt((e.target as HTMLSelectElement).value,10)
                     set({legsHeight: base + legsAdjustment})
+                    floorRef.current?.focus()
                   }}
                 >
                   {baseOptions.map(v=> <option key={v} value={v}>{v}</option>)}
                 </select>
+              </div>
+              <div>
+                <div className="small">{t('global.legsFloorHeight')}</div>
+                <input
+                  ref={floorRef}
+                  className="input"
+                  type="number"
+                  min={legsBase-25}
+                  max={legsBase+25}
+                  value={floorHeight}
+                  onChange={e=>{
+                    let val = parseInt((e.target as HTMLInputElement).value,10)
+                    if (Number.isNaN(val)) val = legsBase
+                    val = Math.max(legsBase-25, Math.min(legsBase+25, val))
+                    set({legsHeight: val})
+                  }}
+                />
               </div>
               <div>
                 <div className="small">{t('global.legsAdjustment')}</div>
