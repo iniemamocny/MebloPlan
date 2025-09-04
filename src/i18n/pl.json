@@ -60,6 +60,7 @@
     "backPanel": "Plecy",
     "legs": "Nóżki",
     "legsBaseHeight": "Wysokość bazowa",
+    "legsFloorHeight": "Wysokość od podłogi",
     "legsAdjustment": "Regulacja (±25 mm)",
     "legsCategory": "Kategoria",
     "offsetWall": "Odsunięcie od ściany (mm)",
@@ -160,6 +161,7 @@
     "hideCountertop": "Ukryj blaty",
     "legsCategory": "Kategoria",
     "legsBaseHeight": "Wysokość bazowa",
+    "legsFloorHeight": "Wysokość od podłogi",
     "legsAdjustment": "Regulacja (±25 mm)"
   },
   "forms": {

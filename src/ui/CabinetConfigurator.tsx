@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FAMILY, Kind, Variant } from '../core/catalog';
 import { usePlannerStore, legCategories } from '../state/store';
@@ -59,9 +59,11 @@ const CabinetConfigurator: React.FC<Props> = ({
   const legsHeight = gLocal.legs?.height ?? globalLegsHeight;
   const legType = gLocal.legs?.type ?? g.legsType;
   const legCategory = gLocal.legs?.category ?? legCategories[legType];
-  const baseOptions = [150, 100, 60];
+  const baseOptions = [60, 100, 150];
   const legsBase = baseOptions.find((b) => Math.abs(legsHeight - b) <= 25) ?? 100;
   const legsAdjustment = legsHeight - legsBase;
+  const floorHeight = legsBase + legsAdjustment;
+  const floorRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
   const [doorsCount, setDoorsCount] = useState(1);
   const [drawersCount, setDrawersCount] = useState(0);
@@ -1461,7 +1463,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                 </select>
               </div>
               <div>
-                <div className="small">Wysokość</div>
+                <div className="small">{t('configurator.legsBaseHeight')}</div>
                 <select
                   className="input"
                   value={legsBase}
@@ -1476,6 +1478,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                         category: legCategories[type],
                       },
                     });
+                    floorRef.current?.focus();
                   }}
                 >
                   {baseOptions.map((v) => (
@@ -1486,7 +1489,32 @@ const CabinetConfigurator: React.FC<Props> = ({
                 </select>
               </div>
               <div>
-                <div className="small">Regulacja</div>
+                <div className="small">{t('configurator.legsFloorHeight')}</div>
+                <input
+                  ref={floorRef}
+                  className="input"
+                  type="number"
+                  min={legsBase - 25}
+                  max={legsBase + 25}
+                  value={floorHeight}
+                  onChange={(e) => {
+                    let val = parseInt((e.target as HTMLInputElement).value, 10);
+                    if (Number.isNaN(val)) val = legsBase;
+                    val = Math.max(legsBase - 25, Math.min(legsBase + 25, val));
+                    const type = gLocal.legs?.type ?? g.legsType;
+                    const height = val;
+                    setAdv({
+                      legs: {
+                        type,
+                        height,
+                        category: legCategories[type],
+                      },
+                    });
+                  }}
+                />
+              </div>
+              <div>
+                <div className="small">{t('configurator.legsAdjustment')}</div>
                 <input
                   className="input"
                   type="number"
@@ -1510,7 +1538,7 @@ const CabinetConfigurator: React.FC<Props> = ({
                 />
               </div>
               <div>
-                <div className="small">Kategoria</div>
+                <div className="small">{t('configurator.legsCategory')}</div>
                 <input className="input" value={legCategory} readOnly />
               </div>
             </div>
