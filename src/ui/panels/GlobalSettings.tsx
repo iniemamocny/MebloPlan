@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { usePlannerStore } from '../../state/store'
+import { usePlannerStore, legCategories } from '../../state/store'
 import { FAMILY } from '../../core/catalog'
 
 const FamList = [FAMILY.BASE, FAMILY.WALL, FAMILY.PAWLACZ, FAMILY.TALL]
@@ -33,6 +33,11 @@ export default function GlobalSettings(){
     const g = store.globals[fam]
     const isOpen = openFam===fam
     const set = (patch:any)=>store.updateGlobals(fam, patch)
+    const legHeight = g.legsHeight ?? 0
+    const baseOptions = [150,100,60]
+    const legsBase = baseOptions.find(b=>Math.abs(legHeight - b) <= 25) ?? 100
+    const legsAdjustment = legHeight - legsBase
+    const legCategory = g.legsCategory ?? legCategories[g.legsType]
     return (
       <div className="section" style={{marginTop:8}}>
         <div className="hd" onClick={()=>setOpenFam(prev=> prev===fam ? null : fam)}>
@@ -77,8 +82,46 @@ export default function GlobalSettings(){
               ]}
             />
             {fam===FAMILY.BASE && (<>
-              <Field label={t('global.legs')} type="select" value={g.legsType} onChange={(v)=>set({legsType:v})} options={Object.keys(store.prices.legs)} />
-              <Field label={t('global.legsHeight')} value={g.legsHeight||0} onChange={(v)=>set({legsHeight:v})} />
+              <Field
+                label={t('global.legs')}
+                type="select"
+                value={g.legsType}
+                onChange={(v)=>set({legsType:v, legsCategory: legCategories[v]})}
+                options={Object.keys(store.prices.legs)}
+              />
+              <div>
+                <div className="small">{t('global.legsHeight')}</div>
+                <select
+                  className="input"
+                  value={legsBase}
+                  onChange={e=>{
+                    const base = parseInt((e.target as HTMLSelectElement).value,10)
+                    set({legsHeight: base + legsAdjustment})
+                  }}
+                >
+                  {baseOptions.map(v=> <option key={v} value={v}>{v}</option>)}
+                </select>
+              </div>
+              <div>
+                <div className="small">{t('global.legsAdjustment')}</div>
+                <input
+                  className="input"
+                  type="number"
+                  min={-25}
+                  max={25}
+                  value={legsAdjustment}
+                  onChange={e=>{
+                    let val = parseInt((e.target as HTMLInputElement).value,10)
+                    if (Number.isNaN(val)) val = 0
+                    val = Math.max(-25, Math.min(25, val))
+                    set({legsHeight: legsBase + val})
+                  }}
+                />
+              </div>
+              <div>
+                <div className="small">{t('global.legsCategory')}</div>
+                <input className="input" value={legCategory} readOnly />
+              </div>
               <Field label={t('global.offsetWall')} value={g.offsetWall||0} onChange={(v)=>set({offsetWall:v})} />
             </>)}
             {(fam===FAMILY.WALL || fam===FAMILY.PAWLACZ) && (<>
