@@ -162,8 +162,9 @@ export interface ModuleAdv {
     right?: SidePanelSpec;
   };
   carcassType?: 'type1' | 'type2' | 'type3' | 'type4' | 'type5' | 'type6';
+  category?: string;
   legsType?: string;
-  legs?: { type: string; height: number };
+  legs?: { type: string; height: number; category?: string };
 }
 
 export interface Module3D {
