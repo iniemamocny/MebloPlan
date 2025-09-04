@@ -1107,12 +1107,11 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       const plateThickness = mm(22);
       const plateOuterR = mm(60) / 2;
       const plateInnerR = mm(50) / 2;
-      const shaftHeight = mm(22);
-      const shaftRadius = mm(22) / 2;
-      const footRadius = mm(50) / 2;
-      // Set the base (foot) height to 22 mm as well
       const footHeight = mm(22);
+      const footRadius = mm(50) / 2;
+      const shaftRadius = mm(22) / 2;
       const screwRadius = mm(10) / 2;
+      const shaftHeight = mm(22);
       const screwHeight = Math.max(
         height - plateThickness - shaftHeight - footHeight,
         0,
