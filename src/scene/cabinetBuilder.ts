@@ -999,7 +999,7 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   // Feet (hardware)
   if (legHeight > 0) {
     const footHeight = legHeight;
-    const standardRadius = 0.02;
+    const standardRadius = 0.03;
     const baseSize = 0.08;
     const reinforcedCylRadius = 0.036 / 2;
     const decorativeSize = 0.04;
@@ -1010,10 +1010,10 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
           ? baseSize / 2
           : standardRadius;
     const positions: [number, number][] = [
-      [T + halfSize, -legOffset],
-      [W - T - halfSize, -legOffset],
-      [T + halfSize, -D + legOffset],
-      [W - T - halfSize, -D + legOffset],
+      [T + halfSize, -(legOffset + halfSize)],
+      [W - T - halfSize, -(legOffset + halfSize)],
+      [T + halfSize, -D + legOffset + halfSize],
+      [W - T - halfSize, -D + legOffset + halfSize],
     ];
     positions.forEach(([x, z]) => {
       let leg: THREE.Object3D;
