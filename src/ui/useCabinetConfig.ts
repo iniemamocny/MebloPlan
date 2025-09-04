@@ -48,6 +48,7 @@ export function useCabinetConfig(
       traverseEdgeBanding: {},
       backEdgeBanding: {},
       sidePanels: {},
+      legs: { type: g.legsType, height: g.legsHeight },
       carcassType: g.carcassType,
     });
   }, [family, store.globals]);
@@ -302,13 +303,21 @@ export function useCabinetConfig(
     });
   };
 
-  const gLocal: CabinetConfig = adv || (store.globals[family] as CabinetConfig);
+  const gLocal: CabinetConfig = (() => {
+    const g = store.globals[family];
+    const base = adv ? { ...adv } : ({ ...g } as CabinetConfig);
+    if (!base.legs) base.legs = { type: g.legsType, height: g.legsHeight };
+    return base;
+  })();
 
   const setAdv = (patch: Partial<CabinetConfig>) =>
-    setAdvState((prev) => ({
-      ...(prev || (store.globals[family] as CabinetConfig)),
-      ...patch,
-    }));
+    setAdvState((prev) => {
+      const g = store.globals[family];
+      const base = prev
+        ? { ...prev, legs: prev.legs || { type: g.legsType, height: g.legsHeight } }
+        : ({ ...g, legs: { type: g.legsType, height: g.legsHeight } } as CabinetConfig);
+      return { ...base, ...patch };
+    });
 
   const initSidePanel = (side: 'left' | 'right') => {
     setAdvState((prev) => {

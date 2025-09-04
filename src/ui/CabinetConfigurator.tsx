@@ -53,9 +53,9 @@ const CabinetConfigurator: React.FC<Props> = ({
   initSidePanel,
 }) => {
   const prices = usePlannerStore((s) => s.prices);
-  const legsHeight = usePlannerStore(
-    (s) => s.globals[family].legsHeight || 0,
-  );
+  const legTypes = usePlannerStore((s) => s.prices.legs);
+  const g = usePlannerStore((s) => s.globals[family]);
+  const legsHeight = gLocal.legs?.height ?? g.legsHeight ?? 0;
   const { t } = useTranslation();
   const [doorsCount, setDoorsCount] = useState(1);
   const [drawersCount, setDrawersCount] = useState(0);
@@ -1431,11 +1431,43 @@ const CabinetConfigurator: React.FC<Props> = ({
             <div className="grid2">
               <div>
                 <div className="small">Typ</div>
-                <input className="input" placeholder="-" />
+                <select
+                  className="input"
+                  value={gLocal.legs?.type ?? g.legsType}
+                  onChange={(e) => {
+                    const height = gLocal.legs?.height ?? g.legsHeight ?? 0;
+                    setAdv({
+                      legs: {
+                        type: (e.target as HTMLSelectElement).value,
+                        height,
+                      },
+                    });
+                  }}
+                >
+                  {Object.keys(legTypes).map((k) => (
+                    <option key={k} value={k}>
+                      {k}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <div className="small">Wysokość</div>
-                <input className="input" placeholder="-" />
+                <input
+                  className="input"
+                  type="number"
+                  value={gLocal.legs?.height ?? g.legsHeight ?? 0}
+                  onChange={(e) => {
+                    const val = parseInt((e.target as HTMLInputElement).value, 10);
+                    const type = gLocal.legs?.type ?? g.legsType;
+                    setAdv({
+                      legs: {
+                        type,
+                        height: val,
+                      },
+                    });
+                  }}
+                />
               </div>
             </div>
           </div>
