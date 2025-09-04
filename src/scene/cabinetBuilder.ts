@@ -350,9 +350,14 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
 
   if (sidePanels.left?.panel && hasValidSidePanelDimensions(sidePanels.left)) {
     const pw = sidePanels.left.width / 1000;
-    const ph = sidePanels.left.height / 1000;
+    const drop = sidePanels.left.dropToFloor;
+    const ph = drop
+      ? (sidePanels.left.height + legHeight) / 1000
+      : sidePanels.left.height / 1000;
+    const bottom = drop
+      ? (gaps.bottom || 0) / 1000
+      : legHeight + (gaps.bottom || 0) / 1000;
     const geo = new THREE.BoxGeometry(T, ph, pw);
-    const bottom = legHeight + (gaps.bottom || 0) / 1000;
     const panel = new THREE.Mesh(geo, carcMat);
     const y = bottom + ph / 2;
     panel.position.set(-T / 2, y, -pw / 2);
@@ -364,9 +369,14 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
   }
   if (sidePanels.right?.panel && hasValidSidePanelDimensions(sidePanels.right)) {
     const pw = sidePanels.right.width / 1000;
-    const ph = sidePanels.right.height / 1000;
+    const drop = sidePanels.right.dropToFloor;
+    const ph = drop
+      ? (sidePanels.right.height + legHeight) / 1000
+      : sidePanels.right.height / 1000;
+    const bottom = drop
+      ? (gaps.bottom || 0) / 1000
+      : legHeight + (gaps.bottom || 0) / 1000;
     const geo = new THREE.BoxGeometry(T, ph, pw);
-    const bottom = legHeight + (gaps.bottom || 0) / 1000;
     const panel = new THREE.Mesh(geo, carcMat);
     const y = bottom + ph / 2;
     panel.position.set(W + T / 2, y, -pw / 2);
