@@ -15,6 +15,10 @@ export function setupThree(container: HTMLElement) {
   const orthoCamera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 100);
   orthoCamera.position.set(0, 20, 0);
   orthoCamera.lookAt(0, 0, 0);
+  const defaultPerspPos = perspCamera.position.clone();
+  const defaultPerspQuat = perspCamera.quaternion.clone();
+  const topPos = orthoCamera.position.clone();
+  const topQuat = orthoCamera.quaternion.clone();
   let camera: THREE.Camera = perspCamera;
   const renderer = new THREE.WebGLRenderer({
     antialias: true,
@@ -59,23 +63,57 @@ export function setupThree(container: HTMLElement) {
     }
   };
   window.addEventListener('resize', onResize);
+  const transition = (
+    startPos: THREE.Vector3,
+    startQuat: THREE.Quaternion,
+    endPos: THREE.Vector3,
+    endQuat: THREE.Quaternion,
+    onDone: () => void,
+  ) => {
+    const duration = 500;
+    const start = performance.now();
+    const animate = (now: number) => {
+      const t = Math.min((now - start) / duration, 1);
+      perspCamera.position.lerpVectors(startPos, endPos, t);
+      perspCamera.quaternion.slerpQuaternions(startQuat, endQuat, t);
+      if (t < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        onDone();
+      }
+    };
+    requestAnimationFrame(animate);
+  };
   const enterTopDownMode = () => {
-    camera = orthoCamera;
-    controls.object = camera as any;
-    controls.enableRotate = false;
-    group.visible = false;
-    floor.visible = false;
-    onResize();
-    wallDrawer.enable();
+    transition(
+      perspCamera.position.clone(),
+      perspCamera.quaternion.clone(),
+      topPos,
+      topQuat,
+      () => {
+        camera = orthoCamera;
+        controls.object = camera as any;
+        controls.enableRotate = false;
+        onResize();
+        wallDrawer.enable();
+      },
+    );
   };
   const exitTopDownMode = () => {
     wallDrawer.disable();
+    perspCamera.position.copy(topPos);
+    perspCamera.quaternion.copy(topQuat);
     camera = perspCamera;
     controls.object = camera as any;
     controls.enableRotate = true;
-    group.visible = true;
-    floor.visible = true;
     onResize();
+    transition(
+      perspCamera.position.clone(),
+      perspCamera.quaternion.clone(),
+      defaultPerspPos,
+      defaultPerspQuat,
+      () => {},
+    );
   };
   const run = true;
   const loop = () => {
