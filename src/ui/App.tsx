@@ -39,6 +39,8 @@ export default function App() {
   const [boardW, setBoardW] = useState(2070);
   const [boardKerf, setBoardKerf] = useState(3);
   const [boardHasGrain, setBoardHasGrain] = useState(false);
+  const [isDrawingWalls, setIsDrawingWalls] = useState(false);
+  const [wallLength, setWallLength] = useState(0);
 
   const undo = store.undo;
   const redo = store.redo;
@@ -93,10 +95,18 @@ export default function App() {
           setBoardHasGrain={setBoardHasGrain}
           addCountertop={addCountertop}
           setAddCountertop={setAddCountertop}
+          isDrawingWalls={isDrawingWalls}
+          wallLength={wallLength}
+          setWallLength={setWallLength}
         />
       </div>
       <div className="canvasWrap">
-        <SceneViewer threeRef={threeRef} addCountertop={addCountertop} />
+        <SceneViewer
+          threeRef={threeRef}
+          addCountertop={addCountertop}
+          setIsDrawingWalls={setIsDrawingWalls}
+          setWallLength={setWallLength}
+        />
         <TopBar
           t={t}
           store={store}

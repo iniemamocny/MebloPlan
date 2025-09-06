@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FAMILY, FAMILY_LABELS } from '../core/catalog';
 import type { Kind, Variant } from '../core/catalog';
 import TypePicker, { KindTabs, VariantList } from './panels/CatalogPicker';
@@ -43,6 +43,9 @@ interface MainTabsProps {
   setBoardHasGrain: (v: boolean) => void;
   addCountertop: boolean;
   setAddCountertop: (v: boolean) => void;
+  isDrawingWalls: boolean;
+  wallLength: number;
+  setWallLength: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export default function MainTabs({
@@ -73,8 +76,10 @@ export default function MainTabs({
   setBoardHasGrain,
   addCountertop,
   setAddCountertop,
+  isDrawingWalls,
+  wallLength,
+  setWallLength,
 }: MainTabsProps) {
-  const [isDrawingWalls, setIsDrawingWalls] = useState(false);
   const toggleTab = (name: 'cab' | 'room' | 'costs' | 'cut' | 'global') => {
     setTab(tab === name ? null : name);
   };
@@ -189,7 +194,8 @@ export default function MainTabs({
           <RoomTab
             three={threeRef}
             isDrawingWalls={isDrawingWalls}
-            setIsDrawingWalls={setIsDrawingWalls}
+            wallLength={wallLength}
+            setWallLength={setWallLength}
           />
         )}
         {tab === 'costs' && <CostsTab />}

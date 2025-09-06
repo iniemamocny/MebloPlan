@@ -18,6 +18,8 @@ interface ThreeContext {
 interface Props {
   threeRef: React.MutableRefObject<ThreeContext | null>;
   addCountertop: boolean;
+  setIsDrawingWalls: React.Dispatch<React.SetStateAction<boolean>>;
+  setWallLength: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const getLegHeight = (mod: Module3D, globals: Globals): number => {
@@ -28,7 +30,12 @@ export const getLegHeight = (mod: Module3D, globals: Globals): number => {
   return 0.1;
 };
 
-const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
+const SceneViewer: React.FC<Props> = ({
+  threeRef,
+  addCountertop,
+  setIsDrawingWalls,
+  setWallLength,
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const store = usePlannerStore();
   const showEdges = store.role === 'stolarz';
@@ -36,8 +43,15 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
 
   useEffect(() => {
     if (!containerRef.current) return;
-    threeRef.current = setupThree(containerRef.current);
-  }, [threeRef]);
+    threeRef.current = setupThree(containerRef.current, {
+      onEnterTopDownMode: () => setIsDrawingWalls(true),
+      onExitTopDownMode: () => {
+        setIsDrawingWalls(false);
+        setWallLength(0);
+      },
+      onLengthChange: setWallLength,
+    });
+  }, [threeRef, setIsDrawingWalls, setWallLength]);
 
   const createCabinetMesh = (mod: Module3D, legHeight: number) => {
     const W = mod.size.w;
