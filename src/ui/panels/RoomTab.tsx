@@ -12,6 +12,11 @@ export default function RoomTab({
   const store = usePlannerStore();
   const { t } = useTranslation();
   const [isDrawingWalls, setIsDrawingWalls] = useState(false);
+  const onHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    store.setRoom({ height: Number((e.target as HTMLInputElement).value) || 0 });
+  };
+  const onAddWindow = () => store.addOpening({ kind: 0 });
+  const onAddDoor = () => store.addOpening({ kind: 1 });
   const onDrawWalls = () => {
     three.current?.enterTopDownMode?.();
     setIsDrawingWalls(true);
@@ -79,6 +84,25 @@ export default function RoomTab({
           </div>
         </div>
         <div className="bd">
+          <div className="row">
+            <div>
+              <div className="small">{t('room.height')}</div>
+              <input
+                className="input"
+                type="number"
+                value={store.room.height || 0}
+                onChange={onHeightChange}
+              />
+            </div>
+          </div>
+          <div className="row" style={{ marginTop: 8 }}>
+            <button className="btnGhost" onClick={onAddWindow}>
+              {t('room.addWindow')}
+            </button>
+            <button className="btnGhost" onClick={onAddDoor}>
+              {t('room.addDoor')}
+            </button>
+          </div>
           <div className="row" style={{ marginTop: 8 }}>
             <button
               className="btnGhost"
@@ -89,7 +113,7 @@ export default function RoomTab({
             </button>
             {isDrawingWalls && (
               <button className="btnGhost" onClick={onFinishDrawing}>
-                Zakończ rysowanie
+                {t('room.finishDrawing')}
               </button>
             )}
           </div>
