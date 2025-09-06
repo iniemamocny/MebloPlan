@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { useTranslation } from 'react-i18next';
 import { usePlannerStore } from '../../state/store';
 import RoomUploader from '../RoomUploader';
+import WallDrawing2D from './WallDrawing2D';
 export default function RoomTab({
   three,
 }: {
@@ -153,6 +154,9 @@ export default function RoomTab({
         </div>
       </div>
       <RoomUploader three={three} />
+      {isDrawingWalls && (
+        <WallDrawing2D onFinish={() => setIsDrawingWalls(false)} />
+      )}
     </>
   );
 }
