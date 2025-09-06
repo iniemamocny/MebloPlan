@@ -186,7 +186,7 @@ export interface Module3D {
 export type Opening = Record<string, number>;
 
 export interface Room {
-  walls: { length: number; angle: number }[];
+  walls: { length: number; angle: number; thickness: number }[];
   openings: Opening[];
   height: number;
 }

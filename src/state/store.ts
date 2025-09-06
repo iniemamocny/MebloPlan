@@ -124,6 +124,7 @@ type Store = {
   past: { modules: Module3D[]; room: Room }[];
   future: { modules: Module3D[]; room: Room }[];
   room: Room;
+  wallThickness: number;
   showFronts: boolean;
   setRole: (r: 'stolarz' | 'klient') => void;
   updateGlobals: (fam: FAMILY, patch: Partial<Globals[FAMILY]>) => void;
@@ -135,14 +136,15 @@ type Store = {
   undo: () => void;
   redo: () => void;
   setRoom: (patch: Partial<Room>) => void;
-  addWall: (w: { length: number; angle: number }) => void;
+  addWall: (w: { length: number; angle: number; thickness: number }) => void;
   removeWall: (index: number) => void;
   updateWall: (
     index: number,
-    patch: Partial<{ length: number; angle: number }>,
+    patch: Partial<{ length: number; angle: number; thickness: number }>,
   ) => void;
   addOpening: (op: Opening) => void;
   setShowFronts: (v: boolean) => void;
+  setWallThickness: (v: number) => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -152,7 +154,17 @@ export const usePlannerStore = create<Store>((set, get) => ({
   modules: persisted?.modules || [],
   past: [],
   future: [],
-  room: persisted?.room || { walls: [], openings: [], height: 2700 },
+  room: persisted?.room
+    ? {
+        ...persisted.room,
+        walls:
+          persisted.room.walls?.map((w: any) => ({
+            thickness: 100,
+            ...w,
+          })) || [],
+      }
+    : { walls: [], openings: [], height: 2700 },
+  wallThickness: persisted?.wallThickness || 100,
   showFronts: true,
   setRole: (r) => set({ role: r }),
   updateGlobals: (fam, patch) =>
@@ -363,6 +375,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
       future: [],
     })),
   setShowFronts: (v) => set({ showFronts: v }),
+  setWallThickness: (v) => set({ wallThickness: v }),
 }));
 
 usePlannerStore.subscribe((state) => {
@@ -375,6 +388,7 @@ usePlannerStore.subscribe((state) => {
         prices: state.prices,
         modules: state.modules,
         room: state.room,
+        wallThickness: state.wallThickness,
       }),
     );
   } catch (e) {

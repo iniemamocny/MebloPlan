@@ -65,7 +65,7 @@ export default function RoomTab({
         (cursor.y + next.y) / 2,
       );
       const box = new THREE.Mesh(
-        new THREE.BoxGeometry(len, h, 0.1),
+        new THREE.BoxGeometry(len, h, (w.thickness || 0) / 1000),
         new THREE.MeshStandardMaterial({ color: 0xd1d5db }),
       );
       box.position.set(mid.x, h / 2, mid.y);
@@ -92,6 +92,21 @@ export default function RoomTab({
                 type="number"
                 value={store.room.height || 0}
                 onChange={onHeightChange}
+              />
+            </div>
+          </div>
+          <div className="row" style={{ marginTop: 8 }}>
+            <div>
+              <div className="small">{t('room.wallThickness')}</div>
+              <input
+                className="input"
+                type="number"
+                value={store.wallThickness}
+                onChange={(e) =>
+                  store.setWallThickness(
+                    Number((e.target as HTMLInputElement).value) || 0,
+                  )
+                }
               />
             </div>
           </div>
@@ -124,7 +139,19 @@ export default function RoomTab({
               <ul>
                 {store.room.walls.map((w, i) => (
                   <li key={i}>
-                    {t('app.wallLabel', { num: i + 1, len: w.length })} – {w.angle}°
+                    {t('app.wallLabel', { num: i + 1, len: w.length })} – {w.angle}° –
+                    <input
+                      type="number"
+                      value={w.thickness}
+                      onChange={(e) =>
+                        store.updateWall(i, {
+                          thickness:
+                            Number((e.target as HTMLInputElement).value) || 0,
+                        })
+                      }
+                      style={{ width: 60, marginLeft: 4 }}
+                    />
+                    mm
                   </li>
                 ))}
               </ul>

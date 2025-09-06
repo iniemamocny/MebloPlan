@@ -4,7 +4,8 @@ import type { UseBoundStore, StoreApi } from 'zustand';
 import { usePlannerStore } from '../state/store';
 
 interface PlannerStore {
-  addWall: (w: { length: number; angle: number }) => void;
+  addWall: (w: { length: number; angle: number; thickness: number }) => void;
+  wallThickness: number;
 }
 
 export default class WallDrawer {
@@ -114,7 +115,8 @@ export default class WallDrawer {
     const dz = end.z - this.start.z;
     const length = Math.sqrt(dx * dx + dz * dz) * 1000; // meters to mm
     const angle = (Math.atan2(dz, dx) * 180) / Math.PI;
-    this.store.getState().addWall({ length, angle });
+    const thickness = this.store.getState().wallThickness;
+    this.store.getState().addWall({ length, angle, thickness });
     this.start = null;
     this.cleanupPreview();
   };

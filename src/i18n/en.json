@@ -39,6 +39,7 @@
   "room": {
     "title": "Room — walls",
     "height": "Room height (mm)",
+    "wallThickness": "Wall thickness (mm)",
     "addWindow": "Add window",
     "addDoor": "Add door",
     "drawWalls": "Draw walls",
