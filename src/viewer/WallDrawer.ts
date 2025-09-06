@@ -151,6 +151,12 @@ export default class WallDrawer {
     if (!this.start || !this.preview || !this.lengthInput) return;
     const lengthMm = parseFloat(this.lengthInput.value);
     if (isNaN(lengthMm)) return;
+    if (lengthMm <= 0) {
+      this.lengthInput.setCustomValidity('Length must be greater than 0');
+      this.lengthInput.reportValidity();
+      return;
+    }
+    this.lengthInput.setCustomValidity('');
     const lengthM = lengthMm / 1000;
     const end = new THREE.Vector3(
       this.start.x + Math.cos(this.currentAngle) * lengthM,
