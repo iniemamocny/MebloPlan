@@ -4,6 +4,11 @@ import { FaPencilAlt } from 'react-icons/fa';
 import { usePlannerStore } from '../state/store';
 import SlidingPanel from './components/SlidingPanel';
 
+const ranges = {
+  nosna: { min: 150, max: 250 },
+  dzialowa: { min: 60, max: 120 },
+};
+
 interface WallDrawPanelProps {
   threeRef: React.MutableRefObject<any>;
   isOpen: boolean;
@@ -23,6 +28,7 @@ export default function WallDrawPanel({
 }: WallDrawPanelProps) {
   const { t } = useTranslation();
   const store = usePlannerStore();
+  const range = ranges[store.wallType];
   return (
     <SlidingPanel
       isOpen={isOpen}
@@ -78,6 +84,56 @@ export default function WallDrawPanel({
           />
         </div>
         <div>{Math.round(store.snappedAngleDeg)}°</div>
+      </div>
+      <div
+        className="row"
+        style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center' }}
+      >
+        <div>
+          <div className="small">{t('room.wallType')}</div>
+          <select
+            className="input"
+            value={store.wallType}
+            onChange={(e) =>
+              store.setWallType(
+                (e.target as HTMLSelectElement).value as 'nosna' | 'dzialowa',
+              )
+            }
+          >
+            <option value="nosna">{t('room.wallTypes.nosna')}</option>
+            <option value="dzialowa">{t('room.wallTypes.dzialowa')}</option>
+          </select>
+        </div>
+        <div style={{ flex: 1 }}>
+          <div className="small">{t('room.wallThickness')}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="range"
+              min={range.min}
+              max={range.max}
+              value={store.wallThickness}
+              onChange={(e) =>
+                store.setWallThickness(
+                  Number((e.target as HTMLInputElement).value) || 0,
+                )
+              }
+              style={{ flex: 1 }}
+            />
+            <input
+              className="input"
+              type="number"
+              min={range.min}
+              max={range.max}
+              value={store.wallThickness}
+              onChange={(e) =>
+                store.setWallThickness(
+                  Number((e.target as HTMLInputElement).value) || 0,
+                )
+              }
+              style={{ width: 60 }}
+            />
+          </div>
+        </div>
       </div>
       <div className="row" style={{ marginTop: 8 }}>
         <label
