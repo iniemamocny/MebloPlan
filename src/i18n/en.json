@@ -13,6 +13,8 @@
     "autoWall": "Auto for wall",
     "removeWall": "Remove wall",
     "editWall": "Edit wall",
+    "view2D": "View 2D",
+    "view3D": "View 3D",
     "auto": "Auto",
     "material": {
       "title": "Material (sheet)",

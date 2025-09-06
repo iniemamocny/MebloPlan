@@ -125,6 +125,8 @@ export default function App() {
           doAutoOnSelectedWall={doAutoOnSelectedWall}
           lang={lang}
           setLang={setLang}
+          threeRef={threeRef}
+          isTopDown={isDrawingWalls}
         />
       </div>
     </div>

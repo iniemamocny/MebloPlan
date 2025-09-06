@@ -1,6 +1,7 @@
 import React from 'react';
 import { getWallSegments } from '../utils/walls';
 import type { Kind, Variant } from '../core/catalog';
+import { FaCube, FaRegSquare } from 'react-icons/fa';
 
 interface TopBarProps {
   t: (key: string, opts?: any) => string;
@@ -12,9 +13,11 @@ interface TopBarProps {
   doAutoOnSelectedWall: () => void;
   lang: string;
   setLang: (l: string) => void;
+  threeRef: React.MutableRefObject<any>;
+  isTopDown: boolean;
 }
 
-export default function TopBar({ t, store, setVariant, setKind, selWall, setSelWall, doAutoOnSelectedWall, lang, setLang }: TopBarProps) {
+export default function TopBar({ t, store, setVariant, setKind, selWall, setSelWall, doAutoOnSelectedWall, lang, setLang, threeRef, isTopDown }: TopBarProps) {
   const onRemoveWall = () => {
     store.removeWall(selWall);
     setSelWall(0);
@@ -67,6 +70,17 @@ export default function TopBar({ t, store, setVariant, setKind, selWall, setSelW
         disabled={store.room.walls.length === 0}
       >
         {t('app.editWall')}
+      </button>
+      <button
+        className="btnGhost"
+        onClick={() =>
+          isTopDown
+            ? threeRef.current?.exitTopDownMode?.()
+            : threeRef.current?.enterTopDownMode?.()
+        }
+        title={isTopDown ? t('app.view3D') : t('app.view2D')}
+      >
+        {isTopDown ? <FaCube /> : <FaRegSquare />}
       </button>
       <button className="btn" onClick={doAutoOnSelectedWall}>
         {t('app.autoWall')}
