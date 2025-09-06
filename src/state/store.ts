@@ -108,6 +108,14 @@ export const defaultPrices: Prices = {
   margin: 0.15,
 };
 
+const wallRanges = {
+  nosna: { min: 150, max: 250 },
+  dzialowa: { min: 60, max: 120 },
+};
+
+const clamp = (v: number, min: number, max: number) =>
+  Math.min(Math.max(v, min), max);
+
 const persisted = (() => {
   try {
     return JSON.parse(localStorage.getItem('kv7_state') || 'null');
@@ -124,6 +132,7 @@ type Store = {
   past: { modules: Module3D[]; room: Room }[];
   future: { modules: Module3D[]; room: Room }[];
   room: Room;
+  wallType: 'nosna' | 'dzialowa';
   wallThickness: number;
   snapAngle: number;
   snapLength: number;
@@ -150,6 +159,7 @@ type Store = {
   ) => void;
   addOpening: (op: Opening) => void;
   setShowFronts: (v: boolean) => void;
+  setWallType: (t: 'nosna' | 'dzialowa') => void;
   setWallThickness: (v: number) => void;
   setSnapAngle: (v: number) => void;
   setSnapLength: (v: number) => void;
@@ -176,7 +186,12 @@ export const usePlannerStore = create<Store>((set, get) => ({
           })) || [],
       }
     : { walls: [], openings: [], height: 2700, origin: { x: 0, y: 0 } },
-  wallThickness: persisted?.wallThickness || 100,
+  wallType: persisted?.wallType || 'dzialowa',
+  wallThickness: clamp(
+    persisted?.wallThickness ?? 100,
+    wallRanges[persisted?.wallType || 'dzialowa'].min,
+    wallRanges[persisted?.wallType || 'dzialowa'].max,
+  ),
   snapAngle: persisted?.snapAngle ?? 90,
   snapLength: persisted?.snapLength ?? 10,
   snapRightAngles: persisted?.snapRightAngles ?? true,
@@ -393,13 +408,25 @@ export const usePlannerStore = create<Store>((set, get) => ({
       future: [],
     })),
   setShowFronts: (v) => set({ showFronts: v }),
-  setWallThickness: (v) => set({ wallThickness: v }),
+  setWallType: (t) =>
+    set((s) => {
+      const { min, max } = wallRanges[t];
+      return {
+        wallType: t,
+        wallThickness: clamp(s.wallThickness, min, max),
+      };
+    }),
+  setWallThickness: (v) =>
+    set((s) => {
+      const { min, max } = wallRanges[s.wallType];
+      return { wallThickness: clamp(v, min, max) };
+    }),
   setSnapAngle: (v) => set({ snapAngle: v }),
   setSnapLength: (v) => set({ snapLength: v }),
-  setSnapRightAngles: (v) =>
-    set({ snapRightAngles: v, snapAngle: v ? 90 : 0 }),
+  setSnapRightAngles: (v) => set({ snapRightAngles: v, snapAngle: v ? 90 : 0 }),
   setAngleToPrev: (v) => set({ angleToPrev: v }),
-  setDraftWall: (len, angle) => set({ snappedLengthMm: len, snappedAngleDeg: angle }),
+  setDraftWall: (len, angle) =>
+    set({ snappedLengthMm: len, snappedAngleDeg: angle }),
 }));
 
 usePlannerStore.subscribe((state) => {
@@ -412,6 +439,7 @@ usePlannerStore.subscribe((state) => {
         prices: state.prices,
         modules: state.modules,
         room: state.room,
+        wallType: state.wallType,
         wallThickness: state.wallThickness,
         snapAngle: state.snapAngle,
         snapLength: state.snapLength,

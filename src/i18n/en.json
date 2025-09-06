@@ -40,6 +40,11 @@
     "title": "Room — walls",
     "height": "Room height (mm)",
     "wallThickness": "Wall thickness (mm)",
+    "wallType": "Wall type",
+    "wallTypes": {
+      "nosna": "Load-bearing",
+      "dzialowa": "Partition"
+    },
     "addWindow": "Add window",
     "addDoor": "Add door",
     "drawWalls": "Draw walls",

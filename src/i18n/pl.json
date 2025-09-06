@@ -40,6 +40,11 @@
     "title": "Pomieszczenie — ściany",
     "height": "Wysokość pomieszczenia (mm)",
     "wallThickness": "Grubość ściany (mm)",
+    "wallType": "Typ ściany",
+    "wallTypes": {
+      "nosna": "Nośna",
+      "dzialowa": "Działowa"
+    },
     "addWindow": "Dodaj okno",
     "addDoor": "Dodaj drzwi",
     "drawWalls": "Rysuj ściany",
@@ -104,15 +109,15 @@
     "back": "Plecy",
     "top": "Góra",
     "bottom": "Dół",
-      "carcassType": "Rodzaj korpusu",
-      "carcassTypes": {
-        "type1": "Typ 1",
-        "type2": "Typ 2",
-        "type3": "Typ 3",
-        "type4": "Typ 4",
-        "type5": "Typ 5",
-        "type6": "Typ 6"
-      },
+    "carcassType": "Rodzaj korpusu",
+    "carcassTypes": {
+      "type1": "Typ 1",
+      "type2": "Typ 2",
+      "type3": "Typ 3",
+      "type4": "Typ 4",
+      "type5": "Typ 5",
+      "type6": "Typ 6"
+    },
     "shelves": "Liczba półek",
     "gapsTitle": "Szczeliny i wysokości frontów (ustawiaj graficznie)",
     "backOptions": {

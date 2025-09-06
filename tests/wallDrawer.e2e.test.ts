@@ -25,6 +25,7 @@ describe('WallDrawer click without drag', () => {
       getState: () => ({
         addWall: vi.fn(),
         wallThickness: 100,
+        wallType: 'dzialowa',
         snapAngle: 0,
         snapLength: 0,
         snapRightAngles: true,
