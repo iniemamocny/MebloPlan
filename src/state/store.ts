@@ -424,7 +424,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setSnapAngle: (v) => set({ snapAngle: v }),
   setSnapLength: (v) => set({ snapLength: v }),
   setSnapRightAngles: (v) => set({ snapRightAngles: v, snapAngle: v ? 90 : 0 }),
-  setAngleToPrev: (v) => set({ angleToPrev: v }),
+  setAngleToPrev: (v) => set({ angleToPrev: clamp(v, 0, 360) }),
   setDraftWall: (len, angle) =>
     set({ snappedLengthMm: len, snappedAngleDeg: angle }),
 }));

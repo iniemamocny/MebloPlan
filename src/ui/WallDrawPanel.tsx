@@ -62,15 +62,17 @@ export default function WallDrawPanel({
             className="input"
             type="number"
             value={store.angleToPrev}
-            onChange={(e) =>
-              store.setAngleToPrev(
-                Number((e.target as HTMLInputElement).value) || 0,
-              )
-            }
+            onChange={(e) => {
+              const val = Number((e.target as HTMLInputElement).value);
+              if (!Number.isNaN(val) && val >= 0 && val <= 360) {
+                store.setAngleToPrev(val);
+              }
+            }}
             disabled={store.snapRightAngles}
             style={{ width: 50 }}
             min={0}
             max={360}
+            maxLength={3}
           />
         </div>
         <div>{Math.round(store.snappedAngleDeg)}°</div>
