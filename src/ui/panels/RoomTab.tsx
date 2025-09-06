@@ -173,20 +173,29 @@ export default function RoomTab({
         className={`bottom ${isDrawingWalls ? 'open' : ''}`}
         locked
       >
-        <div className="row">
+        <div
+          className="row"
+          style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+        >
           <input
             className="input"
             type="number"
             value={wallLength}
-            onChange={(e) => setWallLength(Number((e.target as HTMLInputElement).value) || 0)}
+            onChange={(e) =>
+              setWallLength(Number((e.target as HTMLInputElement).value) || 0)
+            }
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 three.current?.applyWallLength?.(wallLength);
               }
             }}
           />
+          <div>{Math.round(store.snappedLengthMm)} mm</div>
         </div>
-        <div className="row" style={{ marginTop: 8 }}>
+        <div
+          className="row"
+          style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}
+        >
           <div>
             <div className="small">{t('room.angleToPrev')}</div>
             <input
@@ -201,6 +210,7 @@ export default function RoomTab({
               disabled={store.snapRightAngles}
             />
           </div>
+          <div>{Math.round(store.snappedAngleDeg)}°</div>
         </div>
         <div className="row" style={{ marginTop: 8 }}>
           <label

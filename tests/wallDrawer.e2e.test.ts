@@ -31,6 +31,7 @@ describe('WallDrawer click without drag', () => {
         angleToPrev: 0,
         room: { walls: [] },
         setRoom: vi.fn(),
+        setDraftWall: vi.fn(),
       }),
     } as any;
 
