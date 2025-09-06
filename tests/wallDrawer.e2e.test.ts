@@ -27,6 +27,10 @@ describe('WallDrawer click without drag', () => {
         wallThickness: 100,
         snapAngle: 0,
         snapLength: 0,
+        snapRightAngles: true,
+        angleToPrev: 0,
+        room: { walls: [] },
+        setRoom: vi.fn(),
       }),
     } as any;
 

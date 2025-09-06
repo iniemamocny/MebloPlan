@@ -44,7 +44,9 @@
     "addDoor": "Add door",
     "drawWalls": "Draw walls",
     "finishDrawing": "Finish drawing",
-    "noWalls": "No walls"
+    "noWalls": "No walls",
+    "angleToPrev": "Angle to previous (°)",
+    "noRightAngles": "No right angles"
   },
   "global": {
     "title": "Global settings",

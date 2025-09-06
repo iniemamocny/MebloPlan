@@ -186,6 +186,39 @@ export default function RoomTab({
             }}
           />
         </div>
+        <div className="row" style={{ marginTop: 8 }}>
+          <div>
+            <div className="small">{t('room.angleToPrev')}</div>
+            <input
+              className="input"
+              type="number"
+              value={store.angleToPrev}
+              onChange={(e) =>
+                store.setAngleToPrev(
+                  Number((e.target as HTMLInputElement).value) || 0,
+                )
+              }
+              disabled={store.snapRightAngles}
+            />
+          </div>
+        </div>
+        <div className="row" style={{ marginTop: 8 }}>
+          <label
+            className="small"
+            style={{ display: 'flex', gap: 8, alignItems: 'center' }}
+          >
+            <input
+              type="checkbox"
+              checked={!store.snapRightAngles}
+              onChange={(e) =>
+                store.setSnapRightAngles(
+                  !(e.target as HTMLInputElement).checked,
+                )
+              }
+            />
+            {t('room.noRightAngles')}
+          </label>
+        </div>
       </SlidingPanel>
     </>
   );
