@@ -39,6 +39,7 @@
   "room": {
     "title": "Pomieszczenie — ściany",
     "height": "Wysokość pomieszczenia (mm)",
+    "wallThickness": "Grubość ściany (mm)",
     "addWindow": "Dodaj okno",
     "addDoor": "Dodaj drzwi",
     "drawWalls": "Rysuj ściany",
