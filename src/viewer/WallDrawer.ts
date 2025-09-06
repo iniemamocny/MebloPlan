@@ -44,12 +44,46 @@ export default class WallDrawer {
     this.onLengthChange = onLengthChange;
   }
 
+  private unsubscribe?: () => void;
+
+  private updateCursor(thicknessMm: number): string {
+    const size = 64;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return 'crosshair';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1;
+
+    // cross
+    ctx.beginPath();
+    ctx.moveTo(size / 2, 0);
+    ctx.lineTo(size / 2, size);
+    ctx.moveTo(0, size / 2);
+    ctx.lineTo(size, size / 2);
+    ctx.stroke();
+
+    // square with side proportional to thickness
+    const side = thicknessMm / 5; // 1px per 5mm
+    const half = side / 2;
+    ctx.strokeRect(size / 2 - half, size / 2 - half, side, side);
+
+    return `url(${canvas.toDataURL()}) ${size / 2} ${size / 2}, crosshair`;
+  }
+
   enable() {
     const dom = this.renderer.domElement;
     dom.addEventListener('pointerdown', this.onDown);
     dom.addEventListener('pointerup', this.onUp);
     dom.addEventListener('pointermove', this.onMove);
     window.addEventListener('keydown', this.onKeyDown);
+    dom.style.cursor = this.updateCursor(this.store.getState().wallThickness);
+    this.unsubscribe = this.store.subscribe(
+      (s) => s.wallThickness,
+      (t) => {
+        dom.style.cursor = this.updateCursor(t);
+      },
+    );
   }
 
   disable() {
@@ -60,6 +94,9 @@ export default class WallDrawer {
     window.removeEventListener('keydown', this.onKeyDown);
     this.start = null;
     this.cleanupPreview();
+    dom.style.cursor = 'default';
+    this.unsubscribe?.();
+    this.unsubscribe = undefined;
   }
 
   private cleanupPreview() {
