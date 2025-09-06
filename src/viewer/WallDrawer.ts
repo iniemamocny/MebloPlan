@@ -4,6 +4,8 @@ import type { UseBoundStore, StoreApi } from 'zustand';
 import { usePlannerStore } from '../state/store';
 import type { Room } from '../types';
 
+const pixelsPerMm = 0.2; // 1px ≈ 5mm
+
 interface PlannerStore {
   addWall: (w: { length: number; angle: number; thickness: number }) => void;
   wallThickness: number;
@@ -64,7 +66,7 @@ export default class WallDrawer {
     ctx.stroke();
 
     // square with side proportional to thickness
-    const side = thicknessMm / 5; // 1px per 5mm
+    const side = Math.min(thicknessMm * pixelsPerMm, size - 2);
     const half = side / 2;
     ctx.strokeRect(size / 2 - half, size / 2 - half, side, side);
 
@@ -230,7 +232,9 @@ export default class WallDrawer {
       ? Math.round(lengthMm / state.snapLength) * state.snapLength
       : lengthMm;
     if (state.room.walls.length === 0) {
-      state.setRoom({ origin: { x: this.start.x * 1000, y: this.start.z * 1000 } });
+      state.setRoom({
+        origin: { x: this.start.x * 1000, y: this.start.z * 1000 },
+      });
     }
     const thickness = state.wallThickness;
     state.addWall({ length: snappedLength, angle: snappedAngleDeg, thickness });
