@@ -181,6 +181,8 @@ export default class WallDrawer {
       );
       this.finalizeSegment(end);
     } else if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopImmediatePropagation();
       this.disable();
     }
   };

@@ -42,6 +42,7 @@ export default function App() {
 
   const undo = store.undo;
   const redo = store.redo;
+  const removeWall = store.removeWall;
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
@@ -51,11 +52,15 @@ export default function App() {
       } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
         e.preventDefault();
         redo();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        removeWall(selWall);
+        setSelWall(0);
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [undo, redo]);
+  }, [undo, redo, removeWall, selWall]);
 
   return (
     <div className="app">
