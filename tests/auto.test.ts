@@ -35,4 +35,19 @@ describe('placeAlongWall', () => {
     expect(placed[0].rot).toBeCloseTo(-Math.PI / 4)
     expect(placed[1].rot).toBeCloseTo(-Math.PI / 4)
   })
+
+  it('does not place modules beyond segment end', () => {
+    const seg: Segment = {
+      a: { x: 0, y: 0 },
+      b: { x: 2600, y: 0 },
+      angle: 0,
+      length: 2600,
+    }
+    const widths = [1000, 1000, 1000]
+    const placed = placeAlongWall(widths, seg, 5)
+    expect(placed.length).toBe(3)
+    const remaining = seg.length - (widths[0] + widths[1] + 5 * 2)
+    const lastCenter = placed[2].center[0]
+    expect(lastCenter + remaining / 2).toBeLessThanOrEqual(seg.length)
+  })
 })

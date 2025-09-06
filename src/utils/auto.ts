@@ -19,11 +19,18 @@ export function placeAlongWall(widths:number[], seg:Segment, gapMM=5){
   let cursor = 0
   const dir = { x:(seg.b.x-seg.a.x)/seg.length, y:(seg.b.y-seg.a.y)/seg.length }
   for (const w of widths){
-    const centerMM = cursor + w/2
+    const remaining = seg.length - cursor
+    if (remaining <= 0) break
+    let width = w
+    const exceeds = width + gapMM > remaining
+    if (exceeds && width > remaining) width = remaining
+    const centerMM = cursor + width/2
     const cx = seg.a.x + dir.x*centerMM
     const cy = seg.a.y + dir.y*centerMM
     placed.push({ center:[cx, cy], rot: -seg.angle })
-    cursor += w + gapMM
+    cursor += width
+    if (exceeds) break
+    cursor += gapMM
   }
   return placed
 }
