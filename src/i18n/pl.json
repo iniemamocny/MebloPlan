@@ -11,6 +11,8 @@
     "clear": "Wyczyść",
     "wallLabel": "Ściana {{num}} ({{len}} mm)",
     "autoWall": "Auto pod ścianę",
+    "removeWall": "Usuń ścianę",
+    "editWall": "Edytuj ścianę",
     "auto": "Auto",
     "material": {
       "title": "Materiał (arkusz)",
