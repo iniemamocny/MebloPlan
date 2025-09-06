@@ -125,6 +125,8 @@ type Store = {
   future: { modules: Module3D[]; room: Room }[];
   room: Room;
   wallThickness: number;
+  snapAngle: number;
+  snapLength: number;
   showFronts: boolean;
   setRole: (r: 'stolarz' | 'klient') => void;
   updateGlobals: (fam: FAMILY, patch: Partial<Globals[FAMILY]>) => void;
@@ -145,6 +147,8 @@ type Store = {
   addOpening: (op: Opening) => void;
   setShowFronts: (v: boolean) => void;
   setWallThickness: (v: number) => void;
+  setSnapAngle: (v: number) => void;
+  setSnapLength: (v: number) => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -165,6 +169,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
       }
     : { walls: [], openings: [], height: 2700 },
   wallThickness: persisted?.wallThickness || 100,
+  snapAngle: persisted?.snapAngle ?? 90,
+  snapLength: persisted?.snapLength ?? 10,
   showFronts: true,
   setRole: (r) => set({ role: r }),
   updateGlobals: (fam, patch) =>
@@ -376,6 +382,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
     })),
   setShowFronts: (v) => set({ showFronts: v }),
   setWallThickness: (v) => set({ wallThickness: v }),
+  setSnapAngle: (v) => set({ snapAngle: v }),
+  setSnapLength: (v) => set({ snapLength: v }),
 }));
 
 usePlannerStore.subscribe((state) => {
@@ -389,6 +397,8 @@ usePlannerStore.subscribe((state) => {
         modules: state.modules,
         room: state.room,
         wallThickness: state.wallThickness,
+        snapAngle: state.snapAngle,
+        snapLength: state.snapLength,
       }),
     );
   } catch (e) {
