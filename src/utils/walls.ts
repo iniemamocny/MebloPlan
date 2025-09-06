@@ -1,9 +1,10 @@
 import { usePlannerStore } from '../state/store'
 export type Segment = { a:{x:number;y:number}; b:{x:number;y:number}; angle:number; length:number }
-export function getWallSegments(): Segment[] {
+export function getWallSegments(startX = 0, startY = 0, close = false): Segment[] {
   const room = usePlannerStore.getState().room
   const segs: Segment[] = []
-  let cursor = { x:0, y:0 }
+  let cursor = { x:startX, y:startY }
+  const start = { ...cursor }
   for (const w of room.walls){
     const ang = (w.angle||0) * Math.PI/180
     const dir = { x: Math.cos(ang), y: Math.sin(ang) }
@@ -11,6 +12,15 @@ export function getWallSegments(): Segment[] {
     const next = { x: cursor.x + dir.x*len, y: cursor.y + dir.y*len }
     segs.push({ a:{...cursor}, b:{...next}, angle:ang, length:len })
     cursor = next
+  }
+  if (close && segs.length > 0){
+    const last = segs[segs.length - 1].b
+    if (last.x !== start.x || last.y !== start.y){
+      const dx = start.x - last.x, dy = start.y - last.y
+      const len = Math.hypot(dx, dy)
+      const ang = Math.atan2(dy, dx)
+      segs.push({ a:{...last}, b:{...start}, angle:ang, length:len })
+    }
   }
   return segs
 }
