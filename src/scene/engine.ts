@@ -20,7 +20,14 @@ export function setupThree(
     100,
   );
   perspCamera.position.set(4, 3, 6);
-  const orthoCamera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 100);
+  const orthoCamera = new THREE.OrthographicCamera(
+    -5,
+    5,
+    5,
+    -5,
+    0.1,
+    100,
+  );
   orthoCamera.position.set(0, 20, 0);
   orthoCamera.lookAt(0, 0, 0);
   const defaultPerspPos = perspCamera.position.clone();
@@ -40,10 +47,10 @@ export function setupThree(
   const dir = new THREE.DirectionalLight(0xffffff, 0.7);
   dir.position.set(6, 8, 4);
   scene.add(dir);
-  const grid = new THREE.GridHelper(20, 40, 0xdddddd, 0xcccccc);
+  const grid = new THREE.GridHelper(10, 20, 0xdddddd, 0xcccccc);
   scene.add(grid);
   const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(40, 40),
+    new THREE.PlaneGeometry(10, 10),
     new THREE.MeshStandardMaterial({ color: 0xeeeeee, side: THREE.DoubleSide }),
   );
   floor.rotation.x = -Math.PI / 2;
@@ -65,7 +72,7 @@ export function setupThree(
     group,
     usePlannerStore,
   );
-  const orthoSize = 20;
+  const orthoSize = 10;
   const onResize = () => {
     const w = container.clientWidth,
       h = container.clientHeight;
