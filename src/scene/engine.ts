@@ -45,7 +45,7 @@ export function setupThree(container: HTMLElement) {
   scene.add(group);
   const controls = new OrbitControls(perspCamera, renderer.domElement);
   controls.enableDamping = true;
-  const wallDrawer = new WallDrawer(renderer, () => camera, usePlannerStore);
+  const wallDrawer = new WallDrawer(renderer, () => camera, scene, usePlannerStore);
   const cabinetDragger = new CabinetDragger(
     renderer,
     () => camera,
