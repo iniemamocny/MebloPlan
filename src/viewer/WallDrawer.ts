@@ -6,6 +6,8 @@ import { usePlannerStore } from '../state/store';
 interface PlannerStore {
   addWall: (w: { length: number; angle: number; thickness: number }) => void;
   wallThickness: number;
+  snapAngle: number;
+  snapLength: number;
 }
 
 export default class WallDrawer {
@@ -85,15 +87,26 @@ export default class WallDrawer {
     const dz = point.z - this.start.z;
     const length = Math.sqrt(dx * dx + dz * dz);
     const angle = Math.atan2(dz, dx);
+    const { snapAngle, snapLength } = this.store.getState();
+    const angleDeg = (angle * 180) / Math.PI;
+    const lengthMm = length * 1000;
+    const snappedAngleDeg = snapAngle
+      ? Math.round(angleDeg / snapAngle) * snapAngle
+      : angleDeg;
+    const snappedLengthMm = snapLength
+      ? Math.round(lengthMm / snapLength) * snapLength
+      : lengthMm;
+    const snappedAngle = (snappedAngleDeg * Math.PI) / 180;
+    const snappedLength = snappedLengthMm / 1000;
     const positions = (
       this.preview.geometry as THREE.BufferGeometry
     ).attributes.position as THREE.BufferAttribute;
     positions.setXYZ(0, this.start.x, 0, this.start.z);
     positions.setXYZ(
       1,
-      this.start.x + Math.cos(angle) * length,
+      this.start.x + Math.cos(snappedAngle) * snappedLength,
       0,
-      this.start.z + Math.sin(angle) * length,
+      this.start.z + Math.sin(snappedAngle) * snappedLength,
     );
     positions.needsUpdate = true;
   };
@@ -113,10 +126,17 @@ export default class WallDrawer {
     }
     const dx = end.x - this.start.x;
     const dz = end.z - this.start.z;
-    const length = Math.sqrt(dx * dx + dz * dz) * 1000; // meters to mm
-    const angle = (Math.atan2(dz, dx) * 180) / Math.PI;
+    const lengthMm = Math.sqrt(dx * dx + dz * dz) * 1000; // meters to mm
+    const angleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
+    const { snapAngle, snapLength } = this.store.getState();
+    const snappedAngle = snapAngle
+      ? Math.round(angleDeg / snapAngle) * snapAngle
+      : angleDeg;
+    const snappedLength = snapLength
+      ? Math.round(lengthMm / snapLength) * snapLength
+      : lengthMm;
     const thickness = this.store.getState().wallThickness;
-    this.store.getState().addWall({ length, angle, thickness });
+    this.store.getState().addWall({ length: snappedLength, angle: snappedAngle, thickness });
     this.start = null;
     this.cleanupPreview();
   };
