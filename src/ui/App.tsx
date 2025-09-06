@@ -114,7 +114,6 @@ export default function App() {
           isDrawing={isDrawingWalls}
           wallLength={wallLength}
           setWallLength={setWallLength}
-          setIsOpen={setWallPanelOpen}
         />
         <TopBar
           t={t}
