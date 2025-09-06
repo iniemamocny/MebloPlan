@@ -5,6 +5,7 @@ interface SlidingPanelProps {
   onClose: () => void;
   children: React.ReactNode;
   className?: string;
+  locked?: boolean;
 }
 
 export default function SlidingPanel({
@@ -12,11 +13,12 @@ export default function SlidingPanel({
   onClose,
   children,
   className = '',
+  locked = false,
 }: SlidingPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || locked) return;
 
     const handleMouseDown = (e: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
@@ -28,13 +30,15 @@ export default function SlidingPanel({
     return () => {
       document.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, locked]);
 
   return (
     <div ref={panelRef} className={`slidingPanel ${className}`}>
-      <button className="slidingPanelClose" onClick={onClose}>
-        ×
-      </button>
+      {!locked && (
+        <button className="slidingPanelClose" onClick={onClose}>
+          ×
+        </button>
+      )}
       {children}
     </div>
   );
