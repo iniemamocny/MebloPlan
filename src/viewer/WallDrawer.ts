@@ -19,6 +19,8 @@ export default class WallDrawer {
   private plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   private start: THREE.Vector3 | null = null;
   private preview: THREE.Line | null = null;
+  private lengthInput: HTMLInputElement | null = null;
+  private currentAngle = 0; // radians
 
   constructor(
     renderer: WebGLRenderer,
@@ -51,6 +53,10 @@ export default class WallDrawer {
   }
 
   private cleanupPreview() {
+    if (this.lengthInput) {
+      this.lengthInput.remove();
+      this.lengthInput = null;
+    }
     if (!this.preview) return;
     this.scene.remove(this.preview);
     this.preview.geometry.dispose();
@@ -102,17 +108,61 @@ export default class WallDrawer {
       : lengthMm;
     const snappedAngle = (snappedAngleDeg * Math.PI) / 180;
     const snappedLength = snappedLengthMm / 1000;
-    const positions = (
-      this.preview.geometry as THREE.BufferGeometry
-    ).attributes.position as THREE.BufferAttribute;
+    this.currentAngle = snappedAngle;
+    const positions = (this.preview.geometry as THREE.BufferGeometry).attributes
+      .position as THREE.BufferAttribute;
+    const endX = this.start.x + Math.cos(snappedAngle) * snappedLength;
+    const endZ = this.start.z + Math.sin(snappedAngle) * snappedLength;
     positions.setXYZ(0, this.start.x, 0, this.start.z);
-    positions.setXYZ(
-      1,
-      this.start.x + Math.cos(snappedAngle) * snappedLength,
-      0,
-      this.start.z + Math.sin(snappedAngle) * snappedLength,
-    );
+    positions.setXYZ(1, endX, 0, endZ);
     positions.needsUpdate = true;
+
+    const mid = new THREE.Vector3(
+      (this.start.x + endX) / 2,
+      0,
+      (this.start.z + endZ) / 2,
+    );
+    const cam = this.getCamera();
+    const projected = mid.clone().project(cam);
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    const screenX = ((projected.x + 1) / 2) * rect.width + rect.left;
+    const screenY = ((-projected.y + 1) / 2) * rect.height + rect.top;
+
+    if (!this.lengthInput) {
+      this.lengthInput = document.createElement('input');
+      this.lengthInput.type = 'text';
+      this.lengthInput.style.position = 'absolute';
+      this.lengthInput.style.transform = 'translate(-50%, -50%)';
+      this.lengthInput.addEventListener('keydown', this.onInputKeyDown);
+      document.body.appendChild(this.lengthInput);
+    }
+    this.lengthInput.value = snappedLengthMm.toFixed(0);
+    this.lengthInput.style.left = `${screenX}px`;
+    this.lengthInput.style.top = `${screenY}px`;
+    this.lengthInput.style.display = 'block';
+    this.lengthInput.focus();
+  };
+
+  private onInputKeyDown = (e: KeyboardEvent) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (!this.start || !this.preview || !this.lengthInput) return;
+    const lengthMm = parseFloat(this.lengthInput.value);
+    if (isNaN(lengthMm)) return;
+    const lengthM = lengthMm / 1000;
+    const end = new THREE.Vector3(
+      this.start.x + Math.cos(this.currentAngle) * lengthM,
+      0,
+      this.start.z + Math.sin(this.currentAngle) * lengthM,
+    );
+    const positions = (this.preview.geometry as THREE.BufferGeometry).attributes
+      .position as THREE.BufferAttribute;
+    positions.setXYZ(0, this.start.x, 0, this.start.z);
+    positions.setXYZ(1, end.x, 0, end.z);
+    positions.needsUpdate = true;
+    this.lengthInput.style.display = 'none';
+    this.finalizeSegment(end);
   };
 
   private finalizeSegment(end: THREE.Vector3) {
@@ -140,12 +190,14 @@ export default class WallDrawer {
       0,
       this.start.z + Math.sin(rad) * lenM,
     );
-    const positions = (
-      this.preview.geometry as THREE.BufferGeometry
-    ).attributes.position as THREE.BufferAttribute;
+    const positions = (this.preview.geometry as THREE.BufferGeometry).attributes
+      .position as THREE.BufferAttribute;
     positions.setXYZ(0, this.start.x, 0, this.start.z);
     positions.setXYZ(1, this.start.x, 0, this.start.z);
     positions.needsUpdate = true;
+    if (this.lengthInput) {
+      this.lengthInput.style.display = 'none';
+    }
   }
 
   private onUp = (e: PointerEvent) => {
@@ -170,10 +222,10 @@ export default class WallDrawer {
 
   private onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
+      if (e.target === this.lengthInput) return;
       if (!this.start || !this.preview) return;
-      const positions = (
-        this.preview.geometry as THREE.BufferGeometry
-      ).attributes.position as THREE.BufferAttribute;
+      const positions = (this.preview.geometry as THREE.BufferGeometry)
+        .attributes.position as THREE.BufferAttribute;
       const end = new THREE.Vector3(
         positions.getX(1),
         positions.getY(1),
