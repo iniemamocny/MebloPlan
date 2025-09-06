@@ -55,7 +55,8 @@ export default function RoomTab({
     floor.rotation.x = -Math.PI / 2;
     (floor as any).userData.kind = 'room';
     group.add(floor);
-    let cursor = new THREE.Vector2(0, 0);
+    const origin = store.room.origin || { x: 0, y: 0 };
+    let cursor = new THREE.Vector2(origin.x / 1000, origin.y / 1000);
     const h = (store.room.height || 2700) / 1000;
     store.room.walls.forEach((w, i) => {
       const len = (w.length || 0) / 1000;
