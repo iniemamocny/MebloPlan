@@ -65,7 +65,7 @@ export default function WallDrawPanel({
         maxLength={5}
         style={{ width: 70 }}
       />
-      <div>{Math.round(store.snappedLengthMm)} mm</div>
+      <div>{Math.round(store.snappedLengthMm).toString().slice(0, 5)} mm</div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <div>
           <div className="small">{t('room.angleToPrev')}</div>
