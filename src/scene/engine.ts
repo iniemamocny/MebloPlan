@@ -162,6 +162,9 @@ export function setupThree(
     group,
     enterTopDownMode,
     exitTopDownMode,
-    applyWallLength: (len: number) => wallDrawer.applyLength(len),
+    applyWallLength: (len: number) => {
+      const safeLength = Math.min(len, 99999);
+      wallDrawer.applyLength(safeLength);
+    },
   };
 }
