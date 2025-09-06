@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FaPencilAlt } from 'react-icons/fa';
+import { FaPencilAlt, FaCube, FaRegSquare } from 'react-icons/fa';
 import { usePlannerStore } from '../state/store';
 
 const ranges = {
@@ -38,6 +38,17 @@ export default function WallDrawPanel({
         disabled={isDrawing}
       >
         <FaPencilAlt />
+      </button>
+      <button
+        className="btnGhost"
+        onClick={() =>
+          isDrawing
+            ? threeRef.current?.exitTopDownMode?.()
+            : threeRef.current?.enterTopDownMode?.()
+        }
+        title={isDrawing ? t('app.view3D') : t('app.view2D')}
+      >
+        {isDrawing ? <FaCube /> : <FaRegSquare />}
       </button>
       <input
         className="input"
