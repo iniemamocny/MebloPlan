@@ -36,6 +36,8 @@ export default class WallDrawer {
     const dom = this.renderer.domElement;
     dom.addEventListener('pointerdown', this.onDown);
     dom.addEventListener('pointerup', this.onUp);
+    dom.addEventListener('pointermove', this.onMove);
+    window.addEventListener('keydown', this.onKeyDown);
   }
 
   disable() {
@@ -43,6 +45,7 @@ export default class WallDrawer {
     dom.removeEventListener('pointerdown', this.onDown);
     dom.removeEventListener('pointerup', this.onUp);
     dom.removeEventListener('pointermove', this.onMove);
+    window.removeEventListener('keydown', this.onKeyDown);
     this.start = null;
     this.cleanupPreview();
   }
@@ -67,16 +70,17 @@ export default class WallDrawer {
   }
 
   private onDown = (e: PointerEvent) => {
-    this.start = this.getPoint(e);
-    if (!this.start) return;
+    if (this.start) return;
+    const point = this.getPoint(e);
+    if (!point) return;
+    this.start = point;
     const geom = new THREE.BufferGeometry().setFromPoints([
-      this.start.clone(),
-      this.start.clone(),
+      point.clone(),
+      point.clone(),
     ]);
     const mat = new THREE.LineBasicMaterial({ color: 0x000000 });
     this.preview = new THREE.Line(geom, mat);
     this.scene.add(this.preview);
-    this.renderer.domElement.addEventListener('pointermove', this.onMove);
   };
 
   private onMove = (e: PointerEvent) => {
@@ -111,22 +115,12 @@ export default class WallDrawer {
     positions.needsUpdate = true;
   };
 
-  private onUp = (e: PointerEvent) => {
-    const dom = this.renderer.domElement;
-    dom.removeEventListener('pointermove', this.onMove);
-    if (!this.start) {
-      this.cleanupPreview();
-      return;
-    }
-    const end = this.getPoint(e);
-    if (!end) {
-      this.start = null;
-      this.cleanupPreview();
-      return;
-    }
+  private finalizeSegment(end: THREE.Vector3) {
+    if (!this.start || !this.preview) return;
     const dx = end.x - this.start.x;
     const dz = end.z - this.start.z;
     const lengthMm = Math.sqrt(dx * dx + dz * dz) * 1000; // meters to mm
+    if (lengthMm < 1) return;
     const angleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
     const { snapAngle, snapLength } = this.store.getState();
     const snappedAngle = snapAngle
@@ -136,8 +130,58 @@ export default class WallDrawer {
       ? Math.round(lengthMm / snapLength) * snapLength
       : lengthMm;
     const thickness = this.store.getState().wallThickness;
-    this.store.getState().addWall({ length: snappedLength, angle: snappedAngle, thickness });
-    this.start = null;
-    this.cleanupPreview();
+    this.store
+      .getState()
+      .addWall({ length: snappedLength, angle: snappedAngle, thickness });
+    const rad = (snappedAngle * Math.PI) / 180;
+    const lenM = snappedLength / 1000;
+    this.start.set(
+      this.start.x + Math.cos(rad) * lenM,
+      0,
+      this.start.z + Math.sin(rad) * lenM,
+    );
+    const positions = (
+      this.preview.geometry as THREE.BufferGeometry
+    ).attributes.position as THREE.BufferAttribute;
+    positions.setXYZ(0, this.start.x, 0, this.start.z);
+    positions.setXYZ(1, this.start.x, 0, this.start.z);
+    positions.needsUpdate = true;
+  }
+
+  private onUp = (e: PointerEvent) => {
+    if (!this.start || !this.preview) {
+      this.cleanupPreview();
+      return;
+    }
+    const end = this.getPoint(e);
+    if (!end) {
+      this.disable();
+      return;
+    }
+    const dx = end.x - this.start.x;
+    const dz = end.z - this.start.z;
+    const lengthMm = Math.sqrt(dx * dx + dz * dz) * 1000;
+    if (e.detail > 1 && lengthMm < 1) {
+      this.disable();
+      return;
+    }
+    this.finalizeSegment(end);
+  };
+
+  private onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      if (!this.start || !this.preview) return;
+      const positions = (
+        this.preview.geometry as THREE.BufferGeometry
+      ).attributes.position as THREE.BufferAttribute;
+      const end = new THREE.Vector3(
+        positions.getX(1),
+        positions.getY(1),
+        positions.getZ(1),
+      );
+      this.finalizeSegment(end);
+    } else if (e.key === 'Escape') {
+      this.disable();
+    }
   };
 }
