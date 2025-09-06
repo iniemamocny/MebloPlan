@@ -13,6 +13,8 @@ export default function RoomTab({
   const [len, setLen] = useState(3000);
   const [angle, setAngle] = useState(0);
   const [height, setHeight] = useState(store.room.height || 2700);
+  const [isDrawingWalls, setIsDrawingWalls] = useState(false);
+  const onDrawWalls = () => setIsDrawingWalls((d) => !d);
   useEffect(() => {
     store.setRoom({ height });
   }, [height]);
@@ -141,6 +143,11 @@ export default function RoomTab({
             </button>
             <button className="btnGhost" onClick={addDoor}>
               {t('room.addDoor')}
+            </button>
+            <button className="btnGhost" onClick={onDrawWalls}>
+              {isDrawingWalls
+                ? t('room.finishDrawing')
+                : t('room.drawWalls')}
             </button>
           </div>
         </div>
