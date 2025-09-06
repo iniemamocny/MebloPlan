@@ -36,7 +36,11 @@
   },
   "room": {
     "title": "Pomieszczenie — ściany",
+    "height": "Wysokość pomieszczenia (mm)",
+    "addWindow": "Dodaj okno",
+    "addDoor": "Dodaj drzwi",
     "drawWalls": "Rysuj ściany",
+    "finishDrawing": "Zakończ rysowanie",
     "noWalls": "Brak ścian"
   },
   "global": {
