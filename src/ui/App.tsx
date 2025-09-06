@@ -6,6 +6,7 @@ import useCabinetConfig from './useCabinetConfig';
 import TopBar from './TopBar';
 import { createTranslator } from './i18n';
 import MainTabs from './MainTabs';
+import WallDrawPanel from './WallDrawPanel';
 
 export default function App() {
   const store = usePlannerStore();
@@ -96,8 +97,7 @@ export default function App() {
           addCountertop={addCountertop}
           setAddCountertop={setAddCountertop}
           isDrawingWalls={isDrawingWalls}
-          wallLength={wallLength}
-          setWallLength={setWallLength}
+          setIsDrawingWalls={setIsDrawingWalls}
         />
       </div>
       <div className="canvasWrap">
@@ -105,6 +105,12 @@ export default function App() {
           threeRef={threeRef}
           addCountertop={addCountertop}
           setIsDrawingWalls={setIsDrawingWalls}
+          setWallLength={setWallLength}
+        />
+        <WallDrawPanel
+          threeRef={threeRef}
+          isDrawingWalls={isDrawingWalls}
+          wallLength={wallLength}
           setWallLength={setWallLength}
         />
         <TopBar

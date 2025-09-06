@@ -44,8 +44,7 @@ interface MainTabsProps {
   addCountertop: boolean;
   setAddCountertop: (v: boolean) => void;
   isDrawingWalls: boolean;
-  wallLength: number;
-  setWallLength: React.Dispatch<React.SetStateAction<number>>;
+  setIsDrawingWalls: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function MainTabs({
@@ -77,8 +76,7 @@ export default function MainTabs({
   addCountertop,
   setAddCountertop,
   isDrawingWalls,
-  wallLength,
-  setWallLength,
+  setIsDrawingWalls,
 }: MainTabsProps) {
   const toggleTab = (name: 'cab' | 'room' | 'costs' | 'cut' | 'global') => {
     setTab(tab === name ? null : name);
@@ -194,8 +192,7 @@ export default function MainTabs({
           <RoomTab
             three={threeRef}
             isDrawingWalls={isDrawingWalls}
-            wallLength={wallLength}
-            setWallLength={setWallLength}
+            setIsDrawingWalls={setIsDrawingWalls}
           />
         )}
         {tab === 'costs' && <CostsTab />}
