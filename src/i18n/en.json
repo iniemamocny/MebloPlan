@@ -42,6 +42,8 @@
     "addWall": "Add wall",
     "addWindow": "Add window",
     "addDoor": "Add door",
+    "drawWalls": "Draw walls",
+    "finishDrawing": "Finish drawing",
     "noWalls": "No walls"
   },
   "global": {
