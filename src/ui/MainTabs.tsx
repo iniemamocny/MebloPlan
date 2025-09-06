@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FAMILY, FAMILY_LABELS } from '../core/catalog';
 import type { Kind, Variant } from '../core/catalog';
 import TypePicker, { KindTabs, VariantList } from './panels/CatalogPicker';
@@ -74,6 +74,7 @@ export default function MainTabs({
   addCountertop,
   setAddCountertop,
 }: MainTabsProps) {
+  const [isDrawingWalls, setIsDrawingWalls] = useState(false);
   const toggleTab = (name: 'cab' | 'room' | 'costs' | 'cut' | 'global') => {
     setTab(tab === name ? null : name);
   };
@@ -102,6 +103,7 @@ export default function MainTabs({
         isOpen={tab !== null}
         onClose={() => setTab(null)}
         className={tab !== null ? 'open' : ''}
+        locked={isDrawingWalls}
       >
         {tab === 'cab' && (
           <>
@@ -183,7 +185,13 @@ export default function MainTabs({
           </>
         )}
 
-        {tab === 'room' && <RoomTab three={threeRef} />}
+        {tab === 'room' && (
+          <RoomTab
+            three={threeRef}
+            isDrawingWalls={isDrawingWalls}
+            setIsDrawingWalls={setIsDrawingWalls}
+          />
+        )}
         {tab === 'costs' && <CostsTab />}
         {tab === 'cut' && (
           <CutlistTab

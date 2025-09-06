@@ -1,17 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import * as THREE from 'three';
 import { useTranslation } from 'react-i18next';
 import { usePlannerStore } from '../../state/store';
 import RoomUploader from '../RoomUploader';
 
+interface RoomTabProps {
+  three: React.MutableRefObject<any>;
+  isDrawingWalls: boolean;
+  setIsDrawingWalls: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
 export default function RoomTab({
   three,
-}: {
-  three: React.MutableRefObject<any>;
-}) {
+  isDrawingWalls,
+  setIsDrawingWalls,
+}: RoomTabProps) {
   const store = usePlannerStore();
   const { t } = useTranslation();
-  const [isDrawingWalls, setIsDrawingWalls] = useState(false);
   const onHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     store.setRoom({ height: Number((e.target as HTMLInputElement).value) || 0 });
   };
