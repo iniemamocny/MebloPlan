@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { useTranslation } from 'react-i18next';
 import { usePlannerStore } from '../../state/store';
 import RoomUploader from '../RoomUploader';
-import WallDrawing2D from './WallDrawing2D';
+
 export default function RoomTab({
   three,
 }: {
@@ -11,9 +11,6 @@ export default function RoomTab({
 }) {
   const store = usePlannerStore();
   const { t } = useTranslation();
-  const [len, setLen] = useState(3000);
-  const [angle, setAngle] = useState(0);
-  const [height, setHeight] = useState(store.room.height || 2700);
   const [isDrawingWalls, setIsDrawingWalls] = useState(false);
   const onDrawWalls = () => {
     three.current?.enterTopDownMode?.();
@@ -23,9 +20,6 @@ export default function RoomTab({
     three.current?.exitTopDownMode?.();
     setIsDrawingWalls(false);
   };
-  useEffect(() => {
-    store.setRoom({ height });
-  }, [height]);
   useEffect(() => {
     const group = three.current?.group;
     if (!group) return;
@@ -76,25 +70,6 @@ export default function RoomTab({
       cursor = next;
     });
   }, [store.room, three]);
-  const addWall = () =>
-    store.addWall({ length: Number(len) || 0, angle: Number(angle) || 0 });
-  const addWindow = () =>
-    store.addOpening({
-      type: 'window',
-      wall: 0,
-      offset: 500,
-      width: 900,
-      height: 1200,
-      sill: 900,
-    });
-  const addDoor = () =>
-    store.addOpening({
-      type: 'door',
-      wall: 0,
-      offset: 100,
-      width: 900,
-      height: 2100,
-    });
   return (
     <>
       <div className="section">
@@ -104,54 +79,7 @@ export default function RoomTab({
           </div>
         </div>
         <div className="bd">
-          <div className="grid3">
-            <div>
-              <div className="small">{t('room.height')}</div>
-              <input
-                className="input"
-                type="number"
-                step="1"
-                value={height}
-                onChange={(e) =>
-                  setHeight(Number((e.target as HTMLInputElement).value) || 0)
-                }
-              />
-            </div>
-            <div>
-              <div className="small">{t('room.wallLength')}</div>
-              <input
-                className="input"
-                type="number"
-                step="1"
-                value={len}
-                onChange={(e) =>
-                  setLen(Number((e.target as HTMLInputElement).value) || 0)
-                }
-              />
-            </div>
-            <div>
-              <div className="small">{t('room.angle')}</div>
-              <input
-                className="input"
-                type="number"
-                step="1"
-                value={angle}
-                onChange={(e) =>
-                  setAngle(Number((e.target as HTMLInputElement).value) || 0)
-                }
-              />
-            </div>
-          </div>
           <div className="row" style={{ marginTop: 8 }}>
-            <button className="btn" onClick={addWall}>
-              {t('room.addWall')}
-            </button>
-            <button className="btnGhost" onClick={addWindow}>
-              {t('room.addWindow')}
-            </button>
-            <button className="btnGhost" onClick={addDoor}>
-              {t('room.addDoor')}
-            </button>
             <button
               className="btnGhost"
               onClick={onDrawWalls}
@@ -161,14 +89,13 @@ export default function RoomTab({
             </button>
             {isDrawingWalls && (
               <button className="btnGhost" onClick={onFinishDrawing}>
-                {t('room.finishDrawing')}
+                Zakończ rysowanie
               </button>
             )}
           </div>
         </div>
       </div>
       <RoomUploader three={three} />
-      {isDrawingWalls && <WallDrawing2D onFinish={onFinishDrawing} />}
     </>
   );
 }
