@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import { useTranslation } from 'react-i18next';
 import { usePlannerStore } from '../../state/store';
 import RoomUploader from '../RoomUploader';
-import WallDrawing2D from './WallDrawing2D';
 export default function RoomTab({
   three,
 }: {
@@ -15,7 +14,14 @@ export default function RoomTab({
   const [angle, setAngle] = useState(0);
   const [height, setHeight] = useState(store.room.height || 2700);
   const [isDrawingWalls, setIsDrawingWalls] = useState(false);
-  const onDrawWalls = () => setIsDrawingWalls((d) => !d);
+  const onDrawWalls = () => {
+    three.current?.enterTopDownMode?.();
+    setIsDrawingWalls(true);
+  };
+  const onFinishDrawing = () => {
+    three.current?.exitTopDownMode?.();
+    setIsDrawingWalls(false);
+  };
   useEffect(() => {
     store.setRoom({ height });
   }, [height]);
@@ -145,18 +151,22 @@ export default function RoomTab({
             <button className="btnGhost" onClick={addDoor}>
               {t('room.addDoor')}
             </button>
-            <button className="btnGhost" onClick={onDrawWalls}>
-              {isDrawingWalls
-                ? t('room.finishDrawing')
-                : t('room.drawWalls')}
+            <button
+              className="btnGhost"
+              onClick={onDrawWalls}
+              disabled={isDrawingWalls}
+            >
+              {t('room.drawWalls')}
             </button>
+            {isDrawingWalls && (
+              <button className="btnGhost" onClick={onFinishDrawing}>
+                {t('room.finishDrawing')}
+              </button>
+            )}
           </div>
         </div>
       </div>
       <RoomUploader three={three} />
-      {isDrawingWalls && (
-        <WallDrawing2D onFinish={() => setIsDrawingWalls(false)} />
-      )}
     </>
   );
 }
