@@ -54,6 +54,7 @@ export default class WallDrawer {
 
   private cleanupPreview() {
     if (this.lengthInput) {
+      this.lengthInput.removeEventListener('keydown', this.onInputKeyDown);
       this.lengthInput.remove();
       this.lengthInput = null;
     }
