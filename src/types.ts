@@ -189,6 +189,7 @@ export interface Room {
   walls: { length: number; angle: number; thickness: number }[];
   openings: Opening[];
   height: number;
+  origin: { x: number; y: number };
 }
 
 export interface PricingData {

@@ -62,7 +62,7 @@ export function useCabinetConfig(
     mSize: { w: number; h: number; d: number },
     fam: FAMILY,
   ) => {
-    const segs = getWallSegments(0, 0);
+    const segs = getWallSegments();
     if (segs.length === 0)
       return {
         pos: [
@@ -78,7 +78,7 @@ export function useCabinetConfig(
       pr: ReturnType<typeof projectPointToSegment>;
       i: number;
     } | null = null;
-    const guess = { x: 0, y: 0 };
+    const guess = store.room.origin || { x: 0, y: 0 };
     segs.forEach((seg, i) => {
       const pr = projectPointToSegment(guess.x, guess.y, seg);
       if (!best || pr.dist < best.pr.dist) best = { seg, pr, i };
@@ -111,7 +111,7 @@ export function useCabinetConfig(
     const tryMod: Module3D = { ...mod };
     let loops = 0;
     const step = 0.02;
-    const segs = getWallSegments(0, 0);
+    const segs = getWallSegments();
     const seg = typeof mod.segIndex === 'number' ? segs[mod.segIndex] : null;
     const tangent = seg
       ? {
@@ -238,7 +238,7 @@ export function useCabinetConfig(
   };
 
   const doAutoOnSelectedWall = () => {
-    const segs = getWallSegments(0, 0);
+    const segs = getWallSegments();
     if (segs.length === 0) return alert(t('room.noWalls'));
     const seg = segs[0 + (selWall % segs.length)];
     const len = seg.length;

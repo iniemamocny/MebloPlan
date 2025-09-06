@@ -161,13 +161,14 @@ export const usePlannerStore = create<Store>((set, get) => ({
   room: persisted?.room
     ? {
         ...persisted.room,
+        origin: persisted.room.origin || { x: 0, y: 0 },
         walls:
           persisted.room.walls?.map((w: any) => ({
             thickness: 100,
             ...w,
           })) || [],
       }
-    : { walls: [], openings: [], height: 2700 },
+    : { walls: [], openings: [], height: 2700, origin: { x: 0, y: 0 } },
   wallThickness: persisted?.wallThickness || 100,
   snapAngle: persisted?.snapAngle ?? 90,
   snapLength: persisted?.snapLength ?? 10,

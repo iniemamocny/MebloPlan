@@ -2,12 +2,15 @@ import * as THREE from 'three';
 import type { WebGLRenderer, Camera, Scene } from 'three';
 import type { UseBoundStore, StoreApi } from 'zustand';
 import { usePlannerStore } from '../state/store';
+import type { Room } from '../types';
 
 interface PlannerStore {
   addWall: (w: { length: number; angle: number; thickness: number }) => void;
   wallThickness: number;
   snapAngle: number;
   snapLength: number;
+  room: Room;
+  setRoom: (patch: Partial<Room>) => void;
 }
 
 export default class WallDrawer {
@@ -183,17 +186,18 @@ export default class WallDrawer {
       return;
     }
     const angleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
-    const { snapAngle, snapLength } = this.store.getState();
-    const snappedAngle = snapAngle
-      ? Math.round(angleDeg / snapAngle) * snapAngle
+    const state = this.store.getState();
+    const snappedAngle = state.snapAngle
+      ? Math.round(angleDeg / state.snapAngle) * state.snapAngle
       : angleDeg;
-    const snappedLength = snapLength
-      ? Math.round(lengthMm / snapLength) * snapLength
+    const snappedLength = state.snapLength
+      ? Math.round(lengthMm / state.snapLength) * state.snapLength
       : lengthMm;
-    const thickness = this.store.getState().wallThickness;
-    this.store
-      .getState()
-      .addWall({ length: snappedLength, angle: snappedAngle, thickness });
+    if (state.room.walls.length === 0) {
+      state.setRoom({ origin: { x: this.start.x * 1000, y: this.start.z * 1000 } });
+    }
+    const thickness = state.wallThickness;
+    state.addWall({ length: snappedLength, angle: snappedAngle, thickness });
     const rad = (snappedAngle * Math.PI) / 180;
     const lenM = snappedLength / 1000;
     this.start.set(
