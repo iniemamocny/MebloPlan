@@ -3,17 +3,20 @@ import * as THREE from 'three';
 import { useTranslation } from 'react-i18next';
 import { usePlannerStore } from '../../state/store';
 import RoomUploader from '../RoomUploader';
+import SlidingPanel from '../components/SlidingPanel';
 
 interface RoomTabProps {
   three: React.MutableRefObject<any>;
   isDrawingWalls: boolean;
-  setIsDrawingWalls: React.Dispatch<React.SetStateAction<boolean>>;
+  wallLength: number;
+  setWallLength: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export default function RoomTab({
   three,
   isDrawingWalls,
-  setIsDrawingWalls,
+  wallLength,
+  setWallLength,
 }: RoomTabProps) {
   const store = usePlannerStore();
   const { t } = useTranslation();
@@ -24,11 +27,9 @@ export default function RoomTab({
   const onAddDoor = () => store.addOpening({ kind: 1 });
   const onDrawWalls = () => {
     three.current?.enterTopDownMode?.();
-    setIsDrawingWalls(true);
   };
   const onFinishDrawing = () => {
     three.current?.exitTopDownMode?.();
-    setIsDrawingWalls(false);
   };
   useEffect(() => {
     const group = three.current?.group;
@@ -166,6 +167,26 @@ export default function RoomTab({
         </div>
       </div>
       <RoomUploader three={three} />
+      <SlidingPanel
+        isOpen={isDrawingWalls}
+        onClose={() => three.current?.exitTopDownMode?.()}
+        className={`bottom ${isDrawingWalls ? 'open' : ''}`}
+        locked
+      >
+        <div className="row">
+          <input
+            className="input"
+            type="number"
+            value={wallLength}
+            onChange={(e) => setWallLength(Number((e.target as HTMLInputElement).value) || 0)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                three.current?.applyWallLength?.(wallLength);
+              }
+            }}
+          />
+        </div>
+      </SlidingPanel>
     </>
   );
 }

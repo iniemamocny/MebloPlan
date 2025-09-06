@@ -22,19 +22,21 @@ export default class WallDrawer {
   private plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   private start: THREE.Vector3 | null = null;
   private preview: THREE.Line | null = null;
-  private lengthInput: HTMLInputElement | null = null;
   private currentAngle = 0; // radians
+  private onLengthChange?: (len: number) => void;
 
   constructor(
     renderer: WebGLRenderer,
     getCamera: () => Camera,
     scene: Scene,
     store: typeof usePlannerStore,
+    onLengthChange?: (len: number) => void,
   ) {
     this.renderer = renderer;
     this.getCamera = getCamera;
     this.scene = scene;
     this.store = store;
+    this.onLengthChange = onLengthChange;
   }
 
   enable() {
@@ -56,11 +58,7 @@ export default class WallDrawer {
   }
 
   private cleanupPreview() {
-    if (this.lengthInput) {
-      this.lengthInput.removeEventListener('keydown', this.onInputKeyDown);
-      this.lengthInput.remove();
-      this.lengthInput = null;
-    }
+    this.onLengthChange?.(0);
     if (!this.preview) return;
     this.scene.remove(this.preview);
     this.preview.geometry.dispose();
@@ -121,45 +119,11 @@ export default class WallDrawer {
     positions.setXYZ(1, endX, 0, endZ);
     positions.needsUpdate = true;
 
-    const mid = new THREE.Vector3(
-      (this.start.x + endX) / 2,
-      0,
-      (this.start.z + endZ) / 2,
-    );
-    const cam = this.getCamera();
-    const projected = mid.clone().project(cam);
-    const rect = this.renderer.domElement.getBoundingClientRect();
-    const screenX = ((projected.x + 1) / 2) * rect.width + rect.left;
-    const screenY = ((-projected.y + 1) / 2) * rect.height + rect.top;
-
-    if (!this.lengthInput) {
-      this.lengthInput = document.createElement('input');
-      this.lengthInput.type = 'text';
-      this.lengthInput.style.position = 'absolute';
-      this.lengthInput.style.transform = 'translate(-50%, -50%)';
-      this.lengthInput.addEventListener('keydown', this.onInputKeyDown);
-      document.body.appendChild(this.lengthInput);
-    }
-    this.lengthInput.value = snappedLengthMm.toFixed(0);
-    this.lengthInput.style.left = `${screenX}px`;
-    this.lengthInput.style.top = `${screenY}px`;
-    this.lengthInput.style.display = 'block';
-    this.lengthInput.focus();
+    this.onLengthChange?.(snappedLengthMm);
   };
 
-  private onInputKeyDown = (e: KeyboardEvent) => {
-    if (e.key !== 'Enter') return;
-    e.preventDefault();
-    e.stopPropagation();
-    if (!this.start || !this.preview || !this.lengthInput) return;
-    const lengthMm = parseFloat(this.lengthInput.value);
-    if (isNaN(lengthMm)) return;
-    if (lengthMm <= 0) {
-      this.lengthInput.setCustomValidity('Length must be greater than 0');
-      this.lengthInput.reportValidity();
-      return;
-    }
-    this.lengthInput.setCustomValidity('');
+  applyLength(lengthMm: number) {
+    if (!this.start || !this.preview) return;
     const lengthM = lengthMm / 1000;
     const end = new THREE.Vector3(
       this.start.x + Math.cos(this.currentAngle) * lengthM,
@@ -171,9 +135,8 @@ export default class WallDrawer {
     positions.setXYZ(0, this.start.x, 0, this.start.z);
     positions.setXYZ(1, end.x, 0, end.z);
     positions.needsUpdate = true;
-    this.lengthInput.style.display = 'none';
     this.finalizeSegment(end);
-  };
+  }
 
   private finalizeSegment(end: THREE.Vector3) {
     if (!this.start || !this.preview) return;
@@ -210,9 +173,7 @@ export default class WallDrawer {
     positions.setXYZ(0, this.start.x, 0, this.start.z);
     positions.setXYZ(1, this.start.x, 0, this.start.z);
     positions.needsUpdate = true;
-    if (this.lengthInput) {
-      this.lengthInput.style.display = 'none';
-    }
+    this.onLengthChange?.(0);
   }
 
   private onUp = (e: PointerEvent) => {
@@ -237,7 +198,7 @@ export default class WallDrawer {
 
   private onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
-      if (e.target === this.lengthInput) return;
+      if ((e.target as HTMLElement).tagName === 'INPUT') return;
       if (!this.start || !this.preview) return;
       const positions = (this.preview.geometry as THREE.BufferGeometry)
         .attributes.position as THREE.BufferAttribute;

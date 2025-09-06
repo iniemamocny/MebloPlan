@@ -3,7 +3,14 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { usePlannerStore } from '../state/store';
 import WallDrawer from '../viewer/WallDrawer';
 import CabinetDragger from '../viewer/CabinetDragger';
-export function setupThree(container: HTMLElement) {
+export function setupThree(
+  container: HTMLElement,
+  callbacks?: {
+    onEnterTopDownMode?: () => void;
+    onExitTopDownMode?: () => void;
+    onLengthChange?: (len: number) => void;
+  },
+) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf3f4f6);
   const perspCamera = new THREE.PerspectiveCamera(
@@ -45,7 +52,13 @@ export function setupThree(container: HTMLElement) {
   scene.add(group);
   const controls = new OrbitControls(perspCamera, renderer.domElement);
   controls.enableDamping = true;
-  const wallDrawer = new WallDrawer(renderer, () => camera, scene, usePlannerStore);
+  const wallDrawer = new WallDrawer(
+    renderer,
+    () => camera,
+    scene,
+    usePlannerStore,
+    callbacks?.onLengthChange,
+  );
   const cabinetDragger = new CabinetDragger(
     renderer,
     () => camera,
@@ -104,12 +117,14 @@ export function setupThree(container: HTMLElement) {
         onResize();
         wallDrawer.enable();
         cabinetDragger.enable();
+        callbacks?.onEnterTopDownMode?.();
       },
     );
   };
   const exitTopDownMode = () => {
     wallDrawer.disable();
     cabinetDragger.disable();
+    callbacks?.onExitTopDownMode?.();
     perspCamera.position.copy(topPos);
     perspCamera.quaternion.copy(topQuat);
     camera = perspCamera;
@@ -140,5 +155,6 @@ export function setupThree(container: HTMLElement) {
     group,
     enterTopDownMode,
     exitTopDownMode,
+    applyWallLength: (len: number) => wallDrawer.applyLength(len),
   };
 }
