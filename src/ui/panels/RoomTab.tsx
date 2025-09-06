@@ -7,24 +7,25 @@ import RoomUploader from '../RoomUploader';
 interface RoomTabProps {
   three: React.MutableRefObject<any>;
   isDrawingWalls: boolean;
-  setIsDrawingWalls: React.Dispatch<React.SetStateAction<boolean>>;
+  setWallPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function RoomTab({
   three,
   isDrawingWalls,
-  setIsDrawingWalls,
+  setWallPanelOpen,
 }: RoomTabProps) {
   const store = usePlannerStore();
   const { t } = useTranslation();
   const onHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    store.setRoom({ height: Number((e.target as HTMLInputElement).value) || 0 });
+    store.setRoom({
+      height: Number((e.target as HTMLInputElement).value) || 0,
+    });
   };
   const onAddWindow = () => store.addOpening({ kind: 0 });
   const onAddDoor = () => store.addOpening({ kind: 1 });
   const onDrawWalls = () => {
-    setIsDrawingWalls(true);
-    three.current?.enterTopDownMode?.();
+    setWallPanelOpen(true);
   };
   useEffect(() => {
     const group = three.current?.group;
@@ -136,7 +137,8 @@ export default function RoomTab({
               <ul>
                 {store.room.walls.map((w, i) => (
                   <li key={i}>
-                    {t('app.wallLabel', { num: i + 1, len: w.length })} – {w.angle}° –
+                    {t('app.wallLabel', { num: i + 1, len: w.length })} –{' '}
+                    {w.angle}° –
                     <input
                       type="number"
                       value={w.thickness}
