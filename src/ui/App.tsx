@@ -41,6 +41,7 @@ export default function App() {
   const [boardKerf, setBoardKerf] = useState(3);
   const [boardHasGrain, setBoardHasGrain] = useState(false);
   const [isDrawingWalls, setIsDrawingWalls] = useState(false);
+  const [wallPanelOpen, setWallPanelOpen] = useState(false);
   const [wallLength, setWallLength] = useState(0);
 
   const undo = store.undo;
@@ -97,7 +98,7 @@ export default function App() {
           addCountertop={addCountertop}
           setAddCountertop={setAddCountertop}
           isDrawingWalls={isDrawingWalls}
-          setIsDrawingWalls={setIsDrawingWalls}
+          setWallPanelOpen={setWallPanelOpen}
         />
       </div>
       <div className="canvasWrap">
@@ -109,9 +110,11 @@ export default function App() {
         />
         <WallDrawPanel
           threeRef={threeRef}
-          isDrawingWalls={isDrawingWalls}
+          isOpen={wallPanelOpen}
+          isDrawing={isDrawingWalls}
           wallLength={wallLength}
           setWallLength={setWallLength}
+          setIsOpen={setWallPanelOpen}
         />
         <TopBar
           t={t}

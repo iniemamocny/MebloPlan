@@ -1,34 +1,49 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { FaPencilAlt } from 'react-icons/fa';
 import { usePlannerStore } from '../state/store';
 import SlidingPanel from './components/SlidingPanel';
 
 interface WallDrawPanelProps {
   threeRef: React.MutableRefObject<any>;
-  isDrawingWalls: boolean;
+  isOpen: boolean;
+  isDrawing: boolean;
   wallLength: number;
   setWallLength: React.Dispatch<React.SetStateAction<number>>;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function WallDrawPanel({
   threeRef,
-  isDrawingWalls,
+  isOpen,
+  isDrawing,
   wallLength,
   setWallLength,
+  setIsOpen,
 }: WallDrawPanelProps) {
   const { t } = useTranslation();
   const store = usePlannerStore();
   return (
     <SlidingPanel
-      isOpen={isDrawingWalls}
-      onClose={() => threeRef.current?.exitTopDownMode?.()}
-      className={`bottom ${isDrawingWalls ? 'open' : ''}`}
-      locked
+      isOpen={isOpen}
+      onClose={() => {
+        threeRef.current?.exitTopDownMode?.();
+        setIsOpen(false);
+      }}
+      className={`bottom ${isOpen ? 'open' : ''}`}
+      locked={isDrawing}
     >
       <div
         className="row"
         style={{ display: 'flex', alignItems: 'center', gap: 8 }}
       >
+        <button
+          className="btnGhost"
+          onClick={() => threeRef.current?.enterTopDownMode?.()}
+          disabled={isDrawing}
+        >
+          <FaPencilAlt />
+        </button>
         <input
           className="input"
           type="number"
@@ -73,9 +88,7 @@ export default function WallDrawPanel({
             type="checkbox"
             checked={!store.snapRightAngles}
             onChange={(e) =>
-              store.setSnapRightAngles(
-                !(e.target as HTMLInputElement).checked,
-              )
+              store.setSnapRightAngles(!(e.target as HTMLInputElement).checked)
             }
           />
           {t('room.noRightAngles')}
