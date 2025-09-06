@@ -177,7 +177,11 @@ export default class WallDrawer {
     const dx = end.x - this.start.x;
     const dz = end.z - this.start.z;
     const lengthMm = Math.sqrt(dx * dx + dz * dz) * 1000; // meters to mm
-    if (lengthMm < 1) return;
+    if (lengthMm < 1) {
+      this.cleanupPreview();
+      this.start = null;
+      return;
+    }
     const angleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
     const { snapAngle, snapLength } = this.store.getState();
     const snappedAngle = snapAngle
