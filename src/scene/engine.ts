@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { usePlannerStore } from '../state/store';
 import WallDrawer from '../viewer/WallDrawer';
+import CabinetDragger from '../viewer/CabinetDragger';
 export function setupThree(container: HTMLElement) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf3f4f6);
@@ -45,6 +46,12 @@ export function setupThree(container: HTMLElement) {
   const controls = new OrbitControls(perspCamera, renderer.domElement);
   controls.enableDamping = true;
   const wallDrawer = new WallDrawer(renderer, () => camera, usePlannerStore);
+  const cabinetDragger = new CabinetDragger(
+    renderer,
+    () => camera,
+    group,
+    usePlannerStore,
+  );
   const orthoSize = 20;
   const onResize = () => {
     const w = container.clientWidth,
@@ -96,11 +103,13 @@ export function setupThree(container: HTMLElement) {
         controls.enableRotate = false;
         onResize();
         wallDrawer.enable();
+        cabinetDragger.enable();
       },
     );
   };
   const exitTopDownMode = () => {
     wallDrawer.disable();
+    cabinetDragger.disable();
     perspCamera.position.copy(topPos);
     perspCamera.quaternion.copy(topQuat);
     camera = perspCamera;
