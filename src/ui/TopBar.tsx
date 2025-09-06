@@ -15,6 +15,17 @@ interface TopBarProps {
 }
 
 export default function TopBar({ t, store, setVariant, setKind, selWall, setSelWall, doAutoOnSelectedWall, lang, setLang }: TopBarProps) {
+  const onRemoveWall = () => {
+    store.removeWall(selWall);
+    setSelWall(0);
+  };
+  const onEditWall = () => {
+    const w = store.room.walls[selWall];
+    if (!w) return;
+    const length = Number(prompt('Length (mm)', String(w.length))) || w.length;
+    const angle = Number(prompt('Angle (deg)', String(w.angle))) || w.angle;
+    store.updateWall(selWall, { length, angle });
+  };
   return (
     <div className="topbar row">
       <button className="btnGhost" onClick={() => store.setRole(store.role === 'stolarz' ? 'klient' : 'stolarz')}>
@@ -43,6 +54,20 @@ export default function TopBar({ t, store, setVariant, setKind, selWall, setSelW
           </option>
         ))}
       </select>
+      <button
+        className="btnGhost"
+        onClick={onRemoveWall}
+        disabled={store.room.walls.length === 0}
+      >
+        {t('app.removeWall')}
+      </button>
+      <button
+        className="btnGhost"
+        onClick={onEditWall}
+        disabled={store.room.walls.length === 0}
+      >
+        {t('app.editWall')}
+      </button>
       <button className="btn" onClick={doAutoOnSelectedWall}>
         {t('app.autoWall')}
       </button>

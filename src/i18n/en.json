@@ -11,6 +11,8 @@
     "clear": "Clear",
     "wallLabel": "Wall {{num}} ({{len}} mm)",
     "autoWall": "Auto for wall",
+    "removeWall": "Remove wall",
+    "editWall": "Edit wall",
     "auto": "Auto",
     "material": {
       "title": "Material (sheet)",

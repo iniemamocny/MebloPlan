@@ -121,8 +121,8 @@ type Store = {
   globals: Globals;
   prices: Prices;
   modules: Module3D[];
-  past: Module3D[][];
-  future: Module3D[][];
+  past: { modules: Module3D[]; room: Room }[];
+  future: { modules: Module3D[]; room: Room }[];
   room: Room;
   showFronts: boolean;
   setRole: (r: 'stolarz' | 'klient') => void;
@@ -136,6 +136,11 @@ type Store = {
   redo: () => void;
   setRoom: (patch: Partial<Room>) => void;
   addWall: (w: { length: number; angle: number }) => void;
+  removeWall: (index: number) => void;
+  updateWall: (
+    index: number,
+    patch: Partial<{ length: number; angle: number }>,
+  ) => void;
   addOpening: (op: Opening) => void;
   setShowFronts: (v: boolean) => void;
 };
@@ -209,25 +214,49 @@ export const usePlannerStore = create<Store>((set, get) => ({
   updatePrices: (patch) => set((s) => ({ prices: { ...s.prices, ...patch } })),
   addModule: (m) =>
     set((s) => ({
-      past: [...s.past, JSON.parse(JSON.stringify(s.modules))],
+      past: [
+        ...s.past,
+        {
+          modules: JSON.parse(JSON.stringify(s.modules)),
+          room: JSON.parse(JSON.stringify(s.room)),
+        },
+      ],
       modules: [...s.modules, m],
       future: [],
     })),
   updateModule: (id, patch) =>
     set((s) => ({
-      past: [...s.past, JSON.parse(JSON.stringify(s.modules))],
+      past: [
+        ...s.past,
+        {
+          modules: JSON.parse(JSON.stringify(s.modules)),
+          room: JSON.parse(JSON.stringify(s.room)),
+        },
+      ],
       modules: s.modules.map((x) => (x.id === id ? { ...x, ...patch } : x)),
       future: [],
     })),
   removeModule: (id) =>
     set((s) => ({
-      past: [...s.past, JSON.parse(JSON.stringify(s.modules))],
+      past: [
+        ...s.past,
+        {
+          modules: JSON.parse(JSON.stringify(s.modules)),
+          room: JSON.parse(JSON.stringify(s.room)),
+        },
+      ],
       modules: s.modules.filter((x) => x.id !== id),
       future: [],
     })),
   clear: () =>
     set((s) => ({
-      past: [...s.past, JSON.parse(JSON.stringify(s.modules))],
+      past: [
+        ...s.past,
+        {
+          modules: JSON.parse(JSON.stringify(s.modules)),
+          room: JSON.parse(JSON.stringify(s.room)),
+        },
+      ],
       modules: [],
       future: [],
     })),
@@ -236,9 +265,16 @@ export const usePlannerStore = create<Store>((set, get) => ({
       if (s.past.length === 0) return s;
       const previous = s.past[s.past.length - 1];
       return {
-        modules: previous,
+        modules: previous.modules,
+        room: previous.room,
         past: s.past.slice(0, -1),
-        future: [...s.future, JSON.parse(JSON.stringify(s.modules))],
+        future: [
+          ...s.future,
+          {
+            modules: JSON.parse(JSON.stringify(s.modules)),
+            room: JSON.parse(JSON.stringify(s.room)),
+          },
+        ],
       };
     }),
   redo: () =>
@@ -246,16 +282,86 @@ export const usePlannerStore = create<Store>((set, get) => ({
       if (s.future.length === 0) return s;
       const next = s.future[s.future.length - 1];
       return {
-        modules: next,
-        past: [...s.past, JSON.parse(JSON.stringify(s.modules))],
+        modules: next.modules,
+        room: next.room,
+        past: [
+          ...s.past,
+          {
+            modules: JSON.parse(JSON.stringify(s.modules)),
+            room: JSON.parse(JSON.stringify(s.room)),
+          },
+        ],
         future: s.future.slice(0, -1),
       };
     }),
-  setRoom: (patch) => set((s) => ({ room: { ...s.room, ...patch } })),
+  setRoom: (patch) =>
+    set((s) => ({
+      past: [
+        ...s.past,
+        {
+          modules: JSON.parse(JSON.stringify(s.modules)),
+          room: JSON.parse(JSON.stringify(s.room)),
+        },
+      ],
+      room: { ...s.room, ...patch },
+      future: [],
+    })),
   addWall: (w) =>
-    set((s) => ({ room: { ...s.room, walls: [...s.room.walls, w] } })),
+    set((s) => ({
+      past: [
+        ...s.past,
+        {
+          modules: JSON.parse(JSON.stringify(s.modules)),
+          room: JSON.parse(JSON.stringify(s.room)),
+        },
+      ],
+      room: { ...s.room, walls: [...s.room.walls, w] },
+      future: [],
+    })),
+  removeWall: (index) =>
+    set((s) => ({
+      past: [
+        ...s.past,
+        {
+          modules: JSON.parse(JSON.stringify(s.modules)),
+          room: JSON.parse(JSON.stringify(s.room)),
+        },
+      ],
+      room: {
+        ...s.room,
+        walls: s.room.walls.filter((_, i) => i !== index),
+      },
+      future: [],
+    })),
+  updateWall: (index, patch) =>
+    set((s) => ({
+      past: [
+        ...s.past,
+        {
+          modules: JSON.parse(JSON.stringify(s.modules)),
+          room: JSON.parse(JSON.stringify(s.room)),
+        },
+      ],
+      room: {
+        ...s.room,
+        walls: s.room.walls.map((w, i) =>
+          i === index ? { ...w, ...patch } : w,
+        ),
+      },
+      future: [],
+    })),
   addOpening: (op) =>
-    set((s) => ({ room: { ...s.room, openings: [...s.room.openings, op] } })),
+    set((s) => ({
+      past: [
+        ...s.past,
+        {
+          modules: JSON.parse(JSON.stringify(s.modules)),
+          room: JSON.parse(JSON.stringify(s.room)),
+        },
+      ],
+      room: { ...s.room, openings: [...s.room.openings, op] },
+      future: [],
+    })),
   setShowFronts: (v) => set({ showFronts: v }),
 }));
 

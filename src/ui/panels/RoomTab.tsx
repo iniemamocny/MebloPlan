@@ -74,7 +74,7 @@ export default function RoomTab({
       group.add(box);
       cursor = next;
     });
-  }, [store.room, three]);
+  }, [store.room.walls, store.room.height, three]);
   return (
     <>
       <div className="section">
@@ -115,6 +115,19 @@ export default function RoomTab({
               <button className="btnGhost" onClick={onFinishDrawing}>
                 {t('room.finishDrawing')}
               </button>
+            )}
+          </div>
+          <div className="row" style={{ marginTop: 8 }}>
+            {store.room.walls.length === 0 ? (
+              <div>{t('room.noWalls')}</div>
+            ) : (
+              <ul>
+                {store.room.walls.map((w, i) => (
+                  <li key={i}>
+                    {t('app.wallLabel', { num: i + 1, len: w.length })} – {w.angle}°
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
         </div>
