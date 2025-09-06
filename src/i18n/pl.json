@@ -44,7 +44,9 @@
     "addDoor": "Dodaj drzwi",
     "drawWalls": "Rysuj ściany",
     "finishDrawing": "Zakończ rysowanie",
-    "noWalls": "Brak ścian"
+    "noWalls": "Brak ścian",
+    "angleToPrev": "Kąt do poprzedniej (°)",
+    "noRightAngles": "Bez prostych kątów"
   },
   "global": {
     "title": "Ustawienia ogólne",

@@ -127,6 +127,8 @@ type Store = {
   wallThickness: number;
   snapAngle: number;
   snapLength: number;
+  snapRightAngles: boolean;
+  angleToPrev: number;
   showFronts: boolean;
   setRole: (r: 'stolarz' | 'klient') => void;
   updateGlobals: (fam: FAMILY, patch: Partial<Globals[FAMILY]>) => void;
@@ -149,6 +151,8 @@ type Store = {
   setWallThickness: (v: number) => void;
   setSnapAngle: (v: number) => void;
   setSnapLength: (v: number) => void;
+  setSnapRightAngles: (v: boolean) => void;
+  setAngleToPrev: (v: number) => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -172,6 +176,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
   wallThickness: persisted?.wallThickness || 100,
   snapAngle: persisted?.snapAngle ?? 90,
   snapLength: persisted?.snapLength ?? 10,
+  snapRightAngles: persisted?.snapRightAngles ?? true,
+  angleToPrev: persisted?.angleToPrev ?? 0,
   showFronts: true,
   setRole: (r) => set({ role: r }),
   updateGlobals: (fam, patch) =>
@@ -385,6 +391,9 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setWallThickness: (v) => set({ wallThickness: v }),
   setSnapAngle: (v) => set({ snapAngle: v }),
   setSnapLength: (v) => set({ snapLength: v }),
+  setSnapRightAngles: (v) =>
+    set({ snapRightAngles: v, snapAngle: v ? 90 : 0 }),
+  setAngleToPrev: (v) => set({ angleToPrev: v }),
 }));
 
 usePlannerStore.subscribe((state) => {
@@ -400,6 +409,8 @@ usePlannerStore.subscribe((state) => {
         wallThickness: state.wallThickness,
         snapAngle: state.snapAngle,
         snapLength: state.snapLength,
+        snapRightAngles: state.snapRightAngles,
+        angleToPrev: state.angleToPrev,
       }),
     );
   } catch (e) {

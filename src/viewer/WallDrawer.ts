@@ -9,6 +9,8 @@ interface PlannerStore {
   wallThickness: number;
   snapAngle: number;
   snapLength: number;
+  snapRightAngles: boolean;
+  angleToPrev: number;
   room: Room;
   setRoom: (patch: Partial<Room>) => void;
 }
@@ -95,20 +97,33 @@ export default class WallDrawer {
     if (!this.start || !this.preview) return;
     const point = this.getPoint(e);
     if (!point) return;
-    const dx = point.x - this.start.x;
-    const dz = point.z - this.start.z;
-    const length = Math.sqrt(dx * dx + dz * dz);
-    const angle = Math.atan2(dz, dx);
-    const { snapAngle, snapLength } = this.store.getState();
-    const angleDeg = (angle * 180) / Math.PI;
+    const { snapAngle, snapLength, snapRightAngles, angleToPrev, room } =
+      this.store.getState();
+    let snappedAngle = 0;
+    let length = 0;
+    if (snapRightAngles) {
+      const dx = point.x - this.start.x;
+      const dz = point.z - this.start.z;
+      length = Math.sqrt(dx * dx + dz * dz);
+      const angle = Math.atan2(dz, dx);
+      const angleDeg = (angle * 180) / Math.PI;
+      const snappedAngleDeg = snapAngle
+        ? Math.round(angleDeg / snapAngle) * snapAngle
+        : angleDeg;
+      snappedAngle = (snappedAngleDeg * Math.PI) / 180;
+    } else {
+      const prev = room.walls[room.walls.length - 1];
+      const snappedAngleDeg = (prev ? prev.angle : 0) + angleToPrev;
+      snappedAngle = (snappedAngleDeg * Math.PI) / 180;
+      const dx = point.x - this.start.x;
+      const dz = point.z - this.start.z;
+      length = dx * Math.cos(snappedAngle) + dz * Math.sin(snappedAngle);
+      if (length < 0) length = -length;
+    }
     const lengthMm = length * 1000;
-    const snappedAngleDeg = snapAngle
-      ? Math.round(angleDeg / snapAngle) * snapAngle
-      : angleDeg;
     const snappedLengthMm = snapLength
       ? Math.round(lengthMm / snapLength) * snapLength
       : lengthMm;
-    const snappedAngle = (snappedAngleDeg * Math.PI) / 180;
     const snappedLength = snappedLengthMm / 1000;
     this.currentAngle = snappedAngle;
     const positions = (this.preview.geometry as THREE.BufferGeometry).attributes
@@ -140,19 +155,29 @@ export default class WallDrawer {
 
   private finalizeSegment(end: THREE.Vector3) {
     if (!this.start || !this.preview) return;
+    const state = this.store.getState();
     const dx = end.x - this.start.x;
     const dz = end.z - this.start.z;
-    const lengthMm = Math.sqrt(dx * dx + dz * dz) * 1000; // meters to mm
+    let lengthMm: number;
+    let snappedAngleDeg: number;
+    if (state.snapRightAngles) {
+      lengthMm = Math.sqrt(dx * dx + dz * dz) * 1000;
+      const angleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
+      snappedAngleDeg = state.snapAngle
+        ? Math.round(angleDeg / state.snapAngle) * state.snapAngle
+        : angleDeg;
+    } else {
+      const prev = state.room.walls[state.room.walls.length - 1];
+      snappedAngleDeg = (prev ? prev.angle : 0) + state.angleToPrev;
+      const rad = (snappedAngleDeg * Math.PI) / 180;
+      const lenM = dx * Math.cos(rad) + dz * Math.sin(rad);
+      lengthMm = Math.abs(lenM) * 1000;
+    }
     if (lengthMm < 1) {
       this.cleanupPreview();
       this.start = null;
       return;
     }
-    const angleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
-    const state = this.store.getState();
-    const snappedAngle = state.snapAngle
-      ? Math.round(angleDeg / state.snapAngle) * state.snapAngle
-      : angleDeg;
     const snappedLength = state.snapLength
       ? Math.round(lengthMm / state.snapLength) * state.snapLength
       : lengthMm;
@@ -160,9 +185,10 @@ export default class WallDrawer {
       state.setRoom({ origin: { x: this.start.x * 1000, y: this.start.z * 1000 } });
     }
     const thickness = state.wallThickness;
-    state.addWall({ length: snappedLength, angle: snappedAngle, thickness });
-    const rad = (snappedAngle * Math.PI) / 180;
+    state.addWall({ length: snappedLength, angle: snappedAngleDeg, thickness });
+    const rad = (snappedAngleDeg * Math.PI) / 180;
     const lenM = snappedLength / 1000;
+    this.currentAngle = rad;
     this.start.set(
       this.start.x + Math.cos(rad) * lenM,
       0,
