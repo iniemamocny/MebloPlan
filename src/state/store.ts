@@ -429,25 +429,33 @@ export const usePlannerStore = create<Store>((set, get) => ({
     set({ snappedLengthMm: len, snappedAngleDeg: angle }),
 }));
 
-usePlannerStore.subscribe((state) => {
-  try {
-    localStorage.setItem(
-      'kv7_state',
-      JSON.stringify({
-        role: state.role,
-        globals: state.globals,
-        prices: state.prices,
-        modules: state.modules,
-        room: state.room,
-        wallType: state.wallType,
-        wallThickness: state.wallThickness,
-        snapAngle: state.snapAngle,
-        snapLength: state.snapLength,
-        snapRightAngles: state.snapRightAngles,
-        angleToPrev: state.angleToPrev,
-      }),
-    );
-  } catch (e) {
-    /* ignore */
+const persistSelector = (s: Store) => ({
+  role: s.role,
+  globals: s.globals,
+  prices: s.prices,
+  modules: s.modules,
+  room: s.room,
+  wallType: s.wallType,
+  wallThickness: s.wallThickness,
+  snapAngle: s.snapAngle,
+  snapLength: s.snapLength,
+  snapRightAngles: s.snapRightAngles,
+  angleToPrev: s.angleToPrev,
+});
+
+let persistTimeout = 0;
+usePlannerStore.subscribe(persistSelector, (slice) => {
+  const save = () => {
+    try {
+      localStorage.setItem('kv7_state', JSON.stringify(slice));
+    } catch {
+      /* ignore */
+    }
+  };
+  if ('requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(save);
+  } else {
+    clearTimeout(persistTimeout);
+    persistTimeout = window.setTimeout(save, 250);
   }
 });
