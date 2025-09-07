@@ -114,6 +114,8 @@ export function setupThree(
     requestAnimationFrame(animate);
   };
   const enterTopDownMode = () => {
+    wallDrawer.disable();
+    cabinetDragger.disable();
     transition(
       perspCamera.position.clone(),
       perspCamera.quaternion.clone(),

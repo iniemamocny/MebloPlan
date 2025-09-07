@@ -29,6 +29,7 @@ export default class WallDrawer {
   private currentAngle = 0; // radians
   private onLengthChange?: (len: number) => void;
   private onAngleChange?: (angle: number) => void;
+  private active = false;
 
   constructor(
     renderer: WebGLRenderer,
@@ -74,6 +75,7 @@ export default class WallDrawer {
   }
 
   enable() {
+    if (this.active) return;
     const dom = this.renderer.domElement;
     dom.addEventListener('pointerdown', this.onDown);
     dom.addEventListener('pointerup', this.onUp);
@@ -86,9 +88,11 @@ export default class WallDrawer {
         dom.style.cursor = this.updateCursor(t);
       },
     );
+    this.active = true;
   }
 
   disable() {
+    if (!this.active) return;
     const dom = this.renderer.domElement;
     dom.removeEventListener('pointerdown', this.onDown);
     dom.removeEventListener('pointerup', this.onUp);
@@ -99,6 +103,7 @@ export default class WallDrawer {
     dom.style.cursor = 'default';
     this.unsubscribe?.();
     this.unsubscribe = undefined;
+    this.active = false;
   }
 
   private cleanupPreview() {
