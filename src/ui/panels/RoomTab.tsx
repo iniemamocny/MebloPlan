@@ -134,26 +134,25 @@ export default function RoomTab({
             {store.room.walls.length === 0 ? (
               <div>{t('room.noWalls')}</div>
             ) : (
-              <ul>
-                {store.room.walls.map((w, i) => (
-                  <li key={i}>
-                    {t('app.wallLabel', { num: i + 1, len: w.length })} –{' '}
-                    {w.angle}° –
-                    <input
-                      type="number"
-                      value={w.thickness}
-                      onChange={(e) =>
-                        store.updateWall(i, {
-                          thickness:
-                            Number((e.target as HTMLInputElement).value) || 0,
-                        })
-                      }
-                      style={{ width: 60, marginLeft: 4 }}
-                    />
-                    mm
-                  </li>
-                ))}
-              </ul>
+                <ul>
+                  {store.room.walls.map((w, i) => (
+                    <li key={w.id}>
+                      {t('app.wallLabel', { num: i + 1, len: w.length })} – {w.angle}° –
+                      <input
+                        type="number"
+                        value={w.thickness}
+                        onChange={(e) =>
+                          store.updateWall(w.id, {
+                            thickness:
+                              Number((e.target as HTMLInputElement).value) || 0,
+                          })
+                        }
+                        style={{ width: 60, marginLeft: 4 }}
+                      />
+                      mm
+                    </li>
+                  ))}
+                </ul>
             )}
           </div>
         </div>

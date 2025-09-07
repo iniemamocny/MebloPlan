@@ -2,15 +2,15 @@ import React from 'react';
 import { getWallSegments } from '../utils/walls';
 import type { Kind, Variant } from '../core/catalog';
 import { FaCube, FaRegSquare } from 'react-icons/fa';
-import { wallRanges } from '../state/store';
+import { wallRanges, usePlannerStore } from '../state/store';
 
 interface TopBarProps {
   t: (key: string, opts?: any) => string;
   store: any;
   setVariant: (v: Variant | null) => void;
   setKind: (k: Kind | null) => void;
-  selWall: number;
-  setSelWall: (n: number) => void;
+  selWall: string;
+  setSelWall: (n: string) => void;
   doAutoOnSelectedWall: () => void;
   lang: string;
   setLang: (l: string) => void;
@@ -21,10 +21,11 @@ interface TopBarProps {
 export default function TopBar({ t, store, setVariant, setKind, selWall, setSelWall, doAutoOnSelectedWall, lang, setLang, threeRef, isTopDown }: TopBarProps) {
   const onRemoveWall = () => {
     store.removeWall(selWall);
-    setSelWall(0);
+    const first = usePlannerStore.getState().room.walls[0];
+    setSelWall(first ? first.id : '');
   };
   const onEditWall = () => {
-    const w = store.room.walls[selWall];
+    const w = store.room.walls.find((ww: any) => ww.id === selWall);
     if (!w) return;
     const length = Number(prompt('Length (mm)', String(w.length))) || w.length;
     const angle = Number(prompt('Angle (deg)', String(w.angle))) || w.angle;
@@ -57,10 +58,10 @@ export default function TopBar({ t, store, setVariant, setKind, selWall, setSelW
       <select
         className="btnGhost"
         value={selWall}
-        onChange={e => setSelWall(Number((e.target as HTMLSelectElement).value) || 0)}
+        onChange={e => setSelWall((e.target as HTMLSelectElement).value)}
       >
         {getWallSegments().map((s, i) => (
-          <option key={i} value={i}>
+          <option key={store.room.walls[i]?.id} value={store.room.walls[i]?.id}>
             {t('app.wallLabel', { num: i + 1, len: Math.round(s.length) })}
           </option>
         ))}

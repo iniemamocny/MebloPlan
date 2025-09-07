@@ -151,9 +151,9 @@ type Store = {
   redo: () => void;
   setRoom: (patch: Partial<Room>) => void;
   addWall: (w: { length: number; angle: number; thickness: number }) => void;
-  removeWall: (index: number) => void;
+  removeWall: (id: string) => void;
   updateWall: (
-    index: number,
+    id: string,
     patch: Partial<{ length: number; angle: number; thickness: number }>,
   ) => void;
   addOpening: (op: Opening) => void;
@@ -179,6 +179,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
         origin: persisted.room.origin || { x: 0, y: 0 },
         walls:
           persisted.room.walls?.map((w: any) => ({
+            id: w.id || crypto.randomUUID(),
             thickness: 100,
             ...w,
           })) || [],
@@ -356,25 +357,13 @@ export const usePlannerStore = create<Store>((set, get) => ({
           room: JSON.parse(JSON.stringify(s.room)),
         },
       ],
-      room: { ...s.room, walls: [...s.room.walls, w] },
-      future: [],
-    })),
-  removeWall: (index) =>
-    set((s) => ({
-      past: [
-        ...s.past,
-        {
-          modules: JSON.parse(JSON.stringify(s.modules)),
-          room: JSON.parse(JSON.stringify(s.room)),
-        },
-      ],
       room: {
         ...s.room,
-        walls: s.room.walls.filter((_, i) => i !== index),
+        walls: [...s.room.walls, { id: crypto.randomUUID(), ...w }],
       },
       future: [],
     })),
-  updateWall: (index, patch) =>
+  removeWall: (id) =>
     set((s) => ({
       past: [
         ...s.past,
@@ -385,8 +374,23 @@ export const usePlannerStore = create<Store>((set, get) => ({
       ],
       room: {
         ...s.room,
-        walls: s.room.walls.map((w, i) =>
-          i === index ? { ...w, ...patch } : w,
+        walls: s.room.walls.filter((w) => w.id !== id),
+      },
+      future: [],
+    })),
+  updateWall: (id, patch) =>
+    set((s) => ({
+      past: [
+        ...s.past,
+        {
+          modules: JSON.parse(JSON.stringify(s.modules)),
+          room: JSON.parse(JSON.stringify(s.room)),
+        },
+      ],
+      room: {
+        ...s.room,
+        walls: s.room.walls.map((w) =>
+          w.id === id ? { ...w, ...patch } : w,
         ),
       },
       future: [],

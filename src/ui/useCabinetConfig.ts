@@ -12,7 +12,7 @@ export function useCabinetConfig(
   family: FAMILY,
   kind: Kind | null,
   variant: Variant | null,
-  selWall: number,
+  selWall: string,
   setVariant: (v: Variant | null) => void,
 ) {
   const store = usePlannerStore();
@@ -240,7 +240,8 @@ export function useCabinetConfig(
   const doAutoOnSelectedWall = () => {
     const segs = getWallSegments();
     if (segs.length === 0) return alert(t('room.noWalls'));
-    const seg = segs[0 + (selWall % segs.length)];
+    const wallIndex = store.room.walls.findIndex(w => w.id === selWall);
+    const seg = segs[0 + ((wallIndex >= 0 ? wallIndex : 0) % segs.length)];
     const len = seg.length;
     const widths = autoWidthsForRun(len);
     const g = store.globals[family];
@@ -295,7 +296,7 @@ export function useCabinetConfig(
         size: { w, h, d },
         position: [pl.center[0] / 1000, h / 2, pl.center[1] / 1000],
         rotationY: pl.rot,
-        segIndex: selWall,
+        segIndex: wallIndex >= 0 ? wallIndex : 0,
         price,
         adv: {
           ...g,
