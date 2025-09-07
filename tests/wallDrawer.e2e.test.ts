@@ -49,3 +49,51 @@ describe('WallDrawer click without drag', () => {
     expect((drawer as any).start).toBeNull();
   });
 });
+
+describe('WallDrawer.applyLength', () => {
+  it('ignores non-positive lengths', () => {
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const getCamera = () => camera;
+    const scene = new THREE.Scene();
+    const addWall = vi.fn();
+    const store = {
+      getState: () => ({
+        addWall,
+        wallThickness: 100,
+        wallType: 'dzialowa',
+        snapAngle: 0,
+        snapLength: 0,
+        snapRightAngles: true,
+        angleToPrev: 0,
+        room: { walls: [] },
+        setRoom: vi.fn(),
+      }),
+    } as any;
+
+    const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
+    // initialise start and preview to allow applyLength to proceed
+    (drawer as any).start = new THREE.Vector3();
+    (drawer as any).preview = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]),
+      new THREE.LineBasicMaterial(),
+    );
+
+    drawer.applyLength(0);
+    drawer.applyLength(-50);
+
+    expect(addWall).not.toHaveBeenCalled();
+  });
+});
