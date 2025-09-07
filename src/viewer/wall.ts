@@ -70,5 +70,8 @@ export function createWallMaterial(
   texture.repeat.set(4, 4);
   const topMaterial = new THREE.MeshStandardMaterial({ map: texture });
   const sideMaterial = new THREE.MeshStandardMaterial({ color: 0xd1d5db });
-  return [topMaterial, sideMaterial];
+  // group 0 in ExtrudeGeometry corresponds to the wall's vertical faces while
+  // group 1 represents the top and bottom faces. Returning the materials in
+  // this order keeps the sides plain and applies the texture only to the top.
+  return [sideMaterial, topMaterial];
 }
