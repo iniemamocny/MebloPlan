@@ -2,6 +2,7 @@ import React from 'react';
 import { getWallSegments } from '../utils/walls';
 import type { Kind, Variant } from '../core/catalog';
 import { FaCube, FaRegSquare } from 'react-icons/fa';
+import { wallRanges } from '../state/store';
 
 interface TopBarProps {
   t: (key: string, opts?: any) => string;
@@ -27,7 +28,14 @@ export default function TopBar({ t, store, setVariant, setKind, selWall, setSelW
     if (!w) return;
     const length = Number(prompt('Length (mm)', String(w.length))) || w.length;
     const angle = Number(prompt('Angle (deg)', String(w.angle))) || w.angle;
-    store.updateWall(selWall, { length, angle });
+    const thickness =
+      Number(prompt('Thickness (mm)', String(w.thickness))) || w.thickness;
+    const { min, max } = wallRanges[store.wallType];
+    if (thickness < min || thickness > max) {
+      alert(`Thickness must be between ${min} and ${max}mm`);
+      return;
+    }
+    store.updateWall(selWall, { length, angle, thickness });
   };
   return (
     <div className="topbar row">

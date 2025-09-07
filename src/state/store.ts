@@ -109,7 +109,7 @@ export const defaultPrices: Prices = {
   margin: 0.15,
 };
 
-const wallRanges = {
+export const wallRanges = {
   nosna: { min: 150, max: 250 },
   dzialowa: { min: 60, max: 120 },
 };
