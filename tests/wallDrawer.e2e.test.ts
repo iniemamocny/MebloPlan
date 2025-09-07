@@ -198,3 +198,54 @@ describe('WallDrawer edit mode', () => {
     expect(patch.angle).toBeCloseTo(45, 0);
   });
 });
+
+describe('WallDrawer cancel', () => {
+  it('disables drawing and resets cursor on Escape', () => {
+    (HTMLCanvasElement.prototype as any).getContext = () => ({
+      beginPath() {},
+      moveTo() {},
+      lineTo() {},
+      stroke() {},
+      strokeRect() {},
+    });
+    (HTMLCanvasElement.prototype as any).toDataURL = () => '';
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const getCamera = () => camera;
+    const scene = new THREE.Scene();
+    const state = {
+      addWall: vi.fn(),
+      updateWall: vi.fn(),
+      wallThickness: 100,
+      snapAngle: 0,
+      snapLength: 0,
+      snapRightAngles: true,
+      angleToPrev: 0,
+      room: { walls: [] },
+      setRoom: vi.fn(),
+      autoCloseWalls: false,
+    };
+    const store = {
+      getState: () => state,
+      subscribe: () => () => {},
+    } as any;
+    const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
+    drawer.enable();
+    expect(canvas.style.cursor).not.toBe('default');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(canvas.style.cursor).toBe('default');
+    expect((drawer as any).active).toBe(false);
+  });
+});
