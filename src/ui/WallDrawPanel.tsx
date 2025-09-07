@@ -12,20 +12,22 @@ interface WallDrawPanelProps {
   threeRef: React.MutableRefObject<any>;
   isOpen: boolean;
   isDrawing: boolean;
-  wallLength: number;
-  setWallLength: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export default function WallDrawPanel({
   threeRef,
   isOpen,
   isDrawing,
-  wallLength,
-  setWallLength,
 }: WallDrawPanelProps) {
   const { t } = useTranslation();
   const store = usePlannerStore();
   const range = ranges[store.wallType];
+  const [wallLength, setWallLength] = React.useState(0);
+  const [wallAngle, setWallAngle] = React.useState(0);
+  React.useEffect(() => {
+    threeRef.current.onLengthChange = setWallLength;
+    threeRef.current.onAngleChange = setWallAngle;
+  }, [threeRef]);
   if (!isOpen) {
     threeRef.current?.exitTopDownMode?.();
     return null;
@@ -65,7 +67,7 @@ export default function WallDrawPanel({
         maxLength={5}
         style={{ width: 70 }}
       />
-      <div>{Math.round(store.snappedLengthMm).toString().slice(0, 5)} mm</div>
+      <div>{Math.round(wallLength).toString().slice(0, 5)} mm</div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <div>
           <div className="small">{t('room.angleToPrev')}</div>
@@ -86,7 +88,7 @@ export default function WallDrawPanel({
             maxLength={3}
           />
         </div>
-        <div>{Math.round(store.snappedAngleDeg)}°</div>
+        <div>{Math.round(wallAngle)}°</div>
       </div>
       <div>
         <div className="small">{t('room.wallType')}</div>

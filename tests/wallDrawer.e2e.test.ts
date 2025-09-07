@@ -32,11 +32,10 @@ describe('WallDrawer click without drag', () => {
         angleToPrev: 0,
         room: { walls: [] },
         setRoom: vi.fn(),
-        setDraftWall: vi.fn(),
       }),
     } as any;
 
-    const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {});
+    const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
     (drawer as any).getPoint = () => new THREE.Vector3(0, 0, 0);
 
     const down = { clientX: 0, clientY: 0 } as PointerEvent;

@@ -42,7 +42,6 @@ export default function App() {
   const [boardHasGrain, setBoardHasGrain] = useState(false);
   const [isDrawingWalls, setIsDrawingWalls] = useState(false);
   const [wallPanelOpen, setWallPanelOpen] = useState(false);
-  const [wallLength, setWallLength] = useState(0);
 
   const undo = store.undo;
   const redo = store.redo;
@@ -106,14 +105,11 @@ export default function App() {
           threeRef={threeRef}
           addCountertop={addCountertop}
           setIsDrawingWalls={setIsDrawingWalls}
-          setWallLength={setWallLength}
         />
         <WallDrawPanel
           threeRef={threeRef}
           isOpen={wallPanelOpen}
           isDrawing={isDrawingWalls}
-          wallLength={wallLength}
-          setWallLength={setWallLength}
         />
         <TopBar
           t={t}

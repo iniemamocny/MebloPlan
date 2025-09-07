@@ -138,8 +138,6 @@ type Store = {
   snapLength: number;
   snapRightAngles: boolean;
   angleToPrev: number;
-  snappedLengthMm: number;
-  snappedAngleDeg: number;
   showFronts: boolean;
   setRole: (r: 'stolarz' | 'klient') => void;
   updateGlobals: (fam: FAMILY, patch: Partial<Globals[FAMILY]>) => void;
@@ -165,7 +163,6 @@ type Store = {
   setSnapLength: (v: number) => void;
   setSnapRightAngles: (v: boolean) => void;
   setAngleToPrev: (v: number) => void;
-  setDraftWall: (len: number, angle: number) => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -196,8 +193,6 @@ export const usePlannerStore = create<Store>((set, get) => ({
   snapLength: persisted?.snapLength ?? 10,
   snapRightAngles: persisted?.snapRightAngles ?? true,
   angleToPrev: persisted?.angleToPrev ?? 0,
-  snappedLengthMm: 0,
-  snappedAngleDeg: 0,
   showFronts: true,
   setRole: (r) => set({ role: r }),
   updateGlobals: (fam, patch) =>
@@ -425,8 +420,6 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setSnapLength: (v) => set({ snapLength: v }),
   setSnapRightAngles: (v) => set({ snapRightAngles: v, snapAngle: v ? 90 : 0 }),
   setAngleToPrev: (v) => set({ angleToPrev: clamp(v, 0, 360) }),
-  setDraftWall: (len, angle) =>
-    set({ snappedLengthMm: len, snappedAngleDeg: angle }),
 }));
 
 const persistSelector = (s: Store) => ({
