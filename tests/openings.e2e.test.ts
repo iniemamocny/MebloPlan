@@ -12,7 +12,12 @@ if (!(globalThis as any).crypto) {
 describe('openings', () => {
   beforeEach(() => {
     usePlannerStore.setState({
-      room: { walls: [], openings: [], height: 2700, origin: { x: 0, y: 0 } },
+      room: {
+        walls: [{ id: 'w1', length: 2000, angle: 0, thickness: 100 }],
+        openings: [],
+        height: 2700,
+        origin: { x: 0, y: 0 },
+      },
     });
   });
 
@@ -75,5 +80,65 @@ describe('openings', () => {
       new THREE.Vector3(0, 0, -1),
     );
     expect(rc2.intersectObject(mesh).length).toBeGreaterThan(0);
+  });
+
+  it('rejects opening with negative offset', () => {
+    const { addOpening } = usePlannerStore.getState();
+    expect(() =>
+      addOpening({
+        wallId: 'w1',
+        offset: -10,
+        width: 50,
+        height: 50,
+        bottom: 0,
+        kind: 0,
+      }),
+    ).toThrow();
+    expect(usePlannerStore.getState().room.openings).toHaveLength(0);
+  });
+
+  it('rejects opening exceeding wall length', () => {
+    const { addOpening } = usePlannerStore.getState();
+    expect(() =>
+      addOpening({
+        wallId: 'w1',
+        offset: 1900,
+        width: 200,
+        height: 50,
+        bottom: 0,
+        kind: 0,
+      }),
+    ).toThrow();
+    expect(usePlannerStore.getState().room.openings).toHaveLength(0);
+  });
+
+  it('rejects opening exceeding room height', () => {
+    const { addOpening } = usePlannerStore.getState();
+    expect(() =>
+      addOpening({
+        wallId: 'w1',
+        offset: 100,
+        width: 50,
+        height: 2500,
+        bottom: 300,
+        kind: 0,
+      }),
+    ).toThrow();
+    expect(usePlannerStore.getState().room.openings).toHaveLength(0);
+  });
+
+  it('rejects update that violates constraints', () => {
+    const { addOpening, updateOpening } = usePlannerStore.getState();
+    addOpening({
+      wallId: 'w1',
+      offset: 100,
+      width: 50,
+      height: 50,
+      bottom: 0,
+      kind: 0,
+    });
+    const id = usePlannerStore.getState().room.openings[0].id;
+    expect(() => updateOpening(id, { offset: -5 })).toThrow();
+    expect(usePlannerStore.getState().room.openings[0].offset).toBe(100);
   });
 });
