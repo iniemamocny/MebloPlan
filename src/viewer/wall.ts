@@ -48,7 +48,7 @@ export function createWallMaterial(
     ctx.fillStyle = '#d1d5db';
     ctx.fillRect(0, 0, size, size);
     ctx.strokeStyle = '#666';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1;
     for (let i = -size; i < size; i += 8) {
       ctx.beginPath();
       ctx.moveTo(i, 0);
