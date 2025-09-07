@@ -15,6 +15,7 @@ interface PlannerStore {
   angleToPrev: number;
   room: Room;
   setRoom: (patch: Partial<Room>) => void;
+  autoCloseWalls: boolean;
 }
 
 export default class WallDrawer {
@@ -211,8 +212,26 @@ export default class WallDrawer {
   private finalizeSegment(end: THREE.Vector3) {
     if (!this.start || !this.preview) return;
     const state = this.store.getState();
-    const dx = end.x - this.start.x;
-    const dz = end.z - this.start.z;
+    let target = end.clone();
+    const origin = state.room.origin
+      ? new THREE.Vector3(
+          state.room.origin.x / 1000,
+          0,
+          state.room.origin.y / 1000,
+        )
+      : this.start.clone();
+    const closeThreshold = 0.1; // 10 cm
+    const autoClose =
+      state.autoCloseWalls &&
+      state.room.walls.length > 0 &&
+      state.room.origin &&
+      origin.distanceTo(end) < closeThreshold;
+    if (autoClose) {
+      target = origin;
+    }
+
+    const dx = target.x - this.start.x;
+    const dz = target.z - this.start.z;
     let lengthMm: number;
     let snappedAngleDeg: number;
     if (state.snapRightAngles) {
@@ -264,6 +283,9 @@ export default class WallDrawer {
     positions.needsUpdate = true;
     this.onLengthChange?.(0);
     this.onAngleChange?.(0);
+    if (autoClose) {
+      this.disable();
+    }
   }
 
   private onUp = (e: PointerEvent) => {

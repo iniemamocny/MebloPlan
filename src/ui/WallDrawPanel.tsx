@@ -171,6 +171,19 @@ export default function WallDrawPanel({
         />
         {t('room.noRightAngles')}
       </label>
+      <label
+        className="small"
+        style={{ display: 'flex', gap: 8, alignItems: 'center' }}
+      >
+        <input
+          type="checkbox"
+          checked={store.autoCloseWalls}
+          onChange={(e) =>
+            store.setAutoCloseWalls((e.target as HTMLInputElement).checked)
+          }
+        />
+        {t('room.autoClose')}
+      </label>
     </div>
   );
 }

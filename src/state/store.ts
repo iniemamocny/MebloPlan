@@ -140,6 +140,7 @@ type Store = {
   snapRightAngles: boolean;
   angleToPrev: number;
   showFronts: boolean;
+  autoCloseWalls: boolean;
   setRole: (r: 'stolarz' | 'klient') => void;
   updateGlobals: (fam: FAMILY, patch: Partial<Globals[FAMILY]>) => void;
   updatePrices: (patch: Partial<Prices>) => void;
@@ -164,6 +165,7 @@ type Store = {
   setSnapLength: (v: number) => void;
   setSnapRightAngles: (v: boolean) => void;
   setAngleToPrev: (v: number) => void;
+  setAutoCloseWalls: (v: boolean) => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -195,6 +197,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   snapLength: persisted?.snapLength ?? 10,
   snapRightAngles: persisted?.snapRightAngles ?? true,
   angleToPrev: persisted?.angleToPrev ?? 0,
+  autoCloseWalls: persisted?.autoCloseWalls ?? true,
   showFronts: true,
   setRole: (r) => set({ role: r }),
   updateGlobals: (fam, patch) =>
@@ -389,9 +392,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
       ],
       room: {
         ...s.room,
-        walls: s.room.walls.map((w) =>
-          w.id === id ? { ...w, ...patch } : w,
-        ),
+        walls: s.room.walls.map((w) => (w.id === id ? { ...w, ...patch } : w)),
       },
       future: [],
     })),
@@ -425,6 +426,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setSnapLength: (v) => set({ snapLength: v }),
   setSnapRightAngles: (v) => set({ snapRightAngles: v, snapAngle: v ? 90 : 0 }),
   setAngleToPrev: (v) => set({ angleToPrev: clamp(v, 0, 360) }),
+  setAutoCloseWalls: (v) => set({ autoCloseWalls: v }),
 }));
 
 const persistSelector = (s: Store) => ({
@@ -439,6 +441,7 @@ const persistSelector = (s: Store) => ({
   snapLength: s.snapLength,
   snapRightAngles: s.snapRightAngles,
   angleToPrev: s.angleToPrev,
+  autoCloseWalls: s.autoCloseWalls,
 });
 
 let persistTimeout = 0;
