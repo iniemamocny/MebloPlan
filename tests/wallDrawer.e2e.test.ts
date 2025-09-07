@@ -259,13 +259,93 @@ describe('WallDrawer overlays', () => {
     const labelId = state.room.walls[0].id;
     const labels = (drawer as any).labels;
     expect(labels.has(labelId)).toBe(true);
-    overlay = document.querySelector('input.wall-label') as HTMLInputElement;
-    expect(overlay?.value).toBe('500');
+    const label = document.querySelector('div.wall-label') as HTMLDivElement;
+    expect(label?.textContent).toBe('500');
     // start new wall
     (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
     (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
-    const persistent = document.querySelectorAll('input.wall-label');
+    const persistent = document.querySelectorAll('div.wall-label');
     expect(persistent.length).toBe(1);
+  });
+});
+
+describe('WallDrawer label editing', () => {
+  it('clicking label allows editing wall length', () => {
+    document.body.innerHTML = '';
+    (HTMLCanvasElement.prototype as any).getContext = () => ({
+      beginPath() {},
+      moveTo() {},
+      lineTo() {},
+      stroke() {},
+      strokeRect() {},
+    });
+    (HTMLCanvasElement.prototype as any).toDataURL = () => '';
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const getCamera = () => camera;
+    const scene = new THREE.Scene();
+    const subs: any[] = [];
+    const state: any = {
+      addWall: vi.fn((w) => {
+        const id = `w${state.room.walls.length}`;
+        state.room.walls.push({ id, ...w });
+        subs.forEach((s: any) => s.cb(s.sel(state)));
+      }),
+      updateWall: vi.fn((id: string, patch: any) => {
+        state.room.walls = state.room.walls.map((w: any) =>
+          w.id === id ? { ...w, ...patch } : w,
+        );
+        subs.forEach((s: any) => s.cb(s.sel(state)));
+      }),
+      wallThickness: 100,
+      wallType: 'dzialowa',
+      snapAngle: 0,
+      snapLength: 0,
+      snapRightAngles: true,
+      angleToPrev: 0,
+      room: { origin: { x: 0, y: 0 }, walls: [] },
+      setRoom: vi.fn(),
+      autoCloseWalls: false,
+    };
+    const store = {
+      getState: () => state,
+      subscribe: (sel: any, cb: any) => {
+        subs.push({ sel, cb });
+        return () => {};
+      },
+    } as any;
+    const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
+    drawer.enable();
+    (drawer as any).getPoint = () => new THREE.Vector3(0, 0, 0);
+    (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
+    (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
+    (drawer as any).onMove({} as PointerEvent);
+    (drawer as any).onUp({} as PointerEvent);
+    const wallId = state.room.walls[0].id;
+    let label = document.querySelector('div.wall-label') as HTMLDivElement;
+    expect(label?.textContent).toBe('1000');
+    label.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    const input = document.querySelector('input.wall-label') as HTMLInputElement;
+    input.value = '800';
+    input.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
+    expect(state.updateWall).toHaveBeenCalledWith(wallId, { length: 800 });
+    expect(state.room.walls[0].length).toBe(800);
+    label = document.querySelector('div.wall-label') as HTMLDivElement;
+    expect(label?.textContent).toBe('800');
   });
 });
 
@@ -314,7 +394,11 @@ describe('WallDrawer cancel', () => {
     const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
     drawer.enable();
     expect(canvas.style.cursor).not.toBe('default');
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    (drawer as any).onKeyDown({
+      key: 'Escape',
+      preventDefault() {},
+      stopImmediatePropagation() {},
+    } as KeyboardEvent);
     expect(canvas.style.cursor).toBe('default');
     expect((drawer as any).active).toBe(false);
   });
