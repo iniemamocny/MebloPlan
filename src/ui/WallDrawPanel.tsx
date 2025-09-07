@@ -24,6 +24,7 @@ export default function WallDrawPanel({
   const range = ranges[store.wallType];
   const [wallLength, setWallLength] = React.useState(0);
   const [wallAngle, setWallAngle] = React.useState(0);
+  const [lengthError, setLengthError] = React.useState(false);
   React.useEffect(() => {
     threeRef.current.onLengthChange = setWallLength;
     threeRef.current.onAngleChange = setWallAngle;
@@ -56,21 +57,35 @@ export default function WallDrawPanel({
       >
         {isDrawing ? <FaCube /> : <FaRegSquare />}
       </button>
-      <input
-        className="input"
-        type="number"
-        value={wallLength}
-        onChange={(e) =>
-          setWallLength(Number((e.target as HTMLInputElement).value) || 0)
-        }
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            threeRef.current?.applyWallLength?.(wallLength);
-          }
-        }}
-        maxLength={5}
-        style={{ width: 70 }}
-      />
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <input
+          className="input"
+          type="number"
+          min={0}
+          value={wallLength}
+          onChange={(e) => {
+            const val = Number((e.target as HTMLInputElement).value);
+            if (val >= 0) {
+              setWallLength(val);
+              setLengthError(false);
+            } else {
+              setLengthError(true);
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              threeRef.current?.applyWallLength?.(wallLength);
+            }
+          }}
+          maxLength={5}
+          style={{ width: 70 }}
+        />
+        {lengthError && (
+          <div className="small" style={{ color: 'red' }}>
+            {t('room.invalidLength')}
+          </div>
+        )}
+      </div>
       <div>{Math.round(wallLength).toString().slice(0, 5)} mm</div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <div>

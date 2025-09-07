@@ -53,7 +53,8 @@
     "finishDrawing": "Finish drawing",
     "noWalls": "No walls",
     "angleToPrev": "Angle to previous (°)",
-    "noRightAngles": "No right angles"
+    "noRightAngles": "No right angles",
+    "invalidLength": "Length must be non-negative"
   },
   "global": {
     "title": "Global settings",
