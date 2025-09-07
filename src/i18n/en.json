@@ -54,6 +54,7 @@
     "noWalls": "No walls",
     "angleToPrev": "Angle to previous (°)",
     "noRightAngles": "No right angles",
+    "autoClose": "Auto close",
     "invalidLength": "Length must be non-negative"
   },
   "global": {
