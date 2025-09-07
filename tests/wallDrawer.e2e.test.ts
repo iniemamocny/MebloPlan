@@ -97,3 +97,54 @@ describe('WallDrawer.applyLength', () => {
     expect(addWall).not.toHaveBeenCalled();
   });
 });
+
+describe('WallDrawer snapping', () => {
+  it('snaps to configured angle and length', () => {
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const getCamera = () => camera;
+    const scene = new THREE.Scene();
+    const onLengthChange = vi.fn();
+    const onAngleChange = vi.fn();
+    const state = {
+      addWall: vi.fn(),
+      wallThickness: 100,
+      wallType: 'dzialowa',
+      snapAngle: 30,
+      snapLength: 100,
+      snapRightAngles: true,
+      angleToPrev: 0,
+      room: { walls: [] },
+      setRoom: vi.fn(),
+    };
+    const store = { getState: () => state } as any;
+    const drawer = new WallDrawer(
+      renderer,
+      getCamera,
+      scene,
+      store,
+      onLengthChange,
+      onAngleChange,
+    );
+    (drawer as any).getPoint = () => new THREE.Vector3(0, 0, 0);
+    (drawer as any).onDown({} as PointerEvent);
+    const rad = (20 * Math.PI) / 180;
+    (drawer as any).getPoint = () =>
+      new THREE.Vector3(Math.cos(rad) * 0.12, 0, Math.sin(rad) * 0.12);
+    (drawer as any).onMove({} as PointerEvent);
+    expect(onAngleChange).toHaveBeenLastCalledWith(30);
+    expect(onLengthChange).toHaveBeenLastCalledWith(100);
+  });
+});

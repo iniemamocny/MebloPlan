@@ -113,6 +113,44 @@ export default function WallDrawPanel({
         </div>
         <div>{Math.round(wallAngle)}°</div>
       </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div>
+          <div className="small">{t('room.snapLength')}</div>
+          <input
+            className="input"
+            type="number"
+            value={store.snapLength}
+            onChange={(e) => {
+              const val = Number((e.target as HTMLInputElement).value);
+              if (!Number.isNaN(val) && val >= 0) {
+                store.setSnapLength(val);
+              }
+            }}
+            style={{ width: 50 }}
+            min={0}
+          />
+        </div>
+        {!store.snapRightAngles && (
+          <div>
+            <div className="small">{t('room.snapAngle')}</div>
+            <input
+              className="input"
+              type="number"
+              value={store.snapAngle}
+              onChange={(e) => {
+                const val = Number((e.target as HTMLInputElement).value);
+                if (!Number.isNaN(val) && val >= 0 && val <= 360) {
+                  store.setSnapAngle(val);
+                }
+              }}
+              style={{ width: 50 }}
+              min={0}
+              max={360}
+              maxLength={3}
+            />
+          </div>
+        )}
+      </div>
       <div>
         <div className="small">{t('room.wallType')}</div>
         <select

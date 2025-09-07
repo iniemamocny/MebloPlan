@@ -53,6 +53,8 @@
     "finishDrawing": "Finish drawing",
     "noWalls": "No walls",
     "angleToPrev": "Angle to previous (°)",
+    "snapLength": "Length step (mm)",
+    "snapAngle": "Angle step (°)",
     "noRightAngles": "No right angles",
     "autoClose": "Auto close",
     "invalidLength": "Length must be non-negative"
