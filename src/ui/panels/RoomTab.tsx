@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { useTranslation } from 'react-i18next';
 import { usePlannerStore } from '../../state/store';
 import RoomUploader from '../RoomUploader';
-import { createWallGeometry, createWallMaterials } from '../../viewer/wall';
+import { createWallGeometry, createWallMaterial } from '../../viewer/wall';
 import { Opening } from '../../types';
 
 interface RoomTabProps {
@@ -116,7 +116,7 @@ export default function RoomTab({
         w.thickness || 0,
         store.room.openings.filter((o) => o.wallId === w.id),
       );
-      const mats = createWallMaterials(store.wallType);
+      const mats = createWallMaterial(store.wallType);
       const box = new THREE.Mesh(geom, mats);
       box.position.set(mid.x, h / 2000, mid.y);
       box.rotation.y = -ang;

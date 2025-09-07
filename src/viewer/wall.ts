@@ -37,7 +37,7 @@ export function createWallGeometry(
   return geom;
 }
 
-export function createWallMaterials(
+export function createWallMaterial(
   type: 'dzialowa' | 'nosna',
 ): THREE.Material[] {
   const size = 32;
