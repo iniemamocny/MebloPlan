@@ -13,11 +13,8 @@ interface PlannerStore {
   snapLength: number;
   snapRightAngles: boolean;
   angleToPrev: number;
-  snappedLengthMm: number;
-  snappedAngleDeg: number;
   room: Room;
   setRoom: (patch: Partial<Room>) => void;
-  setDraftWall: (len: number, angle: number) => void;
 }
 
 export default class WallDrawer {
@@ -31,6 +28,7 @@ export default class WallDrawer {
   private preview: THREE.Line | null = null;
   private currentAngle = 0; // radians
   private onLengthChange?: (len: number) => void;
+  private onAngleChange?: (angle: number) => void;
 
   constructor(
     renderer: WebGLRenderer,
@@ -38,12 +36,14 @@ export default class WallDrawer {
     scene: Scene,
     store: typeof usePlannerStore,
     onLengthChange?: (len: number) => void,
+    onAngleChange?: (angle: number) => void,
   ) {
     this.renderer = renderer;
     this.getCamera = getCamera;
     this.scene = scene;
     this.store = store;
     this.onLengthChange = onLengthChange;
+    this.onAngleChange = onAngleChange;
   }
 
   private unsubscribe?: () => void;
@@ -103,7 +103,7 @@ export default class WallDrawer {
 
   private cleanupPreview() {
     this.onLengthChange?.(0);
-    this.store.getState().setDraftWall(0, 0);
+    this.onAngleChange?.(0);
     if (!this.preview) return;
     this.scene.remove(this.preview);
     this.preview.geometry.dispose();
@@ -140,14 +140,8 @@ export default class WallDrawer {
     if (!this.start || !this.preview) return;
     const point = this.getPoint(e);
     if (!point) return;
-    const {
-      snapAngle,
-      snapLength,
-      snapRightAngles,
-      angleToPrev,
-      room,
-      setDraftWall,
-    } = this.store.getState();
+    const { snapAngle, snapLength, snapRightAngles, angleToPrev, room } =
+      this.store.getState();
     let snappedAngle = 0;
     let snappedAngleDeg = 0;
     let length = 0;
@@ -184,7 +178,8 @@ export default class WallDrawer {
     positions.setXYZ(1, endX, 0, endZ);
     positions.needsUpdate = true;
 
-    setDraftWall(snappedLengthMm, snappedAngleDeg);
+    this.onLengthChange?.(snappedLengthMm);
+    this.onAngleChange?.(snappedAngleDeg);
   };
 
   applyLength(lengthMm: number) {
@@ -252,7 +247,7 @@ export default class WallDrawer {
     positions.setXYZ(1, this.start.x, 0, this.start.z);
     positions.needsUpdate = true;
     this.onLengthChange?.(0);
-    this.store.getState().setDraftWall(0, 0);
+    this.onAngleChange?.(0);
   }
 
   private onUp = (e: PointerEvent) => {

@@ -9,6 +9,7 @@ export function setupThree(
     onEnterTopDownMode?: () => void;
     onExitTopDownMode?: () => void;
     onLengthChange?: (len: number) => void;
+    onAngleChange?: (angle: number) => void;
   },
 ) {
   const scene = new THREE.Scene();
@@ -65,6 +66,7 @@ export function setupThree(
     scene,
     usePlannerStore,
     callbacks?.onLengthChange,
+    callbacks?.onAngleChange,
   );
   const cabinetDragger = new CabinetDragger(
     renderer,
