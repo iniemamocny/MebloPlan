@@ -167,8 +167,13 @@ export default class WallDrawer {
       const dx = point.x - this.start.x;
       const dz = point.z - this.start.z;
       length = dx * Math.cos(snappedAngle) + dz * Math.sin(snappedAngle);
-      if (length < 0) length = -length;
+      if (length < 0) {
+        length = -length;
+        snappedAngleDeg = (snappedAngleDeg + 180) % 360;
+        snappedAngle = (snappedAngle + Math.PI) % (Math.PI * 2);
+      }
     }
+    snappedAngleDeg = (snappedAngleDeg + 360) % 360;
     const lengthMm = length * 1000;
     const snappedLengthMm = snapLength
       ? Math.round(lengthMm / snapLength) * snapLength
@@ -188,7 +193,7 @@ export default class WallDrawer {
   };
 
   applyLength(lengthMm: number) {
-    if (!this.start || !this.preview) return;
+    if (!this.start || !this.preview || lengthMm <= 0) return;
     const lengthM = lengthMm / 1000;
     const end = new THREE.Vector3(
       this.start.x + Math.cos(this.currentAngle) * lengthM,
@@ -219,10 +224,16 @@ export default class WallDrawer {
     } else {
       const prev = state.room.walls[state.room.walls.length - 1];
       snappedAngleDeg = (prev ? prev.angle : 0) + state.angleToPrev;
-      const rad = (snappedAngleDeg * Math.PI) / 180;
-      const lenM = dx * Math.cos(rad) + dz * Math.sin(rad);
-      lengthMm = Math.abs(lenM) * 1000;
+      let rad = (snappedAngleDeg * Math.PI) / 180;
+      let lenM = dx * Math.cos(rad) + dz * Math.sin(rad);
+      if (lenM < 0) {
+        lenM = -lenM;
+        snappedAngleDeg = (snappedAngleDeg + 180) % 360;
+        rad = (snappedAngleDeg * Math.PI) / 180;
+      }
+      lengthMm = lenM * 1000;
     }
+    snappedAngleDeg = (snappedAngleDeg + 360) % 360;
     if (lengthMm < 1) {
       this.cleanupPreview();
       this.start = null;
