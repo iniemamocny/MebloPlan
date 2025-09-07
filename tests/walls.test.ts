@@ -57,3 +57,24 @@ describe('getWallSegments', () => {
     expect(last.b.y).toBeCloseTo(segs[0].a.y, 3);
   });
 });
+
+describe('updateWall', () => {
+  it('updates thickness for selected wall', () => {
+    usePlannerStore.setState({
+      room: {
+        walls: [
+          { length: 1000, angle: 0, thickness: 100 },
+          { length: 1000, angle: 90, thickness: 100 },
+        ],
+        openings: [],
+        height: 2700,
+        origin: { x: 0, y: 0 },
+      },
+    });
+    const store = usePlannerStore.getState();
+    store.updateWall(1, { thickness: 80 });
+    const walls = usePlannerStore.getState().room.walls;
+    expect(walls[1].thickness).toBe(80);
+    expect(walls[0].thickness).toBe(100);
+  });
+});
