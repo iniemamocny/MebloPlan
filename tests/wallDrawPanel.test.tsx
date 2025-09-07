@@ -58,4 +58,41 @@ describe('WallDrawPanel callbacks', () => {
       root.unmount();
     });
   });
+
+  it('toggles drawing state when pencil is clicked', async () => {
+    const three: any = {};
+    const threeRef = { current: three } as React.MutableRefObject<any>;
+    const container = document.createElement('div');
+    const root = ReactDOM.createRoot(container);
+
+    const Wrapper = () => {
+      const [isDrawing, setIsDrawing] = React.useState(false);
+      three.enterTopDownMode = () => three.onEnterTopDownMode?.();
+      three.exitTopDownMode = () => three.onExitTopDownMode?.();
+      three.onEnterTopDownMode = () => setIsDrawing(true);
+      three.onExitTopDownMode = () => setIsDrawing(false);
+      return <WallDrawPanel threeRef={threeRef} isOpen isDrawing={isDrawing} />;
+    };
+
+    await act(async () => {
+      root.render(<Wrapper />);
+    });
+
+    const btn = container.querySelector('button') as HTMLButtonElement;
+    expect(btn.className.includes('active')).toBe(false);
+
+    await act(async () => {
+      btn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    expect(btn.className.includes('active')).toBe(true);
+
+    await act(async () => {
+      btn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    expect(btn.className.includes('active')).toBe(false);
+
+    await act(async () => {
+      root.unmount();
+    });
+  });
 });
