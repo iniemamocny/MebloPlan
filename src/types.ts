@@ -183,7 +183,14 @@ export interface Module3D {
   openStates?: boolean[];
 }
 
-export type Opening = Record<string, number>;
+export interface Opening {
+  wallId: string;
+  offset: number;
+  width: number;
+  height: number;
+  bottom: number;
+  kind: number;
+}
 
 export interface Room {
   walls: { id: string; length: number; angle: number; thickness: number }[];

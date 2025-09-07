@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { useTranslation } from 'react-i18next';
 import { usePlannerStore } from '../../state/store';
 import RoomUploader from '../RoomUploader';
+import { createWallGeometry } from '../../viewer/wall';
 
 interface RoomTabProps {
   three: React.MutableRefObject<any>;
@@ -22,8 +23,30 @@ export default function RoomTab({
       height: Number((e.target as HTMLInputElement).value) || 0,
     });
   };
-  const onAddWindow = () => store.addOpening({ kind: 0 });
-  const onAddDoor = () => store.addOpening({ kind: 1 });
+  const [opening, setOpening] = useState({
+    wallId: '',
+    offset: 0,
+    width: 0,
+    height: 0,
+    bottom: 0,
+    kind: 0,
+  });
+  useEffect(() => {
+    if (!opening.wallId && store.room.walls[0]) {
+      setOpening((o) => ({ ...o, wallId: store.room.walls[0].id }));
+    }
+  }, [store.room.walls]);
+  const onAddOpening = () => {
+    if (!opening.wallId) return;
+    store.addOpening({
+      wallId: opening.wallId,
+      offset: Number(opening.offset) || 0,
+      width: Number(opening.width) || 0,
+      height: Number(opening.height) || 0,
+      bottom: Number(opening.bottom) || 0,
+      kind: Number(opening.kind) || 0,
+    });
+  };
   const onDrawWalls = () => {
     setWallPanelOpen(true);
   };
@@ -54,8 +77,8 @@ export default function RoomTab({
     group.add(floor);
     const origin = store.room.origin || { x: 0, y: 0 };
     let cursor = new THREE.Vector2(origin.x / 1000, origin.y / 1000);
-    const h = (store.room.height || 2700) / 1000;
-    store.room.walls.forEach((w, i) => {
+    const h = store.room.height || 2700;
+    store.room.walls.forEach((w) => {
       const len = (w.length || 0) / 1000;
       const ang = ((w.angle || 0) * Math.PI) / 180;
       const dir = new THREE.Vector2(Math.cos(ang), Math.sin(ang));
@@ -67,17 +90,23 @@ export default function RoomTab({
         (cursor.x + next.x) / 2,
         (cursor.y + next.y) / 2,
       );
+      const geom = createWallGeometry(
+        w.length || 0,
+        h,
+        w.thickness || 0,
+        store.room.openings.filter((o) => o.wallId === w.id),
+      );
       const box = new THREE.Mesh(
-        new THREE.BoxGeometry(len, h, (w.thickness || 0) / 1000),
+        geom,
         new THREE.MeshStandardMaterial({ color: 0xd1d5db }),
       );
-      box.position.set(mid.x, h / 2, mid.y);
+      box.position.set(mid.x, h / 2000, mid.y);
       box.rotation.y = -ang;
       (box as any).userData.kind = 'room';
       group.add(box);
       cursor = next;
     });
-  }, [store.room.walls, store.room.height, three]);
+  }, [store.room.walls, store.room.height, store.room.openings, three]);
   return (
     <>
       <div className="section">
@@ -114,11 +143,85 @@ export default function RoomTab({
             </div>
           </div>
           <div className="row" style={{ marginTop: 8 }}>
-            <button className="btnGhost" onClick={onAddWindow}>
-              {t('room.addWindow')}
-            </button>
-            <button className="btnGhost" onClick={onAddDoor}>
-              {t('room.addDoor')}
+            <div>
+              <div className="small">Type</div>
+              <select
+                className="input"
+                value={opening.kind}
+                onChange={(e) =>
+                  setOpening({ ...opening, kind: Number((e.target as HTMLSelectElement).value) })
+                }
+              >
+                <option value={0}>{t('room.addWindow')}</option>
+                <option value={1}>{t('room.addDoor')}</option>
+              </select>
+            </div>
+            <div>
+              <div className="small">Wall</div>
+              <select
+                className="input"
+                value={opening.wallId}
+                onChange={(e) =>
+                  setOpening({ ...opening, wallId: (e.target as HTMLSelectElement).value })
+                }
+              >
+                {store.room.walls.map((w, i) => (
+                  <option key={w.id} value={w.id}>
+                    {t('app.wallLabel', { num: i + 1, len: w.length })}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <div className="small">Offset</div>
+              <input
+                className="input"
+                type="number"
+                value={opening.offset}
+                onChange={(e) =>
+                  setOpening({ ...opening, offset: Number((e.target as HTMLInputElement).value) })
+                }
+                style={{ width: 60 }}
+              />
+            </div>
+            <div>
+              <div className="small">Width</div>
+              <input
+                className="input"
+                type="number"
+                value={opening.width}
+                onChange={(e) =>
+                  setOpening({ ...opening, width: Number((e.target as HTMLInputElement).value) })
+                }
+                style={{ width: 60 }}
+              />
+            </div>
+            <div>
+              <div className="small">Height</div>
+              <input
+                className="input"
+                type="number"
+                value={opening.height}
+                onChange={(e) =>
+                  setOpening({ ...opening, height: Number((e.target as HTMLInputElement).value) })
+                }
+                style={{ width: 60 }}
+              />
+            </div>
+            <div>
+              <div className="small">Bottom</div>
+              <input
+                className="input"
+                type="number"
+                value={opening.bottom}
+                onChange={(e) =>
+                  setOpening({ ...opening, bottom: Number((e.target as HTMLInputElement).value) })
+                }
+                style={{ width: 60 }}
+              />
+            </div>
+            <button className="btnGhost" onClick={onAddOpening} disabled={!opening.wallId}>
+              Add opening
             </button>
           </div>
           <div className="row" style={{ marginTop: 8 }}>
