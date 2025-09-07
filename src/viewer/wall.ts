@@ -47,7 +47,7 @@ export function createWallMaterial(
   if (ctx) {
     ctx.fillStyle = '#d1d5db';
     ctx.fillRect(0, 0, size, size);
-    ctx.strokeStyle = '#666';
+    ctx.strokeStyle = '#000';
     ctx.lineWidth = 1;
     for (let i = -size; i < size; i += 8) {
       ctx.beginPath();
@@ -56,7 +56,6 @@ export function createWallMaterial(
       ctx.stroke();
     }
     if (type === 'nosna') {
-      ctx.strokeStyle = '#000';
       for (let i = 0; i < size * 2; i += 8) {
         ctx.beginPath();
         ctx.moveTo(i, 0);
