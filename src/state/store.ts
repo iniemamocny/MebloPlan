@@ -403,7 +403,17 @@ export const usePlannerStore = create<Store>((set, get) => ({
       },
       future: [],
     })),
-  addOpening: (op) =>
+  addOpening: (op) => {
+    const { room } = get();
+    const wall = room.walls.find((w) => w.id === op.wallId);
+    if (
+      !wall ||
+      op.offset < 0 ||
+      op.offset + op.width > wall.length ||
+      op.bottom + op.height > room.height
+    ) {
+      throw new Error('Invalid opening dimensions');
+    }
     set((s) => ({
       past: [
         ...s.past,
@@ -417,8 +427,26 @@ export const usePlannerStore = create<Store>((set, get) => ({
         openings: [...s.room.openings, { id: crypto.randomUUID(), ...op }],
       },
       future: [],
-    })),
-  updateOpening: (id, patch) =>
+    }));
+  },
+  updateOpening: (id, patch) => {
+    const { room } = get();
+    const existing = room.openings.find((o) => o.id === id);
+    if (!existing) return;
+    const wallId = patch.wallId ?? existing.wallId;
+    const wall = room.walls.find((w) => w.id === wallId);
+    const offset = patch.offset ?? existing.offset;
+    const width = patch.width ?? existing.width;
+    const bottom = patch.bottom ?? existing.bottom;
+    const height = patch.height ?? existing.height;
+    if (
+      !wall ||
+      offset < 0 ||
+      offset + width > wall.length ||
+      bottom + height > room.height
+    ) {
+      throw new Error('Invalid opening dimensions');
+    }
     set((s) => ({
       past: [
         ...s.past,
@@ -434,7 +462,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
         ),
       },
       future: [],
-    })),
+    }));
+  },
   removeOpening: (id) =>
     set((s) => ({
       past: [
