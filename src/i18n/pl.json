@@ -53,7 +53,8 @@
     "finishDrawing": "Zakończ rysowanie",
     "noWalls": "Brak ścian",
     "angleToPrev": "Kąt do poprzedniej (°)",
-    "noRightAngles": "Bez prostych kątów"
+    "noRightAngles": "Bez prostych kątów",
+    "invalidLength": "Długość nie może być ujemna"
   },
   "global": {
     "title": "Ustawienia ogólne",
