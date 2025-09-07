@@ -36,3 +36,36 @@ export function createWallGeometry(
   geom.translate(-len / 2, -h / 2, -t / 2);
   return geom;
 }
+
+export function createWallMaterial(
+  type: 'dzialowa' | 'nosna',
+): THREE.MeshStandardMaterial {
+  const size = 32;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    ctx.fillStyle = '#d1d5db';
+    ctx.fillRect(0, 0, size, size);
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 2;
+    for (let i = -size; i < size; i += 8) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i + size, size);
+      ctx.stroke();
+    }
+    if (type === 'nosna') {
+      ctx.strokeStyle = '#000';
+      for (let y = 4; y < size; y += 8) {
+        ctx.beginPath();
+        ctx.arc(2, y, 4, -Math.PI / 2, Math.PI / 2);
+        ctx.stroke();
+      }
+    }
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(4, 4);
+  return new THREE.MeshStandardMaterial({ map: texture });
+}
