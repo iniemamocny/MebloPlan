@@ -38,11 +38,11 @@ export default class WallDrawer {
   private mode: 'draw' | 'edit' = 'draw';
   private editingIndex: number | null = null;
   private overlay: HTMLInputElement | null = null;
-  private labels = new Map<string, HTMLInputElement>();
+  private labels = new Map<string, HTMLElement>();
 
   // unsubscribes for store subscriptions
   private unsubThickness?: () => void;
-  private unsubWalls?: () => void;
+  private unsubLabels?: () => void;
 
   constructor(
     renderer: WebGLRenderer,
@@ -101,18 +101,13 @@ export default class WallDrawer {
         dom.style.cursor = this.updateCursor(t);
       },
     );
-    this.unsubWalls = this.store.subscribe(
-      (s) => s.room.walls.map((w) => w.id),
-      (ids) => {
-        for (const id of Array.from(this.labels.keys())) {
-          if (!ids.includes(id)) {
-            const el = this.labels.get(id);
-            el?.remove();
-            this.labels.delete(id);
-          }
-        }
+    this.unsubLabels = this.store.subscribe(
+      (s) => s.room.walls,
+      (walls) => {
+        this.updateLabels(walls);
       },
     );
+    this.updateLabels(this.store.getState().room.walls);
     this.active = true;
   }
 
@@ -125,8 +120,7 @@ export default class WallDrawer {
 
   // Allow external code/tests to focus a wall label for editing
   focusLabel(id: string) {
-    const el = this.labels.get(id);
-    el?.focus();
+    this.enterLabelEdit(id);
   }
 
   disable() {
@@ -140,9 +134,9 @@ export default class WallDrawer {
     this.cleanupPreview();
     dom.style.cursor = 'default';
     this.unsubThickness?.();
-    this.unsubWalls?.();
+    this.unsubLabels?.();
     this.unsubThickness = undefined;
-    this.unsubWalls = undefined;
+    this.unsubLabels = undefined;
     if (this.overlay) {
       this.overlay.remove();
       this.overlay = null;
@@ -189,6 +183,88 @@ export default class WallDrawer {
     this.overlay.style.left = `${x}px`;
     this.overlay.style.top = `${y}px`;
   }
+
+  private updateLabels(walls = this.store.getState().room.walls) {
+    if (typeof document === 'undefined') return;
+    const ids = new Set(walls.map((w) => w.id));
+    for (const [id, el] of Array.from(this.labels.entries())) {
+      if (!ids.has(id)) {
+        el.remove();
+        this.labels.delete(id);
+      }
+    }
+    const { room } = this.store.getState();
+    const origin = room.origin
+      ? new THREE.Vector3(room.origin.x / 1000, 0, room.origin.y / 1000)
+      : new THREE.Vector3();
+    let cursor = origin.clone();
+    for (const w of walls) {
+      let el = this.labels.get(w.id);
+      if (!el || el instanceof HTMLInputElement) {
+        el?.remove();
+        el = document.createElement('div');
+        el.className = 'wall-label';
+        el.style.position = 'absolute';
+        el.style.transform = 'translate(-50%, -50%)';
+        el.addEventListener('click', () => this.enterLabelEdit(w.id));
+        document.body.appendChild(el);
+        this.labels.set(w.id, el);
+      }
+      el.textContent = `${Math.round(w.length || 0)}`;
+      const ang = (w.angle * Math.PI) / 180;
+      const len = (w.length || 0) / 1000;
+      const end = new THREE.Vector3(
+        cursor.x + Math.cos(ang) * len,
+        0,
+        cursor.z + Math.sin(ang) * len,
+      );
+      const mid = new THREE.Vector3(
+        (cursor.x + end.x) / 2,
+        0,
+        (cursor.z + end.z) / 2,
+      );
+      const offset = new THREE.Vector3(
+        -Math.sin(ang),
+        0,
+        Math.cos(ang),
+      ).multiplyScalar(0.05);
+      mid.add(offset);
+      const { x, y } = this.worldToScreen(mid);
+      (el as HTMLElement).style.left = `${x}px`;
+      (el as HTMLElement).style.top = `${y}px`;
+      cursor.copy(end);
+    }
+  }
+
+  private enterLabelEdit = (id: string) => {
+    const wall = this.store.getState().room.walls.find((w) => w.id === id);
+    const label = this.labels.get(id);
+    if (!wall || !label) return;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'wall-label';
+    input.style.position = 'absolute';
+    input.style.transform = 'translate(-50%, -50%)';
+    input.value = `${wall.length || 0}`;
+    input.style.left = label.style.left;
+    input.style.top = label.style.top;
+    label.replaceWith(input);
+    this.labels.set(id, input);
+    input.focus();
+    input.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') {
+        ev.preventDefault();
+        const val = parseFloat(input.value);
+        if (!isNaN(val) && val > 0) {
+          this.store.getState().updateWall(id, { length: val });
+        }
+        input.blur();
+      }
+    });
+    input.addEventListener('blur', () => {
+      this.updateLabels();
+    });
+  };
 
   private onDown = (e: PointerEvent) => {
     if (this.start) return;
@@ -429,7 +505,6 @@ export default class WallDrawer {
     }
     const thickness = state.wallThickness;
     state.addWall({ length: snappedLength, angle: snappedAngleDeg, thickness });
-    const wall = this.store.getState().room.walls.slice(-1)[0];
     const rad = (snappedAngleDeg * Math.PI) / 180;
     const lenM = snappedLength / 1000;
     this.currentAngle = rad;
@@ -445,27 +520,11 @@ export default class WallDrawer {
     positions.needsUpdate = true;
     this.onLengthChange?.(0);
     this.onAngleChange?.(0);
-    if (this.overlay && wall) {
-      this.overlay.className = 'wall-label';
-      this.overlay.dataset.wallId = wall.id;
-      const mid = new THREE.Vector3(
-        (segStart.x + target.x) / 2,
-        0,
-        (segStart.z + target.z) / 2,
-      );
-      this.positionOverlay(mid);
-      this.overlay.addEventListener('keydown', (ev) => {
-        if (ev.key === 'Enter') {
-          ev.preventDefault();
-          const val = parseFloat(this.overlay!.value);
-          if (!isNaN(val) && val > 0) {
-            this.store.getState().updateWall(wall.id, { length: val });
-          }
-        }
-      });
-      this.labels.set(wall.id, this.overlay);
+    if (this.overlay) {
+      this.overlay.remove();
       this.overlay = null;
     }
+    this.updateLabels();
     if (autoClose) {
       this.disable();
     }
