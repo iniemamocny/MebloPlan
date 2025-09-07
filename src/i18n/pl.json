@@ -53,6 +53,8 @@
     "finishDrawing": "Zakończ rysowanie",
     "noWalls": "Brak ścian",
     "angleToPrev": "Kąt do poprzedniej (°)",
+    "snapLength": "Krok długości (mm)",
+    "snapAngle": "Krok kąta (°)",
     "noRightAngles": "Bez prostych kątów",
     "autoClose": "Automatyczne domknięcie",
     "invalidLength": "Długość nie może być ujemna"

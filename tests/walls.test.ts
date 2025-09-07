@@ -5,7 +5,9 @@ import WallDrawer from '../src/viewer/WallDrawer';
 import * as THREE from 'three';
 import { webcrypto } from 'node:crypto';
 
-(globalThis as any).crypto = webcrypto as any;
+if (!(globalThis as any).crypto) {
+  (globalThis as any).crypto = webcrypto as any;
+}
 
 beforeEach(() => {
   usePlannerStore.setState({
