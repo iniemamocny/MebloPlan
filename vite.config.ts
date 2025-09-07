@@ -9,7 +9,7 @@ export default defineConfig({
   base: process.env.GITHUB_ACTIONS ? '/MebloPlan/' : '/',
   plugins: [react()],
   resolve: {
-    dedupe: ['react', 'react-dom'],
+    dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
     alias: {
       react: path.resolve(__dirname, 'node_modules/react'),
       'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
@@ -17,7 +17,19 @@ export default defineConfig({
         __dirname,
         'node_modules/react/jsx-runtime.js',
       ),
+      'react/jsx-dev-runtime': path.resolve(
+        __dirname,
+        'node_modules/react/jsx-runtime.js',
+      ),
     },
+  },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react/jsx-runtime',
+      'react/jsx-dev-runtime',
+    ],
   },
   server: { host: true },
   build: { outDir: 'dist', assetsDir: 'assets' },
