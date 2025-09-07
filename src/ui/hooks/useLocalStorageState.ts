@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { safeSetItem } from '../../utils/storage';
 
 export default function useLocalStorageState<T>(key: string, initialValue: T) {
   const [value, setValue] = useState<T>(() => {
@@ -14,11 +15,7 @@ export default function useLocalStorageState<T>(key: string, initialValue: T) {
   });
 
   useEffect(() => {
-    try {
-      window.localStorage.setItem(key, JSON.stringify(value));
-    } catch {
-      /* ignore */
-    }
+    safeSetItem(key, JSON.stringify(value));
   }, [key, value]);
 
   return [value, setValue] as const;

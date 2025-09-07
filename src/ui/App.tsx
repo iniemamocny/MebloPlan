@@ -7,6 +7,7 @@ import TopBar from './TopBar';
 import { createTranslator } from './i18n';
 import MainTabs from './MainTabs';
 import WallDrawPanel from './WallDrawPanel';
+import { safeSetItem } from '../utils/storage';
 
 export default function App() {
   const store = usePlannerStore();
@@ -18,10 +19,12 @@ export default function App() {
   const threeRef = useRef<any>({});
 
   const { t, i18n } = createTranslator();
-  const [lang, setLang] = useState(localStorage.getItem('lang') || i18n.language);
+  const [lang, setLang] = useState(
+    localStorage.getItem('lang') || i18n.language,
+  );
   useEffect(() => {
     i18n.changeLanguage(lang);
-    localStorage.setItem('lang', lang);
+    safeSetItem('lang', lang);
   }, [lang, i18n]);
 
   const {
@@ -35,7 +38,9 @@ export default function App() {
     initSidePanel,
   } = useCabinetConfig(family, kind, variant, selWall, setVariant);
 
-  const [tab, setTab] = useState<'cab' | 'room' | 'costs' | 'cut' | 'global' | null>(null);
+  const [tab, setTab] = useState<
+    'cab' | 'room' | 'costs' | 'cut' | 'global' | null
+  >(null);
   const [boardL, setBoardL] = useState(2800);
   const [boardW, setBoardW] = useState(2070);
   const [boardKerf, setBoardKerf] = useState(3);

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { FAMILY } from '../core/catalog';
 import { Module3D, Room, Globals, Prices, Opening, Gaps } from '../types';
+import { safeSetItem } from '../utils/storage';
 
 export const defaultGaps: Gaps = {
   left: 2,
@@ -439,11 +440,7 @@ const persistSelector = (s: Store) => ({
 let persistTimeout = 0;
 usePlannerStore.subscribe(persistSelector, (slice) => {
   const save = () => {
-    try {
-      localStorage.setItem('kv7_state', JSON.stringify(slice));
-    } catch {
-      /* ignore */
-    }
+    safeSetItem('kv7_state', JSON.stringify(slice));
   };
   if ('requestIdleCallback' in window) {
     (window as any).requestIdleCallback(save);
