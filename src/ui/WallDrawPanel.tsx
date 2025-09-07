@@ -57,6 +57,14 @@ export default function WallDrawPanel({
       >
         <FaPencilAlt />
       </button>
+      {isDrawing && (
+        <button
+          className="btnGhost"
+          onClick={() => threeRef.current?.exitTopDownMode?.()}
+        >
+          {t('room.finishDrawing')}
+        </button>
+      )}
       <label
         className="small"
         style={{ display: 'flex', gap: 8, alignItems: 'center' }}
