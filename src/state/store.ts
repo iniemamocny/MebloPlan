@@ -157,7 +157,9 @@ type Store = {
     id: string,
     patch: Partial<{ length: number; angle: number; thickness: number }>,
   ) => void;
-  addOpening: (op: Opening) => void;
+  addOpening: (op: Omit<Opening, 'id'>) => void;
+  updateOpening: (id: string, patch: Partial<Omit<Opening, 'id'>>) => void;
+  removeOpening: (id: string) => void;
   setShowFronts: (v: boolean) => void;
   setWallType: (t: 'nosna' | 'dzialowa') => void;
   setWallThickness: (v: number) => void;
@@ -184,6 +186,11 @@ export const usePlannerStore = create<Store>((set, get) => ({
             id: w.id || crypto.randomUUID(),
             thickness: 100,
             ...w,
+          })) || [],
+        openings:
+          persisted.room.openings?.map((o: any) => ({
+            id: o.id || crypto.randomUUID(),
+            ...o,
           })) || [],
       }
     : { walls: [], openings: [], height: 2700, origin: { x: 0, y: 0 } },
@@ -405,7 +412,42 @@ export const usePlannerStore = create<Store>((set, get) => ({
           room: JSON.parse(JSON.stringify(s.room)),
         },
       ],
-      room: { ...s.room, openings: [...s.room.openings, op] },
+      room: {
+        ...s.room,
+        openings: [...s.room.openings, { id: crypto.randomUUID(), ...op }],
+      },
+      future: [],
+    })),
+  updateOpening: (id, patch) =>
+    set((s) => ({
+      past: [
+        ...s.past,
+        {
+          modules: JSON.parse(JSON.stringify(s.modules)),
+          room: JSON.parse(JSON.stringify(s.room)),
+        },
+      ],
+      room: {
+        ...s.room,
+        openings: s.room.openings.map((o) =>
+          o.id === id ? { ...o, ...patch } : o,
+        ),
+      },
+      future: [],
+    })),
+  removeOpening: (id) =>
+    set((s) => ({
+      past: [
+        ...s.past,
+        {
+          modules: JSON.parse(JSON.stringify(s.modules)),
+          room: JSON.parse(JSON.stringify(s.room)),
+        },
+      ],
+      room: {
+        ...s.room,
+        openings: s.room.openings.filter((o) => o.id !== id),
+      },
       future: [],
     })),
   setShowFronts: (v) => set({ showFronts: v }),

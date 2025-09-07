@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { usePlannerStore } from '../../state/store';
 import RoomUploader from '../RoomUploader';
 import { createWallGeometry } from '../../viewer/wall';
+import { Opening } from '../../types';
 
 interface RoomTabProps {
   three: React.MutableRefObject<any>;
@@ -23,7 +24,7 @@ export default function RoomTab({
       height: Number((e.target as HTMLInputElement).value) || 0,
     });
   };
-  const [opening, setOpening] = useState({
+  const [opening, setOpening] = useState<Omit<Opening, 'id'>>({
     wallId: '',
     offset: 0,
     width: 0,
@@ -31,6 +32,7 @@ export default function RoomTab({
     bottom: 0,
     kind: 0,
   });
+  const [editingId, setEditingId] = useState<string | null>(null);
   useEffect(() => {
     if (!opening.wallId && store.room.walls[0]) {
       setOpening((o) => ({ ...o, wallId: store.room.walls[0].id }));
@@ -38,13 +40,27 @@ export default function RoomTab({
   }, [store.room.walls]);
   const onAddOpening = () => {
     if (!opening.wallId) return;
-    store.addOpening({
+    const data = {
       wallId: opening.wallId,
       offset: Number(opening.offset) || 0,
       width: Number(opening.width) || 0,
       height: Number(opening.height) || 0,
       bottom: Number(opening.bottom) || 0,
       kind: Number(opening.kind) || 0,
+    };
+    if (editingId) {
+      store.updateOpening(editingId, data);
+      setEditingId(null);
+    } else {
+      store.addOpening(data);
+    }
+    setOpening({
+      wallId: store.room.walls[0]?.id || '',
+      offset: 0,
+      width: 0,
+      height: 0,
+      bottom: 0,
+      kind: 0,
     });
   };
   const onDrawWalls = () => {
@@ -221,8 +237,46 @@ export default function RoomTab({
               />
             </div>
             <button className="btnGhost" onClick={onAddOpening} disabled={!opening.wallId}>
-              Add opening
+              {editingId ? 'Save opening' : 'Add opening'}
             </button>
+          </div>
+          <div className="row" style={{ marginTop: 8 }}>
+            {store.room.openings.length === 0 ? (
+              <div>No openings</div>
+            ) : (
+              <ul>
+                {store.room.openings.map((o, i) => (
+                  <li key={o.id}>
+                    {(o.kind === 0 ? t('room.addWindow') : t('room.addDoor'))}{' '}
+                    - {o.width}x{o.height}mm - {o.offset}mm
+                    <button
+                      className="btnGhost"
+                      style={{ marginLeft: 4 }}
+                      onClick={() => {
+                        setEditingId(o.id);
+                        setOpening({
+                          wallId: o.wallId,
+                          offset: o.offset,
+                          width: o.width,
+                          height: o.height,
+                          bottom: o.bottom,
+                          kind: o.kind,
+                        });
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="btnGhost"
+                      style={{ marginLeft: 4 }}
+                      onClick={() => store.removeOpening(o.id)}
+                    >
+                      Delete
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
           <div className="row" style={{ marginTop: 8 }}>
             <button

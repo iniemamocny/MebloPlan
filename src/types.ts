@@ -184,6 +184,7 @@ export interface Module3D {
 }
 
 export interface Opening {
+  id: string;
   wallId: string;
   offset: number;
   width: number;
