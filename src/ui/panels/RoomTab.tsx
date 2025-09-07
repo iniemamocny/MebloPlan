@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { useTranslation } from 'react-i18next';
 import { usePlannerStore } from '../../state/store';
 import RoomUploader from '../RoomUploader';
-import { createWallGeometry } from '../../viewer/wall';
+import { createWallGeometry, createWallMaterial } from '../../viewer/wall';
 import { Opening } from '../../types';
 
 interface RoomTabProps {
@@ -76,8 +76,12 @@ export default function RoomTab({
       group.remove(m);
       (m as any).geometry?.dispose?.();
       if (Array.isArray((m as any).material)) {
-        (m as any).material.forEach((mm: any) => mm.dispose());
+        (m as any).material.forEach((mm: any) => {
+          mm.map?.dispose?.();
+          mm.dispose();
+        });
       } else {
+        (m as any).material?.map?.dispose?.();
         (m as any).material?.dispose?.();
       }
     });
@@ -112,17 +116,21 @@ export default function RoomTab({
         w.thickness || 0,
         store.room.openings.filter((o) => o.wallId === w.id),
       );
-      const box = new THREE.Mesh(
-        geom,
-        new THREE.MeshStandardMaterial({ color: 0xd1d5db }),
-      );
+      const mat = createWallMaterial(store.wallType);
+      const box = new THREE.Mesh(geom, mat);
       box.position.set(mid.x, h / 2000, mid.y);
       box.rotation.y = -ang;
       (box as any).userData.kind = 'room';
       group.add(box);
       cursor = next;
     });
-  }, [store.room.walls, store.room.height, store.room.openings, three]);
+  }, [
+    store.room.walls,
+    store.room.height,
+    store.room.openings,
+    store.wallType,
+    three,
+  ]);
   return (
     <>
       <div className="section">
