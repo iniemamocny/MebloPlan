@@ -33,8 +33,12 @@ export default function WallDrawPanel({
       threeRef.current.onAngleChange = undefined;
     };
   }, [threeRef]);
+  React.useEffect(() => {
+    if (!isOpen) {
+      threeRef.current?.exitTopDownMode?.();
+    }
+  }, [isOpen, threeRef]);
   if (!isOpen) {
-    threeRef.current?.exitTopDownMode?.();
     return null;
   }
   return (
