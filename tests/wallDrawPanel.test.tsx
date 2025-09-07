@@ -134,4 +134,54 @@ describe('WallDrawPanel callbacks', () => {
       root.unmount();
     });
   });
+
+  it('keeps panel and overlay values in sync', async () => {
+    const three: any = { applyWallLength: vi.fn() };
+    const threeRef = { current: three } as React.MutableRefObject<any>;
+    const container = document.createElement('div');
+    const root = ReactDOM.createRoot(container);
+    document.body.innerHTML = '';
+    const overlay = document.createElement('input');
+    overlay.className = 'wall-overlay';
+    document.body.appendChild(overlay);
+
+    await act(async () => {
+      root.render(<WallDrawPanel threeRef={threeRef} isOpen isDrawing />);
+    });
+
+    await act(async () => {
+      three.onLengthChange(123);
+    });
+    const panelInput = container.querySelector('input.input') as HTMLInputElement;
+    expect(panelInput.value).toBe('123');
+    expect(overlay.value).toBe('123');
+
+    await act(async () => {
+      three.onLengthChange(456);
+    });
+    expect(panelInput.value).toBe('456');
+    expect((document.querySelector('input.wall-overlay') as HTMLInputElement).value).toBe('456');
+
+    await act(async () => {
+      const ov = document.querySelector('input.wall-overlay') as HTMLInputElement;
+      ov.value = '789';
+      ov.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    expect(panelInput.value).toBe('789');
+
+    await act(async () => {
+      const ov = document.querySelector('input.wall-overlay') as HTMLInputElement;
+      ov.value = '900';
+      ov.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
+      );
+    });
+    expect(three.applyWallLength).toHaveBeenCalledWith(900);
+    expect(panelInput.value).toBe('900');
+
+    document.querySelector('input.wall-overlay')?.remove();
+    await act(async () => {
+      root.unmount();
+    });
+  });
 });

@@ -42,6 +42,35 @@ export default function WallDrawPanel({
       threeRef.current?.exitTopDownMode?.();
     }
   }, [isOpen, threeRef]);
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const overlay = document.querySelector(
+      'input.wall-overlay',
+    ) as HTMLInputElement | null;
+    if (!overlay) return;
+    overlay.value = `${wallLength}`;
+    const onInput = () => {
+      const val = Number(overlay.value);
+      if (!Number.isNaN(val)) {
+        setWallLength(val);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        const val = Number(overlay.value);
+        if (!Number.isNaN(val)) {
+          threeRef.current?.applyWallLength?.(val);
+          setWallLength(val);
+        }
+      }
+    };
+    overlay.addEventListener('input', onInput);
+    overlay.addEventListener('keydown', onKey);
+    return () => {
+      overlay.removeEventListener('input', onInput);
+      overlay.removeEventListener('keydown', onKey);
+    };
+  }, [wallLength, isOpen, threeRef]);
   if (!isOpen) {
     return null;
   }
