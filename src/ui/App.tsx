@@ -14,7 +14,7 @@ export default function App() {
   const [family, setFamily] = useState<FAMILY>(FAMILY.BASE);
   const [kind, setKind] = useState<Kind | null>(null);
   const [variant, setVariant] = useState<Variant | null>(null);
-  const [selWall, setSelWall] = useState(0);
+    const [selWall, setSelWall] = useState(() => usePlannerStore.getState().room.walls[0]?.id || '');
   const [addCountertop, setAddCountertop] = useState(true);
   const threeRef = useRef<any>({});
 
@@ -36,7 +36,7 @@ export default function App() {
     doAutoOnSelectedWall,
     initBlenda,
     initSidePanel,
-  } = useCabinetConfig(family, kind, variant, selWall, setVariant);
+    } = useCabinetConfig(family, kind, variant, selWall, setVariant);
 
   const [tab, setTab] = useState<
     'cab' | 'room' | 'costs' | 'cut' | 'global' | null
@@ -62,8 +62,11 @@ export default function App() {
         redo();
       } else if (e.key === 'Escape') {
         e.preventDefault();
-        removeWall(selWall);
-        setSelWall(0);
+          if (selWall) {
+            removeWall(selWall);
+            const first = usePlannerStore.getState().room.walls[0];
+            setSelWall(first ? first.id : '');
+          }
       }
     };
     window.addEventListener('keydown', handler);
@@ -121,8 +124,8 @@ export default function App() {
           store={store}
           setVariant={setVariant}
           setKind={setKind}
-          selWall={selWall}
-          setSelWall={setSelWall}
+            selWall={selWall}
+            setSelWall={setSelWall}
           doAutoOnSelectedWall={doAutoOnSelectedWall}
           lang={lang}
           setLang={setLang}
