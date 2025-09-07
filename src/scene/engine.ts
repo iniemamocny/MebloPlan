@@ -170,5 +170,6 @@ export function setupThree(
       const safeLength = Math.min(len, 99999);
       wallDrawer.applyLength(safeLength);
     },
+    setWallMode: (mode: 'draw' | 'edit') => wallDrawer.setMode(mode),
   };
 }

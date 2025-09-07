@@ -25,6 +25,7 @@ export default function WallDrawPanel({
   const [wallLength, setWallLength] = React.useState(0);
   const [wallAngle, setWallAngle] = React.useState(0);
   const [lengthError, setLengthError] = React.useState(false);
+  const [editMode, setEditMode] = React.useState(false);
   React.useEffect(() => {
     threeRef.current.onLengthChange = setWallLength;
     threeRef.current.onAngleChange = setWallAngle;
@@ -33,6 +34,9 @@ export default function WallDrawPanel({
       threeRef.current.onAngleChange = undefined;
     };
   }, [threeRef]);
+  React.useEffect(() => {
+    threeRef.current?.setWallMode?.(editMode ? 'edit' : 'draw');
+  }, [editMode, threeRef]);
   React.useEffect(() => {
     if (!isOpen) {
       threeRef.current?.exitTopDownMode?.();
@@ -61,6 +65,19 @@ export default function WallDrawPanel({
       >
         {isDrawing ? <FaCube /> : <FaRegSquare />}
       </button>
+      <label
+        className="small"
+        style={{ display: 'flex', gap: 8, alignItems: 'center' }}
+      >
+        <input
+          type="checkbox"
+          checked={editMode}
+          onChange={(e) =>
+            setEditMode((e.target as HTMLInputElement).checked)
+          }
+        />
+        {t('app.editWall')}
+      </label>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <input
           className="input"
