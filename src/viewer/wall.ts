@@ -57,9 +57,10 @@ export function createWallMaterial(
     }
     if (type === 'nosna') {
       ctx.strokeStyle = '#000';
-      for (let y = 4; y < size; y += 8) {
+      for (let i = 0; i < size * 2; i += 8) {
         ctx.beginPath();
-        ctx.arc(2, y, 4, -Math.PI / 2, Math.PI / 2);
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i - size, size);
         ctx.stroke();
       }
     }
