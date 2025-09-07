@@ -37,6 +37,12 @@ export default class WallDrawer {
   private active = false;
   private mode: 'draw' | 'edit' = 'draw';
   private editingIndex: number | null = null;
+  private overlay: HTMLInputElement | null = null;
+  private labels = new Map<string, HTMLInputElement>();
+
+  // unsubscribes for store subscriptions
+  private unsubThickness?: () => void;
+  private unsubWalls?: () => void;
 
   constructor(
     renderer: WebGLRenderer,
@@ -89,10 +95,22 @@ export default class WallDrawer {
     dom.addEventListener('pointermove', this.onMove);
     window.addEventListener('keydown', this.onKeyDown);
     dom.style.cursor = this.updateCursor(this.store.getState().wallThickness);
-    this.unsubscribe = this.store.subscribe(
+    this.unsubThickness = this.store.subscribe(
       (s) => s.wallThickness,
       (t) => {
         dom.style.cursor = this.updateCursor(t);
+      },
+    );
+    this.unsubWalls = this.store.subscribe(
+      (s) => s.room.walls.map((w) => w.id),
+      (ids) => {
+        for (const id of Array.from(this.labels.keys())) {
+          if (!ids.includes(id)) {
+            const el = this.labels.get(id);
+            el?.remove();
+            this.labels.delete(id);
+          }
+        }
       },
     );
     this.active = true;
@@ -105,6 +123,12 @@ export default class WallDrawer {
     this.cleanupPreview();
   }
 
+  // Allow external code/tests to focus a wall label for editing
+  focusLabel(id: string) {
+    const el = this.labels.get(id);
+    el?.focus();
+  }
+
   disable() {
     if (!this.active) return;
     const dom = this.renderer.domElement;
@@ -115,8 +139,18 @@ export default class WallDrawer {
     this.start = null;
     this.cleanupPreview();
     dom.style.cursor = 'default';
-    this.unsubscribe?.();
-    this.unsubscribe = undefined;
+    this.unsubThickness?.();
+    this.unsubWalls?.();
+    this.unsubThickness = undefined;
+    this.unsubWalls = undefined;
+    if (this.overlay) {
+      this.overlay.remove();
+      this.overlay = null;
+    }
+    for (const el of this.labels.values()) {
+      el.remove();
+    }
+    this.labels.clear();
     this.active = false;
   }
 
@@ -141,6 +175,21 @@ export default class WallDrawer {
     return point;
   }
 
+  private worldToScreen(p: THREE.Vector3): { x: number; y: number } {
+    const vector = p.clone().project(this.getCamera());
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    const x = ((vector.x + 1) / 2) * rect.width + rect.left;
+    const y = ((-vector.y + 1) / 2) * rect.height + rect.top;
+    return { x, y };
+  }
+
+  private positionOverlay(point: THREE.Vector3) {
+    if (!this.overlay) return;
+    const { x, y } = this.worldToScreen(point);
+    this.overlay.style.left = `${x}px`;
+    this.overlay.style.top = `${y}px`;
+  }
+
   private onDown = (e: PointerEvent) => {
     if (this.start) return;
     const point = this.getPoint(e);
@@ -154,6 +203,19 @@ export default class WallDrawer {
       const mat = new THREE.LineBasicMaterial({ color: 0x000000 });
       this.preview = new THREE.Line(geom, mat);
       this.scene.add(this.preview);
+      if (this.overlay) {
+        this.overlay.remove();
+      }
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'wall-overlay';
+      input.style.position = 'absolute';
+      input.style.transform = 'translate(-50%, -50%)';
+      input.value = '0';
+      document.body.appendChild(input);
+      this.overlay = input;
+      this.positionOverlay(point.clone());
+      input.focus();
     } else {
       const { room } = this.store.getState();
       const origin = room.origin
@@ -236,6 +298,21 @@ export default class WallDrawer {
 
       this.onLengthChange?.(snappedLengthMm);
       this.onAngleChange?.(snappedAngleDeg);
+      if (this.overlay) {
+        this.overlay.value = `${Math.round(snappedLengthMm)}`;
+        const mid = new THREE.Vector3(
+          (this.start.x + endX) / 2,
+          0,
+          (this.start.z + endZ) / 2,
+        );
+        const offset = new THREE.Vector3(
+          -Math.sin(this.currentAngle),
+          0,
+          Math.cos(this.currentAngle),
+        ).multiplyScalar(0.05);
+        mid.add(offset);
+        this.positionOverlay(mid);
+      }
     } else {
       const { snapAngle, snapLength } = this.store.getState();
       const dx = point.x - this.start.x;
@@ -265,8 +342,12 @@ export default class WallDrawer {
     }
   };
 
-  applyLength(lengthMm: number) {
-    if (!this.start || !this.preview || lengthMm <= 0) return;
+  applyLength(lengthMm?: number) {
+    if (lengthMm === undefined && this.overlay) {
+      const parsed = parseFloat(this.overlay.value);
+      lengthMm = isNaN(parsed) ? undefined : parsed;
+    }
+    if (!this.start || !this.preview || !lengthMm || lengthMm <= 0) return;
     const lengthM = lengthMm / 1000;
     const end = new THREE.Vector3(
       this.start.x + Math.cos(this.currentAngle) * lengthM,
@@ -278,10 +359,10 @@ export default class WallDrawer {
     positions.setXYZ(0, this.start.x, 0, this.start.z);
     positions.setXYZ(1, end.x, 0, end.z);
     positions.needsUpdate = true;
-    this.finalizeSegment(end);
+    this.finalizeSegment(end, lengthMm);
   }
 
-  private finalizeSegment(end: THREE.Vector3) {
+  private finalizeSegment(end: THREE.Vector3, manualLength?: number) {
     if (!this.start || !this.preview) return;
     const state = this.store.getState();
     let target = end.clone();
@@ -302,8 +383,9 @@ export default class WallDrawer {
       target = origin;
     }
 
-    const dx = target.x - this.start.x;
-    const dz = target.z - this.start.z;
+    const segStart = this.start.clone();
+    const dx = target.x - segStart.x;
+    const dz = target.z - segStart.z;
     let lengthMm: number;
     let snappedAngleDeg: number;
     if (state.snapRightAngles) {
@@ -328,18 +410,26 @@ export default class WallDrawer {
     if (lengthMm < 1) {
       this.cleanupPreview();
       this.start = null;
+      if (this.overlay) {
+        this.overlay.remove();
+        this.overlay = null;
+      }
       return;
     }
-    const snappedLength = state.snapLength
+    let snappedLength = state.snapLength
       ? Math.round(lengthMm / state.snapLength) * state.snapLength
       : lengthMm;
+    if (manualLength && manualLength > 0) {
+      snappedLength = manualLength;
+    }
     if (state.room.walls.length === 0) {
       state.setRoom({
-        origin: { x: this.start.x * 1000, y: this.start.z * 1000 },
+        origin: { x: segStart.x * 1000, y: segStart.z * 1000 },
       });
     }
     const thickness = state.wallThickness;
     state.addWall({ length: snappedLength, angle: snappedAngleDeg, thickness });
+    const wall = this.store.getState().room.walls.slice(-1)[0];
     const rad = (snappedAngleDeg * Math.PI) / 180;
     const lenM = snappedLength / 1000;
     this.currentAngle = rad;
@@ -355,6 +445,27 @@ export default class WallDrawer {
     positions.needsUpdate = true;
     this.onLengthChange?.(0);
     this.onAngleChange?.(0);
+    if (this.overlay && wall) {
+      this.overlay.className = 'wall-label';
+      this.overlay.dataset.wallId = wall.id;
+      const mid = new THREE.Vector3(
+        (segStart.x + target.x) / 2,
+        0,
+        (segStart.z + target.z) / 2,
+      );
+      this.positionOverlay(mid);
+      this.overlay.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter') {
+          ev.preventDefault();
+          const val = parseFloat(this.overlay!.value);
+          if (!isNaN(val) && val > 0) {
+            this.store.getState().updateWall(wall.id, { length: val });
+          }
+        }
+      });
+      this.labels.set(wall.id, this.overlay);
+      this.overlay = null;
+    }
     if (autoClose) {
       this.disable();
     }
@@ -414,6 +525,12 @@ export default class WallDrawer {
 
   private onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
+      if (this.overlay && e.target === this.overlay) {
+        e.preventDefault();
+        const val = parseFloat(this.overlay.value);
+        this.applyLength(val);
+        return;
+      }
       if ((e.target as HTMLElement).tagName === 'INPUT') return;
       if (!this.start || !this.preview) return;
       const positions = (this.preview.geometry as THREE.BufferGeometry)
