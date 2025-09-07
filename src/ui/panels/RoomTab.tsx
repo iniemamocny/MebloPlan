@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { useTranslation } from 'react-i18next';
 import { usePlannerStore } from '../../state/store';
 import RoomUploader from '../RoomUploader';
-import { createWallGeometry } from '../../viewer/wall';
+import { createWallGeometry, createWallMaterials } from '../../viewer/wall';
 import { Opening } from '../../types';
 
 interface RoomTabProps {
@@ -76,8 +76,12 @@ export default function RoomTab({
       group.remove(m);
       (m as any).geometry?.dispose?.();
       if (Array.isArray((m as any).material)) {
-        (m as any).material.forEach((mm: any) => mm.dispose());
+        (m as any).material.forEach((mm: any) => {
+          mm.map?.dispose?.();
+          mm.dispose();
+        });
       } else {
+        (m as any).material?.map?.dispose?.();
         (m as any).material?.dispose?.();
       }
     });
@@ -92,7 +96,7 @@ export default function RoomTab({
     (floor as any).userData.kind = 'room';
     group.add(floor);
     const origin = store.room.origin || { x: 0, y: 0 };
-    let cursor = new THREE.Vector2(origin.x / 1000, origin.y / 1000);
+    const cursor = new THREE.Vector2(origin.x / 1000, origin.y / 1000);
     const h = store.room.height || 2700;
     store.room.walls.forEach((w) => {
       const len = (w.length || 0) / 1000;
@@ -112,17 +116,21 @@ export default function RoomTab({
         w.thickness || 0,
         store.room.openings.filter((o) => o.wallId === w.id),
       );
-      const box = new THREE.Mesh(
-        geom,
-        new THREE.MeshStandardMaterial({ color: 0xd1d5db }),
-      );
+      const mats = createWallMaterials(store.wallType);
+      const box = new THREE.Mesh(geom, mats);
       box.position.set(mid.x, h / 2000, mid.y);
       box.rotation.y = -ang;
       (box as any).userData.kind = 'room';
       group.add(box);
-      cursor = next;
+      cursor.copy(next);
     });
-  }, [store.room.walls, store.room.height, store.room.openings, three]);
+  }, [
+    store.room.walls,
+    store.room.height,
+    store.room.openings,
+    store.wallType,
+    three,
+  ]);
   return (
     <>
       <div className="section">
