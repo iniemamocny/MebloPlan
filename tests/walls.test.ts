@@ -83,6 +83,29 @@ describe('getWallSegments', () => {
     expect(last.b.x).toBeCloseTo(segs[0].a.x, 3);
     expect(last.b.y).toBeCloseTo(segs[0].a.y, 3);
   });
+
+  it('handles arc segments', () => {
+    usePlannerStore.setState({
+      room: {
+        walls: [
+          {
+            id: 'a',
+            angle: 0,
+            thickness: 100,
+            arc: { radius: 1000, angle: 90 },
+            length: Math.PI * 1000 * 0.5,
+          },
+        ],
+        openings: [],
+        height: 2700,
+        origin: { x: 0, y: 0 },
+      },
+    });
+    const segs = getWallSegments();
+    expect(segs[0].arc?.radius).toBe(1000);
+    expect(segs[0].b.x).toBeCloseTo(1000, 3);
+    expect(segs[0].b.y).toBeCloseTo(1000, 3);
+  });
 });
 
 describe('updateWall', () => {

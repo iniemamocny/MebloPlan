@@ -193,8 +193,26 @@ export interface Opening {
   kind: number;
 }
 
+export interface WallArc {
+  /** radius in millimetres */
+  radius: number;
+  /** central angle in degrees; positive is counter-clockwise */
+  angle: number;
+}
+
+export interface WallSegment {
+  id: string;
+  /** length in millimetres (for arcs this is the arc length) */
+  length: number;
+  /** direction of the segment start in degrees */
+  angle: number;
+  thickness: number;
+  /** optional arc definition */
+  arc?: WallArc;
+}
+
 export interface Room {
-  walls: { id: string; length: number; angle: number; thickness: number }[];
+  walls: WallSegment[];
   openings: Opening[];
   height: number;
   origin: { x: number; y: number };

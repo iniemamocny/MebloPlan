@@ -1,5 +1,11 @@
 import { usePlannerStore } from '../state/store'
-export type Segment = { a:{x:number;y:number}; b:{x:number;y:number}; angle:number; length:number }
+export type Segment = {
+  a:{x:number;y:number};
+  b:{x:number;y:number};
+  angle:number;
+  length:number;
+  arc?:{ cx:number; cy:number; radius:number; startAngle:number; sweep:number };
+}
 export function getWallSegments(startX?: number, startY?: number, close = false): Segment[] {
   const room = usePlannerStore.getState().room
   const segs: Segment[] = []
@@ -7,12 +13,32 @@ export function getWallSegments(startX?: number, startY?: number, close = false)
   let cursor = { x:startX ?? origin.x, y:startY ?? origin.y }
   const start = { ...cursor }
   for (const w of room.walls){
-    const ang = (w.angle||0) * Math.PI/180
-    const dir = { x: Math.cos(ang), y: Math.sin(ang) }
-    const len = (w.length||0)
-    const next = { x: cursor.x + dir.x*len, y: cursor.y + dir.y*len }
-    segs.push({ a:{...cursor}, b:{...next}, angle:ang, length:len })
-    cursor = next
+    if (w.arc){
+      const ang0 = (w.angle||0) * Math.PI/180
+      const sweep = (w.arc.angle||0) * Math.PI/180
+      const r = w.arc.radius || 0
+      const sign = sweep >= 0 ? 1 : -1
+      const cx = cursor.x - Math.sin(ang0) * r * sign
+      const cy = cursor.y + Math.cos(ang0) * r * sign
+      const startAng = Math.atan2(cursor.y - cy, cursor.x - cx)
+      const endAng = startAng + sweep
+      const next = { x: cx + Math.cos(endAng)*r, y: cy + Math.sin(endAng)*r }
+      segs.push({
+        a:{...cursor},
+        b:{...next},
+        angle:ang0,
+        length:Math.abs(r*sweep),
+        arc:{ cx, cy, radius:r, startAngle:startAng, sweep }
+      })
+      cursor = next
+    } else {
+      const ang = (w.angle||0) * Math.PI/180
+      const dir = { x: Math.cos(ang), y: Math.sin(ang) }
+      const len = (w.length||0)
+      const next = { x: cursor.x + dir.x*len, y: cursor.y + dir.y*len }
+      segs.push({ a:{...cursor}, b:{...next}, angle:ang, length:len })
+      cursor = next
+    }
   }
   if (close && segs.length > 0){
     const last = segs[segs.length - 1].b
