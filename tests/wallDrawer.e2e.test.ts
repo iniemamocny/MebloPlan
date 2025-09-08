@@ -13,6 +13,70 @@ import { usePlannerStore } from '../src/state/store';
 });
 (HTMLCanvasElement.prototype as any).toDataURL = () => '';
 
+describe('WallDrawer ignores non-left clicks', () => {
+  it('does not start drawing on right or middle click', () => {
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const getCamera = () => camera;
+    const scene = new THREE.Scene();
+    const store = {
+      getState: () => ({
+        addWall: vi.fn(() => 'id'),
+        wallThickness: 100,
+        wallType: 'dzialowa',
+        snapAngle: 0,
+        snapLength: 0,
+        snapRightAngles: true,
+        angleToPrev: 0,
+        defaultSquareAngle: 0,
+        room: { walls: [] },
+        setRoom: vi.fn(),
+      }),
+    } as any;
+
+    const drawer = new WallDrawer(
+      renderer,
+      getCamera,
+      scene,
+      store,
+      () => {},
+      () => {},
+    );
+    const getPoint = vi.fn(() => new THREE.Vector3(0, 0, 0));
+    (drawer as any).getPoint = getPoint;
+
+    (drawer as any).onDown({
+      clientX: 0,
+      clientY: 0,
+      button: 2,
+    } as PointerEvent);
+    expect(getPoint).toHaveBeenCalledTimes(0);
+    expect((drawer as any).start).toBeNull();
+    expect((drawer as any).preview).toBeNull();
+
+    (drawer as any).onDown({
+      clientX: 0,
+      clientY: 0,
+      button: 1,
+    } as PointerEvent);
+    expect(getPoint).toHaveBeenCalledTimes(0);
+    expect((drawer as any).start).toBeNull();
+    expect((drawer as any).preview).toBeNull();
+  });
+});
+
 describe('WallDrawer click without drag', () => {
   it('creates square and adds wall to store', () => {
     const canvas = document.createElement('canvas');
@@ -57,7 +121,7 @@ describe('WallDrawer click without drag', () => {
     );
     (drawer as any).getPoint = () => new THREE.Vector3(0, 0, 0);
 
-    const down = { clientX: 0, clientY: 0 } as PointerEvent;
+    const down = { clientX: 0, clientY: 0, button: 0 } as PointerEvent;
     (drawer as any).onDown(down);
     expect((drawer as any).preview).toBeNull();
 
@@ -128,12 +192,12 @@ describe('WallDrawer retains square after drawing segment', () => {
     ];
     (drawer as any).getPoint = () => points.shift()!;
 
-    const down1 = { clientX: 0, clientY: 0 } as PointerEvent;
+    const down1 = { clientX: 0, clientY: 0, button: 0 } as PointerEvent;
     (drawer as any).onDown(down1);
     const up1 = { clientX: 0, clientY: 0, detail: 1, button: 0 } as PointerEvent;
     (drawer as any).onUp(up1);
 
-    const down2 = { clientX: 0, clientY: 0 } as PointerEvent;
+    const down2 = { clientX: 0, clientY: 0, button: 0 } as PointerEvent;
     (drawer as any).onDown(down2);
     const move2 = { clientX: 10, clientY: 0 } as PointerEvent;
     (drawer as any).onMove(move2);
@@ -189,7 +253,7 @@ describe('WallDrawer small movement treated as click', () => {
     );
     (drawer as any).getPoint = () => new THREE.Vector3(0, 0, 0);
 
-    const down = { clientX: 0, clientY: 0 } as PointerEvent;
+    const down = { clientX: 0, clientY: 0, button: 0 } as PointerEvent;
     (drawer as any).onDown(down);
 
     const move = { clientX: 2, clientY: 2 } as PointerEvent;
@@ -364,7 +428,7 @@ describe('WallDrawer snapping', () => {
       onAngleChange,
     );
     (drawer as any).getPoint = () => new THREE.Vector3(0, 0, 0);
-    (drawer as any).onDown({} as PointerEvent);
+    (drawer as any).onDown({ button: 0 } as PointerEvent);
     const rad = (20 * Math.PI) / 180;
     (drawer as any).getPoint = () =>
       new THREE.Vector3(Math.cos(rad) * 0.12, 0, Math.sin(rad) * 0.12);
@@ -419,7 +483,7 @@ describe('WallDrawer vertex snapping to existing point', () => {
       () => {},
     );
     (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
-    (drawer as any).onDown({} as PointerEvent);
+    (drawer as any).onDown({ button: 0 } as PointerEvent);
     (drawer as any).getPoint = () => new THREE.Vector3(0.004, 0, 0.002);
     (drawer as any).onMove({} as PointerEvent);
     (drawer as any).onUp({ button: 0 } as PointerEvent);
@@ -485,7 +549,7 @@ describe('WallDrawer grid snapping', () => {
       idx++;
       return target;
     };
-    (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
+    (drawer as any).onDown({ clientX: 0, clientY: 0, button: 0 } as PointerEvent);
     (drawer as any).onMove({ clientX: 0, clientY: 0 } as PointerEvent);
     (drawer as any).onUp({ clientX: 0, clientY: 0, button: 0 } as PointerEvent);
     expect(setRoom).toHaveBeenCalledWith({ origin: { x: 0, y: 0 } });
@@ -543,7 +607,7 @@ describe('WallDrawer edit mode', () => {
     (drawer as any).setMode('edit');
     // select endpoint at (1,0)
     (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
-    (drawer as any).onDown({} as PointerEvent);
+    (drawer as any).onDown({ button: 0 } as PointerEvent);
     // drag to (0.5, 0.5)
     (drawer as any).getPoint = () => new THREE.Vector3(0.5, 0, 0.5);
     (drawer as any).onMove({} as PointerEvent);
@@ -607,7 +671,7 @@ describe('WallDrawer overlays', () => {
       () => {},
     );
     (drawer as any).getPoint = () => new THREE.Vector3(0, 0, 0);
-    (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
+    (drawer as any).onDown({ clientX: 0, clientY: 0, button: 0 } as PointerEvent);
     let overlay = document.querySelector(
       'input.wall-overlay',
     ) as HTMLInputElement;
@@ -633,7 +697,7 @@ describe('WallDrawer overlays', () => {
     expect(label?.textContent).toBe('500 mm×');
     // start new wall
     (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
-    (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
+    (drawer as any).onDown({ clientX: 0, clientY: 0, button: 0 } as PointerEvent);
     const persistent = document.querySelectorAll('div.wall-label');
     expect(persistent.length).toBe(1);
   });
@@ -708,7 +772,7 @@ describe('WallDrawer label editing', () => {
     );
     drawer.enable();
     (drawer as any).getPoint = () => new THREE.Vector3(0, 0, 0);
-    (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
+    (drawer as any).onDown({ clientX: 0, clientY: 0, button: 0 } as PointerEvent);
     (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
     (drawer as any).onMove({} as PointerEvent);
     (drawer as any).onUp({ button: 0 } as PointerEvent);
@@ -799,7 +863,7 @@ describe('WallDrawer remove button', () => {
     );
     drawer.enable();
     (drawer as any).getPoint = () => new THREE.Vector3(0, 0, 0);
-    (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
+    (drawer as any).onDown({ clientX: 0, clientY: 0, button: 0 } as PointerEvent);
     (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
     (drawer as any).onMove({} as PointerEvent);
     (drawer as any).onUp({ button: 0 } as PointerEvent);
@@ -847,13 +911,13 @@ describe('WallDrawer opening mode', () => {
     drawer.setMode('opening');
 
     (drawer as any).getPoint = () => new THREE.Vector3(0.5, 0, 0);
-    (drawer as any).onDown({} as PointerEvent);
+    (drawer as any).onDown({ button: 0 } as PointerEvent);
     expect(usePlannerStore.getState().room.openings).toHaveLength(1);
     let op = usePlannerStore.getState().room.openings[0];
     expect(op.offset).toBeCloseTo(450);
 
     (drawer as any).getPoint = () => new THREE.Vector3(0.5, 0, 0);
-    (drawer as any).onDown({} as PointerEvent);
+    (drawer as any).onDown({ button: 0 } as PointerEvent);
     (drawer as any).getPoint = () => new THREE.Vector3(0.6, 0, 0);
     (drawer as any).onMove({} as PointerEvent);
     (drawer as any).onUp({ button: 0 } as PointerEvent);
@@ -861,7 +925,7 @@ describe('WallDrawer opening mode', () => {
     expect(op.offset).toBeCloseTo(550);
 
     (drawer as any).getPoint = () => new THREE.Vector3(0.65, 0, 0);
-    (drawer as any).onDown({} as PointerEvent);
+    (drawer as any).onDown({ button: 0 } as PointerEvent);
     (drawer as any).getPoint = () => new THREE.Vector3(0.75, 0, 0);
     (drawer as any).onMove({} as PointerEvent);
     (drawer as any).onUp({ button: 0 } as PointerEvent);
@@ -935,7 +999,7 @@ describe('WallDrawer edit tolerance across zoom', () => {
       const { drawer } = setup(h);
       const segEnd = new THREE.Vector3(1, 0, 0);
       const screen = (drawer as any).worldToScreen(segEnd);
-      const ev = { clientX: screen.x + 4, clientY: screen.y } as PointerEvent;
+      const ev = { clientX: screen.x + 4, clientY: screen.y, button: 0 } as PointerEvent;
       (drawer as any).onDown(ev);
       expect((drawer as any).editingIndex).toBe(0);
     });
