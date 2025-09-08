@@ -58,6 +58,8 @@
     "snapAngle": "Krok kąta (°) w trybie kątów prostych",
     "noRightAngles": "Bez prostych kątów",
     "autoClose": "Automatyczne domknięcie",
+    "area": "Powierzchnia (mm²)",
+    "perimeter": "Obwód (mm)",
     "invalidLength": "Długość nie może być ujemna"
   },
   "global": {

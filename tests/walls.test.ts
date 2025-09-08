@@ -1,5 +1,5 @@
 import { describe, it, beforeEach, expect } from 'vitest';
-import { getWallSegments } from '../src/utils/walls';
+import { getWallSegments, getAreaAndPerimeter, Segment } from '../src/utils/walls';
 import { usePlannerStore } from '../src/state/store';
 import WallDrawer from '../src/viewer/WallDrawer';
 import * as THREE from 'three';
@@ -105,6 +105,20 @@ describe('getWallSegments', () => {
     expect(segs[0].arc?.radius).toBe(1000);
     expect(segs[0].b.x).toBeCloseTo(1000, 3);
     expect(segs[0].b.y).toBeCloseTo(1000, 3);
+  });
+});
+
+describe('getAreaAndPerimeter', () => {
+  it('computes area and perimeter for square', () => {
+    const segs: Segment[] = [
+      { a: { x: 0, y: 0 }, b: { x: 10, y: 0 }, angle: 0, length: 10 },
+      { a: { x: 10, y: 0 }, b: { x: 10, y: 10 }, angle: Math.PI / 2, length: 10 },
+      { a: { x: 10, y: 10 }, b: { x: 0, y: 10 }, angle: Math.PI, length: 10 },
+      { a: { x: 0, y: 10 }, b: { x: 0, y: 0 }, angle: -Math.PI / 2, length: 10 },
+    ];
+    const { area, perimeter } = getAreaAndPerimeter(segs);
+    expect(area).toBeCloseTo(100, 3);
+    expect(perimeter).toBeCloseTo(40, 3);
   });
 });
 

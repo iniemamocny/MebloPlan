@@ -58,6 +58,8 @@
     "snapAngle": "Angle step (°) for right-angle mode",
     "noRightAngles": "No right angles",
     "autoClose": "Auto close",
+    "area": "Area (mm²)",
+    "perimeter": "Perimeter (mm)",
     "invalidLength": "Length must be non-negative"
   },
   "global": {
