@@ -6,10 +6,27 @@ export function createWallGeometry(
   heightMm: number,
   thicknessMm: number,
   openings: Opening[],
+  arc?: { radius: number; angle: number },
 ): THREE.BufferGeometry {
-  const len = lengthMm / 1000;
   const h = heightMm / 1000;
   const t = thicknessMm / 1000;
+  if (arc) {
+    const r = arc.radius / 1000;
+    const sweep = (arc.angle * Math.PI) / 180;
+    const shape = new THREE.Shape();
+    shape.absarc(0, 0, r, 0, sweep, sweep < 0);
+    const inner = new THREE.Path();
+    inner.absarc(0, 0, r - t, sweep, 0, sweep < 0);
+    shape.holes.push(inner);
+    const geom = new THREE.ExtrudeGeometry(shape, {
+      depth: h,
+      bevelEnabled: false,
+    });
+    geom.rotateX(Math.PI / 2);
+    geom.translate(0, -t / 2, -h / 2);
+    return geom;
+  }
+  const len = lengthMm / 1000;
   const shape = new THREE.Shape();
   shape.moveTo(0, 0);
   shape.lineTo(len, 0);

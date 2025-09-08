@@ -2,15 +2,20 @@ import * as THREE from 'three';
 import type { WebGLRenderer, Camera, Scene } from 'three';
 import type { UseBoundStore, StoreApi } from 'zustand';
 import { usePlannerStore } from '../state/store';
-import type { Room } from '../types';
+import type { Room, WallArc } from '../types';
 
 const pixelsPerMm = 0.2; // 1px ≈ 5mm
 
 interface PlannerStore {
-  addWall: (w: { length: number; angle: number; thickness: number }) => void;
+  addWall: (w: {
+    length: number;
+    angle: number;
+    thickness: number;
+    arc?: WallArc;
+  }) => void;
   updateWall: (
     id: string,
-    patch: Partial<{ length: number; angle: number; thickness: number }>,
+    patch: Partial<{ length: number; angle: number; thickness: number; arc?: WallArc }>,
   ) => void;
   wallThickness: number;
   snapAngle: number;
@@ -36,6 +41,8 @@ export default class WallDrawer {
   private onAngleChange?: (angle: number) => void;
   private active = false;
   private mode: 'draw' | 'edit' | 'move' = 'draw';
+  private arcMode = false;
+  private arcCenter: THREE.Vector3 | null = null;
   private editingIndex: number | null = null;
   private moving: {
     segStart: THREE.Vector3;
@@ -164,6 +171,13 @@ export default class WallDrawer {
     this.active = false;
   }
 
+  setArcMode(on: boolean) {
+    this.arcMode = on;
+    this.arcCenter = null;
+    this.start = null;
+    this.cleanupPreview();
+  }
+
   private cleanupPreview() {
     this.onLengthChange?.(0);
     this.onAngleChange?.(0);
@@ -287,6 +301,14 @@ export default class WallDrawer {
     const point = this.getPoint(e);
     if (!point) return;
     if (this.mode === 'draw') {
+      if (this.arcMode) {
+        if (!this.arcCenter) {
+          this.arcCenter = point;
+          return;
+        }
+        this.finalizeArc(point);
+        return;
+      }
       this.start = point;
       const geom = new THREE.BufferGeometry().setFromPoints([
         point.clone(),
@@ -630,6 +652,22 @@ export default class WallDrawer {
     if (autoClose) {
       this.disable();
     }
+  }
+
+  private finalizeArc(point: THREE.Vector3) {
+    if (!this.arcCenter) return;
+    const state = this.store.getState();
+    const r = this.arcCenter.distanceTo(point) * 1000;
+    if (r < 1) {
+      this.arcCenter = null;
+      return;
+    }
+    const sweep = 90; // degrees, placeholder
+    const length = r * (Math.PI / 2);
+    const thickness = state.wallThickness;
+    state.addWall({ length, angle: 0, thickness, arc: { radius: r, angle: sweep } });
+    this.arcCenter = null;
+    this.updateLabels();
   }
 
   private onUp = (e: PointerEvent) => {
