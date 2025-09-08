@@ -229,10 +229,6 @@ export default class WallDrawer {
     this.unsubLabels = undefined;
     this.unsubGrid = undefined;
     this.unsubOpenings = undefined;
-    if (this.overlay) {
-      this.overlay.remove();
-      this.overlay = null;
-    }
     for (const el of this.labels.values()) {
       el.remove();
     }
@@ -331,6 +327,10 @@ export default class WallDrawer {
     if (this.angleLabel) {
       this.angleLabel.remove();
       this.angleLabel = null;
+    }
+    if (this.overlay) {
+      this.overlay.remove();
+      this.overlay = null;
     }
   }
 
@@ -1226,28 +1226,6 @@ export default class WallDrawer {
       target = origin;
     }
     this.updateSnapPreview(null);
-    if (this.startCircle) {
-      this.scene.remove(this.startCircle);
-      this.startCircle.geometry.dispose();
-      (this.startCircle.material as THREE.Material).dispose();
-      this.startCircle = null;
-    }
-    if (this.endCircle) {
-      this.scene.remove(this.endCircle);
-      this.endCircle.geometry.dispose();
-      (this.endCircle.material as THREE.Material).dispose();
-      this.endCircle = null;
-    }
-    if (this.angleArc) {
-      this.scene.remove(this.angleArc);
-      this.angleArc.geometry.dispose();
-      (this.angleArc.material as THREE.Material).dispose();
-      this.angleArc = null;
-    }
-    if (this.angleLabel) {
-      this.angleLabel.remove();
-      this.angleLabel = null;
-    }
 
     const segStart = this.start.clone();
     const dx = target.x - segStart.x;
@@ -1276,10 +1254,6 @@ export default class WallDrawer {
     if (lengthMm < 1) {
       this.cleanupPreview();
       this.start = null;
-      if (this.overlay) {
-        this.overlay.remove();
-        this.overlay = null;
-      }
       return;
     }
     let snappedLength = state.snapLength
@@ -1299,10 +1273,6 @@ export default class WallDrawer {
     this.cleanupPreview();
     this.start = null;
     this.currentAngle = 0;
-    if (this.overlay) {
-      this.overlay.remove();
-      this.overlay = null;
-    }
     this.updateLabels();
     if (autoClose) {
       this.disable();
