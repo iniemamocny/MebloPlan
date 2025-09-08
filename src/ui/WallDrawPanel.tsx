@@ -25,7 +25,7 @@ export default function WallDrawPanel({
   const [wallLength, setWallLength] = React.useState(0);
   const [wallAngle, setWallAngle] = React.useState(0);
   const [lengthError, setLengthError] = React.useState(false);
-  const [editMode, setEditMode] = React.useState(false);
+  const [mode, setMode] = React.useState<'draw' | 'edit' | 'move'>('draw');
   React.useEffect(() => {
     threeRef.current.onLengthChange = setWallLength;
     threeRef.current.onAngleChange = setWallAngle;
@@ -35,8 +35,8 @@ export default function WallDrawPanel({
     };
   }, [threeRef]);
   React.useEffect(() => {
-    threeRef.current?.setWallMode?.(editMode ? 'edit' : 'draw');
-  }, [editMode, threeRef]);
+    threeRef.current?.setWallMode?.(mode);
+  }, [mode, threeRef]);
   React.useEffect(() => {
     if (!isOpen) {
       threeRef.current?.exitTopDownMode?.();
@@ -94,19 +94,21 @@ export default function WallDrawPanel({
           {t('room.finishDrawing')}
         </button>
       )}
-      <label
-        className="small"
-        style={{ display: 'flex', gap: 8, alignItems: 'center' }}
-      >
-        <input
-          type="checkbox"
-          checked={editMode}
+      <div>
+        <div className="small">{t('app.mode')}</div>
+        <select
+          className="input"
+          value={mode}
           onChange={(e) =>
-            setEditMode((e.target as HTMLInputElement).checked)
+            setMode((e.target as HTMLSelectElement).value as 'draw' | 'edit' | 'move')
           }
-        />
-        {t('app.editWall')}
-      </label>
+          style={{ width: 120 }}
+        >
+          <option value="draw">{t('room.drawWalls')}</option>
+          <option value="edit">{t('app.editWall')}</option>
+          <option value="move">{t('app.moveWall')}</option>
+        </select>
+      </div>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <input
           className="input"
