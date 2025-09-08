@@ -70,6 +70,8 @@ export default class WallDrawer {
   private overlay: HTMLInputElement | null = null;
   private labels = new Map<string, HTMLElement>();
   private snapPreview: THREE.Mesh | null = null;
+  private guideX: THREE.Line | null = null;
+  private guideZ: THREE.Line | null = null;
   private readonly snapTolerance = 0.005; // 5mm
   private grid: THREE.GridHelper | null = null;
   private openingMeshes = new Map<string, THREE.Mesh>();
@@ -293,6 +295,18 @@ export default class WallDrawer {
       this.snapPreview.geometry.dispose();
       (this.snapPreview.material as THREE.Material).dispose();
       this.snapPreview = null;
+    }
+    if (this.guideX) {
+      this.scene.remove(this.guideX);
+      this.guideX.geometry.dispose();
+      (this.guideX.material as THREE.Material).dispose();
+      this.guideX = null;
+    }
+    if (this.guideZ) {
+      this.scene.remove(this.guideZ);
+      this.guideZ.geometry.dispose();
+      (this.guideZ.material as THREE.Material).dispose();
+      this.guideZ = null;
     }
   }
 
@@ -605,6 +619,25 @@ export default class WallDrawer {
       (this.preview as THREE.Mesh).scale.set(0, 1, this.currentThickness);
       this.preview.position.set(point.x, 0.001, point.z);
       this.scene.add(this.preview);
+      const guideMat = new THREE.LineDashedMaterial({
+        color: 0x888888,
+        dashSize: 0.2,
+        gapSize: 0.1,
+      });
+      const g1 = new THREE.BufferGeometry().setFromPoints([
+        point.clone(),
+        point.clone(),
+      ]);
+      this.guideX = new THREE.Line(g1, guideMat.clone());
+      this.guideX.computeLineDistances();
+      this.scene.add(this.guideX);
+      const g2 = new THREE.BufferGeometry().setFromPoints([
+        point.clone(),
+        point.clone(),
+      ]);
+      this.guideZ = new THREE.Line(g2, guideMat.clone());
+      this.guideZ.computeLineDistances();
+      this.scene.add(this.guideZ);
       if (this.overlay) {
         this.overlay.remove();
       }
@@ -800,22 +833,75 @@ export default class WallDrawer {
       let snappedAngle = 0;
       let snappedAngleDeg = 0;
       let length = 0;
+      const dx = point.x - this.start.x;
+      const dz = point.z - this.start.z;
+      if (this.guideX) {
+        const pos = (this.guideX.geometry as THREE.BufferGeometry).attributes
+          .position as THREE.BufferAttribute;
+        pos.setXYZ(0, this.start.x, 0, this.start.z);
+        pos.setXYZ(1, this.start.x + dx, 0, this.start.z);
+        pos.needsUpdate = true;
+        this.guideX.computeLineDistances();
+        this.guideX.visible = Math.abs(dx) > 0.0001;
+      }
+      if (this.guideZ) {
+        const pos = (this.guideZ.geometry as THREE.BufferGeometry).attributes
+          .position as THREE.BufferAttribute;
+        pos.setXYZ(0, this.start.x, 0, this.start.z);
+        pos.setXYZ(1, this.start.x, 0, this.start.z + dz);
+        pos.needsUpdate = true;
+        this.guideZ.computeLineDistances();
+        this.guideZ.visible = Math.abs(dz) > 0.0001;
+      }
+      const tol = THREE.MathUtils.degToRad(5);
       if (snapRightAngles) {
-        const dx = point.x - this.start.x;
-        const dz = point.z - this.start.z;
-        length = Math.sqrt(dx * dx + dz * dz);
-        const angle = Math.atan2(dz, dx);
-        const angleDeg = (angle * 180) / Math.PI;
-        snappedAngleDeg = snapAngle
-          ? Math.round(angleDeg / snapAngle) * snapAngle
-          : angleDeg;
-        snappedAngle = (snappedAngleDeg * Math.PI) / 180;
+        const ang = Math.atan2(dz, dx);
+        let angle = ang;
+        let angleDeg = (angle * 180) / Math.PI;
+        const norm = (ang + Math.PI * 2) % (Math.PI * 2);
+        const diffX = Math.min(Math.abs(norm - 0), Math.abs(norm - Math.PI));
+        const diffZ = Math.min(
+          Math.abs(norm - Math.PI / 2),
+          Math.abs(norm - (3 * Math.PI) / 2),
+        );
+        let highlightX = false;
+        let highlightZ = false;
+        if (diffX < tol) {
+          highlightX = true;
+          angle = diffX < Math.abs(norm - Math.PI) ? 0 : Math.PI;
+          angleDeg = (angle * 180) / Math.PI;
+          length = Math.abs(dx);
+        } else if (diffZ < tol) {
+          highlightZ = true;
+          angle =
+            diffZ < Math.abs(norm - Math.PI / 2)
+              ? Math.PI / 2
+              : (3 * Math.PI) / 2;
+          angleDeg = (angle * 180) / Math.PI;
+          length = Math.abs(dz);
+        } else {
+          length = Math.sqrt(dx * dx + dz * dz);
+          angleDeg = snapAngle
+            ? Math.round(angleDeg / snapAngle) * snapAngle
+            : angleDeg;
+          angle = (angleDeg * Math.PI) / 180;
+        }
+        snappedAngle = angle;
+        snappedAngleDeg = angleDeg;
+        const def = 0x888888;
+        const hi = 0xff0000;
+        if (this.guideX)
+          (this.guideX.material as THREE.LineDashedMaterial).color.set(
+            highlightX ? hi : def,
+          );
+        if (this.guideZ)
+          (this.guideZ.material as THREE.LineDashedMaterial).color.set(
+            highlightZ ? hi : def,
+          );
       } else {
         const prev = room.walls[room.walls.length - 1];
         snappedAngleDeg = (prev ? prev.angle : 0) + angleToPrev;
         snappedAngle = (snappedAngleDeg * Math.PI) / 180;
-        const dx = point.x - this.start.x;
-        const dz = point.z - this.start.z;
         length = dx * Math.cos(snappedAngle) + dz * Math.sin(snappedAngle);
         if (length < 0) {
           length = -length;
@@ -824,14 +910,14 @@ export default class WallDrawer {
         }
       }
       snappedAngleDeg = (snappedAngleDeg + 360) % 360;
-      let lengthMm = length * 1000;
+      const lengthMm = length * 1000;
       let snappedLengthMm = snapLength
         ? Math.round(lengthMm / snapLength) * snapLength
         : lengthMm;
       let snappedLength = snappedLengthMm / 1000;
       this.currentAngle = snappedAngle;
-      let endX = this.start.x + Math.cos(snappedAngle) * snappedLength;
-      let endZ = this.start.z + Math.sin(snappedAngle) * snappedLength;
+      const endX = this.start.x + Math.cos(snappedAngle) * snappedLength;
+      const endZ = this.start.z + Math.sin(snappedAngle) * snappedLength;
       let end = new THREE.Vector3(endX, 0, endZ);
       const snap = this.findClosestVertex(end);
       if (snap) {
