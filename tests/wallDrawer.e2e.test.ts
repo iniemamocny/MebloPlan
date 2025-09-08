@@ -46,7 +46,14 @@ describe('WallDrawer click without drag', () => {
       }),
     } as any;
 
-    const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
+    const drawer = new WallDrawer(
+      renderer,
+      getCamera,
+      scene,
+      store,
+      () => {},
+      () => {},
+    );
     (drawer as any).getPoint = () => new THREE.Vector3(0, 0, 0);
 
     const down = { clientX: 0, clientY: 0 } as PointerEvent;
@@ -64,6 +71,67 @@ describe('WallDrawer click without drag', () => {
     expect((drawer as any).preview).toBeNull();
     expect((drawer as any).start).toBeNull();
     expect(scene.children.length).toBeGreaterThan(0);
+  });
+});
+
+describe('WallDrawer small movement treated as click', () => {
+  it('does not start drawing for tiny pointer movement', () => {
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const getCamera = () => camera;
+    const scene = new THREE.Scene();
+    const addWall = vi.fn();
+    const store = {
+      getState: () => ({
+        addWall,
+        wallThickness: 100,
+        wallType: 'dzialowa',
+        snapAngle: 0,
+        snapLength: 0,
+        snapRightAngles: true,
+        angleToPrev: 0,
+        room: { walls: [] },
+        setRoom: vi.fn(),
+      }),
+    } as any;
+
+    const drawer = new WallDrawer(
+      renderer,
+      getCamera,
+      scene,
+      store,
+      () => {},
+      () => {},
+    );
+    (drawer as any).getPoint = () => new THREE.Vector3(0, 0, 0);
+
+    const down = { clientX: 0, clientY: 0 } as PointerEvent;
+    (drawer as any).onDown(down);
+
+    const move = { clientX: 2, clientY: 2 } as PointerEvent;
+    (drawer as any).onMove(move);
+
+    const up = { clientX: 2, clientY: 2, detail: 1, button: 0 } as PointerEvent;
+    (drawer as any).onUp(up);
+
+    expect(addWall).toHaveBeenCalledWith({
+      length: 100,
+      angle: 0,
+      thickness: 100,
+    });
+    expect((drawer as any).preview).toBeNull();
   });
 });
 
@@ -100,11 +168,21 @@ describe('WallDrawer.applyLength', () => {
       }),
     } as any;
 
-    const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
+    const drawer = new WallDrawer(
+      renderer,
+      getCamera,
+      scene,
+      store,
+      () => {},
+      () => {},
+    );
     // initialise start and preview to allow applyLength to proceed
     (drawer as any).start = new THREE.Vector3();
     (drawer as any).preview = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]),
+      new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(),
+        new THREE.Vector3(),
+      ]),
       new THREE.LineBasicMaterial(),
     );
 
@@ -201,7 +279,14 @@ describe('WallDrawer vertex snapping to existing point', () => {
       autoCloseWalls: false,
     };
     const store: any = { getState: () => state };
-    const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
+    const drawer = new WallDrawer(
+      renderer,
+      getCamera,
+      scene,
+      store,
+      () => {},
+      () => {},
+    );
     (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
     (drawer as any).onDown({} as PointerEvent);
     (drawer as any).getPoint = () => new THREE.Vector3(0.004, 0, 0.002);
@@ -249,7 +334,14 @@ describe('WallDrawer grid snapping', () => {
       gridSize: 50,
     };
     const store = { getState: () => state } as any;
-    const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
+    const drawer = new WallDrawer(
+      renderer,
+      getCamera,
+      scene,
+      store,
+      () => {},
+      () => {},
+    );
     const points = [
       new THREE.Vector3(0.012, 0, 0.018),
       new THREE.Vector3(0.104, 0, 0.021),
@@ -265,7 +357,11 @@ describe('WallDrawer grid snapping', () => {
     (drawer as any).onMove({ clientX: 0, clientY: 0 } as PointerEvent);
     (drawer as any).onUp({ clientX: 0, clientY: 0, button: 0 } as PointerEvent);
     expect(setRoom).toHaveBeenCalledWith({ origin: { x: 0, y: 0 } });
-    expect(addWall).toHaveBeenCalledWith({ length: 100, angle: 0, thickness: 100 });
+    expect(addWall).toHaveBeenCalledWith({
+      length: 100,
+      angle: 0,
+      thickness: 100,
+    });
   });
 });
 
@@ -303,7 +399,14 @@ describe('WallDrawer edit mode', () => {
       setRoom: vi.fn(),
     };
     const store = { getState: () => state } as any;
-    const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
+    const drawer = new WallDrawer(
+      renderer,
+      getCamera,
+      scene,
+      store,
+      () => {},
+      () => {},
+    );
     (drawer as any).setMode('edit');
     // select endpoint at (1,0)
     (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
@@ -359,10 +462,19 @@ describe('WallDrawer overlays', () => {
       getState: () => state,
       subscribe: () => () => {},
     } as any;
-    const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
+    const drawer = new WallDrawer(
+      renderer,
+      getCamera,
+      scene,
+      store,
+      () => {},
+      () => {},
+    );
     (drawer as any).getPoint = () => new THREE.Vector3(0, 0, 0);
     (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
-    let overlay = document.querySelector('input.wall-overlay') as HTMLInputElement;
+    let overlay = document.querySelector(
+      'input.wall-overlay',
+    ) as HTMLInputElement;
     expect(overlay).toBeNull();
     // move to start dragging and update overlay
     (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
@@ -448,7 +560,14 @@ describe('WallDrawer label editing', () => {
         return () => {};
       },
     } as any;
-    const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
+    const drawer = new WallDrawer(
+      renderer,
+      getCamera,
+      scene,
+      store,
+      () => {},
+      () => {},
+    );
     drawer.enable();
     (drawer as any).getPoint = () => new THREE.Vector3(0, 0, 0);
     (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
@@ -459,10 +578,16 @@ describe('WallDrawer label editing', () => {
     let label = document.querySelector('div.wall-label') as HTMLDivElement;
     expect(label?.textContent).toBe('1000×');
     label.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    const input = document.querySelector('input.wall-label') as HTMLInputElement;
+    const input = document.querySelector(
+      'input.wall-label',
+    ) as HTMLInputElement;
     input.value = '800';
     input.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+      new KeyboardEvent('keydown', {
+        key: 'Enter',
+        bubbles: true,
+        cancelable: true,
+      }),
     );
     expect(state.updateWall).toHaveBeenCalledWith(wallId, { length: 800 });
     expect(state.room.walls[0].length).toBe(800);
@@ -525,14 +650,23 @@ describe('WallDrawer remove button', () => {
       subs.push({ sel, cb });
       return () => {};
     };
-    const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
+    const drawer = new WallDrawer(
+      renderer,
+      getCamera,
+      scene,
+      store,
+      () => {},
+      () => {},
+    );
     drawer.enable();
     (drawer as any).getPoint = () => new THREE.Vector3(0, 0, 0);
     (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
     (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
     (drawer as any).onMove({} as PointerEvent);
     (drawer as any).onUp({ button: 0 } as PointerEvent);
-    const btn = document.querySelector('div.wall-label button') as HTMLButtonElement;
+    const btn = document.querySelector(
+      'div.wall-label button',
+    ) as HTMLButtonElement;
     expect(btn).not.toBeNull();
   });
 });
@@ -563,7 +697,14 @@ describe('WallDrawer opening mode', () => {
     const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
     const camera = new THREE.PerspectiveCamera();
     const scene = new THREE.Scene();
-    const drawer = new WallDrawer(renderer, () => camera, scene, usePlannerStore, () => {}, () => {});
+    const drawer = new WallDrawer(
+      renderer,
+      () => camera,
+      scene,
+      usePlannerStore,
+      () => {},
+      () => {},
+    );
     drawer.setMode('opening');
 
     (drawer as any).getPoint = () => new THREE.Vector3(0.5, 0, 0);
