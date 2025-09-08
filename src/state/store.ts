@@ -225,7 +225,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   snapRightAngles: true,
   angleToPrev: persisted?.angleToPrev ?? 0,
   defaultSquareAngle: persisted?.defaultSquareAngle ?? 0,
-  autoCloseWalls: persisted?.autoCloseWalls ?? true,
+  autoCloseWalls: persisted?.autoCloseWalls ?? false,
   gridSize: persisted?.gridSize ?? 50,
   snapToGrid: persisted?.snapToGrid ?? false,
   measurementUnit: persisted?.measurementUnit || 'mm',

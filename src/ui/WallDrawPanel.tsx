@@ -364,7 +364,7 @@ export default function WallDrawPanel({
             store.setAutoCloseWalls((e.target as HTMLInputElement).checked)
           }
         />
-        {t('room.autoClose')}
+        {t('room.autoChain')}
       </label>
       <div>
         <div className="small">{t('room.area')}</div>

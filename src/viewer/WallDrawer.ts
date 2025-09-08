@@ -1419,6 +1419,9 @@ export default class WallDrawer {
     if (lengthMm < 1) {
       this.cleanupPreview();
       this.start = null;
+      this.dragStart = null;
+      this.dragStartClient = null;
+      this.isDragging = false;
       return;
     }
     let snappedLength = state.snapLength
@@ -1437,6 +1440,9 @@ export default class WallDrawer {
     this.currentThickness = thickness / 1000;
     this.cleanupPreview();
     this.start = null;
+    this.dragStart = null;
+    this.dragStartClient = null;
+    this.isDragging = false;
     this.currentAngle = 0;
     this.updateLabels();
     if (autoClose) {

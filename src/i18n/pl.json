@@ -56,7 +56,7 @@
     "angleToPrev": "Kąt do poprzedniej (°)",
     "snapLength": "Krok długości (mm; Alt tymczasowo wyłącza przyciąganie)",
     "snapAngle": "Krok kąta (°) w trybie kątów prostych (Alt: chwilowe wyłączenie)",
-    "autoClose": "Automatyczne domknięcie",
+    "autoChain": "Automatyczne łączenie",
     "area": "Powierzchnia (mm²)",
     "perimeter": "Obwód (mm)",
     "invalidLength": "Długość nie może być ujemna"
