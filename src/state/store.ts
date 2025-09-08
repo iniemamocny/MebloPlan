@@ -143,6 +143,7 @@ type Store = {
   autoCloseWalls: boolean;
   gridSize: number;
   snapToGrid: boolean;
+  openingDefaults: { width: number; height: number; bottom: number; kind: number };
   setRole: (r: 'stolarz' | 'klient') => void;
   updateGlobals: (fam: FAMILY, patch: Partial<Globals[FAMILY]>) => void;
   updatePrices: (patch: Partial<Prices>) => void;
@@ -172,6 +173,9 @@ type Store = {
   setAutoCloseWalls: (v: boolean) => void;
   setGridSize: (v: number) => void;
   setSnapToGrid: (v: boolean) => void;
+  setOpeningDefaults: (
+    patch: Partial<{ width: number; height: number; bottom: number; kind: number }>,
+  ) => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -211,6 +215,9 @@ export const usePlannerStore = create<Store>((set, get) => ({
   autoCloseWalls: persisted?.autoCloseWalls ?? true,
   gridSize: persisted?.gridSize ?? 50,
   snapToGrid: persisted?.snapToGrid ?? false,
+  openingDefaults:
+    persisted?.openingDefaults ||
+    { width: 900, height: 2100, bottom: 0, kind: 0 },
   showFronts: true,
   setRole: (r) => set({ role: r }),
   updateGlobals: (fam, patch) =>
@@ -506,6 +513,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setAutoCloseWalls: (v) => set({ autoCloseWalls: v }),
   setGridSize: (v) => set({ gridSize: v }),
   setSnapToGrid: (v) => set({ snapToGrid: v }),
+  setOpeningDefaults: (patch) =>
+    set((s) => ({ openingDefaults: { ...s.openingDefaults, ...patch } })),
 }));
 
 const persistSelector = (s: Store) => ({
@@ -523,6 +532,7 @@ const persistSelector = (s: Store) => ({
   autoCloseWalls: s.autoCloseWalls,
   gridSize: s.gridSize,
   snapToGrid: s.snapToGrid,
+  openingDefaults: s.openingDefaults,
 });
 
 let persistTimeout = 0;

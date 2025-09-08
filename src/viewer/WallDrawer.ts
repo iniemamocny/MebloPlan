@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import type { WebGLRenderer, Camera, Scene } from 'three';
 import type { UseBoundStore, StoreApi } from 'zustand';
 import { usePlannerStore } from '../state/store';
-import type { Room, WallArc } from '../types';
-import { getWallSegments } from '../utils/walls';
+import type { Room, WallArc, Opening } from '../types';
+import { getWallSegments, projectPointToSegment } from '../utils/walls';
 
 const pixelsPerMm = 0.2; // 1px ≈ 5mm
 
@@ -29,6 +29,9 @@ interface PlannerStore {
   autoCloseWalls: boolean;
   gridSize: number;
   snapToGrid: boolean;
+  addOpening: (op: Omit<Opening, 'id'>) => void;
+  updateOpening: (id: string, patch: Partial<Omit<Opening, 'id'>>) => void;
+  openingDefaults: { width: number; height: number; bottom: number; kind: number };
 }
 
 export default class WallDrawer {
@@ -44,7 +47,7 @@ export default class WallDrawer {
   private onLengthChange?: (len: number) => void;
   private onAngleChange?: (angle: number) => void;
   private active = false;
-  private mode: 'draw' | 'edit' | 'move' = 'draw';
+  private mode: 'draw' | 'edit' | 'move' | 'opening' = 'draw';
   private arcMode = false;
   private arcCenter: THREE.Vector3 | null = null;
   private editingIndex: number | null = null;
@@ -59,11 +62,30 @@ export default class WallDrawer {
   private snapPreview: THREE.Mesh | null = null;
   private readonly snapTolerance = 0.005; // 5mm
   private grid: THREE.GridHelper | null = null;
+  private openingMeshes = new Map<string, THREE.Mesh>();
+  private openingEdit:
+    | {
+        id: string;
+        type: 'move' | 'resize-left' | 'resize-right';
+        grab: number;
+        startOffset: number;
+        startWidth: number;
+        seg: {
+          start: THREE.Vector3;
+          end: THREE.Vector3;
+          dir: THREE.Vector3;
+          angle: number;
+          length: number;
+          wall: { id: string; thickness: number };
+        };
+      }
+    | null = null;
 
   // unsubscribes for store subscriptions
   private unsubThickness?: () => void;
   private unsubLabels?: () => void;
   private unsubGrid?: () => void;
+  private unsubOpenings?: () => void;
   // handler for camera movement
   private onCameraChange = () => {
     this.updateLabels();
@@ -141,15 +163,23 @@ export default class WallDrawer {
       },
       { fireImmediately: true },
     );
+    this.unsubOpenings = this.store.subscribe(
+      (s) => s.room.openings,
+      (ops) => {
+        this.updateOpenings(ops);
+      },
+      { fireImmediately: true },
+    );
     this.updateLabels(this.store.getState().room.walls);
     this.active = true;
   }
 
-  setMode(mode: 'draw' | 'edit' | 'move') {
+  setMode(mode: 'draw' | 'edit' | 'move' | 'opening') {
     this.mode = mode;
     this.start = null;
     this.editingIndex = null;
     this.moving = null;
+    this.openingEdit = null;
     this.cleanupPreview();
   }
 
@@ -174,9 +204,11 @@ export default class WallDrawer {
     this.unsubThickness?.();
     this.unsubLabels?.();
     this.unsubGrid?.();
+    this.unsubOpenings?.();
     this.unsubThickness = undefined;
     this.unsubLabels = undefined;
     this.unsubGrid = undefined;
+    this.unsubOpenings = undefined;
     if (this.overlay) {
       this.overlay.remove();
       this.overlay = null;
@@ -191,6 +223,12 @@ export default class WallDrawer {
       (this.grid.material as THREE.Material).dispose();
       this.grid = null;
     }
+    for (const m of this.openingMeshes.values()) {
+      this.scene.remove(m);
+      m.geometry.dispose();
+      (m.material as THREE.Material).dispose();
+    }
+    this.openingMeshes.clear();
     this.active = false;
   }
 
@@ -313,6 +351,100 @@ export default class WallDrawer {
       this.snapPreview.geometry.dispose();
       (this.snapPreview.material as THREE.Material).dispose();
       this.snapPreview = null;
+    }
+  }
+
+  private getWallInfo(id: string) {
+    const { room } = this.store.getState();
+    const origin = room.origin || { x: 0, y: 0 };
+    let cursor = { x: origin.x, y: origin.y };
+    for (const w of room.walls) {
+      const ang = ((w.angle || 0) * Math.PI) / 180;
+      const dir = { x: Math.cos(ang), y: Math.sin(ang) };
+      const len = w.length || 0;
+      const end = { x: cursor.x + dir.x * len, y: cursor.y + dir.y * len };
+      if (w.id === id) {
+        return {
+          start: new THREE.Vector3(cursor.x / 1000, 0, cursor.y / 1000),
+          end: new THREE.Vector3(end.x / 1000, 0, end.y / 1000),
+          dir: new THREE.Vector3(dir.x, 0, dir.y),
+          angle: ang,
+          length: len,
+          wall: w,
+        };
+      }
+      cursor = end;
+    }
+    return null;
+  }
+
+  private findSegmentForPoint(x: number, y: number) {
+    const { room } = this.store.getState();
+    const origin = room.origin || { x: 0, y: 0 };
+    let cursor = { x: origin.x, y: origin.y };
+    let best: any = null;
+    let min = Infinity;
+    for (const w of room.walls) {
+      const ang = ((w.angle || 0) * Math.PI) / 180;
+      const dir = { x: Math.cos(ang), y: Math.sin(ang) };
+      const len = w.length || 0;
+      const end = { x: cursor.x + dir.x * len, y: cursor.y + dir.y * len };
+      const proj = projectPointToSegment(x, y, {
+        a: { ...cursor },
+        b: { ...end },
+        angle: ang,
+        length: len,
+      });
+      const tol = (w.thickness || 0) / 2 + 20;
+      if (proj.dist <= tol && proj.dist < min) {
+        min = proj.dist;
+        best = {
+          wall: w,
+          start: new THREE.Vector3(cursor.x / 1000, 0, cursor.y / 1000),
+          end: new THREE.Vector3(end.x / 1000, 0, end.y / 1000),
+          dir: new THREE.Vector3(dir.x, 0, dir.y),
+          angle: ang,
+          length: len,
+          offset: proj.t * len,
+        };
+      }
+      cursor = end;
+    }
+    return best;
+  }
+
+  private updateOpenings(openings = this.store.getState().room.openings || []) {
+    openings = openings || [];
+    const ids = new Set(openings.map((o) => o.id));
+    for (const [id, mesh] of Array.from(this.openingMeshes.entries())) {
+      if (!ids.has(id)) {
+        this.scene.remove(mesh);
+        mesh.geometry.dispose();
+        (mesh.material as THREE.Material).dispose();
+        this.openingMeshes.delete(id);
+      }
+    }
+    for (const op of openings) {
+      const info = this.getWallInfo(op.wallId);
+      if (!info) continue;
+      const w = (op.width || 0) / 1000;
+      const t = (info.wall.thickness || 0) / 1000;
+      let mesh = this.openingMeshes.get(op.id);
+      if (!mesh) {
+        const geom = new THREE.BoxGeometry(w, 0.01, t);
+        const mat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        mesh = new THREE.Mesh(geom, mat);
+        this.scene.add(mesh);
+        this.openingMeshes.set(op.id, mesh);
+      } else {
+        mesh.geometry.dispose();
+        mesh.geometry = new THREE.BoxGeometry(w, 0.01, t);
+      }
+      const center = info.start
+        .clone()
+        .add(info.dir.clone().multiplyScalar((op.offset + op.width / 2) / 1000));
+      mesh.position.set(center.x, 0.005, center.z);
+      mesh.rotation.y = info.angle;
     }
   }
 
@@ -527,10 +659,92 @@ export default class WallDrawer {
         prevStart.copy(cursor);
         cursor.copy(end);
       }
+    } else if (this.mode === 'opening') {
+      const pm = { x: point.x * 1000, y: point.z * 1000 };
+      const { room, openingDefaults } = this.store.getState();
+      for (const op of room.openings) {
+        const info = this.getWallInfo(op.wallId);
+        if (!info) continue;
+        const proj = projectPointToSegment(pm.x, pm.y, {
+          a: { x: info.start.x * 1000, y: info.start.z * 1000 },
+          b: { x: info.end.x * 1000, y: info.end.z * 1000 },
+          angle: info.angle,
+          length: info.length,
+        });
+        const tol = info.wall.thickness / 2 + 20;
+        if (proj.dist <= tol) {
+          const offset = proj.t * info.length;
+          if (offset >= op.offset && offset <= op.offset + op.width) {
+            const edgeTol = 20;
+            let type: 'move' | 'resize-left' | 'resize-right' = 'move';
+            let grab = offset - op.offset;
+            if (offset - op.offset < edgeTol) {
+              type = 'resize-left';
+              grab = 0;
+            } else if (op.offset + op.width - offset < edgeTol) {
+              type = 'resize-right';
+              grab = 0;
+            }
+            this.openingEdit = {
+              id: op.id,
+              type,
+              grab,
+              startOffset: op.offset,
+              startWidth: op.width,
+              seg: info,
+            };
+            return;
+          }
+        }
+      }
+      const seg = this.findSegmentForPoint(pm.x, pm.y);
+      if (!seg) return;
+      const width = openingDefaults.width;
+      let offset = seg.offset - width / 2;
+      if (offset < 0) offset = 0;
+      if (offset + width > seg.length) offset = Math.max(0, seg.length - width);
+      this.store.getState().addOpening({
+        wallId: seg.wall.id,
+        offset,
+        width,
+        height: openingDefaults.height,
+        bottom: openingDefaults.bottom,
+        kind: openingDefaults.kind,
+      });
     }
   };
 
   private onMove = (e: PointerEvent) => {
+    if (this.mode === 'opening') {
+      if (!this.openingEdit) return;
+      const point = this.getPoint(e);
+      if (!point) return;
+      const pm = { x: point.x * 1000, y: point.z * 1000 };
+      const info = this.openingEdit.seg;
+      const proj = projectPointToSegment(pm.x, pm.y, {
+        a: { x: info.start.x * 1000, y: info.start.z * 1000 },
+        b: { x: info.end.x * 1000, y: info.end.z * 1000 },
+        angle: info.angle,
+        length: info.length,
+      });
+      let offset = proj.t * info.length;
+      if (this.openingEdit.type === 'move') {
+        offset = offset - this.openingEdit.grab;
+        offset = Math.max(0, Math.min(offset, info.length - this.openingEdit.startWidth));
+        this.store.getState().updateOpening(this.openingEdit.id, { offset });
+      } else if (this.openingEdit.type === 'resize-left') {
+        offset = Math.max(0, Math.min(offset, this.openingEdit.startOffset + this.openingEdit.startWidth - 10));
+        let width = this.openingEdit.startOffset + this.openingEdit.startWidth - offset;
+        if (offset + width > info.length) width = info.length - offset;
+        width = Math.max(10, width);
+        this.store.getState().updateOpening(this.openingEdit.id, { offset, width });
+      } else if (this.openingEdit.type === 'resize-right') {
+        let width = offset - this.openingEdit.startOffset;
+        width = Math.max(10, Math.min(width, info.length - this.openingEdit.startOffset));
+        this.store.getState().updateOpening(this.openingEdit.id, { width });
+      }
+      return;
+    }
     if (!this.start || !this.preview) return;
     const point = this.getPoint(e);
     if (!point) return;
@@ -795,6 +1009,10 @@ export default class WallDrawer {
   }
 
   private onUp = (e: PointerEvent) => {
+    if (this.mode === 'opening') {
+      this.openingEdit = null;
+      return;
+    }
     if (!this.start || !this.preview) {
       this.cleanupPreview();
       return;
