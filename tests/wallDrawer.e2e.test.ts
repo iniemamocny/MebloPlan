@@ -242,7 +242,7 @@ describe('WallDrawer overlays', () => {
     const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
     (drawer as any).getPoint = () => new THREE.Vector3(0, 0, 0);
     (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
-    let overlay = document.querySelector('input.wall-overlay') as HTMLInputElement;
+    const overlay = document.querySelector('input.wall-overlay') as HTMLInputElement;
     expect(overlay).not.toBeNull();
     // move to update overlay
     (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
