@@ -141,4 +141,50 @@ describe('openings', () => {
     expect(() => updateOpening(id, { offset: -5 })).toThrow();
     expect(usePlannerStore.getState().room.openings[0].offset).toBe(100);
   });
+
+  it('rejects overlapping opening on add', () => {
+    const { addOpening } = usePlannerStore.getState();
+    addOpening({
+      wallId: 'w1',
+      offset: 100,
+      width: 50,
+      height: 50,
+      bottom: 0,
+      kind: 0,
+    });
+    expect(() =>
+      addOpening({
+        wallId: 'w1',
+        offset: 120,
+        width: 50,
+        height: 50,
+        bottom: 0,
+        kind: 0,
+      }),
+    ).toThrow();
+    expect(usePlannerStore.getState().room.openings).toHaveLength(1);
+  });
+
+  it('rejects overlapping opening on update', () => {
+    const { addOpening, updateOpening } = usePlannerStore.getState();
+    addOpening({
+      wallId: 'w1',
+      offset: 100,
+      width: 50,
+      height: 50,
+      bottom: 0,
+      kind: 0,
+    });
+    addOpening({
+      wallId: 'w1',
+      offset: 200,
+      width: 50,
+      height: 50,
+      bottom: 0,
+      kind: 0,
+    });
+    const id = usePlannerStore.getState().room.openings[0].id;
+    expect(() => updateOpening(id, { offset: 180 })).toThrow();
+    expect(usePlannerStore.getState().room.openings[0].offset).toBe(100);
+  });
 });

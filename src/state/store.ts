@@ -488,6 +488,16 @@ export const usePlannerStore = create<Store>((set, get) => ({
     ) {
       throw new Error('Invalid opening dimensions');
     }
+    if (
+      room.openings.some(
+        (o) =>
+          o.wallId === op.wallId &&
+          op.offset < o.offset + o.width &&
+          o.offset < op.offset + op.width,
+      )
+    ) {
+      throw new Error('Opening overlaps with existing opening');
+    }
     set((s) => ({
       past: [
         ...s.past,
@@ -520,6 +530,17 @@ export const usePlannerStore = create<Store>((set, get) => ({
       bottom + height > room.height
     ) {
       throw new Error('Invalid opening dimensions');
+    }
+    if (
+      room.openings.some(
+        (o) =>
+          o.wallId === wallId &&
+          o.id !== id &&
+          offset < o.offset + o.width &&
+          o.offset < offset + width,
+      )
+    ) {
+      throw new Error('Opening overlaps with existing opening');
     }
     set((s) => ({
       past: [
