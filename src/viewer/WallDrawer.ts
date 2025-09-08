@@ -701,6 +701,7 @@ export default class WallDrawer {
   };
 
   private onDown = (e: PointerEvent) => {
+    if (e.button !== 0) return;
     if (this.start) return;
     const point = this.getPoint(e);
     if (!point) return;
