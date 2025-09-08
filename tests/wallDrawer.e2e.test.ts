@@ -207,6 +207,62 @@ describe('WallDrawer small movement treated as click', () => {
   });
 });
 
+describe('WallDrawer segment selection', () => {
+  it('finds correct segment for a given point', () => {
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const getCamera = () => camera;
+    const scene = new THREE.Scene();
+    const store = {
+      getState: () => ({
+        addWall: vi.fn(() => 'id'),
+        wallThickness: 100,
+        wallType: 'dzialowa',
+        snapAngle: 0,
+        snapLength: 0,
+        snapRightAngles: true,
+        angleToPrev: 0,
+        defaultSquareAngle: 0,
+        room: {
+          origin: { x: 0, y: 0 },
+          walls: [
+            { id: 'a', length: 1000, angle: 0, thickness: 100 },
+            { id: 'b', length: 1000, angle: 90, thickness: 100 },
+          ],
+          openings: [],
+        },
+        setRoom: vi.fn(),
+      }),
+    } as any;
+
+    const drawer = new WallDrawer(
+      renderer,
+      getCamera,
+      scene,
+      store,
+      () => {},
+      () => {},
+    );
+
+    const seg1 = (drawer as any).findSegmentForPoint(500, 30);
+    expect(seg1.wall.id).toBe('a');
+    const seg2 = (drawer as any).findSegmentForPoint(970, 500);
+    expect(seg2.wall.id).toBe('b');
+  });
+});
+
 describe('WallDrawer.applyLength', () => {
   it('ignores non-positive lengths', () => {
     const canvas = document.createElement('canvas');

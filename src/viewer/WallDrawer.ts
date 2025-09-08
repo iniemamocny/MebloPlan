@@ -55,6 +55,14 @@ interface PlannerStore {
   wallType: 'nosna' | 'dzialowa';
 }
 
+type WallSegInfo = ReturnType<typeof getWallSegments>[number] & {
+  start: THREE.Vector3;
+  end: THREE.Vector3;
+  dir: THREE.Vector3;
+  wall: Room['walls'][number];
+  index: number;
+};
+
 export default class WallDrawer {
   private renderer: WebGLRenderer;
   private getCamera: () => Camera;
@@ -114,6 +122,11 @@ export default class WallDrawer {
       wall: { id: string; thickness: number };
     };
   } | null = null;
+
+  private segments: WallSegInfo[] = [];
+  private segmentsByWall = new Map<string, WallSegInfo>();
+  private segmentGrid = new Map<string, WallSegInfo[]>();
+  private readonly segmentGridSize = 1000; // mm
 
   // unsubscribes for store subscriptions
   private unsubThickness?: () => void;
@@ -449,7 +462,32 @@ export default class WallDrawer {
   }
 
   private getSegments() {
-    return getWallSegments(this.store.getState().room);
+    const room = this.store.getState().room;
+    const segs = getWallSegments(room);
+    this.segments = [];
+    this.segmentsByWall.clear();
+    this.segmentGrid.clear();
+    segs.forEach((s, i) => {
+      const wall = room.walls[i];
+      const start = new THREE.Vector3(s.a.x / 1000, 0, s.a.y / 1000);
+      const end = new THREE.Vector3(s.b.x / 1000, 0, s.b.y / 1000);
+      const dir = end.clone().sub(start).normalize();
+      const info: WallSegInfo = { ...s, start, end, dir, wall, index: i };
+      this.segments.push(info);
+      this.segmentsByWall.set(wall.id, info);
+      const midX = (s.a.x + s.b.x) / 2;
+      const midY = (s.a.y + s.b.y) / 2;
+      const key = this.gridKey(midX, midY);
+      if (!this.segmentGrid.has(key)) this.segmentGrid.set(key, []);
+      this.segmentGrid.get(key)!.push(info);
+    });
+    return this.segments;
+  }
+
+  private gridKey(x: number, y: number) {
+    const gx = Math.floor(x / this.segmentGridSize);
+    const gy = Math.floor(y / this.segmentGridSize);
+    return `${gx},${gy}`;
   }
 
   private findClosestVertex(point: THREE.Vector3): THREE.Vector3 | null {
@@ -480,60 +518,31 @@ export default class WallDrawer {
   }
 
   private getWallInfo(id: string) {
-    const { room } = this.store.getState();
-    const origin = room.origin || { x: 0, y: 0 };
-    let cursor = { x: origin.x, y: origin.y };
-    for (const w of room.walls) {
-      const ang = ((w.angle || 0) * Math.PI) / 180;
-      const dir = { x: Math.cos(ang), y: Math.sin(ang) };
-      const len = w.length || 0;
-      const end = { x: cursor.x + dir.x * len, y: cursor.y + dir.y * len };
-      if (w.id === id) {
-        return {
-          start: new THREE.Vector3(cursor.x / 1000, 0, cursor.y / 1000),
-          end: new THREE.Vector3(end.x / 1000, 0, end.y / 1000),
-          dir: new THREE.Vector3(dir.x, 0, dir.y),
-          angle: ang,
-          length: len,
-          wall: w,
-        };
-      }
-      cursor = end;
-    }
-    return null;
+    this.getSegments();
+    return this.segmentsByWall.get(id) || null;
   }
 
   private findSegmentForPoint(x: number, y: number) {
-    const { room } = this.store.getState();
-    const origin = room.origin || { x: 0, y: 0 };
-    let cursor = { x: origin.x, y: origin.y };
+    this.getSegments();
+    const gx = Math.floor(x / this.segmentGridSize);
+    const gy = Math.floor(y / this.segmentGridSize);
+    const candidates: WallSegInfo[] = [];
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        const arr = this.segmentGrid.get(`${gx + dx},${gy + dy}`);
+        if (arr) candidates.push(...arr);
+      }
+    }
+    const list = candidates.length ? candidates : this.segments;
     let best: any = null;
     let min = Infinity;
-    for (const w of room.walls) {
-      const ang = ((w.angle || 0) * Math.PI) / 180;
-      const dir = { x: Math.cos(ang), y: Math.sin(ang) };
-      const len = w.length || 0;
-      const end = { x: cursor.x + dir.x * len, y: cursor.y + dir.y * len };
-      const proj = projectPointToSegment(x, y, {
-        a: { ...cursor },
-        b: { ...end },
-        angle: ang,
-        length: len,
-      });
-      const tol = (w.thickness || 0) / 2 + 20;
+    for (const seg of list) {
+      const proj = projectPointToSegment(x, y, seg);
+      const tol = (seg.wall.thickness || 0) / 2 + 20;
       if (proj.dist <= tol && proj.dist < min) {
         min = proj.dist;
-        best = {
-          wall: w,
-          start: new THREE.Vector3(cursor.x / 1000, 0, cursor.y / 1000),
-          end: new THREE.Vector3(end.x / 1000, 0, end.y / 1000),
-          dir: new THREE.Vector3(dir.x, 0, dir.y),
-          angle: ang,
-          length: len,
-          offset: proj.t * len,
-        };
+        best = { ...seg, offset: proj.t * seg.length };
       }
-      cursor = end;
     }
     return best;
   }
@@ -695,91 +704,50 @@ export default class WallDrawer {
       this.start = point;
       this.currentThickness = this.store.getState().wallThickness / 1000;
     } else if (this.mode === 'edit') {
-      const { room } = this.store.getState();
-      const origin = room.origin
-        ? new THREE.Vector3(room.origin.x / 1000, 0, room.origin.y / 1000)
-        : new THREE.Vector3();
-      const cursor = origin.clone();
-      for (let i = 0; i < room.walls.length; i++) {
-        const w = room.walls[i];
-        const ang = (w.angle * Math.PI) / 180;
-        const len = (w.length || 0) / 1000;
-        const end = new THREE.Vector3(
-          cursor.x + Math.cos(ang) * len,
-          0,
-          cursor.z + Math.sin(ang) * len,
-        );
-        if (point.distanceTo(end) < 0.2) {
-          this.start = cursor.clone();
+      const segs = this.getSegments();
+      for (let i = 0; i < segs.length; i++) {
+        const s = segs[i];
+        if (point.distanceTo(s.end) < 0.2) {
+          this.start = s.start.clone();
           this.editingIndex = i;
           const geom = new THREE.BufferGeometry().setFromPoints([
-            this.start.clone(),
-            end.clone(),
+            s.start.clone(),
+            s.end.clone(),
           ]);
           const mat = new THREE.LineBasicMaterial({ color: 0x000000 });
           this.preview = new THREE.Line(geom, mat);
           this.scene.add(this.preview);
           return;
         }
-        cursor.copy(end);
       }
     } else if (this.mode === 'move') {
-      const { room } = this.store.getState();
-      const origin = room.origin
-        ? new THREE.Vector3(room.origin.x / 1000, 0, room.origin.y / 1000)
-        : new THREE.Vector3();
-      const cursor = origin.clone();
-      const prevStart = origin.clone();
-      for (let i = 0; i < room.walls.length; i++) {
-        const w = room.walls[i];
-        const ang = (w.angle * Math.PI) / 180;
-        const len = (w.length || 0) / 1000;
-        const end = new THREE.Vector3(
-          cursor.x + Math.cos(ang) * len,
-          0,
-          cursor.z + Math.sin(ang) * len,
-        );
-        const segVec = end.clone().sub(cursor);
-        const segLenSq = segVec.lengthSq();
-        if (segLenSq > 0) {
-          const t = point.clone().sub(cursor).dot(segVec) / segLenSq;
-          if (t >= 0 && t <= 1) {
-            const proj = cursor.clone().add(segVec.clone().multiplyScalar(t));
-            if (proj.distanceTo(point) < 0.2) {
-              const nextAnchor =
-                i < room.walls.length - 1
-                  ? (() => {
-                      const nw = room.walls[i + 1];
-                      const nang = (nw.angle * Math.PI) / 180;
-                      const nlen = (nw.length || 0) / 1000;
-                      return new THREE.Vector3(
-                        end.x + Math.cos(nang) * nlen,
-                        0,
-                        end.z + Math.sin(nang) * nlen,
-                      );
-                    })()
-                  : null;
-              this.start = proj.clone();
-              this.editingIndex = i;
-              this.moving = {
-                segStart: cursor.clone(),
-                segEnd: end.clone(),
-                prevAnchor: i > 0 ? prevStart.clone() : null,
-                nextAnchor,
-              };
-              const geom = new THREE.BufferGeometry().setFromPoints([
-                cursor.clone(),
-                end.clone(),
-              ]);
-              const mat = new THREE.LineBasicMaterial({ color: 0x000000 });
-              this.preview = new THREE.Line(geom, mat);
-              this.scene.add(this.preview);
-              return;
-            }
-          }
-        }
-        prevStart.copy(cursor);
-        cursor.copy(end);
+      const pm = { x: point.x * 1000, y: point.z * 1000 };
+      const seg = this.findSegmentForPoint(pm.x, pm.y);
+      if (seg) {
+        const proj = seg.start
+          .clone()
+          .add(seg.dir.clone().multiplyScalar(seg.offset / 1000));
+        const prevAnchor = seg.index > 0 ? this.segments[seg.index - 1].start.clone() : null;
+        const nextAnchor =
+          seg.index < this.segments.length - 1
+            ? this.segments[seg.index + 1].end.clone()
+            : null;
+        this.start = proj.clone();
+        this.editingIndex = seg.index;
+        this.moving = {
+          segStart: seg.start.clone(),
+          segEnd: seg.end.clone(),
+          prevAnchor,
+          nextAnchor,
+        };
+        const geom = new THREE.BufferGeometry().setFromPoints([
+          seg.start.clone(),
+          seg.end.clone(),
+        ]);
+        const mat = new THREE.LineBasicMaterial({ color: 0x000000 });
+        this.preview = new THREE.Line(geom, mat);
+        this.scene.add(this.preview);
+        return;
       }
     } else if (this.mode === 'opening') {
       const pm = { x: point.x * 1000, y: point.z * 1000 };
