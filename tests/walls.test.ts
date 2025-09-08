@@ -1,5 +1,10 @@
 import { describe, it, beforeEach, expect } from 'vitest';
-import { getWallSegments, getAreaAndPerimeter, Segment } from '../src/utils/walls';
+import {
+  getWallSegments,
+  getAreaAndPerimeter,
+  Segment,
+  projectPointToSegment,
+} from '../src/utils/walls';
 import { usePlannerStore, wallRanges } from '../src/state/store';
 import WallDrawer from '../src/viewer/WallDrawer';
 import * as THREE from 'three';
@@ -135,6 +140,33 @@ describe('getAreaAndPerimeter', () => {
     const { area, perimeter } = getAreaAndPerimeter(segs);
     expect(area).toBeCloseTo(Math.PI / 2, 3);
     expect(perimeter).toBeCloseTo(Math.PI + 2, 3);
+  });
+});
+
+describe('projectPointToSegment', () => {
+  const seg: Segment = {
+    a: { x: 1, y: 0 },
+    b: { x: 0, y: 1 },
+    angle: 0,
+    length: Math.PI / 2,
+    arc: { cx: 0, cy: 0, radius: 1, startAngle: 0, sweep: Math.PI / 2 },
+  };
+
+  it('projects point near middle of arc', () => {
+    const res = projectPointToSegment(0.7, 0.7, seg);
+    expect(res.x).toBeCloseTo(Math.SQRT1_2, 3);
+    expect(res.y).toBeCloseTo(Math.SQRT1_2, 3);
+    expect(res.t).toBeCloseTo(0.5, 3);
+    const expected = Math.hypot(0.7 - Math.SQRT1_2, 0.7 - Math.SQRT1_2);
+    expect(res.dist).toBeCloseTo(expected, 3);
+  });
+
+  it('clamps point outside arc sweep', () => {
+    const res = projectPointToSegment(1.2, 0, seg);
+    expect(res.x).toBeCloseTo(1, 3);
+    expect(res.y).toBeCloseTo(0, 3);
+    expect(res.t).toBeCloseTo(0, 3);
+    expect(res.dist).toBeCloseTo(0.2, 3);
   });
 });
 

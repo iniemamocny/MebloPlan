@@ -56,6 +56,27 @@ export function getWallSegments(
   return segs
 }
 export function projectPointToSegment(px:number, py:number, seg:Segment){
+  if (seg.arc) {
+    const { cx, cy, radius, startAngle, sweep } = seg.arc
+    const dx = px - cx
+    const dy = py - cy
+    const start = startAngle
+    const end = startAngle + sweep
+    let ang = Math.atan2(dy, dx)
+    const norm = (a: number) => Math.atan2(Math.sin(a), Math.cos(a))
+    if (sweep >= 0) {
+      if (norm(ang - start) < 0) ang = start
+      else if (norm(ang - end) > 0) ang = end
+    } else {
+      if (norm(ang - start) > 0) ang = start
+      else if (norm(ang - end) < 0) ang = end
+    }
+    const x = cx + Math.cos(ang) * radius
+    const y = cy + Math.sin(ang) * radius
+    const t = sweep ? (ang - start) / sweep : 0
+    const dist = Math.hypot(px - x, py - y)
+    return { x, y, t, dist }
+  }
   const ax=seg.a.x, ay=seg.a.y, bx=seg.b.x, by=seg.b.y
   const abx=bx-ax, aby=by-ay
   const apx=px-ax, apy=py-ay
