@@ -832,10 +832,10 @@ export default class WallDrawer {
             this.start = mid.clone();
             this.dragType = 'mid';
           } else if (minDist === dStart) {
-            this.start = s.end.clone();
+            this.start = s.start.clone();
             this.dragType = 'start';
           } else {
-            this.start = s.start.clone();
+            this.start = s.end.clone();
             this.dragType = 'end';
           }
           return;
@@ -1303,8 +1303,9 @@ export default class WallDrawer {
         const { snapLength } = this.store.getState();
         const positions = (this.preview.geometry as THREE.BufferGeometry)
           .attributes.position as THREE.BufferAttribute;
-        if (this.dragType === 'start') {
-          const vec = point.clone().sub(this.start);
+        if (this.dragType === 'start' && this.moving) {
+          const end = this.moving.segEnd.clone();
+          const vec = end.clone().sub(point);
           const length = vec.length();
           const lengthMm = length * 1000;
           const snappedLengthMm = snapLength
@@ -1318,10 +1319,10 @@ export default class WallDrawer {
             0,
             Math.sin(angle),
           );
-          const newStart = this.start
+          const newStart = end
             .clone()
-            .add(dir.clone().multiplyScalar(snappedLength));
-          const newEnd = this.start.clone();
+            .sub(dir.clone().multiplyScalar(snappedLength));
+          const newEnd = end;
           positions.setXYZ(0, newStart.x, 0, newStart.z);
           positions.setXYZ(1, newEnd.x, 0, newEnd.z);
           positions.needsUpdate = true;
@@ -1329,8 +1330,9 @@ export default class WallDrawer {
           this.onLengthChange?.(snappedLengthMm);
           this.onAngleChange?.(THREE.MathUtils.radToDeg(angle));
           this.updateEditHandles(newStart, newEnd);
-        } else if (this.dragType === 'end') {
-          const vec = point.clone().sub(this.start);
+        } else if (this.dragType === 'end' && this.moving) {
+          const start = this.moving.segStart.clone();
+          const vec = point.clone().sub(start);
           const length = vec.length();
           const lengthMm = length * 1000;
           const snappedLengthMm = snapLength
@@ -1344,10 +1346,8 @@ export default class WallDrawer {
             0,
             Math.sin(angle),
           );
-          const newStart = this.start.clone();
-          const newEnd = this.start
-            .clone()
-            .add(dir.clone().multiplyScalar(snappedLength));
+          const newStart = start;
+          const newEnd = start.clone().add(dir.clone().multiplyScalar(snappedLength));
           positions.setXYZ(0, newStart.x, 0, newStart.z);
           positions.setXYZ(1, newEnd.x, 0, newEnd.z);
           positions.needsUpdate = true;
