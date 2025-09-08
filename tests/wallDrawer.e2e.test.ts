@@ -149,6 +149,54 @@ describe('WallDrawer snapping', () => {
   });
 });
 
+describe('WallDrawer vertex snapping to existing point', () => {
+  it('snaps end of wall when cursor is near existing vertex', () => {
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const getCamera = () => camera;
+    const scene = new THREE.Scene();
+    const addWall = vi.fn();
+    const state = {
+      addWall,
+      wallThickness: 100,
+      wallType: 'dzialowa',
+      snapAngle: 0,
+      snapLength: 0,
+      snapRightAngles: true,
+      angleToPrev: 0,
+      room: {
+        origin: { x: 0, y: 0 },
+        walls: [{ id: 'a', length: 1000, angle: 0, thickness: 100 }],
+      },
+      setRoom: vi.fn(),
+      autoCloseWalls: false,
+    };
+    const store: any = { getState: () => state };
+    const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
+    (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
+    (drawer as any).onDown({} as PointerEvent);
+    (drawer as any).getPoint = () => new THREE.Vector3(0.004, 0, 0.002);
+    (drawer as any).onMove({} as PointerEvent);
+    (drawer as any).onUp({} as PointerEvent);
+    expect(addWall).toHaveBeenCalled();
+    const call = addWall.mock.calls[0][0];
+    expect(call.length).toBeCloseTo(1000, 3);
+    expect(call.angle).toBeCloseTo(180, 3);
+  });
+});
+
 describe('WallDrawer edit mode', () => {
   it('drags endpoint to change length and angle', () => {
     const canvas = document.createElement('canvas');
