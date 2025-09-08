@@ -869,3 +869,75 @@ describe('WallDrawer opening mode', () => {
     expect(op.width).toBeCloseTo(200);
   });
 });
+
+describe('WallDrawer edit tolerance across zoom', () => {
+  function setup(height: number) {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 1000;
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 1000,
+      height: 1000,
+      right: 1000,
+      bottom: 1000,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+    camera.position.set(0, height, 0);
+    camera.lookAt(0, 0, 0);
+    camera.updateProjectionMatrix();
+    camera.updateMatrixWorld();
+    const scene = new THREE.Scene();
+    const state: any = {
+      room: {
+        origin: { x: 0, y: 0 },
+        walls: [{ id: 'w1', length: 1000, angle: 0, thickness: 100 }],
+        openings: [],
+      },
+      wallThickness: 100,
+      wallType: 'dzialowa',
+      snapAngle: 0,
+      snapLength: 0,
+      snapRightAngles: true,
+      angleToPrev: 0,
+      defaultSquareAngle: 0,
+      addWall: vi.fn(),
+      updateWall: vi.fn(),
+      removeWall: vi.fn(),
+      setRoom: vi.fn(),
+      autoCloseWalls: false,
+      gridSize: 50,
+      snapToGrid: false,
+      measurementUnit: 'mm',
+      openingDefaults: { width: 900, height: 2100, bottom: 0, kind: 0 },
+    };
+    const store: any = () => state;
+    store.getState = () => state;
+    store.subscribe = () => () => {};
+    const drawer = new WallDrawer(
+      renderer,
+      () => camera,
+      scene,
+      store,
+      () => {},
+      () => {},
+    );
+    drawer.setMode('edit');
+    return { drawer };
+  }
+
+  [5, 50].forEach((h) => {
+    it(`selects segment at camera height ${h}`, () => {
+      const { drawer } = setup(h);
+      const segEnd = new THREE.Vector3(1, 0, 0);
+      const screen = (drawer as any).worldToScreen(segEnd);
+      const ev = { clientX: screen.x + 4, clientY: screen.y } as PointerEvent;
+      (drawer as any).onDown(ev);
+      expect((drawer as any).editingIndex).toBe(0);
+    });
+  });
+});
