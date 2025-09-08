@@ -14,6 +14,7 @@ import i18n from '../i18n';
 const pixelsPerMm = 0.2; // 1px ≈ 5mm
 const DRAG_PIXEL_THRESHOLD = 4;
 const DRAG_WORLD_THRESHOLD = 0.01;
+const SELECT_PIXEL_TOLERANCE = 8;
 
 interface PlannerStore {
   addWall: (w: {
@@ -454,6 +455,18 @@ export default class WallDrawer {
     return { x, y };
   }
 
+  private screenToWorldDistance(px: number, point: THREE.Vector3): number {
+    const { x, y } = this.worldToScreen(point);
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    const ndcX = ((x + px - rect.left) / rect.width) * 2 - 1;
+    const ndcY = -((y - rect.top) / rect.height) * 2 + 1;
+    const cam = this.getCamera();
+    this.raycaster.setFromCamera(new THREE.Vector2(ndcX, ndcY), cam);
+    const p = new THREE.Vector3();
+    this.raycaster.ray.intersectPlane(this.plane, p);
+    return point.distanceTo(p);
+  }
+
   private positionOverlay(point: THREE.Vector3) {
     if (!this.overlay) return;
     const { x, y } = this.worldToScreen(point);
@@ -707,7 +720,11 @@ export default class WallDrawer {
       const segs = this.getSegments();
       for (let i = 0; i < segs.length; i++) {
         const s = segs[i];
-        if (point.distanceTo(s.end) < 0.2) {
+        const tol = this.screenToWorldDistance(
+          SELECT_PIXEL_TOLERANCE,
+          s.end,
+        );
+        if (point.distanceTo(s.end) < tol) {
           this.start = s.start.clone();
           this.editingIndex = i;
           const geom = new THREE.BufferGeometry().setFromPoints([
