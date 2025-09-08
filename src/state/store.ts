@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import * as THREE from 'three';
 import { FAMILY } from '../core/catalog';
 import { Module3D, Room, Globals, Prices, Opening, Gaps, WallArc } from '../types';
 import { safeSetItem } from '../utils/storage';
@@ -459,6 +460,11 @@ export const usePlannerStore = create<Store>((set, get) => ({
       if (ang === 0) ang = 360;
       arc.angle = ang;
       validated.arc = arc;
+      if (patch.arc.radius !== undefined || patch.arc.angle !== undefined) {
+        validated.length = Math.abs(
+          arc.radius * THREE.MathUtils.degToRad(arc.angle),
+        );
+      }
     }
 
     if (Object.keys(validated).length === 0) return;
