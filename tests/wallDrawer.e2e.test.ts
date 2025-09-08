@@ -916,6 +916,84 @@ describe('WallDrawer edit mode', () => {
     expect(origin.x).toBe(500);
     expect(origin.y).toBeCloseTo(0);
   });
+
+  it('dragging endpoints respects start and end when snapRightAngles disabled', () => {
+    const createDrawer = (
+      updateWall: any,
+      setRoom: any,
+    ): any => {
+      const canvas = document.createElement('canvas');
+      canvas.getBoundingClientRect = () => ({
+        left: 0,
+        top: 0,
+        width: 100,
+        height: 100,
+        right: 100,
+        bottom: 100,
+        x: 0,
+        y: 0,
+        toJSON() {},
+      });
+      const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+      const camera = new THREE.PerspectiveCamera();
+      const getCamera = () => camera;
+      const scene = new THREE.Scene();
+      const state = {
+        updateWall,
+        wallThickness: 100,
+        wallType: 'dzialowa',
+        snapAngle: 0,
+        snapLength: 0,
+        snapRightAngles: false,
+        angleToPrev: 0,
+        defaultSquareAngle: 0,
+        room: {
+          origin: { x: 0, y: 0 },
+          walls: [{ id: 'a', length: 1000, angle: 0, thickness: 100 }],
+        },
+        setRoom,
+      } as any;
+      const store = { getState: () => state } as any;
+      const drawer = new WallDrawer(
+        renderer,
+        getCamera,
+        scene,
+        store,
+        () => {},
+        () => {},
+      );
+      (drawer as any).setMode('edit');
+      return drawer;
+    };
+
+    const updateWallStart = vi.fn();
+    const setRoomStart = vi.fn();
+    const drawerStart = createDrawer(updateWallStart, setRoomStart);
+    (drawerStart as any).getPoint = () => new THREE.Vector3(0, 0, 0);
+    (drawerStart as any).onDown({ button: 0 } as PointerEvent);
+    (drawerStart as any).getPoint = () => new THREE.Vector3(0.5, 0, 0);
+    (drawerStart as any).onMove({} as PointerEvent);
+    (drawerStart as any).onUp({ button: 0 } as PointerEvent);
+    expect(updateWallStart).toHaveBeenCalledWith(
+      'a',
+      expect.objectContaining({ length: 500, angle: 0 }),
+    );
+    expect(setRoomStart).toHaveBeenCalledWith({ origin: { x: 500, y: 0 } });
+
+    const updateWallEnd = vi.fn();
+    const setRoomEnd = vi.fn();
+    const drawerEnd = createDrawer(updateWallEnd, setRoomEnd);
+    (drawerEnd as any).getPoint = () => new THREE.Vector3(1, 0, 0);
+    (drawerEnd as any).onDown({ button: 0 } as PointerEvent);
+    (drawerEnd as any).getPoint = () => new THREE.Vector3(1.5, 0, 0);
+    (drawerEnd as any).onMove({} as PointerEvent);
+    (drawerEnd as any).onUp({ button: 0 } as PointerEvent);
+    expect(updateWallEnd).toHaveBeenCalledWith(
+      'a',
+      expect.objectContaining({ length: 1500, angle: 0 }),
+    );
+    expect(setRoomEnd).not.toHaveBeenCalled();
+  });
 });
 
 describe('WallDrawer overlays', () => {
