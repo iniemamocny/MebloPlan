@@ -845,6 +845,8 @@ export default class WallDrawer {
     if (this.mode === 'draw') {
       const { snapAngle, snapLength, snapRightAngles, angleToPrev, room } =
         this.store.getState();
+      const disableSnap = e.altKey;
+      const useRightAngles = snapRightAngles && !disableSnap;
       const prevWall = room.walls[room.walls.length - 1];
       let snappedAngle = 0;
       let snappedAngleDeg = 0;
@@ -870,7 +872,7 @@ export default class WallDrawer {
         this.guideZ.visible = Math.abs(dz) > 0.0001;
       }
       const tol = THREE.MathUtils.degToRad(5);
-      if (snapRightAngles) {
+      if (useRightAngles) {
         const ang = Math.atan2(dz, dx);
         let angle = ang;
         let angleDeg = (angle * 180) / Math.PI;
@@ -914,6 +916,11 @@ export default class WallDrawer {
           (this.guideZ.material as THREE.LineDashedMaterial).color.set(
             highlightZ ? hi : def,
           );
+      } else if (disableSnap) {
+        const angle = Math.atan2(dz, dx);
+        snappedAngle = angle;
+        snappedAngleDeg = (angle * 180) / Math.PI;
+        length = Math.sqrt(dx * dx + dz * dz);
       } else {
         snappedAngleDeg = (prevWall ? prevWall.angle : 0) + angleToPrev;
         snappedAngle = (snappedAngleDeg * Math.PI) / 180;
@@ -926,15 +933,15 @@ export default class WallDrawer {
       }
       snappedAngleDeg = (snappedAngleDeg + 360) % 360;
       const lengthMm = length * 1000;
-      let snappedLengthMm = snapLength
-        ? Math.round(lengthMm / snapLength) * snapLength
-        : lengthMm;
+      let snappedLengthMm = disableSnap || !snapLength
+        ? lengthMm
+        : Math.round(lengthMm / snapLength) * snapLength;
       let snappedLength = snappedLengthMm / 1000;
       this.currentAngle = snappedAngle;
       const endX = this.start.x + Math.cos(snappedAngle) * snappedLength;
       const endZ = this.start.z + Math.sin(snappedAngle) * snappedLength;
       let end = new THREE.Vector3(endX, 0, endZ);
-      const snap = this.findClosestVertex(end);
+      const snap = disableSnap ? null : this.findClosestVertex(end);
       if (snap) {
         end = snap;
         const dxs = end.x - this.start.x;

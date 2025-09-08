@@ -213,7 +213,6 @@ export default function WallDrawPanel({
                 store.setAngleToPrev(val);
               }
             }}
-            disabled={store.snapRightAngles}
             style={{ width: 50 }}
             min={0}
             max={360}
@@ -239,7 +238,6 @@ export default function WallDrawPanel({
             min={0}
           />
         </div>
-      {store.snapRightAngles && (
         <div>
           <div className="small">{t('room.snapAngle')}</div>
           <input
@@ -258,7 +256,6 @@ export default function WallDrawPanel({
             maxLength={3}
           />
         </div>
-      )}
       </div>
       <label
         className="small"
@@ -336,19 +333,6 @@ export default function WallDrawPanel({
           />
         </div>
       </div>
-      <label
-        className="small"
-        style={{ display: 'flex', gap: 8, alignItems: 'center' }}
-      >
-        <input
-          type="checkbox"
-          checked={!store.snapRightAngles}
-          onChange={(e) =>
-            store.setSnapRightAngles(!(e.target as HTMLInputElement).checked)
-          }
-        />
-        {t('room.noRightAngles')}
-      </label>
       <label
         className="small"
         style={{ display: 'flex', gap: 8, alignItems: 'center' }}
