@@ -323,7 +323,7 @@ describe('WallDrawer.applyLength', () => {
 });
 
 describe('WallDrawer snapping', () => {
-  it('snaps to configured angle and length', () => {
+  it('uses actual angle and snaps to configured length', () => {
     const canvas = document.createElement('canvas');
     canvas.getBoundingClientRect = () => ({
       left: 0,
@@ -369,7 +369,7 @@ describe('WallDrawer snapping', () => {
     (drawer as any).getPoint = () =>
       new THREE.Vector3(Math.cos(rad) * 0.12, 0, Math.sin(rad) * 0.12);
     (drawer as any).onMove({} as PointerEvent);
-    expect(onAngleChange).toHaveBeenLastCalledWith(30);
+    expect(onAngleChange.mock.calls.at(-1)?.[0]).toBeCloseTo(20);
     expect(onLengthChange).toHaveBeenLastCalledWith(100);
   });
 });

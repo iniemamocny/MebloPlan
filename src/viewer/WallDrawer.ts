@@ -946,14 +946,8 @@ export default class WallDrawer {
           return;
         }
       }
-      const { snapAngle, snapLength, snapRightAngles, angleToPrev, room } =
-        this.store.getState();
-      const disableSnap = e.altKey;
-      const useRightAngles = snapRightAngles && !disableSnap;
+      const { snapLength, room } = this.store.getState();
       const prevWall = room.walls[room.walls.length - 1];
-      let snappedAngle = 0;
-      let snappedAngleDeg = 0;
-      let length = 0;
       const dx = point.x - this.start.x;
       const dz = point.z - this.start.z;
       if (this.guideX) {
@@ -974,78 +968,19 @@ export default class WallDrawer {
         this.guideZ.computeLineDistances();
         this.guideZ.visible = Math.abs(dz) > 0.0001;
       }
-      const tol = THREE.MathUtils.degToRad(5);
-      if (useRightAngles) {
-        const ang = Math.atan2(dz, dx);
-        let angle = ang;
-        let angleDeg = (angle * 180) / Math.PI;
-        const norm = (ang + Math.PI * 2) % (Math.PI * 2);
-        const diffX = Math.min(Math.abs(norm - 0), Math.abs(norm - Math.PI));
-        const diffZ = Math.min(
-          Math.abs(norm - Math.PI / 2),
-          Math.abs(norm - (3 * Math.PI) / 2),
-        );
-        let highlightX = false;
-        let highlightZ = false;
-        if (diffX < tol) {
-          highlightX = true;
-          angle = diffX < Math.abs(norm - Math.PI) ? 0 : Math.PI;
-          angleDeg = (angle * 180) / Math.PI;
-          length = Math.abs(dx);
-        } else if (diffZ < tol) {
-          highlightZ = true;
-          angle =
-            diffZ < Math.abs(norm - Math.PI / 2)
-              ? Math.PI / 2
-              : (3 * Math.PI) / 2;
-          angleDeg = (angle * 180) / Math.PI;
-          length = Math.abs(dz);
-        } else {
-          length = Math.sqrt(dx * dx + dz * dz);
-          angleDeg = snapAngle
-            ? Math.round(angleDeg / snapAngle) * snapAngle
-            : angleDeg;
-          angle = (angleDeg * Math.PI) / 180;
-        }
-        snappedAngle = angle;
-        snappedAngleDeg = angleDeg;
-        const def = 0x888888;
-        const hi = 0xff0000;
-        if (this.guideX)
-          (this.guideX.material as THREE.LineDashedMaterial).color.set(
-            highlightX ? hi : def,
-          );
-        if (this.guideZ)
-          (this.guideZ.material as THREE.LineDashedMaterial).color.set(
-            highlightZ ? hi : def,
-          );
-      } else if (disableSnap) {
-        const angle = Math.atan2(dz, dx);
-        snappedAngle = angle;
-        snappedAngleDeg = (angle * 180) / Math.PI;
-        length = Math.sqrt(dx * dx + dz * dz);
-      } else {
-        snappedAngleDeg = (prevWall ? prevWall.angle : 0) + angleToPrev;
-        snappedAngle = (snappedAngleDeg * Math.PI) / 180;
-        length = dx * Math.cos(snappedAngle) + dz * Math.sin(snappedAngle);
-        if (length < 0) {
-          length = -length;
-          snappedAngleDeg = (snappedAngleDeg + 180) % 360;
-          snappedAngle = (snappedAngle + Math.PI) % (Math.PI * 2);
-        }
-      }
-      snappedAngleDeg = (snappedAngleDeg + 360) % 360;
-      const lengthMm = length * 1000;
-      let snappedLengthMm =
-        disableSnap || !snapLength
-          ? lengthMm
-          : Math.round(lengthMm / snapLength) * snapLength;
+      let snappedAngleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
+      let snappedAngle = THREE.MathUtils.degToRad(snappedAngleDeg);
+      let length = Math.sqrt(dx * dx + dz * dz);
+      let lengthMm = length * 1000;
+      let snappedLengthMm = snapLength
+        ? Math.round(lengthMm / snapLength) * snapLength
+        : lengthMm;
       let snappedLength = snappedLengthMm / 1000;
       this.currentAngle = snappedAngle;
       const endX = this.start.x + Math.cos(snappedAngle) * snappedLength;
       const endZ = this.start.z + Math.sin(snappedAngle) * snappedLength;
       let end = new THREE.Vector3(endX, 0, endZ);
-      const snap = disableSnap ? null : this.findClosestVertex(end);
+      const snap = this.findClosestVertex(end);
       if (snap) {
         end = snap;
         const dxs = end.x - this.start.x;
@@ -1232,16 +1167,12 @@ export default class WallDrawer {
         }
       }
     } else if (this.mode === 'edit') {
-      const { snapAngle, snapLength } = this.store.getState();
+      const { snapLength } = this.store.getState();
       const dx = point.x - this.start.x;
       const dz = point.z - this.start.z;
       const length = Math.sqrt(dx * dx + dz * dz);
-      let angle = Math.atan2(dz, dx);
-      let angleDeg = (angle * 180) / Math.PI;
-      if (snapAngle) {
-        angleDeg = Math.round(angleDeg / snapAngle) * snapAngle;
-        angle = (angleDeg * Math.PI) / 180;
-      }
+      const angle = Math.atan2(dz, dx);
+      const angleDeg = (angle * 180) / Math.PI;
       const lengthMm = length * 1000;
       const snappedLengthMm = snapLength
         ? Math.round(lengthMm / snapLength) * snapLength
@@ -1340,27 +1271,8 @@ export default class WallDrawer {
     const segStart = this.start.clone();
     const dx = target.x - segStart.x;
     const dz = target.z - segStart.z;
-    let lengthMm: number;
-    let snappedAngleDeg: number;
-    if (state.snapRightAngles) {
-      lengthMm = Math.sqrt(dx * dx + dz * dz) * 1000;
-      const angleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
-      snappedAngleDeg = state.snapAngle
-        ? Math.round(angleDeg / state.snapAngle) * state.snapAngle
-        : angleDeg;
-    } else {
-      const prev = state.room.walls[state.room.walls.length - 1];
-      snappedAngleDeg = (prev ? prev.angle : 0) + state.angleToPrev;
-      let rad = (snappedAngleDeg * Math.PI) / 180;
-      let lenM = dx * Math.cos(rad) + dz * Math.sin(rad);
-      if (lenM < 0) {
-        lenM = -lenM;
-        snappedAngleDeg = (snappedAngleDeg + 180) % 360;
-        rad = (snappedAngleDeg * Math.PI) / 180;
-      }
-      lengthMm = lenM * 1000;
-    }
-    snappedAngleDeg = (snappedAngleDeg + 360) % 360;
+    let angleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
+    let lengthMm = Math.sqrt(dx * dx + dz * dz) * 1000;
     if (lengthMm < 1) {
       this.cleanupPreview();
       this.start = null;
@@ -1378,7 +1290,7 @@ export default class WallDrawer {
       });
     }
     const thickness = state.wallThickness;
-    state.addWall({ length: snappedLength, angle: snappedAngleDeg, thickness });
+    state.addWall({ length: snappedLength, angle: (angleDeg + 360) % 360, thickness });
     this.currentThickness = thickness / 1000;
     this.cleanupPreview();
     this.start = null;
@@ -1497,14 +1409,10 @@ export default class WallDrawer {
           this.editingIndex = null;
           return;
         }
-        const { snapAngle, snapLength, room, updateWall } =
-          this.store.getState();
+        const { snapLength, room, updateWall } = this.store.getState();
         const dx = end.x - this.start.x;
         const dz = end.z - this.start.z;
         let angleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
-        if (snapAngle) {
-          angleDeg = Math.round(angleDeg / snapAngle) * snapAngle;
-        }
         angleDeg = (angleDeg + 360) % 360;
         const lengthMmRaw = Math.sqrt(dx * dx + dz * dz) * 1000;
         const snappedLength = snapLength
