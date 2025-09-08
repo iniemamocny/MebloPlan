@@ -589,13 +589,29 @@ export default class WallDrawer {
         mesh.geometry.dispose();
         mesh.geometry = new THREE.BoxGeometry(w, 0.01, t);
       }
-      const center = info.start
-        .clone()
-        .add(
-          info.dir.clone().multiplyScalar((op.offset + op.width / 2) / 1000),
+      let center: THREE.Vector3;
+      let rot = info.angle;
+      if (info.arc) {
+        const tmid = (op.offset + op.width / 2) / info.length;
+        const ang = info.arc.startAngle + info.arc.sweep * tmid;
+        const cx = info.arc.cx / 1000;
+        const cy = info.arc.cy / 1000;
+        const r = info.arc.radius / 1000;
+        center = new THREE.Vector3(
+          cx + Math.cos(ang) * r,
+          0,
+          cy + Math.sin(ang) * r,
         );
+        rot = ang + (info.arc.sweep >= 0 ? Math.PI / 2 : -Math.PI / 2);
+      } else {
+        center = info.start
+          .clone()
+          .add(
+            info.dir.clone().multiplyScalar((op.offset + op.width / 2) / 1000),
+          );
+      }
       mesh.position.set(center.x, 0.005, center.z);
-      mesh.rotation.y = info.angle;
+      mesh.rotation.y = rot;
     }
   }
 
@@ -615,11 +631,7 @@ export default class WallDrawer {
         this.labels.delete(id);
       }
     }
-    const { room } = this.store.getState();
-    const origin = room.origin
-      ? new THREE.Vector3(room.origin.x / 1000, 0, room.origin.y / 1000)
-      : new THREE.Vector3();
-    const cursor = origin.clone();
+    this.getSegments();
     for (const w of walls) {
       let el = this.labels.get(w.id);
       if (!el || el instanceof HTMLInputElement) {
@@ -645,18 +657,32 @@ export default class WallDrawer {
         this.updateLabels();
       });
       el.appendChild(remove);
-      const ang = (w.angle * Math.PI) / 180;
-      const len = (w.length || 0) / 1000;
-      const end = new THREE.Vector3(
-        cursor.x + Math.cos(ang) * len,
-        0,
-        cursor.z + Math.sin(ang) * len,
-      );
-      const mid = new THREE.Vector3(
-        (cursor.x + end.x) / 2,
-        0,
-        (cursor.z + end.z) / 2,
-      );
+      const info = this.segmentsByWall.get(w.id);
+      if (!info) continue;
+      let mid: THREE.Vector3;
+      let ang: number;
+      if (info.arc) {
+        const arc = info.arc;
+        const cx = arc.cx / 1000;
+        const cy = arc.cy / 1000;
+        const r = arc.radius / 1000;
+        const a = arc.startAngle + arc.sweep / 2;
+        mid = new THREE.Vector3(
+          cx + Math.cos(a) * r,
+          0,
+          cy + Math.sin(a) * r,
+        );
+        ang = a + (arc.sweep >= 0 ? Math.PI / 2 : -Math.PI / 2);
+      } else {
+        const start = info.start;
+        const end = info.end;
+        mid = new THREE.Vector3(
+          (start.x + end.x) / 2,
+          0,
+          (start.z + end.z) / 2,
+        );
+        ang = Math.atan2(end.z - start.z, end.x - start.x);
+      }
       const offset = new THREE.Vector3(
         -Math.sin(ang),
         0,
@@ -666,7 +692,6 @@ export default class WallDrawer {
       const { x, y } = this.worldToScreen(mid);
       (el as HTMLElement).style.left = `${x}px`;
       (el as HTMLElement).style.top = `${y}px`;
-      cursor.copy(end);
     }
   }
 
@@ -781,6 +806,7 @@ export default class WallDrawer {
           b: { x: info.end.x * 1000, y: info.end.z * 1000 },
           angle: info.angle,
           length: info.length,
+          arc: info.arc,
         });
         const tol = info.wall.thickness / 2 + 20;
         if (proj.dist <= tol) {
@@ -837,6 +863,7 @@ export default class WallDrawer {
         b: { x: info.end.x * 1000, y: info.end.z * 1000 },
         angle: info.angle,
         length: info.length,
+        arc: info.arc,
       });
       let offset = proj.t * info.length;
       if (this.openingEdit.type === 'move') {
@@ -973,9 +1000,9 @@ export default class WallDrawer {
         this.guideZ.visible = Math.abs(dz) > 0.0001;
       }
       let snappedAngleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
-      let snappedAngle = THREE.MathUtils.degToRad(snappedAngleDeg);
-      let length = Math.sqrt(dx * dx + dz * dz);
-      let lengthMm = length * 1000;
+      const snappedAngle = THREE.MathUtils.degToRad(snappedAngleDeg);
+      const length = Math.sqrt(dx * dx + dz * dz);
+      const lengthMm = length * 1000;
       let snappedLengthMm = snapLength
         ? Math.round(lengthMm / snapLength) * snapLength
         : lengthMm;
@@ -1275,8 +1302,8 @@ export default class WallDrawer {
     const segStart = this.start.clone();
     const dx = target.x - segStart.x;
     const dz = target.z - segStart.z;
-    let angleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
-    let lengthMm = Math.sqrt(dx * dx + dz * dz) * 1000;
+    const angleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
+    const lengthMm = Math.sqrt(dx * dx + dz * dz) * 1000;
     if (lengthMm < 1) {
       this.cleanupPreview();
       this.start = null;
