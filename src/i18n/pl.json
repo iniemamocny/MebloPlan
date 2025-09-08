@@ -57,7 +57,6 @@
     "snapLength": "Krok długości (mm; Alt tymczasowo wyłącza przyciąganie)",
     "snapAngle": "Krok kąta (°) w trybie kątów prostych (Alt: chwilowe wyłączenie)",
     "snapRightAngles": "Kąty proste",
-    "autoChain": "Automatyczne łączenie",
     "area": "Powierzchnia (mm²)",
     "perimeter": "Obwód (mm)",
     "invalidLength": "Długość nie może być ujemna"

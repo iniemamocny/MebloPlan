@@ -41,7 +41,6 @@ interface PlannerStore {
   defaultSquareAngle: number;
   room: Room;
   setRoom: (patch: Partial<Room>) => void;
-  autoCloseWalls: boolean;
   gridSize: number;
   snapToGrid: boolean;
   measurementUnit: 'mm' | 'cm';
@@ -1419,23 +1418,7 @@ export default class WallDrawer {
     if (!this.start || !this.preview) return;
     const state = this.store.getState();
     const snap = this.findClosestPoint(end);
-    let target = snap ? snap.clone() : end.clone();
-    const origin = state.room.origin
-      ? new THREE.Vector3(
-          state.room.origin.x / 1000,
-          0,
-          state.room.origin.y / 1000,
-        )
-      : this.start.clone();
-    const closeThreshold = 0.1; // 10 cm
-    const autoClose =
-      state.autoCloseWalls &&
-      state.room.walls.length > 0 &&
-      state.room.origin &&
-      origin.distanceTo(end) < closeThreshold;
-    if (autoClose) {
-      target = origin;
-    }
+    const target = snap ? snap.clone() : end.clone();
     this.updateSnapPreview(null);
 
     const segStart = this.start.clone();
@@ -1474,9 +1457,6 @@ export default class WallDrawer {
     this.isDragging = false;
     this.currentAngle = 0;
     this.updateLabels();
-    if (autoClose) {
-      this.disable();
-    }
   }
 
   private finalizeArc(point: THREE.Vector3) {

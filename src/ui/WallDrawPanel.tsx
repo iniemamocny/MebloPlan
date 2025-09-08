@@ -366,19 +366,6 @@ export default function WallDrawPanel({
           />
         </div>
       </div>
-      <label
-        className="small"
-        style={{ display: 'flex', gap: 8, alignItems: 'center' }}
-      >
-        <input
-          type="checkbox"
-          checked={store.autoCloseWalls}
-          onChange={(e) =>
-            store.setAutoCloseWalls((e.target as HTMLInputElement).checked)
-          }
-        />
-        {t('room.autoChain')}
-      </label>
       <div>
         <div className="small">{t('room.area')}</div>
         <div>{Math.round(area)} mm²</div>

@@ -57,7 +57,6 @@
     "snapLength": "Length step (mm; hold Alt to disable snapping)",
     "snapAngle": "Angle step (°) for right-angle mode (hold Alt to disable snapping)",
     "snapRightAngles": "Right angles",
-    "autoChain": "Auto-chain walls",
     "area": "Area (mm²)",
     "perimeter": "Perimeter (mm)",
     "invalidLength": "Length must be non-negative"
