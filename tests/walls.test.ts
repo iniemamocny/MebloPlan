@@ -120,6 +120,22 @@ describe('getAreaAndPerimeter', () => {
     expect(area).toBeCloseTo(100, 3);
     expect(perimeter).toBeCloseTo(40, 3);
   });
+
+  it('computes area for room with curved wall', () => {
+    const room = {
+      walls: [
+        { id: 'a', angle: 90, thickness: 100, arc: { radius: 1, angle: -180 } },
+        { id: 'b', angle: 180, thickness: 100, length: 2 },
+      ],
+      openings: [],
+      height: 2700,
+      origin: { x: -1, y: 0 },
+    } as any;
+    const segs = getWallSegments(room);
+    const { area, perimeter } = getAreaAndPerimeter(segs);
+    expect(area).toBeCloseTo(Math.PI / 2, 3);
+    expect(perimeter).toBeCloseTo(Math.PI + 2, 3);
+  });
 });
 
 describe('updateWall', () => {
