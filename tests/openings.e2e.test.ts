@@ -52,6 +52,41 @@ describe('openings', () => {
     expect(usePlannerStore.getState().room.openings).toHaveLength(0);
   });
 
+  it('removes openings of deleted wall', () => {
+    usePlannerStore.setState({
+      room: {
+        walls: [
+          { id: 'w1', length: 2000, angle: 0, thickness: 100 },
+          { id: 'w2', length: 2000, angle: 90, thickness: 100 },
+        ],
+        openings: [],
+        height: 2700,
+        origin: { x: 0, y: 0 },
+      },
+    });
+    const { addOpening, removeWall } = usePlannerStore.getState();
+    addOpening({
+      wallId: 'w1',
+      offset: 100,
+      width: 50,
+      height: 50,
+      bottom: 0,
+      kind: 0,
+    });
+    addOpening({
+      wallId: 'w2',
+      offset: 100,
+      width: 50,
+      height: 50,
+      bottom: 0,
+      kind: 0,
+    });
+    removeWall('w1');
+    const openings = usePlannerStore.getState().room.openings;
+    expect(openings).toHaveLength(1);
+    expect(openings[0].wallId).toBe('w2');
+  });
+
   it('creates geometry with hole for opening', () => {
     const wall = { id: 'w1', length: 2000, angle: 0, thickness: 100 };
     const opening = {
