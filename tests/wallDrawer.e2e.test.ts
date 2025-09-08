@@ -2,6 +2,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import * as THREE from 'three';
 import WallDrawer from '../src/viewer/WallDrawer';
+import { usePlannerStore } from '../src/state/store';
 
 describe('WallDrawer click without drag', () => {
   it('cleans up preview and resets state', () => {
@@ -570,5 +571,58 @@ describe('WallDrawer remove button', () => {
     (drawer as any).onUp({} as PointerEvent);
     const btn = document.querySelector('div.wall-label button') as HTMLButtonElement;
     expect(btn).not.toBeNull();
+  });
+});
+
+describe('WallDrawer opening mode', () => {
+  it('adds and edits opening', () => {
+    usePlannerStore.setState({
+      room: {
+        walls: [{ id: 'w1', length: 1000, angle: 0, thickness: 100 }],
+        openings: [],
+        height: 2700,
+        origin: { x: 0, y: 0 },
+      },
+      openingDefaults: { width: 100, height: 200, bottom: 0, kind: 0 },
+    });
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const scene = new THREE.Scene();
+    const drawer = new WallDrawer(renderer, () => camera, scene, usePlannerStore, () => {}, () => {});
+    drawer.setMode('opening');
+
+    (drawer as any).getPoint = () => new THREE.Vector3(0.5, 0, 0);
+    (drawer as any).onDown({} as PointerEvent);
+    expect(usePlannerStore.getState().room.openings).toHaveLength(1);
+    let op = usePlannerStore.getState().room.openings[0];
+    expect(op.offset).toBeCloseTo(450);
+
+    (drawer as any).getPoint = () => new THREE.Vector3(0.5, 0, 0);
+    (drawer as any).onDown({} as PointerEvent);
+    (drawer as any).getPoint = () => new THREE.Vector3(0.6, 0, 0);
+    (drawer as any).onMove({} as PointerEvent);
+    (drawer as any).onUp({} as PointerEvent);
+    op = usePlannerStore.getState().room.openings[0];
+    expect(op.offset).toBeCloseTo(550);
+
+    (drawer as any).getPoint = () => new THREE.Vector3(0.65, 0, 0);
+    (drawer as any).onDown({} as PointerEvent);
+    (drawer as any).getPoint = () => new THREE.Vector3(0.75, 0, 0);
+    (drawer as any).onMove({} as PointerEvent);
+    (drawer as any).onUp({} as PointerEvent);
+    op = usePlannerStore.getState().room.openings[0];
+    expect(op.width).toBeCloseTo(200);
   });
 });

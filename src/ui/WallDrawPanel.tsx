@@ -26,7 +26,7 @@ export default function WallDrawPanel({
   const [wallLength, setWallLength] = React.useState(0);
   const [wallAngle, setWallAngle] = React.useState(0);
   const [lengthError, setLengthError] = React.useState(false);
-  const [mode, setMode] = React.useState<'draw' | 'edit' | 'move'>('draw');
+  const [mode, setMode] = React.useState<'draw' | 'edit' | 'move' | 'opening'>('draw');
   const { area, perimeter } = React.useMemo(() => {
     const segs = getWallSegments(undefined, undefined, true);
     return getAreaAndPerimeter(segs);
@@ -105,15 +105,71 @@ export default function WallDrawPanel({
           className="input"
           value={mode}
           onChange={(e) =>
-            setMode((e.target as HTMLSelectElement).value as 'draw' | 'edit' | 'move')
+            setMode(
+              (e.target as HTMLSelectElement).value as
+                | 'draw'
+                | 'edit'
+                | 'move'
+                | 'opening',
+            )
           }
           style={{ width: 120 }}
         >
           <option value="draw">{t('room.drawWalls')}</option>
           <option value="edit">{t('app.editWall')}</option>
           <option value="move">{t('app.moveWall')}</option>
+          <option value="opening">Opening</option>
         </select>
       </div>
+      {mode === 'opening' && (
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div>
+            <div className="small">Width</div>
+            <input
+              className="input"
+              type="number"
+              value={store.openingDefaults.width}
+              onChange={(e) =>
+                store.setOpeningDefaults({
+                  width: Number((e.target as HTMLInputElement).value),
+                })
+              }
+              style={{ width: 60 }}
+              min={0}
+            />
+          </div>
+          <div>
+            <div className="small">Height</div>
+            <input
+              className="input"
+              type="number"
+              value={store.openingDefaults.height}
+              onChange={(e) =>
+                store.setOpeningDefaults({
+                  height: Number((e.target as HTMLInputElement).value),
+                })
+              }
+              style={{ width: 60 }}
+              min={0}
+            />
+          </div>
+          <div>
+            <div className="small">Bottom</div>
+            <input
+              className="input"
+              type="number"
+              value={store.openingDefaults.bottom}
+              onChange={(e) =>
+                store.setOpeningDefaults({
+                  bottom: Number((e.target as HTMLInputElement).value),
+                })
+              }
+              style={{ width: 60 }}
+              min={0}
+            />
+          </div>
+        </div>
+      )}
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <input
           className="input"
