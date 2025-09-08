@@ -410,7 +410,31 @@ export const usePlannerStore = create<Store>((set, get) => ({
       },
       future: [],
     })),
-  updateWall: (id, patch) =>
+  updateWall: (id, patch) => {
+    const { wallType } = get();
+    const { min, max } = wallRanges[wallType];
+    const validated: Partial<{ length: number; angle: number; thickness: number }> = {};
+
+    if (patch.length !== undefined) {
+      if (patch.length <= 0) {
+        throw new Error('Wall length must be positive');
+      }
+      validated.length = clamp(patch.length, min, max);
+    }
+
+    if (patch.thickness !== undefined) {
+      if (patch.thickness <= 0) {
+        throw new Error('Wall thickness must be positive');
+      }
+      validated.thickness = clamp(patch.thickness, min, max);
+    }
+
+    if (patch.angle !== undefined) {
+      validated.angle = ((patch.angle % 360) + 360) % 360;
+    }
+
+    if (Object.keys(validated).length === 0) return;
+
     set((s) => ({
       past: [
         ...s.past,
@@ -421,10 +445,13 @@ export const usePlannerStore = create<Store>((set, get) => ({
       ],
       room: {
         ...s.room,
-        walls: s.room.walls.map((w) => (w.id === id ? { ...w, ...patch } : w)),
+        walls: s.room.walls.map((w) =>
+          w.id === id ? { ...w, ...validated } : w,
+        ),
       },
       future: [],
-    })),
+    }));
+  },
   addOpening: (op) => {
     const { room } = get();
     const wall = room.walls.find((w) => w.id === op.wallId);
