@@ -62,7 +62,7 @@ export function useCabinetConfig(
     mSize: { w: number; h: number; d: number },
     fam: FAMILY,
   ) => {
-    const segs = getWallSegments();
+    const segs = getWallSegments(store.room);
     if (segs.length === 0)
       return {
         pos: [
@@ -111,7 +111,7 @@ export function useCabinetConfig(
     const tryMod: Module3D = { ...mod };
     let loops = 0;
     const step = 0.02;
-    const segs = getWallSegments();
+    const segs = getWallSegments(store.room);
     const seg = typeof mod.segIndex === 'number' ? segs[mod.segIndex] : null;
     const tangent = seg
       ? {
@@ -238,7 +238,7 @@ export function useCabinetConfig(
   };
 
   const doAutoOnSelectedWall = () => {
-    const segs = getWallSegments();
+    const segs = getWallSegments(store.room);
     if (segs.length === 0) return alert(t('room.noWalls'));
     const wallIndex = store.room.walls.findIndex(w => w.id === selWall);
     const seg = segs[0 + ((wallIndex >= 0 ? wallIndex : 0) % segs.length)];

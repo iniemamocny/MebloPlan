@@ -60,7 +60,7 @@ export default function TopBar({ t, store, setVariant, setKind, selWall, setSelW
         value={selWall}
         onChange={e => setSelWall((e.target as HTMLSelectElement).value)}
       >
-        {getWallSegments().map((s, i) => (
+        {getWallSegments(store.room).map((s, i) => (
           <option key={store.room.walls[i]?.id} value={store.room.walls[i]?.id}>
             {t('app.wallLabel', { num: i + 1, len: Math.round(s.length) })}
           </option>

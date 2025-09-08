@@ -1,4 +1,4 @@
-import { usePlannerStore } from '../state/store'
+import type { Room } from '../types'
 export type Segment = {
   a:{x:number;y:number};
   b:{x:number;y:number};
@@ -6,8 +6,12 @@ export type Segment = {
   length:number;
   arc?:{ cx:number; cy:number; radius:number; startAngle:number; sweep:number };
 }
-export function getWallSegments(startX?: number, startY?: number, close = false): Segment[] {
-  const room = usePlannerStore.getState().room
+export function getWallSegments(
+  room: Room,
+  startX?: number,
+  startY?: number,
+  close = false,
+): Segment[] {
   const segs: Segment[] = []
   const origin = room.origin || { x:0, y:0 }
   let cursor = { x:startX ?? origin.x, y:startY ?? origin.y }

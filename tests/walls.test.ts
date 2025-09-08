@@ -25,7 +25,7 @@ describe('getWallSegments', () => {
         origin: { x: 1000, y: 2000 },
       },
     });
-    const segs = getWallSegments();
+    const segs = getWallSegments(usePlannerStore.getState().room);
     expect(segs[0].a.x).toBe(1000);
     expect(segs[0].a.y).toBe(2000);
   });
@@ -39,7 +39,7 @@ describe('getWallSegments', () => {
         origin: { x: 0, y: 0 },
       },
     });
-    const segs = getWallSegments(50, 60);
+    const segs = getWallSegments(usePlannerStore.getState().room, 50, 60);
     expect(segs[0].a.x).toBe(50);
     expect(segs[0].a.y).toBe(60);
   });
@@ -57,7 +57,7 @@ describe('getWallSegments', () => {
         origin: { x: 0, y: 0 },
       },
     });
-    const segs = getWallSegments(undefined, undefined, true);
+    const segs = getWallSegments(usePlannerStore.getState().room, undefined, undefined, true);
     expect(segs.length).toBe(4);
     const last = segs[3];
     expect(last.b.x).toBeCloseTo(segs[0].a.x, 3);
@@ -77,7 +77,7 @@ describe('getWallSegments', () => {
         origin: { x: 0, y: 0 },
       },
     });
-    const segs = getWallSegments(undefined, undefined, true);
+    const segs = getWallSegments(usePlannerStore.getState().room, undefined, undefined, true);
     expect(segs.length).toBe(3);
     const last = segs[2];
     expect(last.b.x).toBeCloseTo(segs[0].a.x, 3);
@@ -101,7 +101,7 @@ describe('getWallSegments', () => {
         origin: { x: 0, y: 0 },
       },
     });
-    const segs = getWallSegments();
+    const segs = getWallSegments(usePlannerStore.getState().room);
     expect(segs[0].arc?.radius).toBe(1000);
     expect(segs[0].b.x).toBeCloseTo(1000, 3);
     expect(segs[0].b.y).toBeCloseTo(1000, 3);
@@ -183,7 +183,7 @@ describe('WallDrawer auto close', () => {
     wd['preview'] = makePreview();
     wd['start'] = new THREE.Vector3(0, 0, 1);
     wd.finalizeSegment(new THREE.Vector3(0.05, 0, 0.02));
-    const segs = getWallSegments();
+    const segs = getWallSegments(usePlannerStore.getState().room);
     expect(segs.length).toBe(4);
     const last = segs[3];
     expect(last.b.x).toBeCloseTo(segs[0].a.x, 3);
