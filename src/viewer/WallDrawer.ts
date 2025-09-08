@@ -778,9 +778,11 @@ export default class WallDrawer {
   };
 
   private onDown = (e: PointerEvent) => {
-    this.renderer.domElement.setPointerCapture(e.pointerId);
     if (e.button !== 0) return;
     if (this.start) return;
+
+    this.renderer.domElement.setPointerCapture(e.pointerId);
+
     const point = this.getPoint(e);
     if (!point) return;
     this.dragStart = point.clone();
