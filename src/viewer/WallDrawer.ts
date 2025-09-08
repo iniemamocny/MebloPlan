@@ -20,7 +20,12 @@ interface PlannerStore {
   }) => void;
   updateWall: (
     id: string,
-    patch: Partial<{ length: number; angle: number; thickness: number; arc?: WallArc }>,
+    patch: Partial<{
+      length: number;
+      angle: number;
+      thickness: number;
+      arc?: WallArc;
+    }>,
   ) => void;
   removeWall: (id: string) => void;
   wallThickness: number;
@@ -35,7 +40,12 @@ interface PlannerStore {
   snapToGrid: boolean;
   addOpening: (op: Omit<Opening, 'id'>) => void;
   updateOpening: (id: string, patch: Partial<Omit<Opening, 'id'>>) => void;
-  openingDefaults: { width: number; height: number; bottom: number; kind: number };
+  openingDefaults: {
+    width: number;
+    height: number;
+    bottom: number;
+    kind: number;
+  };
   wallType: 'nosna' | 'dzialowa';
 }
 
@@ -81,23 +91,21 @@ export default class WallDrawer {
   private readonly snapTolerance = 0.005; // 5mm
   private grid: THREE.GridHelper | null = null;
   private openingMeshes = new Map<string, THREE.Mesh>();
-  private openingEdit:
-    | {
-        id: string;
-        type: 'move' | 'resize-left' | 'resize-right';
-        grab: number;
-        startOffset: number;
-        startWidth: number;
-        seg: {
-          start: THREE.Vector3;
-          end: THREE.Vector3;
-          dir: THREE.Vector3;
-          angle: number;
-          length: number;
-          wall: { id: string; thickness: number };
-        };
-      }
-    | null = null;
+  private openingEdit: {
+    id: string;
+    type: 'move' | 'resize-left' | 'resize-right';
+    grab: number;
+    startOffset: number;
+    startWidth: number;
+    seg: {
+      start: THREE.Vector3;
+      end: THREE.Vector3;
+      dir: THREE.Vector3;
+      angle: number;
+      length: number;
+      wall: { id: string; thickness: number };
+    };
+  } | null = null;
 
   // unsubscribes for store subscriptions
   private unsubThickness?: () => void;
@@ -142,9 +150,14 @@ export default class WallDrawer {
     // try to fill with wall top-view texture
     let pattern: CanvasPattern | null = null;
     try {
-      const [, topMaterial] = createWallMaterial(this.store.getState().wallType);
+      const [, topMaterial] = createWallMaterial(
+        this.store.getState().wallType,
+      );
       const texture = topMaterial.map as THREE.CanvasTexture | null;
-      const source = texture?.image as HTMLCanvasElement | HTMLImageElement | undefined;
+      const source = texture?.image as
+        | HTMLCanvasElement
+        | HTMLImageElement
+        | undefined;
       pattern = source ? ctx.createPattern(source, 'repeat') : null;
     } catch {
       // ignore errors (e.g. getContext not implemented in tests)
@@ -297,9 +310,7 @@ export default class WallDrawer {
     }
     this.cleanupDimensions();
     if (this.startCircle) {
-      this.scene.remove(this.startCircle);
-      this.startCircle.geometry.dispose();
-      (this.startCircle.material as THREE.Material).dispose();
+      // keep marker in the scene
       this.startCircle = null;
     }
     if (this.endCircle) {
@@ -511,7 +522,9 @@ export default class WallDrawer {
       }
       const center = info.start
         .clone()
-        .add(info.dir.clone().multiplyScalar((op.offset + op.width / 2) / 1000));
+        .add(
+          info.dir.clone().multiplyScalar((op.offset + op.width / 2) / 1000),
+        );
       mesh.position.set(center.x, 0.005, center.z);
       mesh.rotation.y = info.angle;
     }
@@ -623,21 +636,25 @@ export default class WallDrawer {
         return;
       }
       this.start = point;
-      const startGeom = new THREE.CircleGeometry(0.02, 16);
-      startGeom.rotateX(-Math.PI / 2);
-      const startMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-      this.startCircle = new THREE.Mesh(startGeom, startMat);
-      this.startCircle.position.set(point.x, 0.002, point.z);
-      this.scene.add(this.startCircle);
       this.currentThickness = this.store.getState().wallThickness / 1000;
-      const geom = new THREE.BoxGeometry(1, 0.01, 1);
-      geom.translate(0, 0.005, 0);
       let topMat: THREE.Material;
       try {
         [, topMat] = createWallMaterial(this.store.getState().wallType);
       } catch {
         topMat = new THREE.MeshBasicMaterial({ color: 0xd1d5db });
       }
+      const startGeom = new THREE.BoxGeometry(
+        this.currentThickness,
+        0.01,
+        this.currentThickness,
+      );
+      startGeom.translate(0, 0.005, 0);
+      const startMat = topMat.clone();
+      this.startCircle = new THREE.Mesh(startGeom, startMat);
+      this.startCircle.position.set(point.x, 0.001, point.z);
+      this.scene.add(this.startCircle);
+      const geom = new THREE.BoxGeometry(1, 0.01, 1);
+      geom.translate(0, 0.005, 0);
       this.preview = new THREE.Mesh(geom, topMat);
       (this.preview as THREE.Mesh).scale.set(0, 1, this.currentThickness);
       this.preview.position.set(point.x, 0.001, point.z);
@@ -832,17 +849,32 @@ export default class WallDrawer {
       let offset = proj.t * info.length;
       if (this.openingEdit.type === 'move') {
         offset = offset - this.openingEdit.grab;
-        offset = Math.max(0, Math.min(offset, info.length - this.openingEdit.startWidth));
+        offset = Math.max(
+          0,
+          Math.min(offset, info.length - this.openingEdit.startWidth),
+        );
         this.store.getState().updateOpening(this.openingEdit.id, { offset });
       } else if (this.openingEdit.type === 'resize-left') {
-        offset = Math.max(0, Math.min(offset, this.openingEdit.startOffset + this.openingEdit.startWidth - 10));
-        let width = this.openingEdit.startOffset + this.openingEdit.startWidth - offset;
+        offset = Math.max(
+          0,
+          Math.min(
+            offset,
+            this.openingEdit.startOffset + this.openingEdit.startWidth - 10,
+          ),
+        );
+        let width =
+          this.openingEdit.startOffset + this.openingEdit.startWidth - offset;
         if (offset + width > info.length) width = info.length - offset;
         width = Math.max(10, width);
-        this.store.getState().updateOpening(this.openingEdit.id, { offset, width });
+        this.store
+          .getState()
+          .updateOpening(this.openingEdit.id, { offset, width });
       } else if (this.openingEdit.type === 'resize-right') {
         let width = offset - this.openingEdit.startOffset;
-        width = Math.max(10, Math.min(width, info.length - this.openingEdit.startOffset));
+        width = Math.max(
+          10,
+          Math.min(width, info.length - this.openingEdit.startOffset),
+        );
         this.store.getState().updateOpening(this.openingEdit.id, { width });
       }
       return;
@@ -948,9 +980,10 @@ export default class WallDrawer {
       }
       snappedAngleDeg = (snappedAngleDeg + 360) % 360;
       const lengthMm = length * 1000;
-      let snappedLengthMm = disableSnap || !snapLength
-        ? lengthMm
-        : Math.round(lengthMm / snapLength) * snapLength;
+      let snappedLengthMm =
+        disableSnap || !snapLength
+          ? lengthMm
+          : Math.round(lengthMm / snapLength) * snapLength;
       let snappedLength = snappedLengthMm / 1000;
       this.currentAngle = snappedAngle;
       const endX = this.start.x + Math.cos(snappedAngle) * snappedLength;
@@ -984,7 +1017,9 @@ export default class WallDrawer {
         0,
         Math.sin(this.currentAngle),
       );
-      const mid = this.start.clone().add(dir.clone().multiplyScalar(snappedLength / 2));
+      const mid = this.start
+        .clone()
+        .add(dir.clone().multiplyScalar(snappedLength / 2));
       mesh.position.set(mid.x, 0.001, mid.z);
       mesh.rotation.y = this.currentAngle;
 
@@ -1030,7 +1065,10 @@ export default class WallDrawer {
         canvas.width = 256;
         canvas.height = 64;
         const texture = new THREE.CanvasTexture(canvas);
-        const material = new THREE.SpriteMaterial({ map: texture, depthTest: false });
+        const material = new THREE.SpriteMaterial({
+          map: texture,
+          depthTest: false,
+        });
         this.dimTextTexture = texture;
         this.dimText = new THREE.Sprite(material);
         this.dimText.scale.set(0.5, 0.125, 1);
@@ -1050,10 +1088,16 @@ export default class WallDrawer {
           ctx.font = '48px sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText(`${Math.round(snappedLengthMm)}`, canvas.width / 2, canvas.height / 2);
+          ctx.fillText(
+            `${Math.round(snappedLengthMm)}`,
+            canvas.width / 2,
+            canvas.height / 2,
+          );
           this.dimTextTexture.needsUpdate = true;
         }
-        const textPos = mid.clone().add(normal.clone().multiplyScalar(thickness / 2 + 0.05));
+        const textPos = mid
+          .clone()
+          .add(normal.clone().multiplyScalar(thickness / 2 + 0.05));
         this.dimText.position.set(textPos.x, 0.001, textPos.z);
       }
 
@@ -1061,9 +1105,7 @@ export default class WallDrawer {
       this.onAngleChange?.(snappedAngleDeg);
       if (this.overlay) {
         this.overlay.value = `${Math.round(snappedLengthMm)}`;
-        const midOff = mid
-          .clone()
-          .add(normal.clone().multiplyScalar(0.05));
+        const midOff = mid.clone().add(normal.clone().multiplyScalar(0.05));
         this.positionOverlay(midOff);
       }
 
@@ -1116,7 +1158,8 @@ export default class WallDrawer {
         const { x, y } = this.worldToScreen(labelPos);
         this.angleLabel.style.left = `${x}px`;
         this.angleLabel.style.top = `${y}px`;
-        const highlight = Math.abs(absDiff - Math.PI / 2) > this.rightAngleTolerance;
+        const highlight =
+          Math.abs(absDiff - Math.PI / 2) > this.rightAngleTolerance;
         const color = highlight ? '#f00' : '#000';
         (this.angleArc.material as THREE.LineBasicMaterial).color.set(color);
         this.angleLabel.style.color = color;
@@ -1301,13 +1344,19 @@ export default class WallDrawer {
     const sweep = 90; // degrees, placeholder
     const length = r * (Math.PI / 2);
     const thickness = state.wallThickness;
-    state.addWall({ length, angle: 0, thickness, arc: { radius: r, angle: sweep } });
+    state.addWall({
+      length,
+      angle: 0,
+      thickness,
+      arc: { radius: r, angle: sweep },
+    });
     this.arcCenter = null;
     this.updateLabels();
   }
 
   private placeSquare(start: THREE.Vector3) {
-    const size = this.currentThickness || this.store.getState().wallThickness / 1000;
+    const size =
+      this.currentThickness || this.store.getState().wallThickness / 1000;
     const geom = new THREE.BoxGeometry(size, 0.01, size);
     geom.translate(0, 0.005, 0);
     let mat: THREE.Material;
@@ -1360,7 +1409,8 @@ export default class WallDrawer {
           this.editingIndex = null;
           return;
         }
-        const { snapAngle, snapLength, room, updateWall } = this.store.getState();
+        const { snapAngle, snapLength, room, updateWall } =
+          this.store.getState();
         const dx = end.x - this.start.x;
         const dz = end.z - this.start.z;
         let angleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
