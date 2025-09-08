@@ -83,6 +83,7 @@ export default class WallDrawer {
   private labels = new Map<string, HTMLElement>();
   private startCircle: THREE.Mesh | null = null;
   private endCircle: THREE.Mesh | null = null;
+  private squareMeshes: THREE.Mesh[] = [];
   private guideX: THREE.Line | null = null;
   private guideZ: THREE.Line | null = null;
   private angleArc: THREE.Line | null = null;
@@ -1355,19 +1356,32 @@ export default class WallDrawer {
   }
 
   private placeSquare(start: THREE.Vector3) {
-    const size =
-      this.currentThickness || this.store.getState().wallThickness / 1000;
-    const geom = new THREE.BoxGeometry(size, 0.01, size);
-    geom.translate(0, 0.005, 0);
-    let mat: THREE.Material;
-    try {
-      [, mat] = createWallMaterial(this.store.getState().wallType);
-    } catch {
-      mat = new THREE.MeshBasicMaterial({ color: 0xd1d5db });
+    const state = this.store.getState();
+    const size = this.currentThickness || state.wallThickness / 1000;
+    let square: THREE.Mesh;
+    if (this.startCircle) {
+      square = this.startCircle;
+      this.startCircle = null;
+    } else {
+      const geom = new THREE.BoxGeometry(size, 0.01, size);
+      geom.translate(0, 0.005, 0);
+      let mat: THREE.Material;
+      try {
+        [, mat] = createWallMaterial(state.wallType);
+      } catch {
+        mat = new THREE.MeshBasicMaterial({ color: 0xd1d5db });
+      }
+      square = new THREE.Mesh(geom, mat);
+      square.position.set(start.x, 0.001, start.z);
+      this.scene.add(square);
     }
-    const square = new THREE.Mesh(geom, mat);
-    square.position.set(start.x, 0.001, start.z);
-    this.scene.add(square);
+    this.squareMeshes.push(square);
+    if (state.room.walls.length === 0) {
+      state.setRoom({ origin: { x: start.x * 1000, y: start.z * 1000 } });
+    }
+    const thickness = size * 1000;
+    const lastAngle = state.room.walls[state.room.walls.length - 1]?.angle ?? 0;
+    state.addWall({ length: thickness, angle: lastAngle, thickness });
   }
 
   private onUp = (e: PointerEvent) => {
