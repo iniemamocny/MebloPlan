@@ -431,11 +431,7 @@ export default class WallDrawer {
   }
 
   private getSegments() {
-    const orig = usePlannerStore.getState;
-    (usePlannerStore as any).getState = this.store.getState.bind(this.store);
-    const segs = getWallSegments();
-    (usePlannerStore as any).getState = orig;
-    return segs;
+    return getWallSegments(this.store.getState().room);
   }
 
   private findClosestVertex(point: THREE.Vector3): THREE.Vector3 | null {

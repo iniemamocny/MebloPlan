@@ -28,7 +28,7 @@ export default function WallDrawPanel({
   const [lengthError, setLengthError] = React.useState(false);
   const [mode, setMode] = React.useState<'draw' | 'edit' | 'move' | 'opening'>('draw');
   const { area, perimeter } = React.useMemo(() => {
-    const segs = getWallSegments(undefined, undefined, true);
+    const segs = getWallSegments(store.room, undefined, undefined, true);
     return getAreaAndPerimeter(segs);
   }, [store.room.walls]);
   React.useEffect(() => {
