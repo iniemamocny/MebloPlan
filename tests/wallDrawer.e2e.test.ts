@@ -14,7 +14,7 @@ import { usePlannerStore } from '../src/state/store';
 (HTMLCanvasElement.prototype as any).toDataURL = () => '';
 
 describe('WallDrawer click without drag', () => {
-  it('cleans up preview and resets state', () => {
+  it('creates square and adds wall to store', () => {
     const canvas = document.createElement('canvas');
     canvas.getBoundingClientRect = () => ({
       left: 0,
@@ -31,9 +31,10 @@ describe('WallDrawer click without drag', () => {
     const camera = new THREE.PerspectiveCamera();
     const getCamera = () => camera;
     const scene = new THREE.Scene();
+    const addWall = vi.fn();
     const store = {
       getState: () => ({
-        addWall: vi.fn(),
+        addWall,
         wallThickness: 100,
         wallType: 'dzialowa',
         snapAngle: 0,
@@ -55,8 +56,14 @@ describe('WallDrawer click without drag', () => {
     const up = { clientX: 0, clientY: 0, detail: 1, button: 0 } as PointerEvent;
     (drawer as any).onUp(up);
 
+    expect(addWall).toHaveBeenCalledWith({
+      length: 100,
+      angle: 0,
+      thickness: 100,
+    });
     expect((drawer as any).preview).toBeNull();
     expect((drawer as any).start).toBeNull();
+    expect(scene.children.length).toBeGreaterThan(0);
   });
 });
 
