@@ -63,3 +63,13 @@ export function projectPointToSegment(px:number, py:number, seg:Segment){
   const dist=Math.hypot(dx,dy)
   return { x,y,t,dist }
 }
+
+export function getAreaAndPerimeter(segments: Segment[]) {
+  let area = 0
+  let perimeter = 0
+  for (const s of segments) {
+    area += s.a.x * s.b.y - s.b.x * s.a.y
+    perimeter += s.length
+  }
+  return { area: Math.abs(area) / 2, perimeter }
+}
