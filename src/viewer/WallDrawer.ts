@@ -10,6 +10,8 @@ import { getWallSegments, projectPointToSegment } from '../utils/walls';
 import { createWallMaterial } from './wall';
 
 const pixelsPerMm = 0.2; // 1px ≈ 5mm
+const DRAG_PIXEL_THRESHOLD = 4;
+const DRAG_WORLD_THRESHOLD = 0.01;
 
 interface PlannerStore {
   addWall: (w: {
@@ -58,6 +60,7 @@ export default class WallDrawer {
   private plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   private start: THREE.Vector3 | null = null;
   private dragStart: THREE.Vector3 | null = null;
+  private dragStartClient: { x: number; y: number } | null = null;
   private preview: THREE.Line | THREE.Mesh | null = null;
   private currentAngle = 0; // radians
   private currentThickness = 0; // meters
@@ -628,6 +631,7 @@ export default class WallDrawer {
     const point = this.getPoint(e);
     if (!point) return;
     this.dragStart = point.clone();
+    this.dragStartClient = { x: e.clientX, y: e.clientY };
     this.isDragging = false;
     if (this.mode === 'draw') {
       if (this.arcMode) {
@@ -833,7 +837,21 @@ export default class WallDrawer {
     if (!point) return;
     if (this.mode === 'draw') {
       if (!this.isDragging) {
-        if (this.dragStart && this.dragStart.distanceTo(point) > 0.01) {
+        if (this.dragStart && this.dragStartClient) {
+          const worldDist = this.dragStart.distanceTo(point);
+          let screenDist = DRAG_PIXEL_THRESHOLD + 1;
+          if (e.clientX !== undefined && e.clientY !== undefined) {
+            screenDist = Math.hypot(
+              e.clientX - this.dragStartClient.x,
+              e.clientY - this.dragStartClient.y,
+            );
+          }
+          if (
+            worldDist < DRAG_WORLD_THRESHOLD &&
+            screenDist < DRAG_PIXEL_THRESHOLD
+          ) {
+            return;
+          }
           this.isDragging = true;
           let topMat: THREE.Material;
           try {
@@ -1393,32 +1411,44 @@ export default class WallDrawer {
         this.openingEdit = null;
         return;
       }
-      if (this.mode === 'draw' && this.start && !this.preview) {
-        this.placeSquare(this.start.clone());
-        this.cleanupPreview();
-        this.start = null;
-        return;
-      }
-      if (!this.start || !this.preview) {
-        this.cleanupPreview();
-        this.start = null;
-        return;
-      }
       if (this.mode === 'draw') {
+        if (!this.start) {
+          this.cleanupPreview();
+          return;
+        }
         const end = this.getPoint(e);
         if (!end) {
           this.disable();
           return;
         }
-        if (!this.isDragging) {
-          if (this.start) {
-            this.placeSquare(this.start.clone());
+        let worldDist = 0;
+        let screenDist = DRAG_PIXEL_THRESHOLD + 1;
+        if (this.dragStart && this.dragStartClient) {
+          worldDist = this.dragStart.distanceTo(end);
+          if (e.clientX !== undefined && e.clientY !== undefined) {
+            screenDist = Math.hypot(
+              e.clientX - this.dragStartClient.x,
+              e.clientY - this.dragStartClient.y,
+            );
           }
+        }
+        if (
+          worldDist < DRAG_WORLD_THRESHOLD &&
+          screenDist < DRAG_PIXEL_THRESHOLD
+        ) {
+          this.placeSquare(this.start.clone());
           this.cleanupPreview();
           this.start = null;
-        } else {
+        } else if (this.preview) {
           this.finalizeSegment(end);
+        } else {
+          this.cleanupPreview();
+          this.start = null;
         }
+      } else if (!this.start || !this.preview) {
+        this.cleanupPreview();
+        this.start = null;
+        return;
       } else if (this.mode === 'edit') {
         if (this.editingIndex === null) {
           this.cleanupPreview();
@@ -1509,6 +1539,7 @@ export default class WallDrawer {
       }
     } finally {
       this.dragStart = null;
+      this.dragStartClient = null;
       this.isDragging = false;
     }
   };
