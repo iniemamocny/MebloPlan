@@ -39,7 +39,7 @@ export function createWallGeometry(
 
 export function createWallMaterial(
   type: 'dzialowa' | 'nosna',
-): THREE.MeshStandardMaterial {
+): [THREE.MeshStandardMaterial, THREE.MeshStandardMaterial] {
   const size = 32;
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
@@ -54,12 +54,10 @@ export function createWallMaterial(
       ctx.moveTo(i, 0);
       ctx.lineTo(i + size, size);
       ctx.stroke();
-    }
-    if (type === 'nosna') {
-      ctx.strokeStyle = '#000';
-      for (let y = 4; y < size; y += 8) {
+      if (type === 'nosna') {
         ctx.beginPath();
-        ctx.arc(2, y, 4, -Math.PI / 2, Math.PI / 2);
+        ctx.moveTo(i, size);
+        ctx.lineTo(i + size, 0);
         ctx.stroke();
       }
     }
@@ -67,5 +65,7 @@ export function createWallMaterial(
   const texture = new THREE.CanvasTexture(canvas);
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set(4, 4);
-  return new THREE.MeshStandardMaterial({ map: texture });
+  const topMaterial = new THREE.MeshStandardMaterial({ map: texture });
+  const sideMaterial = new THREE.MeshStandardMaterial({ color: '#d1d5db' });
+  return [sideMaterial, topMaterial];
 }

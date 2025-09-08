@@ -197,7 +197,7 @@ export default class WallDrawer {
     const origin = room.origin
       ? new THREE.Vector3(room.origin.x / 1000, 0, room.origin.y / 1000)
       : new THREE.Vector3();
-    let cursor = origin.clone();
+    const cursor = origin.clone();
     for (const w of walls) {
       let el = this.labels.get(w.id);
       if (!el || el instanceof HTMLInputElement) {
@@ -297,7 +297,7 @@ export default class WallDrawer {
       const origin = room.origin
         ? new THREE.Vector3(room.origin.x / 1000, 0, room.origin.y / 1000)
         : new THREE.Vector3();
-      let cursor = origin.clone();
+      const cursor = origin.clone();
       for (let i = 0; i < room.walls.length; i++) {
         const w = room.walls[i];
         const ang = (w.angle * Math.PI) / 180;
@@ -393,7 +393,7 @@ export default class WallDrawer {
       const { snapAngle, snapLength } = this.store.getState();
       const dx = point.x - this.start.x;
       const dz = point.z - this.start.z;
-      let length = Math.sqrt(dx * dx + dz * dz);
+      const length = Math.sqrt(dx * dx + dz * dz);
       let angle = Math.atan2(dz, dx);
       let angleDeg = (angle * 180) / Math.PI;
       if (snapAngle) {
