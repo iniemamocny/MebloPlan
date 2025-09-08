@@ -184,4 +184,31 @@ describe('WallDrawPanel callbacks', () => {
       root.unmount();
     });
   });
+
+  it('toggles right angle snapping', async () => {
+    const three: any = {};
+    const threeRef = { current: three } as React.MutableRefObject<any>;
+    const container = document.createElement('div');
+    const root = ReactDOM.createRoot(container);
+
+    await act(async () => {
+      root.render(<WallDrawPanel threeRef={threeRef} isOpen isDrawing={false} />);
+    });
+
+    const label = Array.from(container.querySelectorAll('label')).find((l) =>
+      l.textContent?.includes(i18n.t('room.snapRightAngles')),
+    ) as HTMLLabelElement;
+    const cb = label.querySelector('input') as HTMLInputElement;
+    expect(cb.checked).toBe(true);
+
+    await act(async () => {
+      cb.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(cb.checked).toBe(false);
+
+    await act(async () => {
+      root.unmount();
+    });
+  });
 });
