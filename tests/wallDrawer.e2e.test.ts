@@ -273,6 +273,63 @@ describe('WallDrawer small movement treated as click', () => {
   });
 });
 
+describe('WallDrawer keeps first point fixed', () => {
+  it('does not move initial point when dragging', () => {
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const getCamera = () => camera;
+    const scene = new THREE.Scene();
+    const store: any = {
+      getState: () => ({
+        addWall: vi.fn(),
+        wallThickness: 100,
+        wallType: 'dzialowa',
+        snapAngle: 0,
+        snapLength: 0,
+        snapRightAngles: true,
+        angleToPrev: 0,
+        defaultSquareAngle: 0,
+        room: { walls: [] },
+        setRoom: vi.fn(),
+      }),
+    };
+
+    const drawer = new WallDrawer(
+      renderer,
+      getCamera,
+      scene,
+      store,
+      () => {},
+      () => {},
+    );
+
+    const p = new THREE.Vector3(0, 0, 0);
+    (drawer as any).getPoint = () => p;
+    (drawer as any).onDown({ button: 0 } as PointerEvent);
+
+    (drawer as any).getPoint = () => {
+      p.set(1, 0, 0);
+      return p;
+    };
+    (drawer as any).onMove({ clientX: 10, clientY: 0 } as PointerEvent);
+
+    expect((drawer as any).start.x).toBeCloseTo(0, 3);
+    expect((drawer as any).start.z).toBeCloseTo(0, 3);
+  });
+});
+
 describe('WallDrawer segment selection', () => {
   it('finds correct segment for a given point', () => {
     const canvas = document.createElement('canvas');

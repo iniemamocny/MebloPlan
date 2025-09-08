@@ -712,13 +712,13 @@ export default class WallDrawer {
     if (this.mode === 'draw') {
       if (this.arcMode) {
         if (!this.arcCenter) {
-          this.arcCenter = point;
+          this.arcCenter = point.clone();
           return;
         }
         this.finalizeArc(point);
         return;
       }
-      this.start = point;
+      this.start = point.clone();
       this.currentThickness = this.store.getState().wallThickness / 1000;
     } else if (this.mode === 'edit') {
       const segs = this.getSegments();
