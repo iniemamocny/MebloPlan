@@ -313,3 +313,59 @@ describe('updateWall', () => {
     expect(wall.arc?.angle).toBe(90);
   });
 });
+
+describe('addWall', () => {
+  it('rejects non-positive values', () => {
+    const store = usePlannerStore.getState();
+    expect(() =>
+      store.addWall({ length: 0, angle: 0, thickness: 100 }),
+    ).toThrow();
+    expect(() =>
+      store.addWall({ length: 100, angle: 0, thickness: -5 }),
+    ).toThrow();
+    expect(usePlannerStore.getState().room.walls).toHaveLength(0);
+  });
+
+  it('clamps and normalizes wall values', () => {
+    const store = usePlannerStore.getState();
+    store.addWall({ length: 500, angle: 450, thickness: 200 });
+    const { max } = wallRanges['dzialowa'];
+    const wall = usePlannerStore.getState().room.walls[0];
+    expect(wall.length).toBe(max);
+    expect(wall.thickness).toBe(max);
+    expect(wall.angle).toBe(90);
+  });
+
+  it('rejects invalid arc parameters', () => {
+    const store = usePlannerStore.getState();
+    expect(() =>
+      store.addWall({
+        length: 100,
+        angle: 0,
+        thickness: 100,
+        arc: { radius: -5, angle: 90 },
+      }),
+    ).toThrow();
+    expect(() =>
+      store.addWall({
+        length: 100,
+        angle: 0,
+        thickness: 100,
+        arc: { radius: 5, angle: 0 },
+      }),
+    ).toThrow();
+    expect(usePlannerStore.getState().room.walls).toHaveLength(0);
+  });
+
+  it('normalizes arc angle', () => {
+    const store = usePlannerStore.getState();
+    store.addWall({
+      length: 100,
+      angle: 0,
+      thickness: 100,
+      arc: { radius: 1000, angle: 450 },
+    });
+    const wall = usePlannerStore.getState().room.walls[0];
+    expect(wall.arc?.angle).toBe(90);
+  });
+});

@@ -383,6 +383,34 @@ export const usePlannerStore = create<Store>((set, get) => ({
       future: [],
     })),
   addWall: (w) => {
+    const { wallType } = get();
+    const { min, max } = wallRanges[wallType];
+
+    if (w.length <= 0) {
+      throw new Error('Wall length must be positive');
+    }
+    if (w.thickness <= 0) {
+      throw new Error('Wall thickness must be positive');
+    }
+
+    let length = clamp(w.length, min, max);
+    const thickness = clamp(w.thickness, min, max);
+    const angle = ((w.angle % 360) + 360) % 360;
+
+    let arc: WallArc | undefined;
+    if (w.arc) {
+      if (w.arc.radius === undefined || w.arc.radius <= 0) {
+        throw new Error('Arc radius must be positive');
+      }
+      if (w.arc.angle === undefined || w.arc.angle === 0) {
+        throw new Error('Arc angle must be non-zero');
+      }
+      let ang = w.arc.angle % 360;
+      if (ang === 0) ang = 360;
+      arc = { radius: w.arc.radius, angle: ang };
+      length = Math.abs(arc.radius * THREE.MathUtils.degToRad(arc.angle));
+    }
+
     const id = crypto.randomUUID();
     set((s) => ({
       past: [
@@ -394,7 +422,10 @@ export const usePlannerStore = create<Store>((set, get) => ({
       ],
       room: {
         ...s.room,
-        walls: [...s.room.walls, { id, ...w }],
+        walls: [
+          ...s.room.walls,
+          { id, length, angle, thickness, ...(arc ? { arc } : {}) },
+        ],
       },
       future: [],
     }));
