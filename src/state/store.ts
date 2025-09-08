@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { FAMILY } from '../core/catalog';
-import { Module3D, Room, Globals, Prices, Opening, Gaps } from '../types';
+import { Module3D, Room, Globals, Prices, Opening, Gaps, WallArc } from '../types';
 import { safeSetItem } from '../utils/storage';
 
 export const defaultGaps: Gaps = {
@@ -160,7 +160,12 @@ type Store = {
   removeWall: (id: string) => void;
   updateWall: (
     id: string,
-    patch: Partial<{ length: number; angle: number; thickness: number }>,
+    patch: Partial<{
+      length: number;
+      angle: number;
+      thickness: number;
+      arc: Partial<WallArc>;
+    }>,
   ) => void;
   addOpening: (op: Omit<Opening, 'id'>) => void;
   updateOpening: (id: string, patch: Partial<Omit<Opening, 'id'>>) => void;
@@ -413,7 +418,13 @@ export const usePlannerStore = create<Store>((set, get) => ({
   updateWall: (id, patch) => {
     const { wallType } = get();
     const { min, max } = wallRanges[wallType];
-    const validated: Partial<{ length: number; angle: number; thickness: number }> = {};
+    const wall = get().room.walls.find((w) => w.id === id);
+    const validated: Partial<{
+      length: number;
+      angle: number;
+      thickness: number;
+      arc: WallArc;
+    }> = {};
 
     if (patch.length !== undefined) {
       if (patch.length <= 0) {
@@ -431,6 +442,20 @@ export const usePlannerStore = create<Store>((set, get) => ({
 
     if (patch.angle !== undefined) {
       validated.angle = ((patch.angle % 360) + 360) % 360;
+    }
+
+    if (patch.arc !== undefined) {
+      const arc: WallArc = { ...(wall?.arc || {}), ...patch.arc } as WallArc;
+      if (arc.radius === undefined || arc.radius <= 0) {
+        throw new Error('Arc radius must be positive');
+      }
+      if (arc.angle === undefined || arc.angle === 0) {
+        throw new Error('Arc angle must be non-zero');
+      }
+      let ang = arc.angle % 360;
+      if (ang === 0) ang = 360;
+      arc.angle = ang;
+      validated.arc = arc;
     }
 
     if (Object.keys(validated).length === 0) return;
