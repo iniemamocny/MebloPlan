@@ -43,6 +43,10 @@ export default class WallDrawer {
   // unsubscribes for store subscriptions
   private unsubThickness?: () => void;
   private unsubLabels?: () => void;
+  // handler for camera movement
+  private onCameraChange = () => {
+    this.updateLabels();
+  };
 
   constructor(
     renderer: WebGLRenderer,
@@ -93,6 +97,8 @@ export default class WallDrawer {
     dom.addEventListener('pointerdown', this.onDown);
     dom.addEventListener('pointerup', this.onUp);
     dom.addEventListener('pointermove', this.onMove);
+    dom.addEventListener('pointermove', this.onCameraChange);
+    dom.addEventListener('wheel', this.onCameraChange);
     window.addEventListener('keydown', this.onKeyDown);
     dom.style.cursor = this.updateCursor(this.store.getState().wallThickness);
     this.unsubThickness = this.store.subscribe(
@@ -129,6 +135,8 @@ export default class WallDrawer {
     dom.removeEventListener('pointerdown', this.onDown);
     dom.removeEventListener('pointerup', this.onUp);
     dom.removeEventListener('pointermove', this.onMove);
+    dom.removeEventListener('pointermove', this.onCameraChange);
+    dom.removeEventListener('wheel', this.onCameraChange);
     window.removeEventListener('keydown', this.onKeyDown);
     this.start = null;
     this.cleanupPreview();
