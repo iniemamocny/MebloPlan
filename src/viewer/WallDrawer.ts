@@ -1,9 +1,13 @@
 import * as THREE from 'three';
 import type { WebGLRenderer, Camera, Scene } from 'three';
+import { Line2 } from 'three/examples/jsm/lines/Line2.js';
+import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import type { UseBoundStore, StoreApi } from 'zustand';
 import { usePlannerStore } from '../state/store';
 import type { Room, WallArc, Opening } from '../types';
 import { getWallSegments, projectPointToSegment } from '../utils/walls';
+import { createWallMaterial } from './wall';
 
 const pixelsPerMm = 0.2; // 1px ≈ 5mm
 
@@ -32,6 +36,7 @@ interface PlannerStore {
   addOpening: (op: Omit<Opening, 'id'>) => void;
   updateOpening: (id: string, patch: Partial<Omit<Opening, 'id'>>) => void;
   openingDefaults: { width: number; height: number; bottom: number; kind: number };
+  wallType: 'nosna' | 'dzialowa';
 }
 
 export default class WallDrawer {
@@ -42,8 +47,13 @@ export default class WallDrawer {
   private raycaster = new THREE.Raycaster();
   private plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   private start: THREE.Vector3 | null = null;
-  private preview: THREE.Line | null = null;
+  private preview: THREE.Line | THREE.Mesh | null = null;
   private currentAngle = 0; // radians
+  private currentThickness = 0; // meters
+  private dimLine1: Line2 | null = null;
+  private dimLine2: Line2 | null = null;
+  private dimText: THREE.Sprite | null = null;
+  private dimTextTexture: THREE.CanvasTexture | null = null;
   private onLengthChange?: (len: number) => void;
   private onAngleChange?: (angle: number) => void;
   private active = false;
@@ -239,15 +249,45 @@ export default class WallDrawer {
     this.cleanupPreview();
   }
 
+  private cleanupDimensions() {
+    if (this.dimLine1) {
+      this.scene.remove(this.dimLine1);
+      this.dimLine1.geometry.dispose();
+      (this.dimLine1.material as THREE.Material).dispose();
+      this.dimLine1 = null;
+    }
+    if (this.dimLine2) {
+      this.scene.remove(this.dimLine2);
+      this.dimLine2.geometry.dispose();
+      (this.dimLine2.material as THREE.Material).dispose();
+      this.dimLine2 = null;
+    }
+    if (this.dimText) {
+      this.scene.remove(this.dimText);
+      const mat = this.dimText.material as THREE.SpriteMaterial;
+      mat.map?.dispose();
+      mat.dispose();
+      this.dimTextTexture?.dispose();
+      this.dimTextTexture = null;
+      this.dimText = null;
+    }
+  }
+
   private cleanupPreview() {
     this.onLengthChange?.(0);
     this.onAngleChange?.(0);
     if (this.preview) {
       this.scene.remove(this.preview);
-      this.preview.geometry.dispose();
-      (this.preview.material as THREE.Material).dispose();
+      (this.preview as any).geometry?.dispose?.();
+      const mat = (this.preview as any).material;
+      if (Array.isArray(mat)) {
+        mat.forEach((m: THREE.Material) => m.dispose());
+      } else {
+        mat?.dispose?.();
+      }
       this.preview = null;
     }
+    this.cleanupDimensions();
     if (this.snapPreview) {
       this.scene.remove(this.snapPreview);
       this.snapPreview.geometry.dispose();
@@ -552,12 +592,18 @@ export default class WallDrawer {
         return;
       }
       this.start = point;
-      const geom = new THREE.BufferGeometry().setFromPoints([
-        point.clone(),
-        point.clone(),
-      ]);
-      const mat = new THREE.LineBasicMaterial({ color: 0x000000 });
-      this.preview = new THREE.Line(geom, mat);
+      this.currentThickness = this.store.getState().wallThickness / 1000;
+      const geom = new THREE.PlaneGeometry(1, 1);
+      geom.rotateX(-Math.PI / 2);
+      let topMat: THREE.Material;
+      try {
+        [, topMat] = createWallMaterial(this.store.getState().wallType);
+      } catch {
+        topMat = new THREE.MeshBasicMaterial({ color: 0xd1d5db });
+      }
+      this.preview = new THREE.Mesh(geom, topMat);
+      (this.preview as THREE.Mesh).scale.set(0, 1, this.currentThickness);
+      this.preview.position.set(point.x, 0.001, point.z);
       this.scene.add(this.preview);
       if (this.overlay) {
         this.overlay.remove();
@@ -797,29 +843,95 @@ export default class WallDrawer {
         this.currentAngle = Math.atan2(dzs, dxs);
         snappedAngleDeg = (this.currentAngle * 180) / Math.PI;
       }
-      const positions = (this.preview.geometry as THREE.BufferGeometry)
-        .attributes.position as THREE.BufferAttribute;
-      positions.setXYZ(0, this.start.x, 0, this.start.z);
-      positions.setXYZ(1, end.x, 0, end.z);
-      positions.needsUpdate = true;
+      const mesh = this.preview as THREE.Mesh;
+      const thickness = this.currentThickness;
+      mesh.scale.set(snappedLength, 1, thickness);
+      const mid = new THREE.Vector3(
+        (this.start.x + end.x) / 2,
+        0,
+        (this.start.z + end.z) / 2,
+      );
+      mesh.position.copy(mid.clone().setY(0.001));
+      mesh.rotation.y = this.currentAngle;
+
+      const normal = new THREE.Vector3(
+        -Math.sin(this.currentAngle),
+        0,
+        Math.cos(this.currentAngle),
+      );
+      const edge = normal.clone().multiplyScalar(thickness / 2);
+      const s1 = this.start.clone().add(edge);
+      const e1 = end.clone().add(edge);
+      const s2 = this.start.clone().sub(edge);
+      const e2 = end.clone().sub(edge);
+      const canvasSize = this.renderer.domElement as HTMLCanvasElement;
+      const res = new THREE.Vector2(canvasSize.width, canvasSize.height);
+      if (!this.dimLine1) {
+        const g1 = new LineGeometry();
+        g1.setPositions([s1.x, s1.y, s1.z, e1.x, e1.y, e1.z]);
+        const m1 = new LineMaterial({ color: 0x000000, linewidth: 0.001 });
+        m1.resolution.set(res.x, res.y);
+        this.dimLine1 = new Line2(g1, m1);
+        this.scene.add(this.dimLine1);
+      } else {
+        const g1 = this.dimLine1.geometry as LineGeometry;
+        g1.setPositions([s1.x, s1.y, s1.z, e1.x, e1.y, e1.z]);
+        (this.dimLine1.material as LineMaterial).resolution.set(res.x, res.y);
+      }
+      if (!this.dimLine2) {
+        const g2 = new LineGeometry();
+        g2.setPositions([s2.x, s2.y, s2.z, e2.x, e2.y, e2.z]);
+        const m2 = new LineMaterial({ color: 0x000000, linewidth: 0.001 });
+        m2.resolution.set(res.x, res.y);
+        this.dimLine2 = new Line2(g2, m2);
+        this.scene.add(this.dimLine2);
+      } else {
+        const g2 = this.dimLine2.geometry as LineGeometry;
+        g2.setPositions([s2.x, s2.y, s2.z, e2.x, e2.y, e2.z]);
+        (this.dimLine2.material as LineMaterial).resolution.set(res.x, res.y);
+      }
+
+      if (!this.dimText) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 64;
+        const texture = new THREE.CanvasTexture(canvas);
+        const material = new THREE.SpriteMaterial({ map: texture, depthTest: false });
+        this.dimTextTexture = texture;
+        this.dimText = new THREE.Sprite(material);
+        this.dimText.scale.set(0.5, 0.125, 1);
+        this.scene.add(this.dimText);
+      }
+      if (this.dimText && this.dimTextTexture) {
+        const canvas = this.dimTextTexture.image as HTMLCanvasElement;
+        let ctx: CanvasRenderingContext2D | null = null;
+        try {
+          ctx = canvas.getContext('2d');
+        } catch {
+          ctx = null;
+        }
+        if (ctx && typeof ctx.clearRect === 'function') {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#000';
+          ctx.font = '48px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(`${Math.round(snappedLengthMm)}`, canvas.width / 2, canvas.height / 2);
+          this.dimTextTexture.needsUpdate = true;
+        }
+        const textPos = mid.clone().add(normal.clone().multiplyScalar(thickness / 2 + 0.05));
+        this.dimText.position.set(textPos.x, 0.001, textPos.z);
+      }
 
       this.updateSnapPreview(snap || null);
       this.onLengthChange?.(snappedLengthMm);
       this.onAngleChange?.(snappedAngleDeg);
       if (this.overlay) {
         this.overlay.value = `${Math.round(snappedLengthMm)}`;
-        const mid = new THREE.Vector3(
-          (this.start.x + end.x) / 2,
-          0,
-          (this.start.z + end.z) / 2,
-        );
-        const offset = new THREE.Vector3(
-          -Math.sin(this.currentAngle),
-          0,
-          Math.cos(this.currentAngle),
-        ).multiplyScalar(0.05);
-        mid.add(offset);
-        this.positionOverlay(mid);
+        const midOff = mid
+          .clone()
+          .add(normal.clone().multiplyScalar(0.05));
+        this.positionOverlay(midOff);
       }
     } else if (this.mode === 'edit') {
       const { snapAngle, snapLength } = this.store.getState();
@@ -890,11 +1002,15 @@ export default class WallDrawer {
       0,
       this.start.z + Math.sin(this.currentAngle) * lengthM,
     );
-    const positions = (this.preview.geometry as THREE.BufferGeometry).attributes
-      .position as THREE.BufferAttribute;
-    positions.setXYZ(0, this.start.x, 0, this.start.z);
-    positions.setXYZ(1, end.x, 0, end.z);
-    positions.needsUpdate = true;
+    const mesh = this.preview as THREE.Mesh;
+    mesh.scale.set(lengthM, 1, this.currentThickness);
+    const mid = new THREE.Vector3(
+      (this.start.x + end.x) / 2,
+      0,
+      (this.start.z + end.z) / 2,
+    );
+    mesh.position.set(mid.x, 0.001, mid.z);
+    mesh.rotation.y = this.currentAngle;
     this.finalizeSegment(end, lengthMm);
   }
 
@@ -967,6 +1083,7 @@ export default class WallDrawer {
     }
     const thickness = state.wallThickness;
     state.addWall({ length: snappedLength, angle: snappedAngleDeg, thickness });
+    this.currentThickness = thickness / 1000;
     const rad = (snappedAngleDeg * Math.PI) / 180;
     const lenM = snappedLength / 1000;
     this.currentAngle = rad;
@@ -975,11 +1092,11 @@ export default class WallDrawer {
       0,
       this.start.z + Math.sin(rad) * lenM,
     );
-    const positions = (this.preview.geometry as THREE.BufferGeometry).attributes
-      .position as THREE.BufferAttribute;
-    positions.setXYZ(0, this.start.x, 0, this.start.z);
-    positions.setXYZ(1, this.start.x, 0, this.start.z);
-    positions.needsUpdate = true;
+    const mesh = this.preview as any;
+    mesh?.scale?.set?.(0, 1, this.currentThickness);
+    mesh?.position?.set?.(this.start.x, 0.001, this.start.z);
+    if (mesh?.rotation) mesh.rotation.y = this.currentAngle;
+    this.cleanupDimensions();
     this.onLengthChange?.(0);
     this.onAngleChange?.(0);
     if (this.overlay) {
@@ -1130,13 +1247,23 @@ export default class WallDrawer {
       }
       if ((e.target as HTMLElement).tagName === 'INPUT') return;
       if (!this.start || !this.preview) return;
-      const positions = (this.preview.geometry as THREE.BufferGeometry)
-        .attributes.position as THREE.BufferAttribute;
-      const end = new THREE.Vector3(
-        positions.getX(1),
-        positions.getY(1),
-        positions.getZ(1),
-      );
+      let end: THREE.Vector3;
+      if (this.mode === 'draw' && this.preview instanceof THREE.Mesh) {
+        const length = (this.preview as THREE.Mesh).scale.x;
+        end = new THREE.Vector3(
+          this.start.x + Math.cos(this.currentAngle) * length,
+          0,
+          this.start.z + Math.sin(this.currentAngle) * length,
+        );
+      } else {
+        const positions = (this.preview as any).geometry
+          .attributes.position as THREE.BufferAttribute;
+        end = new THREE.Vector3(
+          positions.getX(1),
+          positions.getY(1),
+          positions.getZ(1),
+        );
+      }
       if (this.mode === 'draw') {
         this.finalizeSegment(end);
       } else if (this.mode === 'edit' && this.editingIndex !== null) {
