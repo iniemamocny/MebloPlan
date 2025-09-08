@@ -206,6 +206,7 @@ export default class WallDrawer {
     const dom = this.renderer.domElement;
     dom.addEventListener('pointerdown', this.onDown);
     dom.addEventListener('pointermove', this.onMove);
+    dom.addEventListener('pointerup', this.onUp);
     if (this.controls) {
       this.controls.addEventListener('change', this.onCameraChange);
     } else {
@@ -276,6 +277,7 @@ export default class WallDrawer {
     const dom = this.renderer.domElement;
     dom.removeEventListener('pointerdown', this.onDown);
     dom.removeEventListener('pointermove', this.onMove);
+    dom.removeEventListener('pointerup', this.onUp);
     if (this.controls) {
       this.controls.removeEventListener('change', this.onCameraChange);
     } else {
