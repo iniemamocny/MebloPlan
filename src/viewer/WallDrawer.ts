@@ -69,7 +69,8 @@ export default class WallDrawer {
   } | null = null;
   private overlay: HTMLInputElement | null = null;
   private labels = new Map<string, HTMLElement>();
-  private snapPreview: THREE.Mesh | null = null;
+  private startCircle: THREE.Mesh | null = null;
+  private endCircle: THREE.Mesh | null = null;
   private guideX: THREE.Line | null = null;
   private guideZ: THREE.Line | null = null;
   private angleArc: THREE.Line | null = null;
@@ -293,11 +294,17 @@ export default class WallDrawer {
       this.preview = null;
     }
     this.cleanupDimensions();
-    if (this.snapPreview) {
-      this.scene.remove(this.snapPreview);
-      this.snapPreview.geometry.dispose();
-      (this.snapPreview.material as THREE.Material).dispose();
-      this.snapPreview = null;
+    if (this.startCircle) {
+      this.scene.remove(this.startCircle);
+      this.startCircle.geometry.dispose();
+      (this.startCircle.material as THREE.Material).dispose();
+      this.startCircle = null;
+    }
+    if (this.endCircle) {
+      this.scene.remove(this.endCircle);
+      this.endCircle.geometry.dispose();
+      (this.endCircle.material as THREE.Material).dispose();
+      this.endCircle = null;
     }
     if (this.guideX) {
       this.scene.remove(this.guideX);
@@ -405,20 +412,9 @@ export default class WallDrawer {
   }
 
   private updateSnapPreview(p: THREE.Vector3 | null) {
-    if (p) {
-      if (!this.snapPreview) {
-        const geom = new THREE.SphereGeometry(0.02, 8, 8);
-        const mat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        this.snapPreview = new THREE.Mesh(geom, mat);
-        this.scene.add(this.snapPreview);
-      }
-      this.snapPreview.position.copy(p);
-    } else if (this.snapPreview) {
-      this.scene.remove(this.snapPreview);
-      this.snapPreview.geometry.dispose();
-      (this.snapPreview.material as THREE.Material).dispose();
-      this.snapPreview = null;
-    }
+    if (!this.endCircle) return;
+    const mat = this.endCircle.material as THREE.MeshBasicMaterial;
+    mat.color.set(p ? 0xff0000 : 0x000000);
   }
 
   private getWallInfo(id: string) {
@@ -619,6 +615,12 @@ export default class WallDrawer {
         return;
       }
       this.start = point;
+      const startGeom = new THREE.CircleGeometry(0.02, 16);
+      startGeom.rotateX(-Math.PI / 2);
+      const startMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+      this.startCircle = new THREE.Mesh(startGeom, startMat);
+      this.startCircle.position.set(point.x, 0.002, point.z);
+      this.scene.add(this.startCircle);
       this.currentThickness = this.store.getState().wallThickness / 1000;
       const geom = new THREE.PlaneGeometry(1, 1);
       geom.rotateX(-Math.PI / 2);
@@ -942,6 +944,15 @@ export default class WallDrawer {
         this.currentAngle = Math.atan2(dzs, dxs);
         snappedAngleDeg = (this.currentAngle * 180) / Math.PI;
       }
+      if (!this.endCircle) {
+        const endGeom = new THREE.CircleGeometry(0.02, 16);
+        endGeom.rotateX(-Math.PI / 2);
+        const endMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        this.endCircle = new THREE.Mesh(endGeom, endMat);
+        this.scene.add(this.endCircle);
+      }
+      this.endCircle.position.set(end.x, 0.002, end.z);
+      this.updateSnapPreview(snap || null);
       const mesh = this.preview as THREE.Mesh;
       const thickness = this.currentThickness;
       mesh.scale.set(snappedLength, 1, thickness);
@@ -1022,7 +1033,6 @@ export default class WallDrawer {
         this.dimText.position.set(textPos.x, 0.001, textPos.z);
       }
 
-      this.updateSnapPreview(snap || null);
       this.onLengthChange?.(snappedLengthMm);
       this.onAngleChange?.(snappedAngleDeg);
       if (this.overlay) {
@@ -1201,6 +1211,18 @@ export default class WallDrawer {
       target = origin;
     }
     this.updateSnapPreview(null);
+    if (this.startCircle) {
+      this.scene.remove(this.startCircle);
+      this.startCircle.geometry.dispose();
+      (this.startCircle.material as THREE.Material).dispose();
+      this.startCircle = null;
+    }
+    if (this.endCircle) {
+      this.scene.remove(this.endCircle);
+      this.endCircle.geometry.dispose();
+      (this.endCircle.material as THREE.Material).dispose();
+      this.endCircle = null;
+    }
     if (this.angleArc) {
       this.scene.remove(this.angleArc);
       this.angleArc.geometry.dispose();
