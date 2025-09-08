@@ -121,7 +121,6 @@ describe('WallDrawer wall chaining', () => {
         defaultSquareAngle: 0,
         room: { origin: { x: 0, y: 0 }, walls: [] },
         setRoom: vi.fn(),
-        autoCloseWalls: false,
       }),
       subscribe: () => () => {},
     } as any;

@@ -603,7 +603,6 @@ describe('WallDrawer vertex snapping to existing point', () => {
         walls: [{ id: 'a', length: 1000, angle: 0, thickness: 100 }],
       },
       setRoom: vi.fn(),
-      autoCloseWalls: false,
     };
     const store: any = { getState: () => state };
     const drawer = new WallDrawer(
@@ -659,7 +658,6 @@ describe('WallDrawer edge snapping to existing wall', () => {
         walls: [{ id: 'a', length: 1000, angle: 0, thickness: 100 }],
       },
       setRoom: vi.fn(),
-      autoCloseWalls: false,
     };
     const store: any = { getState: () => state };
     const drawer = new WallDrawer(
@@ -713,7 +711,6 @@ describe('WallDrawer grid snapping', () => {
       defaultSquareAngle: 0,
       room: { walls: [] },
       setRoom,
-      autoCloseWalls: false,
       snapToGrid: true,
       gridSize: 50,
     };
@@ -958,7 +955,6 @@ describe('WallDrawer overlays', () => {
       defaultSquareAngle: 0,
       room: { origin: { x: 0, y: 0 }, walls: [] },
       setRoom: vi.fn(),
-      autoCloseWalls: false,
     };
     const store = {
       getState: () => state,
@@ -1055,7 +1051,6 @@ describe('WallDrawer label editing', () => {
       defaultSquareAngle: 0,
       room: { origin: { x: 0, y: 0 }, walls: [] },
       setRoom: vi.fn(),
-      autoCloseWalls: false,
     };
     const store = {
       getState: () => state,
@@ -1147,7 +1142,6 @@ describe('WallDrawer remove button', () => {
       angleToPrev: 0,
       room: { origin: { x: 0, y: 0 }, walls: [] },
       setRoom: vi.fn(),
-      autoCloseWalls: false,
     };
     const store: any = () => state;
     store.getState = () => state;
@@ -1275,7 +1269,6 @@ describe('WallDrawer edit tolerance across zoom', () => {
       updateWall: vi.fn(),
       removeWall: vi.fn(),
       setRoom: vi.fn(),
-      autoCloseWalls: false,
       gridSize: 50,
       snapToGrid: false,
       measurementUnit: 'mm',
