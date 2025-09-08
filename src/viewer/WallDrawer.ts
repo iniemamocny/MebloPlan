@@ -539,7 +539,7 @@ export default class WallDrawer {
     return `${gx},${gy}`;
   }
 
-  private findClosestVertex(point: THREE.Vector3): THREE.Vector3 | null {
+  private findClosestPoint(point: THREE.Vector3): THREE.Vector3 | null {
     const segs = this.getSegments();
     let closest: THREE.Vector3 | null = null;
     let min = this.snapTolerance;
@@ -555,6 +555,17 @@ export default class WallDrawer {
       if (db < min) {
         min = db;
         closest = b;
+      }
+    }
+    if (closest) return closest;
+    const px = point.x * 1000;
+    const py = point.z * 1000;
+    for (const s of segs) {
+      const proj = projectPointToSegment(px, py, s);
+      const dist = proj.dist / 1000;
+      if (dist < min) {
+        min = dist;
+        closest = new THREE.Vector3(proj.x / 1000, 0, proj.y / 1000);
       }
     }
     return closest;
@@ -1068,7 +1079,7 @@ export default class WallDrawer {
       const endX = this.start.x + Math.cos(snappedAngle) * snappedLength;
       const endZ = this.start.z + Math.sin(snappedAngle) * snappedLength;
       let end = new THREE.Vector3(endX, 0, endZ);
-      const snap = this.findClosestVertex(end);
+      const snap = this.findClosestPoint(end);
       if (snap) {
         end = snap;
         const dxs = end.x - this.start.x;
@@ -1391,7 +1402,7 @@ export default class WallDrawer {
   private finalizeSegment(end: THREE.Vector3, manualLength?: number) {
     if (!this.start || !this.preview) return;
     const state = this.store.getState();
-    const snap = this.findClosestVertex(end);
+    const snap = this.findClosestPoint(end);
     let target = snap ? snap.clone() : end.clone();
     const origin = state.room.origin
       ? new THREE.Vector3(
