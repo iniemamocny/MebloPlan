@@ -311,7 +311,9 @@ export default class WallDrawer {
     }
     this.cleanupDimensions();
     if (this.startCircle) {
-      // keep marker in the scene
+      this.scene.remove(this.startCircle);
+      this.startCircle.geometry.dispose();
+      (this.startCircle.material as THREE.Material).dispose();
       this.startCircle = null;
     }
     if (this.endCircle) {
@@ -638,60 +640,6 @@ export default class WallDrawer {
       }
       this.start = point;
       this.currentThickness = this.store.getState().wallThickness / 1000;
-      let topMat: THREE.Material;
-      try {
-        [, topMat] = createWallMaterial(this.store.getState().wallType);
-      } catch {
-        topMat = new THREE.MeshBasicMaterial({ color: 0xd1d5db });
-      }
-      const startGeom = new THREE.BoxGeometry(
-        this.currentThickness,
-        0.01,
-        this.currentThickness,
-      );
-      startGeom.translate(0, 0.005, 0);
-      const startMat = topMat.clone();
-      this.startCircle = new THREE.Mesh(startGeom, startMat);
-      this.startCircle.position.set(point.x, 0.001, point.z);
-      this.scene.add(this.startCircle);
-      const geom = new THREE.BoxGeometry(1, 0.01, 1);
-      geom.translate(0, 0.005, 0);
-      this.preview = new THREE.Mesh(geom, topMat);
-      (this.preview as THREE.Mesh).scale.set(0, 1, this.currentThickness);
-      this.preview.position.set(point.x, 0.001, point.z);
-      this.scene.add(this.preview);
-      const guideMat = new THREE.LineDashedMaterial({
-        color: 0x888888,
-        dashSize: 0.2,
-        gapSize: 0.1,
-      });
-      const g1 = new THREE.BufferGeometry().setFromPoints([
-        point.clone(),
-        point.clone(),
-      ]);
-      this.guideX = new THREE.Line(g1, guideMat.clone());
-      this.guideX.computeLineDistances();
-      this.scene.add(this.guideX);
-      const g2 = new THREE.BufferGeometry().setFromPoints([
-        point.clone(),
-        point.clone(),
-      ]);
-      this.guideZ = new THREE.Line(g2, guideMat.clone());
-      this.guideZ.computeLineDistances();
-      this.scene.add(this.guideZ);
-      if (this.overlay) {
-        this.overlay.remove();
-      }
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.className = 'wall-overlay';
-      input.style.position = 'absolute';
-      input.style.transform = 'translate(-50%, -50%)';
-      input.value = '0';
-      document.body.appendChild(input);
-      this.overlay = input;
-      this.positionOverlay(point.clone());
-      input.focus();
     } else if (this.mode === 'edit') {
       const { room } = this.store.getState();
       const origin = room.origin
@@ -880,13 +828,67 @@ export default class WallDrawer {
       }
       return;
     }
-    if (!this.start || !this.preview) return;
+    if (!this.start) return;
     const point = this.getPoint(e);
     if (!point) return;
     if (this.mode === 'draw') {
       if (!this.isDragging) {
         if (this.dragStart && this.dragStart.distanceTo(point) > 0.01) {
           this.isDragging = true;
+          let topMat: THREE.Material;
+          try {
+            [, topMat] = createWallMaterial(this.store.getState().wallType);
+          } catch {
+            topMat = new THREE.MeshBasicMaterial({ color: 0xd1d5db });
+          }
+          const startGeom = new THREE.BoxGeometry(
+            this.currentThickness,
+            0.01,
+            this.currentThickness,
+          );
+          startGeom.translate(0, 0.005, 0);
+          const startMat = topMat.clone();
+          this.startCircle = new THREE.Mesh(startGeom, startMat);
+          this.startCircle.position.set(this.start.x, 0.001, this.start.z);
+          this.scene.add(this.startCircle);
+          const geom = new THREE.BoxGeometry(1, 0.01, 1);
+          geom.translate(0, 0.005, 0);
+          this.preview = new THREE.Mesh(geom, topMat);
+          (this.preview as THREE.Mesh).scale.set(0, 1, this.currentThickness);
+          this.preview.position.set(this.start.x, 0.001, this.start.z);
+          this.scene.add(this.preview);
+          const guideMat = new THREE.LineDashedMaterial({
+            color: 0x888888,
+            dashSize: 0.2,
+            gapSize: 0.1,
+          });
+          const g1 = new THREE.BufferGeometry().setFromPoints([
+            this.start.clone(),
+            this.start.clone(),
+          ]);
+          this.guideX = new THREE.Line(g1, guideMat.clone());
+          this.guideX.computeLineDistances();
+          this.scene.add(this.guideX);
+          const g2 = new THREE.BufferGeometry().setFromPoints([
+            this.start.clone(),
+            this.start.clone(),
+          ]);
+          this.guideZ = new THREE.Line(g2, guideMat.clone());
+          this.guideZ.computeLineDistances();
+          this.scene.add(this.guideZ);
+          if (this.overlay) {
+            this.overlay.remove();
+          }
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.className = 'wall-overlay';
+          input.style.position = 'absolute';
+          input.style.transform = 'translate(-50%, -50%)';
+          input.value = '0';
+          document.body.appendChild(input);
+          this.overlay = input;
+          this.positionOverlay(this.start.clone());
+          input.focus();
         } else {
           return;
         }
@@ -1391,8 +1393,15 @@ export default class WallDrawer {
         this.openingEdit = null;
         return;
       }
+      if (this.mode === 'draw' && this.start && !this.preview) {
+        this.placeSquare(this.start.clone());
+        this.cleanupPreview();
+        this.start = null;
+        return;
+      }
       if (!this.start || !this.preview) {
         this.cleanupPreview();
+        this.start = null;
         return;
       }
       if (this.mode === 'draw') {

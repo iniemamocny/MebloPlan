@@ -51,7 +51,7 @@ describe('WallDrawer click without drag', () => {
 
     const down = { clientX: 0, clientY: 0 } as PointerEvent;
     (drawer as any).onDown(down);
-    expect((drawer as any).preview).not.toBeNull();
+    expect((drawer as any).preview).toBeNull();
 
     const up = { clientX: 0, clientY: 0, detail: 1, button: 0 } as PointerEvent;
     (drawer as any).onUp(up);
@@ -362,17 +362,19 @@ describe('WallDrawer overlays', () => {
     const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
     (drawer as any).getPoint = () => new THREE.Vector3(0, 0, 0);
     (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
-    const overlay = document.querySelector('input.wall-overlay') as HTMLInputElement;
-    expect(overlay).not.toBeNull();
-    // move to update overlay
+    let overlay = document.querySelector('input.wall-overlay') as HTMLInputElement;
+    expect(overlay).toBeNull();
+    // move to start dragging and update overlay
     (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
     (drawer as any).onMove({} as PointerEvent);
-    expect(overlay.value).toBe('1000');
+    overlay = document.querySelector('input.wall-overlay') as HTMLInputElement;
+    expect(overlay).not.toBeNull();
+    expect(overlay!.value).toBe('1000');
     // manual entry
-    overlay.value = '500';
+    overlay!.value = '500';
     (drawer as any).onKeyDown({
       key: 'Enter',
-      target: overlay,
+      target: overlay!,
       preventDefault() {},
     } as KeyboardEvent);
     expect(addWall).toHaveBeenCalled();
