@@ -71,7 +71,77 @@ describe('WallDrawer click without drag', () => {
     });
     expect((drawer as any).preview).toBeNull();
     expect((drawer as any).start).toBeNull();
-    expect(scene.children.length).toBe(0);
+    expect(scene.children.length).toBe(1);
+  });
+});
+
+describe('WallDrawer retains square after drawing segment', () => {
+  it('keeps initial square in scene when segment is drawn', () => {
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const getCamera = () => camera;
+    const scene = new THREE.Scene();
+    let wallId = 0;
+    const addWall = vi.fn(() => `id${wallId++}`);
+    const store = {
+      getState: () => ({
+        addWall,
+        wallThickness: 100,
+        wallType: 'dzialowa',
+        snapAngle: 0,
+        snapLength: 0,
+        snapRightAngles: true,
+        angleToPrev: 0,
+        defaultSquareAngle: 0,
+        room: { walls: [] },
+        setRoom: vi.fn(),
+      }),
+    } as any;
+
+    const drawer = new WallDrawer(
+      renderer,
+      getCamera,
+      scene,
+      store,
+      () => {},
+      () => {},
+    );
+
+    const points = [
+      new THREE.Vector3(0, 0, 0), // onDown1
+      new THREE.Vector3(0, 0, 0), // onUp1
+      new THREE.Vector3(0, 0, 0), // onDown2
+      new THREE.Vector3(1, 0, 0), // onMove2
+      new THREE.Vector3(1, 0, 0), // onUp2
+    ];
+    (drawer as any).getPoint = () => points.shift()!;
+
+    const down1 = { clientX: 0, clientY: 0 } as PointerEvent;
+    (drawer as any).onDown(down1);
+    const up1 = { clientX: 0, clientY: 0, detail: 1, button: 0 } as PointerEvent;
+    (drawer as any).onUp(up1);
+
+    const down2 = { clientX: 0, clientY: 0 } as PointerEvent;
+    (drawer as any).onDown(down2);
+    const move2 = { clientX: 10, clientY: 0 } as PointerEvent;
+    (drawer as any).onMove(move2);
+    const up2 = { clientX: 10, clientY: 0, detail: 1, button: 0 } as PointerEvent;
+    (drawer as any).onUp(up2);
+
+    expect(scene.children.length).toBe(1);
+    expect((drawer as any).squareMeshes.size).toBe(1);
   });
 });
 
