@@ -1294,21 +1294,9 @@ export default class WallDrawer {
     const thickness = state.wallThickness;
     state.addWall({ length: snappedLength, angle: snappedAngleDeg, thickness });
     this.currentThickness = thickness / 1000;
-    const rad = (snappedAngleDeg * Math.PI) / 180;
-    const lenM = snappedLength / 1000;
-    this.currentAngle = rad;
-    this.start.set(
-      this.start.x + Math.cos(rad) * lenM,
-      0,
-      this.start.z + Math.sin(rad) * lenM,
-    );
-    const mesh = this.preview as any;
-    mesh?.scale?.set?.(0, 1, this.currentThickness);
-    mesh?.position?.set?.(this.start.x, 0.001, this.start.z);
-    if (mesh?.rotation) mesh.rotation.y = this.currentAngle;
-    this.cleanupDimensions();
-    this.onLengthChange?.(0);
-    this.onAngleChange?.(0);
+    this.cleanupPreview();
+    this.start = null;
+    this.currentAngle = 0;
     if (this.overlay) {
       this.overlay.remove();
       this.overlay = null;
