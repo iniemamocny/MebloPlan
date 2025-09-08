@@ -260,7 +260,7 @@ describe('WallDrawer overlays', () => {
     const labels = (drawer as any).labels;
     expect(labels.has(labelId)).toBe(true);
     const label = document.querySelector('div.wall-label') as HTMLDivElement;
-    expect(label?.textContent).toBe('500');
+    expect(label?.textContent).toBe('500×');
     // start new wall
     (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
     (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
@@ -335,7 +335,7 @@ describe('WallDrawer label editing', () => {
     (drawer as any).onUp({} as PointerEvent);
     const wallId = state.room.walls[0].id;
     let label = document.querySelector('div.wall-label') as HTMLDivElement;
-    expect(label?.textContent).toBe('1000');
+    expect(label?.textContent).toBe('1000×');
     label.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     const input = document.querySelector('input.wall-label') as HTMLInputElement;
     input.value = '800';
@@ -345,7 +345,7 @@ describe('WallDrawer label editing', () => {
     expect(state.updateWall).toHaveBeenCalledWith(wallId, { length: 800 });
     expect(state.room.walls[0].length).toBe(800);
     label = document.querySelector('div.wall-label') as HTMLDivElement;
-    expect(label?.textContent).toBe('800');
+    expect(label?.textContent).toBe('800×');
   });
 });
 
@@ -401,5 +401,71 @@ describe('WallDrawer cancel', () => {
     } as KeyboardEvent);
     expect(canvas.style.cursor).toBe('default');
     expect((drawer as any).active).toBe(false);
+  });
+});
+
+describe('WallDrawer remove button', () => {
+  it('removes wall when × button clicked', () => {
+    (HTMLCanvasElement.prototype as any).getContext = () => ({
+      beginPath() {},
+      moveTo() {},
+      lineTo() {},
+      stroke() {},
+      strokeRect() {},
+    });
+    (HTMLCanvasElement.prototype as any).toDataURL = () => '';
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const getCamera = () => camera;
+    const scene = new THREE.Scene();
+    const subs: any[] = [];
+    const state: any = {
+      addWall: (w: any) => {
+        const id = `w${state.room.walls.length}`;
+        state.room.walls.push({ id, ...w });
+        subs.forEach((s: any) => s.cb(s.sel(state)));
+      },
+      updateWall: vi.fn(),
+      removeWall: (id: string) => {
+        state.room.walls = state.room.walls.filter((w: any) => w.id !== id);
+        subs.forEach((s: any) => s.cb(s.sel(state)));
+      },
+      wallThickness: 100,
+      wallType: 'dzialowa',
+      snapAngle: 0,
+      snapLength: 0,
+      snapRightAngles: true,
+      angleToPrev: 0,
+      room: { origin: { x: 0, y: 0 }, walls: [] },
+      setRoom: vi.fn(),
+      autoCloseWalls: false,
+    };
+    const store: any = () => state;
+    store.getState = () => state;
+    store.subscribe = (sel: any, cb: any) => {
+      subs.push({ sel, cb });
+      return () => {};
+    };
+    const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
+    drawer.enable();
+    (drawer as any).getPoint = () => new THREE.Vector3(0, 0, 0);
+    (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
+    (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
+    (drawer as any).onMove({} as PointerEvent);
+    (drawer as any).onUp({} as PointerEvent);
+    const btn = document.querySelector('div.wall-label button') as HTMLButtonElement;
+    expect(btn).not.toBeNull();
   });
 });
