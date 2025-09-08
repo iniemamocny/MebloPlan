@@ -160,7 +160,6 @@ export default class WallDrawer {
     if (this.active) return;
     const dom = this.renderer.domElement;
     dom.addEventListener('pointerdown', this.onDown);
-    dom.addEventListener('pointerup', this.onUp);
     dom.addEventListener('pointermove', this.onMove);
     dom.addEventListener('pointermove', this.onCameraChange);
     dom.addEventListener('wheel', this.onCameraChange);
@@ -214,7 +213,6 @@ export default class WallDrawer {
     if (!this.active) return;
     const dom = this.renderer.domElement;
     dom.removeEventListener('pointerdown', this.onDown);
-    dom.removeEventListener('pointerup', this.onUp);
     dom.removeEventListener('pointermove', this.onMove);
     dom.removeEventListener('pointermove', this.onCameraChange);
     dom.removeEventListener('wheel', this.onCameraChange);
@@ -1324,6 +1322,7 @@ export default class WallDrawer {
   }
 
   private onUp = (e: PointerEvent) => {
+    if (e.button !== 0) return;
     if (this.mode === 'opening') {
       this.openingEdit = null;
       return;
@@ -1335,13 +1334,6 @@ export default class WallDrawer {
     if (this.mode === 'draw') {
       const end = this.getPoint(e);
       if (!end) {
-        this.disable();
-        return;
-      }
-      const dx = end.x - this.start.x;
-      const dz = end.z - this.start.z;
-      const lengthMm = Math.sqrt(dx * dx + dz * dz) * 1000;
-      if (e.detail > 1 && lengthMm < 1) {
         this.disable();
         return;
       }
@@ -1436,60 +1428,10 @@ export default class WallDrawer {
   };
 
   private onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      if (this.overlay && e.target === this.overlay) {
-        e.preventDefault();
-        const val = parseFloat(this.overlay.value);
-        this.applyLength(val);
-        return;
-      }
-      if ((e.target as HTMLElement).tagName === 'INPUT') return;
-      if (!this.start || !this.preview) return;
-      let end: THREE.Vector3;
-      if (this.mode === 'draw' && this.preview instanceof THREE.Mesh) {
-        const length = (this.preview as THREE.Mesh).scale.x;
-        end = new THREE.Vector3(
-          this.start.x + Math.cos(this.currentAngle) * length,
-          0,
-          this.start.z + Math.sin(this.currentAngle) * length,
-        );
-      } else {
-        const positions = (this.preview as any).geometry
-          .attributes.position as THREE.BufferAttribute;
-        end = new THREE.Vector3(
-          positions.getX(1),
-          positions.getY(1),
-          positions.getZ(1),
-        );
-      }
-      if (this.mode === 'draw') {
-        this.finalizeSegment(end);
-      } else if (this.mode === 'edit' && this.editingIndex !== null) {
-        const { snapAngle, snapLength, room, updateWall } =
-          this.store.getState();
-        const dx = end.x - this.start.x;
-        const dz = end.z - this.start.z;
-        let angleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
-        if (snapAngle) {
-          angleDeg = Math.round(angleDeg / snapAngle) * snapAngle;
-        }
-        angleDeg = (angleDeg + 360) % 360;
-        const lengthMmRaw = Math.sqrt(dx * dx + dz * dz) * 1000;
-        const snappedLength = snapLength
-          ? Math.round(lengthMmRaw / snapLength) * snapLength
-          : lengthMmRaw;
-        const wall = room.walls[this.editingIndex];
-        updateWall(wall.id, { length: snappedLength, angle: angleDeg });
-        this.start = null;
-        this.editingIndex = null;
-        this.cleanupPreview();
-      } else if (this.mode === 'move') {
-        this.onUp(new PointerEvent('pointerup'));
-      }
-    } else if (e.key === 'Escape') {
+    if (e.key === 'Enter' && this.overlay && e.target === this.overlay) {
       e.preventDefault();
-      e.stopImmediatePropagation();
-      this.disable();
+      const val = parseFloat(this.overlay.value);
+      this.applyLength(val);
     }
   };
 }

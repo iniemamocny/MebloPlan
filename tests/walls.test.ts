@@ -167,14 +167,21 @@ describe('WallDrawer auto close', () => {
       wd['preview'] = null;
     };
     const positions = { setXYZ: () => {}, needsUpdate: false } as any;
-    wd['preview'] = {
+    const makePreview = () => ({
       geometry: { attributes: { position: positions } },
       material: {},
-    } as any;
+    });
+    wd['preview'] = makePreview();
     wd['start'] = new THREE.Vector3(0, 0, 0);
     wd.finalizeSegment(new THREE.Vector3(1, 0, 0));
+    wd['preview'] = makePreview();
+    wd['start'] = new THREE.Vector3(1, 0, 0);
     wd.finalizeSegment(new THREE.Vector3(1, 0, 1));
+    wd['preview'] = makePreview();
+    wd['start'] = new THREE.Vector3(1, 0, 1);
     wd.finalizeSegment(new THREE.Vector3(0, 0, 1));
+    wd['preview'] = makePreview();
+    wd['start'] = new THREE.Vector3(0, 0, 1);
     wd.finalizeSegment(new THREE.Vector3(0.05, 0, 0.02));
     const segs = getWallSegments();
     expect(segs.length).toBe(4);

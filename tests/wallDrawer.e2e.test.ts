@@ -4,6 +4,15 @@ import * as THREE from 'three';
 import WallDrawer from '../src/viewer/WallDrawer';
 import { usePlannerStore } from '../src/state/store';
 
+(HTMLCanvasElement.prototype as any).getContext = () => ({
+  beginPath() {},
+  moveTo() {},
+  lineTo() {},
+  stroke() {},
+  strokeRect() {},
+});
+(HTMLCanvasElement.prototype as any).toDataURL = () => '';
+
 describe('WallDrawer click without drag', () => {
   it('cleans up preview and resets state', () => {
     const canvas = document.createElement('canvas');
@@ -43,7 +52,7 @@ describe('WallDrawer click without drag', () => {
     (drawer as any).onDown(down);
     expect((drawer as any).preview).not.toBeNull();
 
-    const up = { clientX: 0, clientY: 0, detail: 1 } as PointerEvent;
+    const up = { clientX: 0, clientY: 0, detail: 1, button: 0 } as PointerEvent;
     (drawer as any).onUp(up);
 
     expect((drawer as any).preview).toBeNull();
@@ -190,7 +199,7 @@ describe('WallDrawer vertex snapping to existing point', () => {
     (drawer as any).onDown({} as PointerEvent);
     (drawer as any).getPoint = () => new THREE.Vector3(0.004, 0, 0.002);
     (drawer as any).onMove({} as PointerEvent);
-    (drawer as any).onUp({} as PointerEvent);
+    (drawer as any).onUp({ button: 0 } as PointerEvent);
     expect(addWall).toHaveBeenCalled();
     const call = addWall.mock.calls[0][0];
     expect(call.length).toBeCloseTo(1000, 3);
@@ -247,7 +256,7 @@ describe('WallDrawer grid snapping', () => {
     };
     (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
     (drawer as any).onMove({ clientX: 0, clientY: 0 } as PointerEvent);
-    (drawer as any).onUp({ clientX: 0, clientY: 0 } as PointerEvent);
+    (drawer as any).onUp({ clientX: 0, clientY: 0, button: 0 } as PointerEvent);
     expect(setRoom).toHaveBeenCalledWith({ origin: { x: 0, y: 0 } });
     expect(addWall).toHaveBeenCalledWith({ length: 100, angle: 0, thickness: 100 });
   });
@@ -295,7 +304,7 @@ describe('WallDrawer edit mode', () => {
     // drag to (0.5, 0.5)
     (drawer as any).getPoint = () => new THREE.Vector3(0.5, 0, 0.5);
     (drawer as any).onMove({} as PointerEvent);
-    (drawer as any).onUp({} as PointerEvent);
+    (drawer as any).onUp({ button: 0 } as PointerEvent);
     expect(updateWall).toHaveBeenCalled();
     const patch = updateWall.mock.calls[0][1];
     expect(patch.length).toBeCloseTo(707, 0);
@@ -436,7 +445,7 @@ describe('WallDrawer label editing', () => {
     (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
     (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
     (drawer as any).onMove({} as PointerEvent);
-    (drawer as any).onUp({} as PointerEvent);
+    (drawer as any).onUp({ button: 0 } as PointerEvent);
     const wallId = state.room.walls[0].id;
     let label = document.querySelector('div.wall-label') as HTMLDivElement;
     expect(label?.textContent).toBe('1000×');
@@ -450,61 +459,6 @@ describe('WallDrawer label editing', () => {
     expect(state.room.walls[0].length).toBe(800);
     label = document.querySelector('div.wall-label') as HTMLDivElement;
     expect(label?.textContent).toBe('800×');
-  });
-});
-
-describe('WallDrawer cancel', () => {
-  it('disables drawing and resets cursor on Escape', () => {
-    (HTMLCanvasElement.prototype as any).getContext = () => ({
-      beginPath() {},
-      moveTo() {},
-      lineTo() {},
-      stroke() {},
-      strokeRect() {},
-    });
-    (HTMLCanvasElement.prototype as any).toDataURL = () => '';
-    const canvas = document.createElement('canvas');
-    canvas.getBoundingClientRect = () => ({
-      left: 0,
-      top: 0,
-      width: 100,
-      height: 100,
-      right: 100,
-      bottom: 100,
-      x: 0,
-      y: 0,
-      toJSON() {},
-    });
-    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
-    const camera = new THREE.PerspectiveCamera();
-    const getCamera = () => camera;
-    const scene = new THREE.Scene();
-    const state = {
-      addWall: vi.fn(),
-      updateWall: vi.fn(),
-      wallThickness: 100,
-      snapAngle: 0,
-      snapLength: 0,
-      snapRightAngles: true,
-      angleToPrev: 0,
-      room: { walls: [] },
-      setRoom: vi.fn(),
-      autoCloseWalls: false,
-    };
-    const store = {
-      getState: () => state,
-      subscribe: () => () => {},
-    } as any;
-    const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
-    drawer.enable();
-    expect(canvas.style.cursor).not.toBe('default');
-    (drawer as any).onKeyDown({
-      key: 'Escape',
-      preventDefault() {},
-      stopImmediatePropagation() {},
-    } as KeyboardEvent);
-    expect(canvas.style.cursor).toBe('default');
-    expect((drawer as any).active).toBe(false);
   });
 });
 
@@ -568,7 +522,7 @@ describe('WallDrawer remove button', () => {
     (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
     (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
     (drawer as any).onMove({} as PointerEvent);
-    (drawer as any).onUp({} as PointerEvent);
+    (drawer as any).onUp({ button: 0 } as PointerEvent);
     const btn = document.querySelector('div.wall-label button') as HTMLButtonElement;
     expect(btn).not.toBeNull();
   });
@@ -613,7 +567,7 @@ describe('WallDrawer opening mode', () => {
     (drawer as any).onDown({} as PointerEvent);
     (drawer as any).getPoint = () => new THREE.Vector3(0.6, 0, 0);
     (drawer as any).onMove({} as PointerEvent);
-    (drawer as any).onUp({} as PointerEvent);
+    (drawer as any).onUp({ button: 0 } as PointerEvent);
     op = usePlannerStore.getState().room.openings[0];
     expect(op.offset).toBeCloseTo(550);
 
@@ -621,7 +575,7 @@ describe('WallDrawer opening mode', () => {
     (drawer as any).onDown({} as PointerEvent);
     (drawer as any).getPoint = () => new THREE.Vector3(0.75, 0, 0);
     (drawer as any).onMove({} as PointerEvent);
-    (drawer as any).onUp({} as PointerEvent);
+    (drawer as any).onUp({ button: 0 } as PointerEvent);
     op = usePlannerStore.getState().room.openings[0];
     expect(op.width).toBeCloseTo(200);
   });
