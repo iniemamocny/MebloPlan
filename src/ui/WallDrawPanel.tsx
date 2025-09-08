@@ -202,6 +202,26 @@ export default function WallDrawPanel({
       <div>{Math.round(wallLength).toString().slice(0, 5)} mm</div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <div>
+          <div className="small">Square angle</div>
+          <input
+            className="input"
+            type="number"
+            value={store.defaultSquareAngle}
+            onChange={(e) => {
+              const val = Number((e.target as HTMLInputElement).value);
+              if (!Number.isNaN(val) && val >= 0 && val <= 360) {
+                store.setDefaultSquareAngle(val);
+              }
+            }}
+            style={{ width: 50 }}
+            min={0}
+            max={360}
+            maxLength={3}
+          />
+        </div>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div>
           <div className="small">{t('room.angleToPrev')}</div>
           <input
             className="input"

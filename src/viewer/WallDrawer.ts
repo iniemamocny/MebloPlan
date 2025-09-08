@@ -1454,7 +1454,7 @@ export default class WallDrawer {
       state.setRoom({ origin: { x: start.x * 1000, y: start.z * 1000 } });
     }
     const thickness = size * 1000;
-    const lastAngle = state.room.walls[state.room.walls.length - 1]?.angle ?? 0;
+    const lastAngle = state.defaultSquareAngle ?? 0;
     const id = state.addWall({ length: thickness, angle: lastAngle, thickness });
     this.squareMeshes.set(id, square);
   }

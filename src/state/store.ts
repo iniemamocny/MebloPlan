@@ -139,6 +139,7 @@ type Store = {
   snapLength: number;
   snapRightAngles: boolean;
   angleToPrev: number;
+  defaultSquareAngle: number;
   showFronts: boolean;
   autoCloseWalls: boolean;
   gridSize: number;
@@ -171,6 +172,7 @@ type Store = {
   setSnapLength: (v: number) => void;
   setSnapRightAngles: (v: boolean) => void;
   setAngleToPrev: (v: number) => void;
+  setDefaultSquareAngle: (v: number) => void;
   setAutoCloseWalls: (v: boolean) => void;
   setGridSize: (v: number) => void;
   setSnapToGrid: (v: boolean) => void;
@@ -214,6 +216,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   snapLength: persisted?.snapLength ?? 10,
   snapRightAngles: true,
   angleToPrev: persisted?.angleToPrev ?? 0,
+  defaultSquareAngle: persisted?.defaultSquareAngle ?? 0,
   autoCloseWalls: persisted?.autoCloseWalls ?? true,
   gridSize: persisted?.gridSize ?? 50,
   snapToGrid: persisted?.snapToGrid ?? false,
@@ -516,6 +519,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setSnapLength: (v) => set({ snapLength: v }),
   setSnapRightAngles: (v) => set({ snapRightAngles: v, snapAngle: v ? 90 : 0 }),
   setAngleToPrev: (v) => set({ angleToPrev: clamp(v, 0, 360) }),
+  setDefaultSquareAngle: (v) => set({ defaultSquareAngle: clamp(v, 0, 360) }),
   setAutoCloseWalls: (v) => set({ autoCloseWalls: v }),
   setGridSize: (v) => set({ gridSize: v }),
   setSnapToGrid: (v) => set({ snapToGrid: v }),
@@ -535,6 +539,7 @@ const persistSelector = (s: Store) => ({
   snapAngle: s.snapAngle,
   snapLength: s.snapLength,
   angleToPrev: s.angleToPrev,
+  defaultSquareAngle: s.defaultSquareAngle,
   autoCloseWalls: s.autoCloseWalls,
   gridSize: s.gridSize,
   snapToGrid: s.snapToGrid,
