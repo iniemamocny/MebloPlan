@@ -12,6 +12,8 @@ import { usePlannerStore } from '../src/state/store';
   strokeRect() {},
 });
 (HTMLCanvasElement.prototype as any).toDataURL = () => '';
+(HTMLCanvasElement.prototype as any).setPointerCapture = () => {};
+(HTMLCanvasElement.prototype as any).releasePointerCapture = () => {};
 
 describe('WallDrawer ignores non-left clicks', () => {
   it('does not start drawing on right or middle click', () => {
