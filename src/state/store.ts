@@ -412,6 +412,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
       room: {
         ...s.room,
         walls: s.room.walls.filter((w) => w.id !== id),
+        openings: s.room.openings.filter((o) => o.wallId !== id),
       },
       future: [],
     })),
