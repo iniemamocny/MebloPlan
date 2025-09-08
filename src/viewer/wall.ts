@@ -18,6 +18,27 @@ export function createWallGeometry(
     const inner = new THREE.Path();
     inner.absarc(0, 0, r - t, sweep, 0, sweep < 0);
     shape.holes.push(inner);
+    openings.forEach((o) => {
+      const offset = (o.offset || 0) / 1000;
+      const width = (o.width || 0) / 1000;
+      const start = offset / r;
+      const delta = width / r;
+      const path = new THREE.Path();
+      const outerStart = new THREE.Vector2(
+        r * Math.cos(start),
+        r * Math.sin(start),
+      );
+      path.moveTo(outerStart.x, outerStart.y);
+      path.absarc(0, 0, r, start, start + delta, !(sweep < 0));
+      path.lineTo(
+        (r - t) * Math.cos(start + delta),
+        (r - t) * Math.sin(start + delta),
+      );
+      path.absarc(0, 0, r - t, start + delta, start, sweep < 0);
+      path.lineTo(outerStart.x, outerStart.y);
+      path.closePath();
+      shape.holes.push(path);
+    });
     const geom = new THREE.ExtrudeGeometry(shape, {
       depth: h,
       bevelEnabled: false,

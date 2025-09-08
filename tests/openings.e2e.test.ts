@@ -117,6 +117,46 @@ describe('openings', () => {
     expect(rc2.intersectObject(mesh).length).toBeGreaterThan(0);
   });
 
+  it('creates geometry with hole for opening on arc wall', () => {
+    const opening = {
+      id: 'o1',
+      wallId: 'w1',
+      offset: 500,
+      width: 800,
+      height: 1000,
+      bottom: 0,
+      kind: 1,
+    };
+    const geom = createWallGeometry(0, 2700, 100, [opening], {
+      radius: 2000,
+      angle: 90,
+    });
+    const mesh = new THREE.Mesh(geom, new THREE.MeshBasicMaterial());
+    const r = 2000 / 1000;
+    const t = 100 / 1000;
+    const h = 2700 / 1000;
+    const start = (opening.offset / 1000) / r;
+    const delta = (opening.width / 1000) / r;
+    const theta = start + delta / 2;
+    const origin = new THREE.Vector3(
+      (r - t - 0.01) * Math.cos(theta),
+      -(h + t) / 2,
+      (r - t - 0.01) * Math.sin(theta) - h / 2,
+    );
+    const dir = new THREE.Vector3(Math.cos(theta), 0, Math.sin(theta));
+    const rc = new THREE.Raycaster(origin, dir);
+    expect(rc.intersectObject(mesh)).toHaveLength(0);
+    const outside = start + delta + 0.1;
+    const origin2 = new THREE.Vector3(
+      (r - t - 0.01) * Math.cos(outside),
+      -(h + t) / 2,
+      (r - t - 0.01) * Math.sin(outside) - h / 2,
+    );
+    const dir2 = new THREE.Vector3(Math.cos(outside), 0, Math.sin(outside));
+    const rc2 = new THREE.Raycaster(origin2, dir2);
+    expect(rc2.intersectObject(mesh).length).toBeGreaterThan(0);
+  });
+
   it('rejects opening with negative offset', () => {
     const { addOpening } = usePlannerStore.getState();
     expect(() =>
