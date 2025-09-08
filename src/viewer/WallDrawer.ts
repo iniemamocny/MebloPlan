@@ -35,8 +35,14 @@ export default class WallDrawer {
   private onLengthChange?: (len: number) => void;
   private onAngleChange?: (angle: number) => void;
   private active = false;
-  private mode: 'draw' | 'edit' = 'draw';
+  private mode: 'draw' | 'edit' | 'move' = 'draw';
   private editingIndex: number | null = null;
+  private moving: {
+    segStart: THREE.Vector3;
+    segEnd: THREE.Vector3;
+    prevAnchor: THREE.Vector3 | null;
+    nextAnchor: THREE.Vector3 | null;
+  } | null = null;
   private overlay: HTMLInputElement | null = null;
   private labels = new Map<string, HTMLElement>();
 
@@ -117,10 +123,11 @@ export default class WallDrawer {
     this.active = true;
   }
 
-  setMode(mode: 'draw' | 'edit') {
+  setMode(mode: 'draw' | 'edit' | 'move') {
     this.mode = mode;
     this.start = null;
     this.editingIndex = null;
+    this.moving = null;
     this.cleanupPreview();
   }
 
@@ -139,6 +146,7 @@ export default class WallDrawer {
     dom.removeEventListener('wheel', this.onCameraChange);
     window.removeEventListener('keydown', this.onKeyDown);
     this.start = null;
+    this.moving = null;
     this.cleanupPreview();
     dom.style.cursor = 'default';
     this.unsubThickness?.();
@@ -300,7 +308,7 @@ export default class WallDrawer {
       this.overlay = input;
       this.positionOverlay(point.clone());
       input.focus();
-    } else {
+    } else if (this.mode === 'edit') {
       const { room } = this.store.getState();
       const origin = room.origin
         ? new THREE.Vector3(room.origin.x / 1000, 0, room.origin.y / 1000)
@@ -327,6 +335,64 @@ export default class WallDrawer {
           this.scene.add(this.preview);
           return;
         }
+        cursor.copy(end);
+      }
+    } else if (this.mode === 'move') {
+      const { room } = this.store.getState();
+      const origin = room.origin
+        ? new THREE.Vector3(room.origin.x / 1000, 0, room.origin.y / 1000)
+        : new THREE.Vector3();
+      const cursor = origin.clone();
+      const prevStart = origin.clone();
+      for (let i = 0; i < room.walls.length; i++) {
+        const w = room.walls[i];
+        const ang = (w.angle * Math.PI) / 180;
+        const len = (w.length || 0) / 1000;
+        const end = new THREE.Vector3(
+          cursor.x + Math.cos(ang) * len,
+          0,
+          cursor.z + Math.sin(ang) * len,
+        );
+        const segVec = end.clone().sub(cursor);
+        const segLenSq = segVec.lengthSq();
+        if (segLenSq > 0) {
+          const t = point.clone().sub(cursor).dot(segVec) / segLenSq;
+          if (t >= 0 && t <= 1) {
+            const proj = cursor.clone().add(segVec.clone().multiplyScalar(t));
+            if (proj.distanceTo(point) < 0.2) {
+              const nextAnchor =
+                i < room.walls.length - 1
+                  ? (() => {
+                      const nw = room.walls[i + 1];
+                      const nang = (nw.angle * Math.PI) / 180;
+                      const nlen = (nw.length || 0) / 1000;
+                      return new THREE.Vector3(
+                        end.x + Math.cos(nang) * nlen,
+                        0,
+                        end.z + Math.sin(nang) * nlen,
+                      );
+                    })()
+                  : null;
+              this.start = proj.clone();
+              this.editingIndex = i;
+              this.moving = {
+                segStart: cursor.clone(),
+                segEnd: end.clone(),
+                prevAnchor: i > 0 ? prevStart.clone() : null,
+                nextAnchor,
+              };
+              const geom = new THREE.BufferGeometry().setFromPoints([
+                cursor.clone(),
+                end.clone(),
+              ]);
+              const mat = new THREE.LineBasicMaterial({ color: 0x000000 });
+              this.preview = new THREE.Line(geom, mat);
+              this.scene.add(this.preview);
+              return;
+            }
+          }
+        }
+        prevStart.copy(cursor);
         cursor.copy(end);
       }
     }
@@ -397,7 +463,7 @@ export default class WallDrawer {
         mid.add(offset);
         this.positionOverlay(mid);
       }
-    } else {
+    } else if (this.mode === 'edit') {
       const { snapAngle, snapLength } = this.store.getState();
       const dx = point.x - this.start.x;
       const dz = point.z - this.start.z;
@@ -423,6 +489,34 @@ export default class WallDrawer {
       positions.needsUpdate = true;
       this.onLengthChange?.(snappedLengthMm);
       this.onAngleChange?.(angleDeg);
+    } else if (this.mode === 'move' && this.moving) {
+      const delta = point.clone().sub(this.start);
+      const newStart = this.moving.segStart.clone().add(delta);
+      const newEnd = this.moving.segEnd.clone().add(delta);
+      const positions = (this.preview.geometry as THREE.BufferGeometry)
+        .attributes.position as THREE.BufferAttribute;
+      positions.setXYZ(0, newStart.x, 0, newStart.z);
+      positions.setXYZ(1, newEnd.x, 0, newEnd.z);
+      positions.needsUpdate = true;
+      const wall = this.store.getState().room.walls[this.editingIndex!];
+      const label = this.labels.get(wall.id);
+      if (label) {
+        const mid = new THREE.Vector3(
+          (newStart.x + newEnd.x) / 2,
+          0,
+          (newStart.z + newEnd.z) / 2,
+        );
+        const ang = Math.atan2(newEnd.z - newStart.z, newEnd.x - newStart.x);
+        const offset = new THREE.Vector3(
+          -Math.sin(ang),
+          0,
+          Math.cos(ang),
+        ).multiplyScalar(0.05);
+        mid.add(offset);
+        const { x, y } = this.worldToScreen(mid);
+        (label as HTMLElement).style.left = `${x}px`;
+        (label as HTMLElement).style.top = `${y}px`;
+      }
     }
   };
 
@@ -557,7 +651,7 @@ export default class WallDrawer {
         return;
       }
       this.finalizeSegment(end);
-    } else {
+    } else if (this.mode === 'edit') {
       if (this.editingIndex === null) {
         this.cleanupPreview();
         this.start = null;
@@ -587,6 +681,62 @@ export default class WallDrawer {
       this.start = null;
       this.editingIndex = null;
       this.cleanupPreview();
+    } else if (this.mode === 'move') {
+      if (this.editingIndex === null || !this.moving) {
+        this.cleanupPreview();
+        this.start = null;
+        this.moving = null;
+        return;
+      }
+      const positions = (this.preview.geometry as THREE.BufferGeometry)
+        .attributes.position as THREE.BufferAttribute;
+      const newStart = new THREE.Vector3(
+        positions.getX(0),
+        0,
+        positions.getZ(0),
+      );
+      const newEnd = new THREE.Vector3(
+        positions.getX(1),
+        0,
+        positions.getZ(1),
+      );
+      const { room, updateWall, setRoom } = this.store.getState();
+      const walls = room.walls;
+      const wall = walls[this.editingIndex];
+      const angDeg =
+        (Math.atan2(newEnd.z - newStart.z, newEnd.x - newStart.x) * 180) /
+        Math.PI;
+      const lenMm = newStart.distanceTo(newEnd) * 1000;
+      updateWall(wall.id, { length: lenMm, angle: (angDeg + 360) % 360 });
+      if (this.moving.prevAnchor) {
+        const prev = walls[this.editingIndex - 1];
+        const p = this.moving.prevAnchor;
+        const prevAng =
+          (Math.atan2(newStart.z - p.z, newStart.x - p.x) * 180) / Math.PI;
+        const prevLen = p.distanceTo(newStart) * 1000;
+        updateWall(prev.id, {
+          length: prevLen,
+          angle: (prevAng + 360) % 360,
+        });
+      } else {
+        setRoom({ origin: { x: newStart.x * 1000, y: newStart.z * 1000 } });
+      }
+      if (this.moving.nextAnchor) {
+        const next = walls[this.editingIndex + 1];
+        const n = this.moving.nextAnchor;
+        const nextAng =
+          (Math.atan2(n.z - newEnd.z, n.x - newEnd.x) * 180) / Math.PI;
+        const nextLen = newEnd.distanceTo(n) * 1000;
+        updateWall(next.id, {
+          length: nextLen,
+          angle: (nextAng + 360) % 360,
+        });
+      }
+      this.start = null;
+      this.editingIndex = null;
+      this.moving = null;
+      this.cleanupPreview();
+      this.updateLabels();
     }
   };
 
@@ -609,7 +759,7 @@ export default class WallDrawer {
       );
       if (this.mode === 'draw') {
         this.finalizeSegment(end);
-      } else if (this.editingIndex !== null) {
+      } else if (this.mode === 'edit' && this.editingIndex !== null) {
         const { snapAngle, snapLength, room, updateWall } =
           this.store.getState();
         const dx = end.x - this.start.x;
@@ -628,6 +778,8 @@ export default class WallDrawer {
         this.start = null;
         this.editingIndex = null;
         this.cleanupPreview();
+      } else if (this.mode === 'move') {
+        this.onUp(new PointerEvent('pointerup'));
       }
     } else if (e.key === 'Escape') {
       e.preventDefault();
