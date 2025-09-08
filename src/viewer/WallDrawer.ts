@@ -99,6 +99,8 @@ export default class WallDrawer {
   private labels = new Map<string, HTMLElement>();
   private startCircle: THREE.Mesh | null = null;
   private endCircle: THREE.Mesh | null = null;
+  private midCircle: THREE.Mesh | null = null;
+  private dragType: 'start' | 'end' | 'mid' | null = null;
   private squareMeshes = new Map<string, THREE.Mesh>();
   private guideX: THREE.Line | null = null;
   private guideZ: THREE.Line | null = null;
@@ -263,6 +265,7 @@ export default class WallDrawer {
     this.start = null;
     this.editingIndex = null;
     this.moving = null;
+    this.dragType = null;
     this.openingEdit = null;
     this.cleanupPreview();
   }
@@ -384,6 +387,12 @@ export default class WallDrawer {
       (this.endCircle.material as THREE.Material).dispose();
       this.endCircle = null;
     }
+    if (this.midCircle) {
+      this.scene.remove(this.midCircle);
+      this.midCircle.geometry.dispose();
+      (this.midCircle.material as THREE.Material).dispose();
+      this.midCircle = null;
+    }
     if (this.guideX) {
       this.scene.remove(this.guideX);
       this.guideX.geometry.dispose();
@@ -410,6 +419,31 @@ export default class WallDrawer {
       this.overlay.remove();
       this.overlay = null;
     }
+  }
+
+  private updateEditHandles(start: THREE.Vector3, end: THREE.Vector3) {
+    const mid = start.clone().add(end).multiplyScalar(0.5);
+    const makeCircle = () => {
+      const g = new THREE.CircleGeometry(0.02, 16);
+      g.rotateX(-Math.PI / 2);
+      const m = new THREE.MeshBasicMaterial({ color: 0x000000 });
+      return new THREE.Mesh(g, m);
+    };
+    if (!this.startCircle) {
+      this.startCircle = makeCircle();
+      this.scene.add(this.startCircle);
+    }
+    if (!this.endCircle) {
+      this.endCircle = makeCircle();
+      this.scene.add(this.endCircle);
+    }
+    if (!this.midCircle) {
+      this.midCircle = makeCircle();
+      this.scene.add(this.midCircle);
+    }
+    this.startCircle.position.set(start.x, 0.002, start.z);
+    this.endCircle.position.set(end.x, 0.002, end.z);
+    this.midCircle.position.set(mid.x, 0.002, mid.z);
   }
 
   private updateGrid(snap: boolean, size: number) {
@@ -753,9 +787,21 @@ export default class WallDrawer {
           SELECT_PIXEL_TOLERANCE,
           s.end,
         );
-        if (point.distanceTo(s.end) < tol) {
-          this.start = s.start.clone();
+        const mid = s.start.clone().add(s.end).multiplyScalar(0.5);
+        const prevAnchor = i > 0 ? segs[i - 1].start.clone() : null;
+        const nextAnchor = i < segs.length - 1 ? segs[i + 1].end.clone() : null;
+        const dStart = point.distanceTo(s.start);
+        const dEnd = point.distanceTo(s.end);
+        const dMid = point.distanceTo(mid);
+        const minDist = Math.min(dStart, dEnd, dMid);
+        if (minDist < tol) {
           this.editingIndex = i;
+          this.moving = {
+            segStart: s.start.clone(),
+            segEnd: s.end.clone(),
+            prevAnchor,
+            nextAnchor,
+          };
           const geom = new THREE.BufferGeometry().setFromPoints([
             s.start.clone(),
             s.end.clone(),
@@ -763,6 +809,17 @@ export default class WallDrawer {
           const mat = new THREE.LineBasicMaterial({ color: 0x000000 });
           this.preview = new THREE.Line(geom, mat);
           this.scene.add(this.preview);
+          this.updateEditHandles(s.start.clone(), s.end.clone());
+          if (minDist === dMid) {
+            this.start = mid.clone();
+            this.dragType = 'mid';
+          } else if (minDist === dStart) {
+            this.start = s.end.clone();
+            this.dragType = 'start';
+          } else {
+            this.start = s.start.clone();
+            this.dragType = 'end';
+          }
           return;
         }
       }
@@ -1044,6 +1101,14 @@ export default class WallDrawer {
         .add(dir.clone().multiplyScalar(snappedLength / 2));
       mesh.position.set(mid.x, 0.001, mid.z);
       mesh.rotation.y = this.currentAngle;
+      if (!this.midCircle) {
+        const midGeom = new THREE.CircleGeometry(0.02, 16);
+        midGeom.rotateX(-Math.PI / 2);
+        const midMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        this.midCircle = new THREE.Mesh(midGeom, midMat);
+        this.scene.add(this.midCircle);
+      }
+      this.midCircle.position.set(mid.x, 0.002, mid.z);
 
       const normal = new THREE.Vector3(
         -Math.sin(this.currentAngle),
@@ -1198,27 +1263,74 @@ export default class WallDrawer {
         }
       }
     } else if (this.mode === 'edit') {
-      const { snapLength } = this.store.getState();
-      const dx = point.x - this.start.x;
-      const dz = point.z - this.start.z;
-      const length = Math.sqrt(dx * dx + dz * dz);
-      const angle = Math.atan2(dz, dx);
-      const angleDeg = (angle * 180) / Math.PI;
-      const lengthMm = length * 1000;
-      const snappedLengthMm = snapLength
-        ? Math.round(lengthMm / snapLength) * snapLength
-        : lengthMm;
-      const snappedLength = snappedLengthMm / 1000;
-      this.currentAngle = angle;
-      const positions = (this.preview.geometry as THREE.BufferGeometry)
-        .attributes.position as THREE.BufferAttribute;
-      const endX = this.start.x + Math.cos(angle) * snappedLength;
-      const endZ = this.start.z + Math.sin(angle) * snappedLength;
-      positions.setXYZ(0, this.start.x, 0, this.start.z);
-      positions.setXYZ(1, endX, 0, endZ);
-      positions.needsUpdate = true;
-      this.onLengthChange?.(snappedLengthMm);
-      this.onAngleChange?.(angleDeg);
+      if (this.dragType === 'mid' && this.moving) {
+        const delta = point.clone().sub(this.start);
+        const dir = this.moving.segEnd
+          .clone()
+          .sub(this.moving.segStart)
+          .normalize();
+        const perp = new THREE.Vector3(-dir.z, 0, dir.x);
+        const offset = perp.multiplyScalar(delta.dot(perp));
+        const newStart = this.moving.segStart.clone().add(offset);
+        const newEnd = this.moving.segEnd.clone().add(offset);
+        const positions = (this.preview.geometry as THREE.BufferGeometry)
+          .attributes.position as THREE.BufferAttribute;
+        positions.setXYZ(0, newStart.x, 0, newStart.z);
+        positions.setXYZ(1, newEnd.x, 0, newEnd.z);
+        positions.needsUpdate = true;
+        this.updateEditHandles(newStart, newEnd);
+      } else if (this.dragType === 'start' || this.dragType === 'end') {
+        const { snapLength } = this.store.getState();
+        const positions = (this.preview.geometry as THREE.BufferGeometry)
+          .attributes.position as THREE.BufferAttribute;
+        if (this.dragType === 'start') {
+          const vec = point.clone().sub(this.start);
+          const length = vec.length();
+          const lengthMm = length * 1000;
+          const snappedLengthMm = snapLength
+            ? Math.round(lengthMm / snapLength) * snapLength
+            : lengthMm;
+          const snappedLength = snappedLengthMm / 1000;
+          const dir = vec.normalize();
+          const newStart = this.start
+            .clone()
+            .add(dir.clone().multiplyScalar(snappedLength));
+          const newEnd = this.start.clone();
+          positions.setXYZ(0, newStart.x, 0, newStart.z);
+          positions.setXYZ(1, newEnd.x, 0, newEnd.z);
+          positions.needsUpdate = true;
+          const angle = Math.atan2(
+            newEnd.z - newStart.z,
+            newEnd.x - newStart.x,
+          );
+          this.currentAngle = angle;
+          this.onLengthChange?.(snappedLengthMm);
+          this.onAngleChange?.((angle * 180) / Math.PI);
+          this.updateEditHandles(newStart, newEnd);
+        } else if (this.dragType === 'end') {
+          const vec = point.clone().sub(this.start);
+          const length = vec.length();
+          const lengthMm = length * 1000;
+          const snappedLengthMm = snapLength
+            ? Math.round(lengthMm / snapLength) * snapLength
+            : lengthMm;
+          const snappedLength = snappedLengthMm / 1000;
+          const dir = vec.normalize();
+          const newStart = this.start.clone();
+          const newEnd = this.start.clone().add(dir.clone().multiplyScalar(snappedLength));
+          positions.setXYZ(0, newStart.x, 0, newStart.z);
+          positions.setXYZ(1, newEnd.x, 0, newEnd.z);
+          positions.needsUpdate = true;
+          const angle = Math.atan2(
+            newEnd.z - newStart.z,
+            newEnd.x - newStart.x,
+          );
+          this.currentAngle = angle;
+          this.onLengthChange?.(snappedLengthMm);
+          this.onAngleChange?.((angle * 180) / Math.PI);
+          this.updateEditHandles(newStart, newEnd);
+        }
+      }
     } else if (this.mode === 'move' && this.moving) {
       const delta = point.clone().sub(this.start);
       const newStart = this.moving.segStart.clone().add(delta);
@@ -1429,32 +1541,69 @@ export default class WallDrawer {
         this.start = null;
         return;
       } else if (this.mode === 'edit') {
-        if (this.editingIndex === null) {
+        if (this.editingIndex === null || !this.preview) {
           this.cleanupPreview();
           this.start = null;
+          this.moving = null;
+          this.dragType = null;
           return;
         }
-        const end = this.getPoint(e);
-        if (!end) {
-          this.cleanupPreview();
-          this.start = null;
-          this.editingIndex = null;
-          return;
+        const positions = (this.preview.geometry as THREE.BufferGeometry)
+          .attributes.position as THREE.BufferAttribute;
+        const newStart = new THREE.Vector3(
+          positions.getX(0),
+          0,
+          positions.getZ(0),
+        );
+        const newEnd = new THREE.Vector3(
+          positions.getX(1),
+          0,
+          positions.getZ(1),
+        );
+        const { room, updateWall, setRoom } = this.store.getState();
+        const walls = room.walls;
+        const wall = walls[this.editingIndex];
+        const angDeg =
+          (Math.atan2(newEnd.z - newStart.z, newEnd.x - newStart.x) * 180) /
+          Math.PI;
+        const lenMm = newStart.distanceTo(newEnd) * 1000;
+        updateWall(wall.id, { length: lenMm, angle: (angDeg + 360) % 360 });
+        if (this.dragType === 'start' || this.dragType === 'mid') {
+          if (this.moving && this.moving.prevAnchor) {
+            const prev = walls[this.editingIndex - 1];
+            const p = this.moving.prevAnchor;
+            const prevAng =
+              (Math.atan2(newStart.z - p.z, newStart.x - p.x) * 180) /
+              Math.PI;
+            const prevLen = p.distanceTo(newStart) * 1000;
+            updateWall(prev.id, {
+              length: prevLen,
+              angle: (prevAng + 360) % 360,
+            });
+          } else {
+            setRoom({ origin: { x: newStart.x * 1000, y: newStart.z * 1000 } });
+          }
         }
-        const { snapLength, room, updateWall } = this.store.getState();
-        const dx = end.x - this.start.x;
-        const dz = end.z - this.start.z;
-        let angleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
-        angleDeg = (angleDeg + 360) % 360;
-        const lengthMmRaw = Math.sqrt(dx * dx + dz * dz) * 1000;
-        const snappedLength = snapLength
-          ? Math.round(lengthMmRaw / snapLength) * snapLength
-          : lengthMmRaw;
-        const wall = room.walls[this.editingIndex];
-        updateWall(wall.id, { length: snappedLength, angle: angleDeg });
+        if (this.dragType === 'end' || this.dragType === 'mid') {
+          if (this.moving && this.moving.nextAnchor) {
+            const next = walls[this.editingIndex + 1];
+            const n = this.moving.nextAnchor;
+            const nextAng =
+              (Math.atan2(n.z - newEnd.z, n.x - newEnd.x) * 180) /
+              Math.PI;
+            const nextLen = newEnd.distanceTo(n) * 1000;
+            updateWall(next.id, {
+              length: nextLen,
+              angle: (nextAng + 360) % 360,
+            });
+          }
+        }
         this.start = null;
         this.editingIndex = null;
+        this.moving = null;
+        this.dragType = null;
         this.cleanupPreview();
+        this.updateLabels();
       } else if (this.mode === 'move') {
         if (this.editingIndex === null || !this.moving) {
           this.cleanupPreview();
