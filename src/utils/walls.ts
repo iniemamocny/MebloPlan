@@ -73,6 +73,9 @@ export function getAreaAndPerimeter(segments: Segment[]) {
   let perimeter = 0
   for (const s of segments) {
     area += s.a.x * s.b.y - s.b.x * s.a.y
+    if (s.arc) {
+      area += s.arc.radius * s.arc.radius * s.arc.sweep
+    }
     perimeter += s.length
   }
   return { area: Math.abs(area) / 2, perimeter }
