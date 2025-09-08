@@ -37,6 +37,7 @@ interface PlannerStore {
   snapLength: number;
   snapRightAngles: boolean;
   angleToPrev: number;
+  defaultSquareAngle: number;
   room: Room;
   setRoom: (patch: Partial<Room>) => void;
   autoCloseWalls: boolean;
