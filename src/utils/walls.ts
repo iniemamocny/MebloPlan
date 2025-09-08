@@ -95,7 +95,9 @@ export function getAreaAndPerimeter(segments: Segment[]) {
   for (const s of segments) {
     area += s.a.x * s.b.y - s.b.x * s.a.y
     if (s.arc) {
-      area += s.arc.radius * s.arc.radius * s.arc.sweep
+      const { radius: r, sweep } = s.arc
+      const sign = sweep >= 0 ? 1 : -1
+      area += sign * (r * r / 2) * (Math.abs(sweep) - Math.sin(Math.abs(sweep)))
     }
     perimeter += s.length
   }

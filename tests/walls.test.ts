@@ -132,8 +132,25 @@ describe('getAreaAndPerimeter', () => {
     } as any;
     const segs = getWallSegments(room);
     const { area, perimeter } = getAreaAndPerimeter(segs);
-    expect(area).toBeCloseTo(Math.PI / 2, 3);
+    expect(area).toBeCloseTo(Math.PI / 4, 3);
     expect(perimeter).toBeCloseTo(Math.PI + 2, 3);
+  });
+
+  it('computes area for quarter-circle sector', () => {
+    const room = {
+      walls: [
+        { id: 'a', length: 1, angle: 0, thickness: 100 },
+        { id: 'b', angle: 90, thickness: 100, arc: { radius: 1, angle: 90 } },
+        { id: 'c', length: 1, angle: -90, thickness: 100 },
+      ],
+      openings: [],
+      height: 2700,
+      origin: { x: 0, y: 0 },
+    } as any;
+    const segs = getWallSegments(room);
+    const { area, perimeter } = getAreaAndPerimeter(segs);
+    expect(area).toBeCloseTo((Math.PI + 2) / 8, 3);
+    expect(perimeter).toBeCloseTo(Math.PI / 2 + 2, 3);
   });
 });
 
