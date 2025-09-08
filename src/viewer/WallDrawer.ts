@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { WebGLRenderer, Camera, Scene } from 'three';
+import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
@@ -116,9 +117,15 @@ export default class WallDrawer {
   private unsubLabels?: () => void;
   private unsubGrid?: () => void;
   private unsubOpenings?: () => void;
+  private controls?: OrbitControls;
+  private cameraChangeRaf: number | null = null;
   // handler for camera movement
   private onCameraChange = () => {
-    this.updateLabels();
+    if (this.cameraChangeRaf !== null) return;
+    this.cameraChangeRaf = requestAnimationFrame(() => {
+      this.cameraChangeRaf = null;
+      this.updateLabels();
+    });
   };
 
   constructor(
@@ -128,6 +135,7 @@ export default class WallDrawer {
     store: typeof usePlannerStore,
     onLengthChange?: (len: number) => void,
     onAngleChange?: (angle: number) => void,
+    controls?: OrbitControls,
   ) {
     this.renderer = renderer;
     this.getCamera = getCamera;
@@ -135,6 +143,7 @@ export default class WallDrawer {
     this.store = store;
     this.onLengthChange = onLengthChange;
     this.onAngleChange = onAngleChange;
+    this.controls = controls;
   }
 
   private unsubscribe?: () => void;
@@ -180,8 +189,12 @@ export default class WallDrawer {
     const dom = this.renderer.domElement;
     dom.addEventListener('pointerdown', this.onDown);
     dom.addEventListener('pointermove', this.onMove);
-    dom.addEventListener('pointermove', this.onCameraChange);
-    dom.addEventListener('wheel', this.onCameraChange);
+    if (this.controls) {
+      this.controls.addEventListener('change', this.onCameraChange);
+    } else {
+      dom.addEventListener('pointermove', this.onCameraChange);
+      dom.addEventListener('wheel', this.onCameraChange);
+    }
     window.addEventListener('keydown', this.onKeyDown);
     dom.style.cursor = this.updateCursor(this.store.getState().wallThickness);
     this.unsubThickness = this.store.subscribe(
@@ -246,9 +259,17 @@ export default class WallDrawer {
     const dom = this.renderer.domElement;
     dom.removeEventListener('pointerdown', this.onDown);
     dom.removeEventListener('pointermove', this.onMove);
-    dom.removeEventListener('pointermove', this.onCameraChange);
-    dom.removeEventListener('wheel', this.onCameraChange);
+    if (this.controls) {
+      this.controls.removeEventListener('change', this.onCameraChange);
+    } else {
+      dom.removeEventListener('pointermove', this.onCameraChange);
+      dom.removeEventListener('wheel', this.onCameraChange);
+    }
     window.removeEventListener('keydown', this.onKeyDown);
+    if (this.cameraChangeRaf !== null) {
+      cancelAnimationFrame(this.cameraChangeRaf);
+      this.cameraChangeRaf = null;
+    }
     this.start = null;
     this.moving = null;
     this.cleanupPreview();

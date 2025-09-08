@@ -67,6 +67,7 @@ export function setupThree(
     usePlannerStore,
     callbacks?.onLengthChange,
     callbacks?.onAngleChange,
+    controls,
   );
   const cabinetDragger = new CabinetDragger(
     renderer,
