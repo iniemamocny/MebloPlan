@@ -214,6 +214,10 @@
     },
     "currency": "zł"
   },
+  "units": {
+    "mm": "mm",
+    "cm": "cm"
+  },
   "cutlist": {
     "validation": "Walidacja formatu {{width}}×{{height}}",
     "sheets": "Arkusze: {{sheets}}",
