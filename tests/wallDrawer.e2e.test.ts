@@ -197,6 +197,61 @@ describe('WallDrawer vertex snapping to existing point', () => {
   });
 });
 
+describe('WallDrawer grid snapping', () => {
+  it('snaps start and end points to grid when enabled', () => {
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const getCamera = () => camera;
+    const scene = new THREE.Scene();
+    const addWall = vi.fn();
+    const setRoom = vi.fn();
+    const state = {
+      addWall,
+      wallThickness: 100,
+      wallType: 'dzialowa',
+      snapAngle: 0,
+      snapLength: 0,
+      snapRightAngles: true,
+      angleToPrev: 0,
+      room: { walls: [] },
+      setRoom,
+      autoCloseWalls: false,
+      snapToGrid: true,
+      gridSize: 50,
+    };
+    const store = { getState: () => state } as any;
+    const drawer = new WallDrawer(renderer, getCamera, scene, store, () => {}, () => {});
+    const points = [
+      new THREE.Vector3(0.012, 0, 0.018),
+      new THREE.Vector3(0.104, 0, 0.021),
+    ];
+    let idx = 0;
+    (drawer as any).raycaster.ray.intersectPlane = (_: any, target: any) => {
+      const p = points[Math.min(idx, points.length - 1)];
+      target.copy(p);
+      idx++;
+      return target;
+    };
+    (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
+    (drawer as any).onMove({ clientX: 0, clientY: 0 } as PointerEvent);
+    (drawer as any).onUp({ clientX: 0, clientY: 0 } as PointerEvent);
+    expect(setRoom).toHaveBeenCalledWith({ origin: { x: 0, y: 0 } });
+    expect(addWall).toHaveBeenCalledWith({ length: 100, angle: 0, thickness: 100 });
+  });
+});
+
 describe('WallDrawer edit mode', () => {
   it('drags endpoint to change length and angle', () => {
     const canvas = document.createElement('canvas');

@@ -27,6 +27,8 @@ interface PlannerStore {
   room: Room;
   setRoom: (patch: Partial<Room>) => void;
   autoCloseWalls: boolean;
+  gridSize: number;
+  snapToGrid: boolean;
 }
 
 export default class WallDrawer {
@@ -56,10 +58,12 @@ export default class WallDrawer {
   private labels = new Map<string, HTMLElement>();
   private snapPreview: THREE.Mesh | null = null;
   private readonly snapTolerance = 0.005; // 5mm
+  private grid: THREE.GridHelper | null = null;
 
   // unsubscribes for store subscriptions
   private unsubThickness?: () => void;
   private unsubLabels?: () => void;
+  private unsubGrid?: () => void;
   // handler for camera movement
   private onCameraChange = () => {
     this.updateLabels();
@@ -130,6 +134,13 @@ export default class WallDrawer {
         this.updateLabels(walls);
       },
     );
+    this.unsubGrid = this.store.subscribe(
+      (s) => ({ snapToGrid: s.snapToGrid, gridSize: s.gridSize }),
+      ({ snapToGrid, gridSize }) => {
+        this.updateGrid(snapToGrid, gridSize);
+      },
+      { fireImmediately: true },
+    );
     this.updateLabels(this.store.getState().room.walls);
     this.active = true;
   }
@@ -162,8 +173,10 @@ export default class WallDrawer {
     dom.style.cursor = 'default';
     this.unsubThickness?.();
     this.unsubLabels?.();
+    this.unsubGrid?.();
     this.unsubThickness = undefined;
     this.unsubLabels = undefined;
+    this.unsubGrid = undefined;
     if (this.overlay) {
       this.overlay.remove();
       this.overlay = null;
@@ -172,6 +185,12 @@ export default class WallDrawer {
       el.remove();
     }
     this.labels.clear();
+    if (this.grid) {
+      this.scene.remove(this.grid);
+      this.grid.geometry.dispose();
+      (this.grid.material as THREE.Material).dispose();
+      this.grid = null;
+    }
     this.active = false;
   }
 
@@ -199,6 +218,26 @@ export default class WallDrawer {
     }
   }
 
+  private updateGrid(snap: boolean, size: number) {
+    if (snap) {
+      const sizeM = 20;
+      const divisions = Math.max(1, Math.round(sizeM / (size / 1000)));
+      if (this.grid) {
+        this.scene.remove(this.grid);
+        this.grid.geometry.dispose();
+        (this.grid.material as THREE.Material).dispose();
+      }
+      this.grid = new THREE.GridHelper(sizeM, divisions, 0xdddddd, 0xcccccc);
+      (this.grid.material as THREE.Material).depthWrite = false;
+      this.scene.add(this.grid);
+    } else if (this.grid) {
+      this.scene.remove(this.grid);
+      this.grid.geometry.dispose();
+      (this.grid.material as THREE.Material).dispose();
+      this.grid = null;
+    }
+  }
+
   private getPoint(event: PointerEvent): THREE.Vector3 | null {
     const rect = this.renderer.domElement.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -207,6 +246,12 @@ export default class WallDrawer {
     this.raycaster.setFromCamera(new THREE.Vector2(x, y), cam);
     const point = new THREE.Vector3();
     this.raycaster.ray.intersectPlane(this.plane, point);
+    const state = this.store.getState();
+    if (state.snapToGrid) {
+      const step = state.gridSize / 1000;
+      point.x = Math.round(point.x / step) * step;
+      point.z = Math.round(point.z / step) * step;
+    }
     return point;
   }
 
