@@ -3,6 +3,7 @@ import type { WebGLRenderer, Camera, Scene } from 'three';
 import type { UseBoundStore, StoreApi } from 'zustand';
 import { usePlannerStore } from '../state/store';
 import type { Room, WallArc } from '../types';
+import { getWallSegments } from '../utils/walls';
 
 const pixelsPerMm = 0.2; // 1px ≈ 5mm
 
@@ -53,6 +54,8 @@ export default class WallDrawer {
   } | null = null;
   private overlay: HTMLInputElement | null = null;
   private labels = new Map<string, HTMLElement>();
+  private snapPreview: THREE.Mesh | null = null;
+  private readonly snapTolerance = 0.005; // 5mm
 
   // unsubscribes for store subscriptions
   private unsubThickness?: () => void;
@@ -182,11 +185,18 @@ export default class WallDrawer {
   private cleanupPreview() {
     this.onLengthChange?.(0);
     this.onAngleChange?.(0);
-    if (!this.preview) return;
-    this.scene.remove(this.preview);
-    this.preview.geometry.dispose();
-    (this.preview.material as THREE.Material).dispose();
-    this.preview = null;
+    if (this.preview) {
+      this.scene.remove(this.preview);
+      this.preview.geometry.dispose();
+      (this.preview.material as THREE.Material).dispose();
+      this.preview = null;
+    }
+    if (this.snapPreview) {
+      this.scene.remove(this.snapPreview);
+      this.snapPreview.geometry.dispose();
+      (this.snapPreview.material as THREE.Material).dispose();
+      this.snapPreview = null;
+    }
   }
 
   private getPoint(event: PointerEvent): THREE.Vector3 | null {
@@ -213,6 +223,52 @@ export default class WallDrawer {
     const { x, y } = this.worldToScreen(point);
     this.overlay.style.left = `${x}px`;
     this.overlay.style.top = `${y}px`;
+  }
+
+  private getSegments() {
+    const orig = usePlannerStore.getState;
+    (usePlannerStore as any).getState = this.store.getState.bind(this.store);
+    const segs = getWallSegments();
+    (usePlannerStore as any).getState = orig;
+    return segs;
+  }
+
+  private findClosestVertex(point: THREE.Vector3): THREE.Vector3 | null {
+    const segs = this.getSegments();
+    let closest: THREE.Vector3 | null = null;
+    let min = this.snapTolerance;
+    for (const s of segs) {
+      const a = new THREE.Vector3(s.a.x / 1000, 0, s.a.y / 1000);
+      const da = a.distanceTo(point);
+      if (da < min) {
+        min = da;
+        closest = a;
+      }
+      const b = new THREE.Vector3(s.b.x / 1000, 0, s.b.y / 1000);
+      const db = b.distanceTo(point);
+      if (db < min) {
+        min = db;
+        closest = b;
+      }
+    }
+    return closest;
+  }
+
+  private updateSnapPreview(p: THREE.Vector3 | null) {
+    if (p) {
+      if (!this.snapPreview) {
+        const geom = new THREE.SphereGeometry(0.02, 8, 8);
+        const mat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        this.snapPreview = new THREE.Mesh(geom, mat);
+        this.scene.add(this.snapPreview);
+      }
+      this.snapPreview.position.copy(p);
+    } else if (this.snapPreview) {
+      this.scene.remove(this.snapPreview);
+      this.snapPreview.geometry.dispose();
+      (this.snapPreview.material as THREE.Material).dispose();
+      this.snapPreview = null;
+    }
   }
 
   private updateLabels(walls = this.store.getState().room.walls) {
@@ -463,28 +519,40 @@ export default class WallDrawer {
         }
       }
       snappedAngleDeg = (snappedAngleDeg + 360) % 360;
-      const lengthMm = length * 1000;
-      const snappedLengthMm = snapLength
+      let lengthMm = length * 1000;
+      let snappedLengthMm = snapLength
         ? Math.round(lengthMm / snapLength) * snapLength
         : lengthMm;
-      const snappedLength = snappedLengthMm / 1000;
+      let snappedLength = snappedLengthMm / 1000;
       this.currentAngle = snappedAngle;
+      let endX = this.start.x + Math.cos(snappedAngle) * snappedLength;
+      let endZ = this.start.z + Math.sin(snappedAngle) * snappedLength;
+      let end = new THREE.Vector3(endX, 0, endZ);
+      const snap = this.findClosestVertex(end);
+      if (snap) {
+        end = snap;
+        const dxs = end.x - this.start.x;
+        const dzs = end.z - this.start.z;
+        snappedLength = Math.sqrt(dxs * dxs + dzs * dzs);
+        snappedLengthMm = snappedLength * 1000;
+        this.currentAngle = Math.atan2(dzs, dxs);
+        snappedAngleDeg = (this.currentAngle * 180) / Math.PI;
+      }
       const positions = (this.preview.geometry as THREE.BufferGeometry)
         .attributes.position as THREE.BufferAttribute;
-      const endX = this.start.x + Math.cos(snappedAngle) * snappedLength;
-      const endZ = this.start.z + Math.sin(snappedAngle) * snappedLength;
       positions.setXYZ(0, this.start.x, 0, this.start.z);
-      positions.setXYZ(1, endX, 0, endZ);
+      positions.setXYZ(1, end.x, 0, end.z);
       positions.needsUpdate = true;
 
+      this.updateSnapPreview(snap || null);
       this.onLengthChange?.(snappedLengthMm);
       this.onAngleChange?.(snappedAngleDeg);
       if (this.overlay) {
         this.overlay.value = `${Math.round(snappedLengthMm)}`;
         const mid = new THREE.Vector3(
-          (this.start.x + endX) / 2,
+          (this.start.x + end.x) / 2,
           0,
-          (this.start.z + endZ) / 2,
+          (this.start.z + end.z) / 2,
         );
         const offset = new THREE.Vector3(
           -Math.sin(this.currentAngle),
@@ -574,7 +642,8 @@ export default class WallDrawer {
   private finalizeSegment(end: THREE.Vector3, manualLength?: number) {
     if (!this.start || !this.preview) return;
     const state = this.store.getState();
-    let target = end.clone();
+    const snap = this.findClosestVertex(end);
+    let target = snap ? snap.clone() : end.clone();
     const origin = state.room.origin
       ? new THREE.Vector3(
           state.room.origin.x / 1000,
@@ -591,6 +660,7 @@ export default class WallDrawer {
     if (autoClose) {
       target = origin;
     }
+    this.updateSnapPreview(null);
 
     const segStart = this.start.clone();
     const dx = target.x - segStart.x;
