@@ -29,7 +29,7 @@ interface PlannerStore {
       length: number;
       angle: number;
       thickness: number;
-      arc?: WallArc;
+      arc: Partial<WallArc>;
     }>,
   ) => void;
   removeWall: (id: string) => void;
