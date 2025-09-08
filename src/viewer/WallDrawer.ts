@@ -17,6 +17,7 @@ interface PlannerStore {
     id: string,
     patch: Partial<{ length: number; angle: number; thickness: number; arc?: WallArc }>,
   ) => void;
+  removeWall: (id: string) => void;
   wallThickness: number;
   snapAngle: number;
   snapLength: number;
@@ -241,6 +242,14 @@ export default class WallDrawer {
         this.labels.set(w.id, el);
       }
       el.textContent = `${Math.round(w.length || 0)}`;
+      const remove = document.createElement('button');
+      remove.textContent = '×';
+      remove.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        this.store.getState().removeWall?.(w.id);
+        this.updateLabels();
+      });
+      el.appendChild(remove);
       const ang = (w.angle * Math.PI) / 180;
       const len = (w.length || 0) / 1000;
       const end = new THREE.Vector3(
