@@ -162,6 +162,51 @@ describe('openings', () => {
     expect(usePlannerStore.getState().room.openings).toHaveLength(0);
   });
 
+  it('rejects opening with negative width', () => {
+    const { addOpening } = usePlannerStore.getState();
+    expect(() =>
+      addOpening({
+        wallId: 'w1',
+        offset: 100,
+        width: -50,
+        height: 50,
+        bottom: 0,
+        kind: 0,
+      }),
+    ).toThrow();
+    expect(usePlannerStore.getState().room.openings).toHaveLength(0);
+  });
+
+  it('rejects opening with negative height', () => {
+    const { addOpening } = usePlannerStore.getState();
+    expect(() =>
+      addOpening({
+        wallId: 'w1',
+        offset: 100,
+        width: 50,
+        height: -50,
+        bottom: 0,
+        kind: 0,
+      }),
+    ).toThrow();
+    expect(usePlannerStore.getState().room.openings).toHaveLength(0);
+  });
+
+  it('rejects opening with negative bottom', () => {
+    const { addOpening } = usePlannerStore.getState();
+    expect(() =>
+      addOpening({
+        wallId: 'w1',
+        offset: 100,
+        width: 50,
+        height: 50,
+        bottom: -10,
+        kind: 0,
+      }),
+    ).toThrow();
+    expect(usePlannerStore.getState().room.openings).toHaveLength(0);
+  });
+
   it('rejects update that violates constraints', () => {
     const { addOpening, updateOpening } = usePlannerStore.getState();
     addOpening({
@@ -175,6 +220,24 @@ describe('openings', () => {
     const id = usePlannerStore.getState().room.openings[0].id;
     expect(() => updateOpening(id, { offset: -5 })).toThrow();
     expect(usePlannerStore.getState().room.openings[0].offset).toBe(100);
+  });
+
+  it('rejects update with negative dimensions', () => {
+    const { addOpening, updateOpening } = usePlannerStore.getState();
+    addOpening({
+      wallId: 'w1',
+      offset: 100,
+      width: 50,
+      height: 50,
+      bottom: 0,
+      kind: 0,
+    });
+    const id = usePlannerStore.getState().room.openings[0].id;
+    const before = { ...usePlannerStore.getState().room.openings[0] };
+    expect(() => updateOpening(id, { width: -10 })).toThrow();
+    expect(() => updateOpening(id, { height: -10 })).toThrow();
+    expect(() => updateOpening(id, { bottom: -10 })).toThrow();
+    expect(usePlannerStore.getState().room.openings[0]).toEqual(before);
   });
 
   it('rejects overlapping opening on add', () => {

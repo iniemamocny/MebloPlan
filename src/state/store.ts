@@ -486,6 +486,9 @@ export const usePlannerStore = create<Store>((set, get) => ({
     if (
       !wall ||
       op.offset < 0 ||
+      op.width <= 0 ||
+      op.height <= 0 ||
+      op.bottom < 0 ||
       op.offset + op.width > wall.length ||
       op.bottom + op.height > room.height
     ) {
@@ -529,6 +532,9 @@ export const usePlannerStore = create<Store>((set, get) => ({
     if (
       !wall ||
       offset < 0 ||
+      width <= 0 ||
+      height <= 0 ||
+      bottom < 0 ||
       offset + width > wall.length ||
       bottom + height > room.height
     ) {
