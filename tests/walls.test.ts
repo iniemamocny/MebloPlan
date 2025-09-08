@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, expect } from 'vitest';
 import { getWallSegments, getAreaAndPerimeter, Segment } from '../src/utils/walls';
-import { usePlannerStore } from '../src/state/store';
+import { usePlannerStore, wallRanges } from '../src/state/store';
 import WallDrawer from '../src/viewer/WallDrawer';
 import * as THREE from 'three';
 import { webcrypto } from 'node:crypto';
@@ -156,6 +156,42 @@ describe('updateWall', () => {
     const walls = usePlannerStore.getState().room.walls;
     expect(walls[1].thickness).toBe(80);
     expect(walls[0].thickness).toBe(100);
+  });
+
+  it('rejects non-positive values', () => {
+    usePlannerStore.setState({
+      room: {
+        walls: [{ id: 'a', length: 1000, angle: 0, thickness: 100 }],
+        openings: [],
+        height: 2700,
+        origin: { x: 0, y: 0 },
+      },
+    });
+    const store = usePlannerStore.getState();
+    expect(() => store.updateWall('a', { length: 0 })).toThrow();
+    expect(() => store.updateWall('a', { thickness: -5 })).toThrow();
+    const wall = usePlannerStore.getState().room.walls[0];
+    expect(wall.length).toBe(1000);
+    expect(wall.thickness).toBe(100);
+  });
+
+  it('clamps and normalizes wall values', () => {
+    usePlannerStore.setState({
+      wallType: 'dzialowa',
+      room: {
+        walls: [{ id: 'a', length: 1000, angle: 0, thickness: 100 }],
+        openings: [],
+        height: 2700,
+        origin: { x: 0, y: 0 },
+      },
+    });
+    const store = usePlannerStore.getState();
+    store.updateWall('a', { length: 500, thickness: 200, angle: 450 });
+    const { max } = wallRanges['dzialowa'];
+    const wall = usePlannerStore.getState().room.walls[0];
+    expect(wall.length).toBe(max);
+    expect(wall.thickness).toBe(max);
+    expect(wall.angle).toBe(90);
   });
 });
 
