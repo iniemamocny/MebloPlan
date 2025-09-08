@@ -211,6 +211,79 @@ describe('WallDrawer retains square after drawing segment', () => {
   });
 });
 
+describe('WallDrawer snapRightAngles', () => {
+  it('snaps to 90° when enabled and allows free angle when disabled', () => {
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const getCamera = () => camera;
+    const scene = new THREE.Scene();
+
+    const baseState = {
+      wallThickness: 100,
+      wallType: 'dzialowa',
+      snapAngle: 0,
+      snapLength: 0,
+      angleToPrev: 0,
+      defaultSquareAngle: 0,
+      room: { walls: [] },
+      setRoom: vi.fn(),
+      addWall: vi.fn(() => 'id'),
+    } as any;
+
+    const stateSnap = { ...baseState, snapRightAngles: true };
+    const storeSnap = { getState: () => stateSnap } as any;
+    const drawerSnap = new WallDrawer(
+      renderer,
+      getCamera,
+      scene,
+      storeSnap,
+      () => {},
+      () => {},
+    );
+    (drawerSnap as any).getPoint = vi
+      .fn()
+      .mockReturnValueOnce(new THREE.Vector3(0, 0, 0))
+      .mockReturnValue(new THREE.Vector3(1, 0, 1));
+    (drawerSnap as any).onDown({ clientX: 0, clientY: 0, button: 0 } as PointerEvent);
+    (drawerSnap as any).onMove({ clientX: 10, clientY: 10 } as PointerEvent);
+    expect(
+      Math.round(((drawerSnap as any).currentAngle * 180) / Math.PI),
+    ).toBe(90);
+
+    const stateFree = { ...baseState, snapRightAngles: false };
+    const storeFree = { getState: () => stateFree } as any;
+    const drawerFree = new WallDrawer(
+      renderer,
+      getCamera,
+      scene,
+      storeFree,
+      () => {},
+      () => {},
+    );
+    (drawerFree as any).getPoint = vi
+      .fn()
+      .mockReturnValueOnce(new THREE.Vector3(0, 0, 0))
+      .mockReturnValue(new THREE.Vector3(1, 0, 1));
+    (drawerFree as any).onDown({ clientX: 0, clientY: 0, button: 0 } as PointerEvent);
+    (drawerFree as any).onMove({ clientX: 10, clientY: 10 } as PointerEvent);
+    expect(
+      Math.round(((drawerFree as any).currentAngle * 180) / Math.PI),
+    ).toBe(45);
+  });
+});
+
 describe('WallDrawer small movement treated as click', () => {
   it('does not start drawing for tiny pointer movement', () => {
     const canvas = document.createElement('canvas');
@@ -471,7 +544,7 @@ describe('WallDrawer snapping', () => {
       wallType: 'dzialowa',
       snapAngle: 30,
       snapLength: 100,
-      snapRightAngles: true,
+      snapRightAngles: false,
       angleToPrev: 0,
       defaultSquareAngle: 0,
       room: { walls: [] },
@@ -522,7 +595,7 @@ describe('WallDrawer vertex snapping to existing point', () => {
       wallType: 'dzialowa',
       snapAngle: 0,
       snapLength: 0,
-      snapRightAngles: true,
+      snapRightAngles: false,
       angleToPrev: 0,
       defaultSquareAngle: 0,
       room: {
@@ -578,7 +651,7 @@ describe('WallDrawer edge snapping to existing wall', () => {
       wallType: 'dzialowa',
       snapAngle: 0,
       snapLength: 0,
-      snapRightAngles: true,
+      snapRightAngles: false,
       angleToPrev: 0,
       defaultSquareAngle: 0,
       room: {
@@ -701,7 +774,7 @@ describe('WallDrawer edit mode', () => {
       wallType: 'dzialowa',
       snapAngle: 0,
       snapLength: 0,
-      snapRightAngles: true,
+      snapRightAngles: false,
       angleToPrev: 0,
       defaultSquareAngle: 0,
       room: {
@@ -758,7 +831,7 @@ describe('WallDrawer edit mode', () => {
       wallType: 'dzialowa',
       snapAngle: 0,
       snapLength: 0,
-      snapRightAngles: true,
+      snapRightAngles: false,
       angleToPrev: 0,
       defaultSquareAngle: 0,
       room: {
@@ -842,7 +915,9 @@ describe('WallDrawer edit mode', () => {
       'a',
       expect.objectContaining({ length: 500, angle: 0 }),
     );
-    expect(setRoom).toHaveBeenCalledWith({ origin: { x: 500, y: 0 } });
+    const origin = setRoom.mock.calls[0][0].origin;
+    expect(origin.x).toBe(500);
+    expect(origin.y).toBeCloseTo(0);
   });
 });
 

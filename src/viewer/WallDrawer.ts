@@ -131,6 +131,14 @@ export default class WallDrawer {
   private segmentGrid = new Map<string, WallSegInfo[]>();
   private readonly segmentGridSize = 1000; // mm
 
+  private applyAngleSnap(angle: number): number {
+    const { snapRightAngles } = this.store.getState();
+    if (!snapRightAngles) return angle;
+    const deg = THREE.MathUtils.radToDeg(angle);
+    const snapped = Math.round(deg / 90) * 90;
+    return THREE.MathUtils.degToRad(snapped);
+  }
+
   // unsubscribes for store subscriptions
   private unsubThickness?: () => void;
   private unsubLabels?: () => void;
@@ -1067,8 +1075,10 @@ export default class WallDrawer {
         this.guideZ.computeLineDistances();
         this.guideZ.visible = Math.abs(dz) > 0.0001;
       }
-      let snappedAngleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
-      const snappedAngle = THREE.MathUtils.degToRad(snappedAngleDeg);
+      let angle = Math.atan2(dz, dx);
+      angle = this.applyAngleSnap(angle);
+      let snappedAngleDeg = THREE.MathUtils.radToDeg(angle);
+      const snappedAngle = angle;
       const length = Math.sqrt(dx * dx + dz * dz);
       const lengthMm = length * 1000;
       let snappedLengthMm = snapLength
@@ -1086,8 +1096,8 @@ export default class WallDrawer {
         const dzs = end.z - this.start.z;
         snappedLength = Math.sqrt(dxs * dxs + dzs * dzs);
         snappedLengthMm = snappedLength * 1000;
-        this.currentAngle = Math.atan2(dzs, dxs);
-        snappedAngleDeg = (this.currentAngle * 180) / Math.PI;
+        this.currentAngle = this.applyAngleSnap(Math.atan2(dzs, dxs));
+        snappedAngleDeg = THREE.MathUtils.radToDeg(this.currentAngle);
       }
       if (!this.endCircle) {
         const endGeom = new THREE.CircleGeometry(0.02, 16);
@@ -1302,7 +1312,13 @@ export default class WallDrawer {
             ? Math.round(lengthMm / snapLength) * snapLength
             : lengthMm;
           const snappedLength = snappedLengthMm / 1000;
-          const dir = vec.normalize();
+          let angle = Math.atan2(vec.z, vec.x);
+          angle = this.applyAngleSnap(angle);
+          const dir = new THREE.Vector3(
+            Math.cos(angle),
+            0,
+            Math.sin(angle),
+          );
           const newStart = this.start
             .clone()
             .add(dir.clone().multiplyScalar(snappedLength));
@@ -1310,13 +1326,9 @@ export default class WallDrawer {
           positions.setXYZ(0, newStart.x, 0, newStart.z);
           positions.setXYZ(1, newEnd.x, 0, newEnd.z);
           positions.needsUpdate = true;
-          const angle = Math.atan2(
-            newEnd.z - newStart.z,
-            newEnd.x - newStart.x,
-          );
           this.currentAngle = angle;
           this.onLengthChange?.(snappedLengthMm);
-          this.onAngleChange?.((angle * 180) / Math.PI);
+          this.onAngleChange?.(THREE.MathUtils.radToDeg(angle));
           this.updateEditHandles(newStart, newEnd);
         } else if (this.dragType === 'end') {
           const vec = point.clone().sub(this.start);
@@ -1326,19 +1338,23 @@ export default class WallDrawer {
             ? Math.round(lengthMm / snapLength) * snapLength
             : lengthMm;
           const snappedLength = snappedLengthMm / 1000;
-          const dir = vec.normalize();
+          let angle = Math.atan2(vec.z, vec.x);
+          angle = this.applyAngleSnap(angle);
+          const dir = new THREE.Vector3(
+            Math.cos(angle),
+            0,
+            Math.sin(angle),
+          );
           const newStart = this.start.clone();
-          const newEnd = this.start.clone().add(dir.clone().multiplyScalar(snappedLength));
+          const newEnd = this.start
+            .clone()
+            .add(dir.clone().multiplyScalar(snappedLength));
           positions.setXYZ(0, newStart.x, 0, newStart.z);
           positions.setXYZ(1, newEnd.x, 0, newEnd.z);
           positions.needsUpdate = true;
-          const angle = Math.atan2(
-            newEnd.z - newStart.z,
-            newEnd.x - newStart.x,
-          );
           this.currentAngle = angle;
           this.onLengthChange?.(snappedLengthMm);
-          this.onAngleChange?.((angle * 180) / Math.PI);
+          this.onAngleChange?.(THREE.MathUtils.radToDeg(angle));
           this.updateEditHandles(newStart, newEnd);
         }
       }
@@ -1425,7 +1441,9 @@ export default class WallDrawer {
     const segStart = this.start.clone();
     const dx = target.x - segStart.x;
     const dz = target.z - segStart.z;
-    const angleDeg = (Math.atan2(dz, dx) * 180) / Math.PI;
+    let angle = Math.atan2(dz, dx);
+    angle = this.applyAngleSnap(angle);
+    const angleDeg = THREE.MathUtils.radToDeg(angle);
     const lengthMm = Math.sqrt(dx * dx + dz * dz) * 1000;
     if (lengthMm < 1) {
       this.cleanupPreview();

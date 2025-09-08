@@ -283,6 +283,19 @@ export default function WallDrawPanel({
       >
         <input
           type="checkbox"
+          checked={store.snapRightAngles}
+          onChange={(e) =>
+            store.setSnapRightAngles((e.target as HTMLInputElement).checked)
+          }
+        />
+        {t('room.snapRightAngles')}
+      </label>
+      <label
+        className="small"
+        style={{ display: 'flex', gap: 8, alignItems: 'center' }}
+      >
+        <input
+          type="checkbox"
           checked={store.snapToGrid}
           onChange={(e) =>
             store.setSnapToGrid((e.target as HTMLInputElement).checked)
