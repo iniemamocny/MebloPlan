@@ -16,7 +16,7 @@ export function getWallSegments(startX?: number, startY?: number, close = false)
   }
   if (close && segs.length > 0){
     const last = segs[segs.length - 1].b
-    if (last.x !== start.x || last.y !== start.y){
+    if (Math.abs(last.x - start.x) > 1e-3 || Math.abs(last.y - start.y) > 1e-3){
       const dx = start.x - last.x, dy = start.y - last.y
       const len = Math.hypot(dx, dy)
       const ang = Math.atan2(dy, dx)

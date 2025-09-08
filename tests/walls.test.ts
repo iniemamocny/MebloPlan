@@ -63,6 +63,26 @@ describe('getWallSegments', () => {
     expect(last.b.x).toBeCloseTo(segs[0].a.x, 3);
     expect(last.b.y).toBeCloseTo(segs[0].a.y, 3);
   });
+
+  it('skips closing segment for negligible gap', () => {
+    usePlannerStore.setState({
+      room: {
+        walls: [
+          { id: 'a', length: 10, angle: 0, thickness: 100 },
+          { id: 'b', length: 10, angle: 120, thickness: 100 },
+          { id: 'c', length: 10, angle: 240, thickness: 100 },
+        ],
+        openings: [],
+        height: 2700,
+        origin: { x: 0, y: 0 },
+      },
+    });
+    const segs = getWallSegments(undefined, undefined, true);
+    expect(segs.length).toBe(3);
+    const last = segs[2];
+    expect(last.b.x).toBeCloseTo(segs[0].a.x, 3);
+    expect(last.b.y).toBeCloseTo(segs[0].a.y, 3);
+  });
 });
 
 describe('updateWall', () => {
