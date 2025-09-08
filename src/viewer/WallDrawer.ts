@@ -393,12 +393,6 @@ export default class WallDrawer {
       this.overlay.remove();
       this.overlay = null;
     }
-    for (const m of this.squareMeshes.values()) {
-      this.scene.remove(m);
-      m.geometry.dispose();
-      (m.material as THREE.Material).dispose();
-    }
-    this.squareMeshes.clear();
   }
 
   private updateGrid(snap: boolean, size: number) {
