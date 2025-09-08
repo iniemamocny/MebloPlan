@@ -143,6 +143,7 @@ type Store = {
   autoCloseWalls: boolean;
   gridSize: number;
   snapToGrid: boolean;
+  measurementUnit: 'mm' | 'cm';
   openingDefaults: { width: number; height: number; bottom: number; kind: number };
   setRole: (r: 'stolarz' | 'klient') => void;
   updateGlobals: (fam: FAMILY, patch: Partial<Globals[FAMILY]>) => void;
@@ -173,6 +174,7 @@ type Store = {
   setAutoCloseWalls: (v: boolean) => void;
   setGridSize: (v: number) => void;
   setSnapToGrid: (v: boolean) => void;
+  setMeasurementUnit: (u: 'mm' | 'cm') => void;
   setOpeningDefaults: (
     patch: Partial<{ width: number; height: number; bottom: number; kind: number }>,
   ) => void;
@@ -215,6 +217,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   autoCloseWalls: persisted?.autoCloseWalls ?? true,
   gridSize: persisted?.gridSize ?? 50,
   snapToGrid: persisted?.snapToGrid ?? false,
+  measurementUnit: persisted?.measurementUnit || 'mm',
   openingDefaults:
     persisted?.openingDefaults ||
     { width: 900, height: 2100, bottom: 0, kind: 0 },
@@ -516,6 +519,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setAutoCloseWalls: (v) => set({ autoCloseWalls: v }),
   setGridSize: (v) => set({ gridSize: v }),
   setSnapToGrid: (v) => set({ snapToGrid: v }),
+  setMeasurementUnit: (v) => set({ measurementUnit: v }),
   setOpeningDefaults: (patch) =>
     set((s) => ({ openingDefaults: { ...s.openingDefaults, ...patch } })),
 }));
@@ -534,6 +538,7 @@ const persistSelector = (s: Store) => ({
   autoCloseWalls: s.autoCloseWalls,
   gridSize: s.gridSize,
   snapToGrid: s.snapToGrid,
+  measurementUnit: s.measurementUnit,
   openingDefaults: s.openingDefaults,
 });
 

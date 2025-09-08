@@ -214,6 +214,10 @@
     },
     "currency": "PLN"
   },
+  "units": {
+    "mm": "mm",
+    "cm": "cm"
+  },
   "cutlist": {
     "validation": "Validation for sheet {{width}}×{{height}}",
     "sheets": "Sheets: {{sheets}}",

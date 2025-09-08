@@ -496,7 +496,7 @@ describe('WallDrawer overlays', () => {
     const labels = (drawer as any).labels;
     expect(labels.has(labelId)).toBe(true);
     const label = document.querySelector('div.wall-label') as HTMLDivElement;
-    expect(label?.textContent).toBe('500×');
+    expect(label?.textContent).toBe('500 mm×');
     // start new wall
     (drawer as any).getPoint = () => new THREE.Vector3(1, 0, 0);
     (drawer as any).onDown({ clientX: 0, clientY: 0 } as PointerEvent);
@@ -579,7 +579,7 @@ describe('WallDrawer label editing', () => {
     (drawer as any).onUp({ button: 0 } as PointerEvent);
     const wallId = state.room.walls[0].id;
     let label = document.querySelector('div.wall-label') as HTMLDivElement;
-    expect(label?.textContent).toBe('1000×');
+    expect(label?.textContent).toBe('1000 mm×');
     label.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     const input = document.querySelector(
       'input.wall-label',
@@ -595,7 +595,7 @@ describe('WallDrawer label editing', () => {
     expect(state.updateWall).toHaveBeenCalledWith(wallId, { length: 800 });
     expect(state.room.walls[0].length).toBe(800);
     label = document.querySelector('div.wall-label') as HTMLDivElement;
-    expect(label?.textContent).toBe('800×');
+    expect(label?.textContent).toBe('800 mm×');
   });
 });
 

@@ -9,6 +9,7 @@ import { usePlannerStore } from '../state/store';
 import type { Room, WallArc, Opening } from '../types';
 import { getWallSegments, projectPointToSegment } from '../utils/walls';
 import { createWallMaterial } from './wall';
+import i18n from '../i18n';
 
 const pixelsPerMm = 0.2; // 1px ≈ 5mm
 const DRAG_PIXEL_THRESHOLD = 4;
@@ -41,6 +42,7 @@ interface PlannerStore {
   autoCloseWalls: boolean;
   gridSize: number;
   snapToGrid: boolean;
+  measurementUnit: 'mm' | 'cm';
   addOpening: (op: Omit<Opening, 'id'>) => void;
   updateOpening: (id: string, patch: Partial<Omit<Opening, 'id'>>) => void;
   openingDefaults: {
@@ -580,6 +582,13 @@ export default class WallDrawer {
 
   private updateLabels(walls = this.store.getState().room.walls) {
     if (typeof document === 'undefined') return;
+    let container = document.getElementById('wall-labels');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'wall-labels';
+      container.className = 'wall-labels';
+      document.body.appendChild(container);
+    }
     const ids = new Set(walls.map((w) => w.id));
     for (const [id, el] of Array.from(this.labels.entries())) {
       if (!ids.has(id)) {
@@ -601,10 +610,14 @@ export default class WallDrawer {
         el.style.position = 'absolute';
         el.style.transform = 'translate(-50%, -50%)';
         el.addEventListener('click', () => this.enterLabelEdit(w.id));
-        document.body.appendChild(el);
+        container!.appendChild(el);
         this.labels.set(w.id, el);
       }
-      el.textContent = `${Math.round(w.length || 0)}`;
+      const unit = this.store.getState().measurementUnit || 'mm';
+      const length = w.length || 0;
+      const display = unit === 'cm' ? Math.round(length / 10) : Math.round(length);
+      const unitLabel = i18n.t(`units.${unit}`);
+      el.textContent = `${display} ${unitLabel}`;
       const remove = document.createElement('button');
       remove.textContent = '×';
       remove.addEventListener('click', (ev) => {
