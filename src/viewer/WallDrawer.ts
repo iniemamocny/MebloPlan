@@ -626,8 +626,8 @@ export default class WallDrawer {
       this.startCircle.position.set(point.x, 0.002, point.z);
       this.scene.add(this.startCircle);
       this.currentThickness = this.store.getState().wallThickness / 1000;
-      const geom = new THREE.PlaneGeometry(1, 1);
-      geom.rotateX(-Math.PI / 2);
+      const geom = new THREE.BoxGeometry(1, 0.01, 1);
+      geom.translate(0, 0.005, 0);
       let topMat: THREE.Material;
       try {
         [, topMat] = createWallMaterial(this.store.getState().wallType);
@@ -965,14 +965,16 @@ export default class WallDrawer {
       this.endCircle.position.set(end.x, 0.002, end.z);
       this.updateSnapPreview(snap || null);
       const mesh = this.preview as THREE.Mesh;
+      mesh.scale.x = snappedLength;
+      mesh.scale.z = this.currentThickness;
       const thickness = this.currentThickness;
-      mesh.scale.set(snappedLength, 1, thickness);
-      const mid = new THREE.Vector3(
-        (this.start.x + end.x) / 2,
+      const dir = new THREE.Vector3(
+        Math.cos(this.currentAngle),
         0,
-        (this.start.z + end.z) / 2,
+        Math.sin(this.currentAngle),
       );
-      mesh.position.copy(mid.clone().setY(0.001));
+      const mid = this.start.clone().add(dir.clone().multiplyScalar(snappedLength / 2));
+      mesh.position.set(mid.x, 0.001, mid.z);
       mesh.rotation.y = this.currentAngle;
 
       const normal = new THREE.Vector3(
@@ -1189,12 +1191,14 @@ export default class WallDrawer {
       this.start.z + Math.sin(this.currentAngle) * lengthM,
     );
     const mesh = this.preview as THREE.Mesh;
-    mesh.scale.set(lengthM, 1, this.currentThickness);
-    const mid = new THREE.Vector3(
-      (this.start.x + end.x) / 2,
+    mesh.scale.x = lengthM;
+    mesh.scale.z = this.currentThickness;
+    const dir = new THREE.Vector3(
+      Math.cos(this.currentAngle),
       0,
-      (this.start.z + end.z) / 2,
+      Math.sin(this.currentAngle),
     );
+    const mid = this.start.clone().add(dir.clone().multiplyScalar(lengthM / 2));
     mesh.position.set(mid.x, 0.001, mid.z);
     mesh.rotation.y = this.currentAngle;
     this.finalizeSegment(end, lengthMm);
