@@ -54,7 +54,7 @@
     "noWalls": "Brak ścian",
     "angleToPrev": "Kąt do poprzedniej (°)",
     "snapLength": "Krok długości (mm)",
-    "snapAngle": "Krok kąta (°)",
+    "snapAngle": "Krok kąta (°) w trybie kątów prostych",
     "noRightAngles": "Bez prostych kątów",
     "autoClose": "Automatyczne domknięcie",
     "invalidLength": "Długość nie może być ujemna"

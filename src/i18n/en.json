@@ -54,7 +54,7 @@
     "noWalls": "No walls",
     "angleToPrev": "Angle to previous (°)",
     "snapLength": "Length step (mm)",
-    "snapAngle": "Angle step (°)",
+    "snapAngle": "Angle step (°) for right-angle mode",
     "noRightAngles": "No right angles",
     "autoClose": "Auto close",
     "invalidLength": "Length must be non-negative"
