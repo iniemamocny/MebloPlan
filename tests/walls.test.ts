@@ -193,6 +193,58 @@ describe('updateWall', () => {
     expect(wall.thickness).toBe(max);
     expect(wall.angle).toBe(90);
   });
+
+  it('updates arc radius and angle', () => {
+    usePlannerStore.setState({
+      room: {
+        walls: [
+          {
+            id: 'a',
+            length: Math.PI * 1000 * 0.5,
+            angle: 0,
+            thickness: 100,
+            arc: { radius: 1000, angle: 90 },
+          },
+        ],
+        openings: [],
+        height: 2700,
+        origin: { x: 0, y: 0 },
+      },
+    });
+    const store = usePlannerStore.getState();
+    store.updateWall('a', { arc: { radius: 500 } });
+    let wall = usePlannerStore.getState().room.walls[0];
+    expect(wall.arc?.radius).toBe(500);
+    expect(wall.arc?.angle).toBe(90);
+    store.updateWall('a', { arc: { angle: 450 } });
+    wall = usePlannerStore.getState().room.walls[0];
+    expect(wall.arc?.angle).toBe(90);
+  });
+
+  it('rejects invalid arc parameters', () => {
+    usePlannerStore.setState({
+      room: {
+        walls: [
+          {
+            id: 'a',
+            length: Math.PI * 1000 * 0.5,
+            angle: 0,
+            thickness: 100,
+            arc: { radius: 1000, angle: 90 },
+          },
+        ],
+        openings: [],
+        height: 2700,
+        origin: { x: 0, y: 0 },
+      },
+    });
+    const store = usePlannerStore.getState();
+    expect(() => store.updateWall('a', { arc: { radius: -5 } })).toThrow();
+    expect(() => store.updateWall('a', { arc: { angle: 0 } })).toThrow();
+    const wall = usePlannerStore.getState().room.walls[0];
+    expect(wall.arc?.radius).toBe(1000);
+    expect(wall.arc?.angle).toBe(90);
+  });
 });
 
 describe('WallDrawer auto close', () => {
