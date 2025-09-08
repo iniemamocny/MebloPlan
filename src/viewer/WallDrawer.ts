@@ -130,21 +130,27 @@ export default class WallDrawer {
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = size;
     const ctx = canvas.getContext('2d');
-    if (!ctx) return 'crosshair';
-    ctx.strokeStyle = '#000';
+    if (!ctx || typeof ctx.fillRect !== 'function') return 'crosshair';
     ctx.lineWidth = 1;
-
-    // cross
-    ctx.beginPath();
-    ctx.moveTo(size / 2, 0);
-    ctx.lineTo(size / 2, size);
-    ctx.moveTo(0, size / 2);
-    ctx.lineTo(size, size / 2);
-    ctx.stroke();
 
     // square with side proportional to thickness
     const side = Math.min(thicknessMm * pixelsPerMm, size - 2);
     const half = side / 2;
+
+    // try to fill with wall top-view texture
+    let pattern: CanvasPattern | null = null;
+    try {
+      const [, topMaterial] = createWallMaterial(this.store.getState().wallType);
+      const texture = topMaterial.map as THREE.CanvasTexture | null;
+      const source = texture?.image as HTMLCanvasElement | HTMLImageElement | undefined;
+      pattern = source ? ctx.createPattern(source, 'repeat') : null;
+    } catch {
+      // ignore errors (e.g. getContext not implemented in tests)
+    }
+    ctx.fillStyle = pattern || '#f3f4f6';
+    ctx.fillRect(size / 2 - half, size / 2 - half, side, side);
+
+    ctx.strokeStyle = '#000';
     ctx.strokeRect(size / 2 - half, size / 2 - half, side, side);
 
     return `url(${canvas.toDataURL()}) ${size / 2} ${size / 2}, crosshair`;
