@@ -154,7 +154,7 @@ type Store = {
   undo: () => void;
   redo: () => void;
   setRoom: (patch: Partial<Room>) => void;
-  addWall: (w: { length: number; angle: number; thickness: number }) => void;
+  addWall: (w: { length: number; angle: number; thickness: number }) => string;
   removeWall: (id: string) => void;
   updateWall: (
     id: string,
@@ -371,7 +371,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
       room: { ...s.room, ...patch },
       future: [],
     })),
-  addWall: (w) =>
+  addWall: (w) => {
+    const id = crypto.randomUUID();
     set((s) => ({
       past: [
         ...s.past,
@@ -382,10 +383,12 @@ export const usePlannerStore = create<Store>((set, get) => ({
       ],
       room: {
         ...s.room,
-        walls: [...s.room.walls, { id: crypto.randomUUID(), ...w }],
+        walls: [...s.room.walls, { id, ...w }],
       },
       future: [],
-    })),
+    }));
+    return id;
+  },
   removeWall: (id) =>
     set((s) => ({
       past: [

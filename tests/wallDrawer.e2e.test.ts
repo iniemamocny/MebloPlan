@@ -31,7 +31,7 @@ describe('WallDrawer click without drag', () => {
     const camera = new THREE.PerspectiveCamera();
     const getCamera = () => camera;
     const scene = new THREE.Scene();
-    const addWall = vi.fn();
+    const addWall = vi.fn(() => 'id');
     const store = {
       getState: () => ({
         addWall,
@@ -70,7 +70,7 @@ describe('WallDrawer click without drag', () => {
     });
     expect((drawer as any).preview).toBeNull();
     expect((drawer as any).start).toBeNull();
-    expect(scene.children.length).toBeGreaterThan(0);
+    expect(scene.children.length).toBe(0);
   });
 });
 
@@ -92,7 +92,7 @@ describe('WallDrawer small movement treated as click', () => {
     const camera = new THREE.PerspectiveCamera();
     const getCamera = () => camera;
     const scene = new THREE.Scene();
-    const addWall = vi.fn();
+    const addWall = vi.fn(() => 'id');
     const store = {
       getState: () => ({
         addWall,
@@ -153,7 +153,7 @@ describe('WallDrawer.applyLength', () => {
     const camera = new THREE.PerspectiveCamera();
     const getCamera = () => camera;
     const scene = new THREE.Scene();
-    const addWall = vi.fn();
+    const addWall = vi.fn(() => 'id');
     const store = {
       getState: () => ({
         addWall,
@@ -214,7 +214,7 @@ describe('WallDrawer snapping', () => {
     const onLengthChange = vi.fn();
     const onAngleChange = vi.fn();
     const state = {
-      addWall: vi.fn(),
+      addWall: vi.fn(() => 'id'),
       wallThickness: 100,
       wallType: 'dzialowa',
       snapAngle: 30,
@@ -262,7 +262,7 @@ describe('WallDrawer vertex snapping to existing point', () => {
     const camera = new THREE.PerspectiveCamera();
     const getCamera = () => camera;
     const scene = new THREE.Scene();
-    const addWall = vi.fn();
+    const addWall = vi.fn(() => 'id');
     const state = {
       addWall,
       wallThickness: 100,
@@ -317,7 +317,7 @@ describe('WallDrawer grid snapping', () => {
     const camera = new THREE.PerspectiveCamera();
     const getCamera = () => camera;
     const scene = new THREE.Scene();
-    const addWall = vi.fn();
+    const addWall = vi.fn(() => 'id');
     const setRoom = vi.fn();
     const state = {
       addWall,
@@ -442,7 +442,9 @@ describe('WallDrawer overlays', () => {
     const getCamera = () => camera;
     const scene = new THREE.Scene();
     const addWall = vi.fn((w) => {
-      state.room.walls.push({ id: `w${state.room.walls.length}`, ...w });
+      const id = `w${state.room.walls.length}`;
+      state.room.walls.push({ id, ...w });
+      return id;
     });
     const updateWall = vi.fn();
     const state = {
@@ -536,6 +538,7 @@ describe('WallDrawer label editing', () => {
         const id = `w${state.room.walls.length}`;
         state.room.walls.push({ id, ...w });
         subs.forEach((s: any) => s.cb(s.sel(state)));
+        return id;
       }),
       updateWall: vi.fn((id: string, patch: any) => {
         state.room.walls = state.room.walls.map((w: any) =>
@@ -628,6 +631,7 @@ describe('WallDrawer remove button', () => {
         const id = `w${state.room.walls.length}`;
         state.room.walls.push({ id, ...w });
         subs.forEach((s: any) => s.cb(s.sel(state)));
+        return id;
       },
       updateWall: vi.fn(),
       removeWall: (id: string) => {

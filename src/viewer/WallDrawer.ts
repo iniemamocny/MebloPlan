@@ -19,7 +19,7 @@ interface PlannerStore {
     angle: number;
     thickness: number;
     arc?: WallArc;
-  }) => void;
+  }) => string;
   updateWall: (
     id: string,
     patch: Partial<{
@@ -86,7 +86,7 @@ export default class WallDrawer {
   private labels = new Map<string, HTMLElement>();
   private startCircle: THREE.Mesh | null = null;
   private endCircle: THREE.Mesh | null = null;
-  private squareMeshes: THREE.Mesh[] = [];
+  private squareMeshes = new Map<string, THREE.Mesh>();
   private guideX: THREE.Line | null = null;
   private guideZ: THREE.Line | null = null;
   private angleArc: THREE.Line | null = null;
@@ -192,8 +192,21 @@ export default class WallDrawer {
     );
     this.unsubLabels = this.store.subscribe(
       (s) => s.room.walls,
-      (walls) => {
+      (walls, prevWalls) => {
         this.updateLabels(walls);
+        const curr = new Set(walls.map((w) => w.id));
+        const prev = prevWalls ? new Set(prevWalls.map((w) => w.id)) : new Set<string>();
+        for (const id of prev) {
+          if (!curr.has(id)) {
+            const mesh = this.squareMeshes.get(id);
+            if (mesh) {
+              this.scene.remove(mesh);
+              mesh.geometry.dispose();
+              (mesh.material as THREE.Material).dispose();
+              this.squareMeshes.delete(id);
+            }
+          }
+        }
       },
     );
     this.unsubGrid = this.store.subscribe(
@@ -258,6 +271,12 @@ export default class WallDrawer {
       (this.grid.material as THREE.Material).dispose();
       this.grid = null;
     }
+    for (const m of this.squareMeshes.values()) {
+      this.scene.remove(m);
+      m.geometry.dispose();
+      (m.material as THREE.Material).dispose();
+    }
+    this.squareMeshes.clear();
     for (const m of this.openingMeshes.values()) {
       this.scene.remove(m);
       m.geometry.dispose();
@@ -351,6 +370,12 @@ export default class WallDrawer {
       this.overlay.remove();
       this.overlay = null;
     }
+    for (const m of this.squareMeshes.values()) {
+      this.scene.remove(m);
+      m.geometry.dispose();
+      (m.material as THREE.Material).dispose();
+    }
+    this.squareMeshes.clear();
   }
 
   private updateGrid(snap: boolean, size: number) {
@@ -1395,13 +1420,13 @@ export default class WallDrawer {
       square.position.set(start.x, 0.001, start.z);
       this.scene.add(square);
     }
-    this.squareMeshes.push(square);
     if (state.room.walls.length === 0) {
       state.setRoom({ origin: { x: start.x * 1000, y: start.z * 1000 } });
     }
     const thickness = size * 1000;
     const lastAngle = state.room.walls[state.room.walls.length - 1]?.angle ?? 0;
-    state.addWall({ length: thickness, angle: lastAngle, thickness });
+    const id = state.addWall({ length: thickness, angle: lastAngle, thickness });
+    this.squareMeshes.set(id, square);
   }
 
   private onUp = (e: PointerEvent) => {
