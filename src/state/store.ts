@@ -156,7 +156,9 @@ type Store = {
   undo: () => void;
   redo: () => void;
   setRoom: (patch: Partial<Room>) => void;
-  addWall: (w: { length: number; angle: number; thickness: number }) => string;
+  addWall: (
+    w: { length: number; angle: number; thickness: number; arc?: WallArc },
+  ) => string;
   removeWall: (id: string) => void;
   updateWall: (
     id: string,
