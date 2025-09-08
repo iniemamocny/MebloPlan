@@ -55,7 +55,7 @@
     "noWalls": "Brak ścian",
     "angleToPrev": "Kąt do poprzedniej (°)",
     "snapLength": "Krok długości (mm; Alt tymczasowo wyłącza przyciąganie)",
-    "snapAngle": "Krok kąta (°) w trybie kątów prostych (Alt: chwilowe wyłączenie)",
+    "snapAngle": "Krok kąta (°) (Alt: chwilowe wyłączenie)",
     "snapRightAngles": "Kąty proste",
     "area": "Powierzchnia (mm²)",
     "perimeter": "Obwód (mm)",

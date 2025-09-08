@@ -4,6 +4,7 @@ import React, { act } from 'react';
 import ReactDOM from 'react-dom/client';
 import WallDrawPanel from '../src/ui/WallDrawPanel';
 import i18n from '../src/i18n';
+import { usePlannerStore } from '../src/state/store';
 
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -206,6 +207,34 @@ describe('WallDrawPanel callbacks', () => {
     });
 
     expect(cb.checked).toBe(false);
+
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
+  it('updates snap angle value', async () => {
+    usePlannerStore.setState({ snapAngle: 90, snapRightAngles: true });
+    const three: any = {};
+    const threeRef = { current: three } as React.MutableRefObject<any>;
+    const container = document.createElement('div');
+    const root = ReactDOM.createRoot(container);
+
+    await act(async () => {
+      root.render(<WallDrawPanel threeRef={threeRef} isOpen isDrawing={false} />);
+    });
+
+    const label = Array.from(container.querySelectorAll('div.small')).find(
+      (d) => d.textContent === i18n.t('room.snapAngle'),
+    ) as HTMLDivElement;
+    const input = label.parentElement!.querySelector('input') as HTMLInputElement;
+    expect(input.value).toBe('90');
+
+    await act(async () => {
+      input.value = '45';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    expect(input.value).toBe('45');
 
     await act(async () => {
       root.unmount();

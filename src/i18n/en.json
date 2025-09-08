@@ -55,7 +55,7 @@
     "noWalls": "No walls",
     "angleToPrev": "Angle to previous (°)",
     "snapLength": "Length step (mm; hold Alt to disable snapping)",
-    "snapAngle": "Angle step (°) for right-angle mode (hold Alt to disable snapping)",
+    "snapAngle": "Angle step (°) (hold Alt to disable snapping)",
     "snapRightAngles": "Right angles",
     "area": "Area (mm²)",
     "perimeter": "Perimeter (mm)",

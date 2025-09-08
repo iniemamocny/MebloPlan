@@ -131,7 +131,12 @@ export default class WallDrawer {
   private readonly segmentGridSize = 1000; // mm
 
   private applyAngleSnap(angle: number): number {
-    const { snapRightAngles } = this.store.getState();
+    const { snapAngle, snapRightAngles } = this.store.getState();
+    if (snapAngle > 0) {
+      const deg = THREE.MathUtils.radToDeg(angle);
+      const snapped = Math.round(deg / snapAngle) * snapAngle;
+      return THREE.MathUtils.degToRad(snapped);
+    }
     if (!snapRightAngles) return angle;
     const deg = THREE.MathUtils.radToDeg(angle);
     const snapped = Math.round(deg / 90) * 90;
