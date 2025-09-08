@@ -178,27 +178,58 @@ export default function WallDrawPanel({
             min={0}
           />
         </div>
-        {store.snapRightAngles && (
-          <div>
-            <div className="small">{t('room.snapAngle')}</div>
-            <input
-              className="input"
-              type="number"
-              value={store.snapAngle}
-              onChange={(e) => {
-                const val = Number((e.target as HTMLInputElement).value);
-                if (!Number.isNaN(val) && val >= 0 && val <= 360) {
-                  store.setSnapAngle(val);
-                }
-              }}
-              style={{ width: 50 }}
-              min={0}
-              max={360}
-              maxLength={3}
-            />
-          </div>
-        )}
+      {store.snapRightAngles && (
+        <div>
+          <div className="small">{t('room.snapAngle')}</div>
+          <input
+            className="input"
+            type="number"
+            value={store.snapAngle}
+            onChange={(e) => {
+              const val = Number((e.target as HTMLInputElement).value);
+              if (!Number.isNaN(val) && val >= 0 && val <= 360) {
+                store.setSnapAngle(val);
+              }
+            }}
+            style={{ width: 50 }}
+            min={0}
+            max={360}
+            maxLength={3}
+          />
+        </div>
+      )}
       </div>
+      <label
+        className="small"
+        style={{ display: 'flex', gap: 8, alignItems: 'center' }}
+      >
+        <input
+          type="checkbox"
+          checked={store.snapToGrid}
+          onChange={(e) =>
+            store.setSnapToGrid((e.target as HTMLInputElement).checked)
+          }
+        />
+        {t('room.snapToGrid')}
+      </label>
+      {store.snapToGrid && (
+        <div>
+          <div className="small">{t('room.gridSize')}</div>
+          <input
+            className="input"
+            type="number"
+            value={store.gridSize}
+            onChange={(e) => {
+              const val = Number((e.target as HTMLInputElement).value);
+              if (!Number.isNaN(val) && val > 0) {
+                store.setGridSize(val);
+              }
+            }}
+            style={{ width: 60 }}
+            min={1}
+          />
+        </div>
+      )}
       <div>
         <div className="small">{t('room.wallType')}</div>
         <select

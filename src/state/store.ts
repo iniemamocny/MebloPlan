@@ -141,6 +141,8 @@ type Store = {
   angleToPrev: number;
   showFronts: boolean;
   autoCloseWalls: boolean;
+  gridSize: number;
+  snapToGrid: boolean;
   setRole: (r: 'stolarz' | 'klient') => void;
   updateGlobals: (fam: FAMILY, patch: Partial<Globals[FAMILY]>) => void;
   updatePrices: (patch: Partial<Prices>) => void;
@@ -168,6 +170,8 @@ type Store = {
   setSnapRightAngles: (v: boolean) => void;
   setAngleToPrev: (v: number) => void;
   setAutoCloseWalls: (v: boolean) => void;
+  setGridSize: (v: number) => void;
+  setSnapToGrid: (v: boolean) => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -205,6 +209,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
   snapRightAngles: persisted?.snapRightAngles ?? true,
   angleToPrev: persisted?.angleToPrev ?? 0,
   autoCloseWalls: persisted?.autoCloseWalls ?? true,
+  gridSize: persisted?.gridSize ?? 50,
+  snapToGrid: persisted?.snapToGrid ?? false,
   showFronts: true,
   setRole: (r) => set({ role: r }),
   updateGlobals: (fam, patch) =>
@@ -498,6 +504,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setSnapRightAngles: (v) => set({ snapRightAngles: v, snapAngle: v ? 90 : 0 }),
   setAngleToPrev: (v) => set({ angleToPrev: clamp(v, 0, 360) }),
   setAutoCloseWalls: (v) => set({ autoCloseWalls: v }),
+  setGridSize: (v) => set({ gridSize: v }),
+  setSnapToGrid: (v) => set({ snapToGrid: v }),
 }));
 
 const persistSelector = (s: Store) => ({
@@ -513,6 +521,8 @@ const persistSelector = (s: Store) => ({
   snapRightAngles: s.snapRightAngles,
   angleToPrev: s.angleToPrev,
   autoCloseWalls: s.autoCloseWalls,
+  gridSize: s.gridSize,
+  snapToGrid: s.snapToGrid,
 });
 
 let persistTimeout = 0;
