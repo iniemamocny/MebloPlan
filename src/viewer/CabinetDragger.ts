@@ -58,6 +58,7 @@ export default class CabinetDragger {
   }
 
   private onDown = (e: PointerEvent) => {
+    this.renderer.domElement.setPointerCapture(e.pointerId);
     const rect = this.renderer.domElement.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
@@ -96,7 +97,8 @@ export default class CabinetDragger {
     });
   };
 
-  private onUp = () => {
+  private onUp = (e: PointerEvent) => {
+    this.renderer.domElement.releasePointerCapture(e.pointerId);
     this.draggingId = null;
   };
 }

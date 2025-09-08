@@ -701,6 +701,7 @@ export default class WallDrawer {
   };
 
   private onDown = (e: PointerEvent) => {
+    this.renderer.domElement.setPointerCapture(e.pointerId);
     if (e.button !== 0) return;
     if (this.start) return;
     const point = this.getPoint(e);
@@ -1355,6 +1356,7 @@ export default class WallDrawer {
   }
 
   private onUp = (e: PointerEvent) => {
+    this.renderer.domElement.releasePointerCapture(e.pointerId);
     if (e.button !== 0) return;
     try {
       if (this.mode === 'opening') {
