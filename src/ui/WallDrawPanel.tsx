@@ -176,7 +176,7 @@ export default function WallDrawPanel({
             min={0}
           />
         </div>
-        {!store.snapRightAngles && (
+        {store.snapRightAngles && (
           <div>
             <div className="small">{t('room.snapAngle')}</div>
             <input
