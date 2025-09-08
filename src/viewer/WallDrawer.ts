@@ -72,6 +72,9 @@ export default class WallDrawer {
   private snapPreview: THREE.Mesh | null = null;
   private guideX: THREE.Line | null = null;
   private guideZ: THREE.Line | null = null;
+  private angleArc: THREE.Line | null = null;
+  private angleLabel: HTMLElement | null = null;
+  private readonly rightAngleTolerance = THREE.MathUtils.degToRad(5);
   private readonly snapTolerance = 0.005; // 5mm
   private grid: THREE.GridHelper | null = null;
   private openingMeshes = new Map<string, THREE.Mesh>();
@@ -307,6 +310,16 @@ export default class WallDrawer {
       this.guideZ.geometry.dispose();
       (this.guideZ.material as THREE.Material).dispose();
       this.guideZ = null;
+    }
+    if (this.angleArc) {
+      this.scene.remove(this.angleArc);
+      this.angleArc.geometry.dispose();
+      (this.angleArc.material as THREE.Material).dispose();
+      this.angleArc = null;
+    }
+    if (this.angleLabel) {
+      this.angleLabel.remove();
+      this.angleLabel = null;
     }
   }
 
@@ -830,6 +843,7 @@ export default class WallDrawer {
     if (this.mode === 'draw') {
       const { snapAngle, snapLength, snapRightAngles, angleToPrev, room } =
         this.store.getState();
+      const prevWall = room.walls[room.walls.length - 1];
       let snappedAngle = 0;
       let snappedAngleDeg = 0;
       let length = 0;
@@ -899,8 +913,7 @@ export default class WallDrawer {
             highlightZ ? hi : def,
           );
       } else {
-        const prev = room.walls[room.walls.length - 1];
-        snappedAngleDeg = (prev ? prev.angle : 0) + angleToPrev;
+        snappedAngleDeg = (prevWall ? prevWall.angle : 0) + angleToPrev;
         snappedAngle = (snappedAngleDeg * Math.PI) / 180;
         length = dx * Math.cos(snappedAngle) + dz * Math.sin(snappedAngle);
         if (length < 0) {
@@ -1019,6 +1032,72 @@ export default class WallDrawer {
           .add(normal.clone().multiplyScalar(0.05));
         this.positionOverlay(midOff);
       }
+
+      if (prevWall) {
+        const prevAngle = THREE.MathUtils.degToRad(prevWall.angle);
+        const diff = Math.atan2(
+          Math.sin(this.currentAngle - prevAngle),
+          Math.cos(this.currentAngle - prevAngle),
+        );
+        const absDiff = Math.abs(diff);
+        const radius = 0.3;
+        const curve = new THREE.ArcCurve(
+          0,
+          0,
+          radius,
+          prevAngle,
+          prevAngle + diff,
+          diff < 0,
+        );
+        const pts2 = curve.getPoints(16);
+        const pts3 = pts2.map((p) => new THREE.Vector3(p.x, 0.001, p.y));
+        const geo = new THREE.BufferGeometry().setFromPoints(pts3);
+        if (!this.angleArc) {
+          const mat = new THREE.LineBasicMaterial({ color: 0x000000 });
+          this.angleArc = new THREE.Line(geo, mat);
+          this.scene.add(this.angleArc);
+        } else {
+          this.angleArc.geometry.dispose();
+          this.angleArc.geometry = geo;
+        }
+        this.angleArc.position.set(this.start.x, 0, this.start.z);
+
+        const midAngle = prevAngle + diff / 2;
+        const labelPos = new THREE.Vector3(
+          this.start.x + Math.cos(midAngle) * (radius + 0.1),
+          0,
+          this.start.z + Math.sin(midAngle) * (radius + 0.1),
+        );
+        if (!this.angleLabel) {
+          const el = document.createElement('div');
+          el.className = 'angle-label';
+          el.style.position = 'absolute';
+          el.style.transform = 'translate(-50%, -50%)';
+          document.body.appendChild(el);
+          this.angleLabel = el;
+        }
+        this.angleLabel.textContent = `${Math.round(
+          THREE.MathUtils.radToDeg(absDiff),
+        )}\u00b0`;
+        const { x, y } = this.worldToScreen(labelPos);
+        this.angleLabel.style.left = `${x}px`;
+        this.angleLabel.style.top = `${y}px`;
+        const highlight = Math.abs(absDiff - Math.PI / 2) > this.rightAngleTolerance;
+        const color = highlight ? '#f00' : '#000';
+        (this.angleArc.material as THREE.LineBasicMaterial).color.set(color);
+        this.angleLabel.style.color = color;
+      } else {
+        if (this.angleArc) {
+          this.scene.remove(this.angleArc);
+          this.angleArc.geometry.dispose();
+          (this.angleArc.material as THREE.Material).dispose();
+          this.angleArc = null;
+        }
+        if (this.angleLabel) {
+          this.angleLabel.remove();
+          this.angleLabel = null;
+        }
+      }
     } else if (this.mode === 'edit') {
       const { snapAngle, snapLength } = this.store.getState();
       const dx = point.x - this.start.x;
@@ -1122,6 +1201,16 @@ export default class WallDrawer {
       target = origin;
     }
     this.updateSnapPreview(null);
+    if (this.angleArc) {
+      this.scene.remove(this.angleArc);
+      this.angleArc.geometry.dispose();
+      (this.angleArc.material as THREE.Material).dispose();
+      this.angleArc = null;
+    }
+    if (this.angleLabel) {
+      this.angleLabel.remove();
+      this.angleLabel = null;
+    }
 
     const segStart = this.start.clone();
     const dx = target.x - segStart.x;
