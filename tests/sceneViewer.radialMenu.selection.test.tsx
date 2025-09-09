@@ -52,8 +52,8 @@ vi.mock('../src/ui/components/RadialMenu', () => ({
 
 vi.mock('../src/ui/components/ItemHotbar', () => ({
   default: () => null,
-  hotbarItems: ['cup', null, null, null, null, null, null, null, null],
-  buildHotbarItems: () => ['wall', 'window', 'door', null, null, null, null, null, null],
+  hotbarItems: ['window', 'door', 'cup', 'plate', 'bottle', null, null, null, null],
+  buildHotbarItems: () => ['wall', 'window', 'door', 'cup', 'plate', 'bottle', null, null, null],
   furnishHotbarItems: ['chair', null, null, null, null, null, null, null, null],
 }));
 

@@ -36,7 +36,12 @@
     "walls": "Ściany",
     "windowsDoors": "Okna i drzwi",
     "decor": "Elementy dekoracyjne",
-    "draw": "Rysuj"
+    "draw": "Rysuj",
+    "addWindow": "Dodaj okno",
+    "addDoor": "Dodaj drzwi",
+    "addDecor": "Dodaj dekorację",
+    "noWindows": "Brak okien lub drzwi",
+    "noDecor": "Brak dekoracji"
   },
   "catalog": {
     "choose": "Wybierz"

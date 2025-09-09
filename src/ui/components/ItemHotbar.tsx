@@ -4,11 +4,11 @@ import { usePlannerStore } from '../../state/store';
 import { PlayerMode } from '../types';
 
 export const hotbarItems: (string | null)[] = [
+  'window',
+  'door',
   'cup',
   'plate',
   'bottle',
-  null,
-  null,
   null,
   null,
   null,
@@ -19,9 +19,9 @@ export const buildHotbarItems = (): (string | null)[] => [
   'wall',
   'window',
   'door',
-  null,
-  null,
-  null,
+  'cup',
+  'plate',
+  'bottle',
   null,
   null,
   null,
@@ -37,7 +37,6 @@ const ItemHotbar: React.FC<Props> = ({ mode }) => {
   const { t } = useTranslation();
   const selected = usePlannerStore((s) => s.selectedItemSlot);
   const setSelected = usePlannerStore((s) => s.setSelectedItemSlot);
-  if (!mode) return null;
 
   const items =
     mode === 'build'
