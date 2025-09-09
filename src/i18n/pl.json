@@ -191,6 +191,10 @@
     "mm": "mm",
     "cm": "cm"
   },
+  "play": {
+    "height": "Wysokość człowieka",
+    "speed": "Prędkość poruszania"
+  },
   "cutlist": {
     "validation": "Walidacja formatu {{width}}×{{height}}",
     "sheets": "Arkusze: {{sheets}}",

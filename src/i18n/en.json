@@ -191,6 +191,10 @@
     "mm": "mm",
     "cm": "cm"
   },
+  "play": {
+    "height": "Player height",
+    "speed": "Movement speed"
+  },
   "cutlist": {
     "validation": "Validation for sheet {{width}}×{{height}}",
     "sheets": "Sheets: {{sheets}}",
