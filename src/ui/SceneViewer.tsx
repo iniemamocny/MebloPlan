@@ -286,32 +286,34 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
     const raycaster = new THREE.Raycaster();
     const handlePointer = (event: PointerEvent) => {
       if (playerMode) {
-        const target = targetRef.current;
-        if (target) {
-          const { cab, index } = target;
-          const openStates: boolean[] = cab.userData.openStates || [];
-          if (index >= 0 && index < openStates.length) {
-            openStates[index] = !openStates[index];
-            cab.userData.openStates = openStates;
+        if (event.button === 2) {
+          const target = targetRef.current;
+          if (target) {
+            const { cab, index } = target;
+            const openStates: boolean[] = cab.userData.openStates || [];
+            if (index >= 0 && index < openStates.length) {
+              openStates[index] = !openStates[index];
+              cab.userData.openStates = openStates;
+            }
           }
-          return;
-        }
-        const type = hotbarItems[store.selectedItemSlot - 1];
-        if (!type) return;
-        const dir = new THREE.Vector3();
-        camera.getWorldDirection(dir);
-        const pos = camera.position.clone().add(dir.multiplyScalar(0.5));
-        const id = Math.random().toString(36).slice(2);
-        loadItemModel(type)
-          .catch(() => null)
-          .finally(() => {
-            store.addItem({
-              id,
-              type,
-              position: [pos.x, pos.y, pos.z],
-              rotation: [0, 0, 0],
+        } else if (event.button === 0) {
+          const type = hotbarItems[store.selectedItemSlot - 1];
+          if (!type) return;
+          const dir = new THREE.Vector3();
+          camera.getWorldDirection(dir);
+          const pos = camera.position.clone().add(dir.multiplyScalar(0.5));
+          const id = Math.random().toString(36).slice(2);
+          loadItemModel(type)
+            .catch(() => null)
+            .finally(() => {
+              store.addItem({
+                id,
+                type,
+                position: [pos.x, pos.y, pos.z],
+                rotation: [0, 0, 0],
+              });
             });
-          });
+        }
         return;
       }
       const rect = renderer.domElement.getBoundingClientRect();
@@ -322,7 +324,7 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects(group.children, true);
       if (intersects.length === 0) return;
-      if (selectedItem) {
+      if (event.button === 0 && selectedItem) {
         const inter = intersects[0];
         let cab: THREE.Object3D | null = inter.object;
         while (cab && cab.userData?.kind !== 'cab') {
@@ -341,6 +343,7 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
         setSelectedItem(null);
         return;
       }
+      if (event.button !== 2) return;
       let obj: THREE.Object3D | null = null;
       for (const inter of intersects) {
         obj = inter.object;
@@ -381,9 +384,12 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
         cab.userData.openStates = openStates;
       }
     };
-    renderer.domElement.addEventListener('pointerdown', handlePointer);
+    const handleContextMenu = (event: MouseEvent) => event.preventDefault();
+    window.addEventListener('pointerdown', handlePointer);
+    window.addEventListener('contextmenu', handleContextMenu);
     return () => {
-      renderer.domElement.removeEventListener('pointerdown', handlePointer);
+      window.removeEventListener('pointerdown', handlePointer);
+      window.removeEventListener('contextmenu', handleContextMenu);
     };
   }, [store.modules, playerMode]);
 
