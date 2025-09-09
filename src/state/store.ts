@@ -150,6 +150,8 @@ type Store = {
   playerHeight: number;
   playerSpeed: number;
   selectedItemSlot: number;
+  itemsByCabinet: (cabinetId: string) => Item[];
+  itemsBySurface: (cabinetId: string, surfaceIndex: number) => Item[];
   setRole: (r: 'stolarz' | 'klient') => void;
   updateGlobals: (fam: FAMILY, patch: Partial<Globals[FAMILY]>) => void;
   updatePrices: (patch: Partial<Prices>) => void;
@@ -203,6 +205,12 @@ export const usePlannerStore = create<Store>((set, get) => ({
   playerSpeed: persisted?.playerSpeed ?? 0.1,
   selectedItemSlot: 1,
   showFronts: true,
+  itemsByCabinet: (cabinetId) =>
+    get().items.filter((it) => it.cabinetId === cabinetId),
+  itemsBySurface: (cabinetId, surfaceIndex) =>
+    get().items.filter(
+      (it) => it.cabinetId === cabinetId && it.shelfIndex === surfaceIndex,
+    ),
   setRole: (r) => set({ role: r }),
   updateGlobals: (fam, patch) =>
     set((s) => {

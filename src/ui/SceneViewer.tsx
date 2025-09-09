@@ -40,6 +40,7 @@ interface Props {
 }
 
 const INTERACT_DISTANCE = 1.5;
+const PLATE_HEIGHT = 0.02;
 
 export const getLegHeight = (mod: Module3D, globals: Globals): number => {
   if (mod.family !== FAMILY.BASE) return 0;
@@ -93,27 +94,36 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       }
     });
     const cabId = cab.userData.moduleId;
-    const items = store.items.filter((it) => it.cabinetId === cabId);
     let chosen: THREE.Mesh | null = null;
     let pos = new THREE.Vector3();
-    let topY = 0;
-    for (const surf of surfaces) {
+    let baseY = 0;
+    let finalY = 0;
+    let surfaceIndex = -1;
+    for (let i = 0; i < surfaces.length; i++) {
+      const surf = surfaces[i];
       const p = surf.getWorldPosition(new THREE.Vector3());
       const params = (surf.geometry as any).parameters || {};
       const h = params.height || 0;
-      const y = p.y + h / 2;
-      const occupied = items.some(
-        (it) =>
-          Math.abs(it.position[0] - p.x) < 0.01 &&
-          Math.abs(it.position[2] - p.z) < 0.01 &&
-          Math.abs(it.position[1] - (y + 0.05)) < 0.01,
-      );
-      if (!occupied) {
-        chosen = surf;
-        pos = p;
-        topY = y;
-        break;
+      const topY = p.y + h / 2;
+      const base = topY + 0.05;
+      const existing = store.itemsBySurface(cabId, i);
+      if (existing.length > 0) {
+        if (type === 'plate' && existing.every((it) => it.type === 'plate')) {
+          chosen = surf;
+          pos = p;
+          baseY = base;
+          finalY = base + PLATE_HEIGHT * existing.length;
+          surfaceIndex = i;
+          break;
+        }
+        continue;
       }
+      chosen = surf;
+      pos = p;
+      baseY = base;
+      finalY = base;
+      surfaceIndex = i;
+      break;
     }
     if (!chosen) return;
     const ghost = new THREE.Mesh(
@@ -124,7 +134,9 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
         opacity: 0.5,
       }),
     );
-    ghost.position.set(pos.x, topY + 0.05, pos.z);
+    ghost.position.set(pos.x, finalY, pos.z);
+    (ghost as any).userData.surfaceIndex = surfaceIndex;
+    (ghost as any).userData.baseY = baseY;
     group.add(ghost);
     ghostRef.current = ghost;
   }, [threeRef, playerMode, store.selectedItemSlot, targetCabinet, store.items]);
@@ -369,10 +381,23 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
         } else if (event.button === 0) {
           const ghost = ghostRef.current;
           const type = hotbarItems[store.selectedItemSlot - 1];
-          if (!ghost || !type) return;
-          const pos = ghost.position.clone();
-          const id = Math.random().toString(36).slice(2);
           const cab = targetCabinet;
+          if (!ghost || !type || !cab || !cab.userData?.moduleId) return;
+          const surfaceIndex = ghost.userData?.surfaceIndex;
+          const baseY = ghost.userData?.baseY ?? ghost.position.y;
+          if (surfaceIndex === undefined) return;
+          const existing = store.itemsBySurface(
+            cab.userData.moduleId,
+            surfaceIndex,
+          );
+          if (
+            existing.length > 0 &&
+            (type !== 'plate' || existing.some((it) => it.type !== 'plate'))
+          )
+            return;
+          const pos = ghost.position.clone();
+          pos.y = baseY + (type === 'plate' ? PLATE_HEIGHT * existing.length : 0);
+          const id = Math.random().toString(36).slice(2);
           loadItemModel(type)
             .catch(() => null)
             .finally(() => {
@@ -381,7 +406,8 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
                 type,
                 position: [pos.x, pos.y, pos.z],
                 rotation: [0, 0, 0],
-                cabinetId: cab?.userData.moduleId,
+                cabinetId: cab.userData.moduleId,
+                shelfIndex: surfaceIndex,
               });
               updateGhost();
             });
@@ -405,14 +431,37 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
           cab = cab.parent;
         }
         if (!cab || !cab.userData?.moduleId) return;
+        let surfaceObj: THREE.Object3D | null = inter.object;
+        while (surfaceObj && !surfaceObj.userData?.placeable) {
+          surfaceObj = surfaceObj.parent;
+        }
+        if (!surfaceObj) return;
+        const surfaces: THREE.Mesh[] = [];
+        cab.traverse((obj) => {
+          if (obj instanceof THREE.Mesh && obj.userData?.placeable) {
+            surfaces.push(obj);
+          }
+        });
+        const surfaceIndex = surfaces.indexOf(surfaceObj as THREE.Mesh);
+        if (surfaceIndex === -1) return;
+        const existing = store.itemsBySurface(cab.userData.moduleId, surfaceIndex);
+        if (
+          existing.length > 0 &&
+          (selectedItem !== 'plate' || existing.some((it) => it.type !== 'plate'))
+        )
+          return;
         const point = inter.point.clone();
+        const baseY = point.y + 0.05;
+        const y =
+          baseY + (selectedItem === 'plate' ? PLATE_HEIGHT * existing.length : 0);
         const id = Math.random().toString(36).slice(2);
         store.addItem({
           id,
           type: selectedItem,
-          position: [point.x, point.y + 0.05, point.z],
+          position: [point.x, y, point.z],
           rotation: [0, 0, 0],
           cabinetId: cab.userData.moduleId,
+          shelfIndex: surfaceIndex,
         });
         setSelectedItem(null);
         return;
