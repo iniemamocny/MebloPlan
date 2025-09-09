@@ -78,6 +78,8 @@ const SceneViewer: React.FC<Props> = ({
   const store = usePlannerStore();
   const showEdges = store.role === 'stolarz';
   const showFronts = store.showFronts;
+  const isRoomDrawing = store.isRoomDrawing;
+  const cameraState = useRef<{ position: THREE.Vector3; rotation: THREE.Euler } | null>(null);
 
   const [isMobile, setIsMobile] = useState(false);
   const [showRadial, setShowRadial] = useState(false);
@@ -111,6 +113,28 @@ const SceneViewer: React.FC<Props> = ({
       store.setSelectedTool(null);
     }
   }, [mode, store.selectedItemSlot, store.selectedWall, store.selectedTool]);
+
+  useEffect(() => {
+    const three = threeRef.current;
+    if (!three) return;
+    const { camera, controls } = three;
+    if (isRoomDrawing) {
+      cameraState.current = {
+        position: camera.position.clone(),
+        rotation: camera.rotation.clone(),
+      };
+      controls.enableRotate = false;
+      camera.position.set(0, 10, 0);
+      camera.up.set(0, 0, -1);
+      camera.lookAt(0, 0, 0);
+      controls.update();
+    } else if (cameraState.current) {
+      controls.enableRotate = true;
+      camera.position.copy(cameraState.current.position);
+      camera.rotation.copy(cameraState.current.rotation);
+      controls.update();
+    }
+  }, [isRoomDrawing, threeRef]);
 
   const updateGhost = React.useCallback(() => {
     const three = threeRef.current;
@@ -787,8 +811,8 @@ const SceneViewer: React.FC<Props> = ({
           {mode ? 'Tryb edycji' : 'Tryb gracza'}
         </button>
       </div>
-      {mode === 'build' && <RoomBuilder threeRef={threeRef} />}
-      {mode === 'build' && <WallToolSelector />}
+      {mode === 'build' && isRoomDrawing && <RoomBuilder threeRef={threeRef} />}
+      {mode === 'build' && !isRoomDrawing && <WallToolSelector />}
       {mode && <ItemHotbar mode={mode} />}
       {mode && isMobile && (
         <>

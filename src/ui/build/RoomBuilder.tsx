@@ -32,6 +32,23 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     roomRef.current = room;
   }, [room]);
 
+  useEffect(() => {
+    const three = threeRef.current;
+    if (!three) return;
+    const { controls, scene } = three;
+    const prevRotate = controls.enableRotate;
+    controls.enableRotate = false;
+    const grid = new THREE.GridHelper(20, 40, 0x999999, 0xcccccc);
+    scene.add(grid);
+    return () => {
+      controls.enableRotate = prevRotate;
+      scene.remove(grid);
+      grid.geometry.dispose();
+      if (Array.isArray(grid.material)) grid.material.forEach((m) => m.dispose());
+      else grid.material.dispose();
+    };
+  }, [threeRef]);
+
   // draw room elements whenever data changes
   useEffect(() => {
     const three = threeRef.current;
