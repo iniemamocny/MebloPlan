@@ -3,7 +3,6 @@ import { FAMILY, FAMILY_LABELS } from '../core/catalog';
 import type { Kind, Variant } from '../core/catalog';
 import TypePicker, { KindTabs, VariantList } from './panels/CatalogPicker';
 import CabinetConfigurator from './CabinetConfigurator';
-import RoomTab from './panels/RoomTab';
 import CostsTab from './panels/CostsTab';
 import CutlistTab from './panels/CutlistTab';
 import { CabinetConfig } from './types';
@@ -12,8 +11,8 @@ import GlobalSettings from './panels/GlobalSettings';
 
 interface MainTabsProps {
   t: (key: string, opts?: any) => string;
-  tab: 'cab' | 'room' | 'costs' | 'cut' | 'global' | null;
-  setTab: (t: 'cab' | 'room' | 'costs' | 'cut' | 'global' | null) => void;
+  tab: 'cab' | 'costs' | 'cut' | 'global' | null;
+  setTab: (t: 'cab' | 'costs' | 'cut' | 'global' | null) => void;
   family: FAMILY;
   setFamily: (f: FAMILY) => void;
   kind: Kind | null;
@@ -32,7 +31,6 @@ interface MainTabsProps {
   ) => void;
   initBlenda: (side: 'left' | 'right') => void;
   initSidePanel: (side: 'left' | 'right') => void;
-  threeRef: React.MutableRefObject<any>;
   boardL: number;
   setBoardL: (v: number) => void;
   boardW: number;
@@ -43,8 +41,6 @@ interface MainTabsProps {
   setBoardHasGrain: (v: boolean) => void;
   addCountertop: boolean;
   setAddCountertop: (v: boolean) => void;
-  isDrawingWalls: boolean;
-  setWallPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function MainTabs({
@@ -64,7 +60,6 @@ export default function MainTabs({
   onAdd,
   initBlenda,
   initSidePanel,
-  threeRef,
   boardL,
   setBoardL,
   boardW,
@@ -75,10 +70,8 @@ export default function MainTabs({
   setBoardHasGrain,
   addCountertop,
   setAddCountertop,
-  isDrawingWalls,
-  setWallPanelOpen,
 }: MainTabsProps) {
-  const toggleTab = (name: 'cab' | 'room' | 'costs' | 'cut' | 'global') => {
+  const toggleTab = (name: 'cab' | 'costs' | 'cut' | 'global') => {
     setTab(tab === name ? null : name);
   };
 
@@ -87,9 +80,6 @@ export default function MainTabs({
       <div className="tabs">
         <button className={`tabBtn ${tab === 'cab' ? 'active' : ''}`} onClick={() => toggleTab('cab')}>
           {t('app.tabs.cab')}
-        </button>
-        <button className={`tabBtn ${tab === 'room' ? 'active' : ''}`} onClick={() => toggleTab('room')}>
-          {t('app.tabs.room')}
         </button>
         <button className={`tabBtn ${tab === 'costs' ? 'active' : ''}`} onClick={() => toggleTab('costs')}>
           {t('app.tabs.costs')}
@@ -106,7 +96,6 @@ export default function MainTabs({
         isOpen={tab !== null}
         onClose={() => setTab(null)}
         className={tab !== null ? 'open' : ''}
-        locked={isDrawingWalls}
       >
         {tab === 'cab' && (
           <>
@@ -188,13 +177,6 @@ export default function MainTabs({
           </>
         )}
 
-        {tab === 'room' && (
-          <RoomTab
-            three={threeRef}
-            isDrawingWalls={isDrawingWalls}
-            setWallPanelOpen={setWallPanelOpen}
-          />
-        )}
         {tab === 'costs' && <CostsTab />}
         {tab === 'cut' && (
           <CutlistTab

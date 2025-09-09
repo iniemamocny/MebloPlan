@@ -6,7 +6,6 @@ import useCabinetConfig from './useCabinetConfig';
 import TopBar from './TopBar';
 import { createTranslator } from './i18n';
 import MainTabs from './MainTabs';
-import WallDrawPanel from './WallDrawPanel';
 import { safeSetItem } from '../utils/storage';
 
 export default function App() {
@@ -38,15 +37,11 @@ export default function App() {
     initSidePanel,
     } = useCabinetConfig(family, kind, variant, selWall, setVariant);
 
-  const [tab, setTab] = useState<
-    'cab' | 'room' | 'costs' | 'cut' | 'global' | null
-  >(null);
+  const [tab, setTab] = useState<'cab' | 'costs' | 'cut' | 'global' | null>(null);
   const [boardL, setBoardL] = useState(2800);
   const [boardW, setBoardW] = useState(2070);
   const [boardKerf, setBoardKerf] = useState(3);
   const [boardHasGrain, setBoardHasGrain] = useState(false);
-  const [isDrawingWalls, setIsDrawingWalls] = useState(false);
-  const [wallPanelOpen, setWallPanelOpen] = useState(false);
 
   const undo = store.undo;
   const redo = store.redo;
@@ -93,7 +88,6 @@ export default function App() {
           onAdd={onAdd}
           initBlenda={initBlenda}
           initSidePanel={initSidePanel}
-          threeRef={threeRef}
           boardL={boardL}
           setBoardL={setBoardL}
           boardW={boardW}
@@ -104,20 +98,12 @@ export default function App() {
           setBoardHasGrain={setBoardHasGrain}
           addCountertop={addCountertop}
           setAddCountertop={setAddCountertop}
-          isDrawingWalls={isDrawingWalls}
-          setWallPanelOpen={setWallPanelOpen}
         />
       </div>
       <div className="canvasWrap">
         <SceneViewer
           threeRef={threeRef}
           addCountertop={addCountertop}
-          setIsDrawingWalls={setIsDrawingWalls}
-        />
-        <WallDrawPanel
-          threeRef={threeRef}
-          isOpen={wallPanelOpen}
-          isDrawing={isDrawingWalls}
         />
         <TopBar
           t={t}
@@ -129,8 +115,6 @@ export default function App() {
           doAutoOnSelectedWall={doAutoOnSelectedWall}
           lang={lang}
           setLang={setLang}
-          threeRef={threeRef}
-          isTopDown={isDrawingWalls}
         />
       </div>
     </div>
