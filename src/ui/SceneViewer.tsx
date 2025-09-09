@@ -229,6 +229,20 @@ const SceneViewer: React.FC<Props> = ({
   }, [mode, store]);
 
   useEffect(() => {
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      e.preventDefault();
+      setMode((m) => {
+        const modes: PlayerMode[] = ['build', 'furnish', 'decorate'];
+        const idx = modes.indexOf(m ?? 'decorate');
+        return modes[(idx + 1) % modes.length];
+      });
+    };
+    window.addEventListener('keydown', handleTab);
+    return () => window.removeEventListener('keydown', handleTab);
+  }, [setMode]);
+
+  useEffect(() => {
     updateGhost();
   }, [updateGhost]);
 
@@ -704,6 +718,25 @@ const SceneViewer: React.FC<Props> = ({
             Centrum
           </button>
         </>
+      )}
+      {isMobile && (
+        <div className="modeBar">
+          {(
+            [
+              { key: 'build', label: '🔨' },
+              { key: 'furnish', label: '🪑' },
+              { key: 'decorate', label: '🎨' },
+            ] as { key: PlayerMode; label: string }[]
+          ).map(({ key, label }) => (
+            <div
+              key={key}
+              className={`modeItem${mode === key ? ' active' : ''}`}
+              onClick={() => setMode(key)}
+            >
+              {label}
+            </div>
+          ))}
+        </div>
       )}
       {mode === null && (
         <div

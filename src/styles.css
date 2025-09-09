@@ -48,3 +48,6 @@ details>summary{cursor:pointer;padding:8px 0;font-weight:600}
 details.active>summary{color:var(--accent);text-decoration:underline;font-weight:700}
 details>div{padding:8px 0;animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modeBar{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-around;gap:8px;background:rgba(255,255,255,.85);border-top:1px solid var(--border);padding:8px;backdrop-filter:blur(6px)}
+.modeItem{flex:1;text-align:center;padding:8px 0;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:var(--white)}
+.modeItem.active{background:var(--accent);color:var(--white)}
