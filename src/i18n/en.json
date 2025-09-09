@@ -204,6 +204,8 @@
     "cup": "Cup",
     "plate": "Plate",
     "bottle": "Bottle",
+    "bearingWall": "Load-bearing wall",
+    "partitionWall": "Partition wall",
     "wall": "Wall",
     "window": "Window",
     "door": "Door"
@@ -214,7 +216,9 @@
     "door": "Door",
     "cup": "Cup",
     "plate": "Plate",
-    "bottle": "Bottle"
+    "bottle": "Bottle",
+    "bearing": "Load-bearing",
+    "partition": "Partition"
   },
   "cutlist": {
     "validation": "Validation for sheet {{width}}×{{height}}",

@@ -11,9 +11,9 @@ import { Module3D, ModuleAdv, Globals } from '../types';
 import { loadItemModel } from '../scene/itemLoader';
 import ItemHotbar, {
   hotbarItems,
-  buildHotbarItems,
   furnishHotbarItems,
 } from './components/ItemHotbar';
+import WallToolSelector from './components/WallToolSelector';
 import TouchJoystick from './components/TouchJoystick';
 import { PlayerMode } from './types';
 import RoomBuilder from './build/RoomBuilder';
@@ -81,12 +81,31 @@ const SceneViewer: React.FC<Props> = ({
   const [targetCabinet, setTargetCabinet] = useState<THREE.Object3D | null>(null);
   const ghostRef = useRef<THREE.Object3D | null>(null);
 
+  const buildRadialItems: (string | null)[] = [
+    'wall',
+    'window',
+    'door',
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+  ];
+
   const radialItems =
     mode === 'build'
-      ? buildHotbarItems
+      ? buildRadialItems
       : mode === 'furnish'
         ? furnishHotbarItems
         : hotbarItems;
+
+  const wallSubMenu = {
+    items: ['bearing', 'partition'] as (string | null)[],
+    selected: store.selectedWall?.kind === 'bearing' ? 1 : 2,
+    onSelect: (slot: number) =>
+      store.setSelectedWallKind(slot === 1 ? 'bearing' : 'partition'),
+  };
 
   const updateGhost = React.useCallback(() => {
     const three = threeRef.current;
@@ -688,6 +707,7 @@ const SceneViewer: React.FC<Props> = ({
           }
         }}
         visible={showRadial}
+        subMenu={wallSubMenu}
       />
       {mode === null && (
         <div className="zoomControls">
@@ -721,6 +741,7 @@ const SceneViewer: React.FC<Props> = ({
         </button>
       </div>
       {mode === 'build' && <RoomBuilder threeRef={threeRef} />}
+      {mode === 'build' && <WallToolSelector />}
       {mode && <ItemHotbar mode={mode} />}
       {mode && isMobile && (
         <>

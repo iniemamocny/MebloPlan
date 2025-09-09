@@ -49,7 +49,7 @@ vi.mock('../src/scene/engine', () => {
 vi.mock('../src/ui/components/ItemHotbar', () => ({
   default: () => null,
   hotbarItems: [],
-  buildHotbarItems: [],
+  buildHotbarItems: () => [],
   furnishHotbarItems: [],
 }));
 vi.mock('../src/ui/components/TouchJoystick', () => ({ default: () => null }));

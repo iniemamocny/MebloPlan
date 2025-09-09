@@ -151,6 +151,7 @@ type Store = {
   playerSpeed: number;
   selectedItemSlot: number;
   selectedTool: string | null;
+  selectedWall: { kind: 'bearing' | 'partition'; thickness: number } | null;
   itemsByCabinet: (cabinetId: string) => Item[];
   itemsBySurface: (cabinetId: string, surfaceIndex: number) => Item[];
   setRole: (r: 'stolarz' | 'klient') => void;
@@ -179,6 +180,8 @@ type Store = {
   setPlayerSpeed: (v: number) => void;
   setSelectedItemSlot: (slot: number) => void;
   setSelectedTool: (tool: string | null) => void;
+  setSelectedWallKind: (kind: 'bearing' | 'partition') => void;
+  setSelectedWallThickness: (thickness: number) => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -216,6 +219,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   playerSpeed: persisted?.playerSpeed ?? 0.1,
   selectedItemSlot: 1,
   selectedTool: null,
+  selectedWall: null,
   showFronts: true,
   itemsByCabinet: (cabinetId) =>
     get().items.filter((it) => it.cabinetId === cabinetId),
@@ -437,6 +441,21 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setPlayerSpeed: (v) => set({ playerSpeed: v }),
   setSelectedItemSlot: (slot) => set({ selectedItemSlot: slot }),
   setSelectedTool: (tool) => set({ selectedTool: tool }),
+  setSelectedWallKind: (kind) =>
+    set((s) => ({
+      selectedWall: {
+        kind,
+        thickness:
+          s.selectedWall?.thickness ?? (kind === 'bearing' ? 0.3 : 0.1),
+      },
+    })),
+  setSelectedWallThickness: (thickness) =>
+    set((s) => ({
+      selectedWall: {
+        kind: s.selectedWall?.kind ?? 'partition',
+        thickness,
+      },
+    })),
 }));
 
 const persistSelector = (s: Store) => ({

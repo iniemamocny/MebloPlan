@@ -15,8 +15,14 @@ export const hotbarItems: (string | null)[] = [
   null,
 ];
 
-export const buildHotbarItems: (string | null)[] = [
-  'wall',
+export const buildHotbarItems = (
+  selectedWall: { kind: 'bearing' | 'partition'; thickness: number } | null,
+): (string | null)[] => [
+  selectedWall
+    ? selectedWall.kind === 'bearing'
+      ? 'bearingWall'
+      : 'partitionWall'
+    : 'wall',
   'window',
   'door',
   null,
@@ -37,11 +43,12 @@ const ItemHotbar: React.FC<Props> = ({ mode }) => {
   const { t } = useTranslation();
   const selected = usePlannerStore((s) => s.selectedItemSlot);
   const setSelected = usePlannerStore((s) => s.setSelectedItemSlot);
+  const selectedWall = usePlannerStore((s) => s.selectedWall);
   if (!mode) return null;
 
   const items =
     mode === 'build'
-      ? buildHotbarItems
+      ? buildHotbarItems(selectedWall)
       : mode === 'furnish'
         ? furnishHotbarItems
         : hotbarItems;
