@@ -249,12 +249,14 @@ const SceneViewer: React.FC<Props> = ({
       }
       const n = Number(e.key);
       if (n >= 1 && n <= 9) {
-        store.setSelectedItemSlot(n);
+        if (mode === 'decorate') {
+          store.setSelectedItemSlot(n);
+        }
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [store]);
+  }, [store, mode]);
 
   useEffect(() => {
     setShowRadial(false);

@@ -5,6 +5,8 @@ import { act } from 'react';
 import ReactDOM from 'react-dom/client';
 import * as THREE from 'three';
 import SceneViewer from '../src/ui/SceneViewer';
+import { usePlannerStore } from '../src/state/store';
+import { PlayerMode } from '../src/ui/types';
 
 vi.mock('../src/scene/engine', () => {
   return {
@@ -96,6 +98,37 @@ describe('SceneViewer Tab key', () => {
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
     });
     expect(setMode).not.toHaveBeenCalled();
+
+    root.unmount();
+  });
+});
+
+describe('SceneViewer hotbar keys', () => {
+  it('does not change selectedItemSlot when mode is not decorate', () => {
+    const threeRef: any = { current: null };
+    const setMode = vi.fn();
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+
+    const modes: (PlayerMode | null)[] = [null, 'build', 'furnish'];
+    for (const m of modes) {
+      act(() => {
+        usePlannerStore.setState({ selectedItemSlot: 5 });
+        root.render(
+          <SceneViewer
+            threeRef={threeRef}
+            addCountertop={false}
+            mode={m}
+            setMode={setMode}
+          />,
+        );
+      });
+      act(() => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: '1' }));
+      });
+      expect(usePlannerStore.getState().selectedItemSlot).toBe(5);
+    }
 
     root.unmount();
   });
