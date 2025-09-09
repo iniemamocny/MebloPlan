@@ -248,18 +248,21 @@ const SceneViewer: React.FC<Props> = ({
     });
   }, [store.playerHeight, store.playerSpeed, threeRef]);
 
-  useEffect(() => {
-    let id = 0;
-    const loop = () => {
-      const { x, y } = lookVec.current;
-      if (x !== 0 || y !== 0) {
-        threeRef.current?.updateCameraRotation?.(x * 2, y * 2);
-      }
+    useEffect(() => {
+      if (!mode) return;
+      let id = 0;
+      const loop = () => {
+        const { x, y } = lookVec.current;
+        if (x !== 0 || y !== 0) {
+          threeRef.current?.updateCameraRotation?.(x * 2, y * 2);
+        }
+        if (mode) {
+          id = requestAnimationFrame(loop);
+        }
+      };
       id = requestAnimationFrame(loop);
-    };
-    loop();
-    return () => cancelAnimationFrame(id);
-  }, [threeRef]);
+      return () => cancelAnimationFrame(id);
+    }, [threeRef, mode]);
 
   useEffect(() => {
     if (!mode) return;
@@ -623,108 +626,114 @@ const SceneViewer: React.FC<Props> = ({
     store.room,
   ]);
 
-  useEffect(() => {
-    let animId: number;
-    const raycaster = new THREE.Raycaster();
-    const detect = () => {
-      const three = threeRef.current;
-      if (mode && three && three.group) {
-        const camera = three.camera as THREE.PerspectiveCamera;
-        const group = three.group as THREE.Group;
-        const origin = camera.getWorldPosition(new THREE.Vector3());
-        const dir = camera.getWorldDirection(new THREE.Vector3());
-        raycaster.set(origin, dir);
-        raycaster.far = INTERACT_DISTANCE;
-        const intersects = raycaster.intersectObjects(group.children, true);
-        let target: { cab: THREE.Object3D; index: number } | null = null;
-        for (const inter of intersects) {
-          let obj: THREE.Object3D | null = inter.object;
-          let ignore = false;
-          while (obj) {
-            if (obj.userData?.ignoreRaycast) {
-              ignore = true;
-              break;
+    useEffect(() => {
+      if (!mode) return;
+      let animId: number;
+      const raycaster = new THREE.Raycaster();
+      const detect = () => {
+        const three = threeRef.current;
+        if (mode && three && three.group) {
+          const camera = three.camera as THREE.PerspectiveCamera;
+          const group = three.group as THREE.Group;
+          const origin = camera.getWorldPosition(new THREE.Vector3());
+          const dir = camera.getWorldDirection(new THREE.Vector3());
+          raycaster.set(origin, dir);
+          raycaster.far = INTERACT_DISTANCE;
+          const intersects = raycaster.intersectObjects(group.children, true);
+          let target: { cab: THREE.Object3D; index: number } | null = null;
+          for (const inter of intersects) {
+            let obj: THREE.Object3D | null = inter.object;
+            let ignore = false;
+            while (obj) {
+              if (obj.userData?.ignoreRaycast) {
+                ignore = true;
+                break;
+              }
+              if (obj.userData?.frontIndex !== undefined) break;
+              obj = obj.parent;
             }
-            if (obj.userData?.frontIndex !== undefined) break;
-            obj = obj.parent;
-          }
-          if (ignore || !obj || obj.userData?.frontIndex === undefined) {
-            continue;
-          }
-          if (obj.userData.isHandle) {
-            obj = obj.parent;
-            if (!obj || obj.userData?.frontIndex === undefined) {
+            if (ignore || !obj || obj.userData?.frontIndex === undefined) {
               continue;
             }
+            if (obj.userData.isHandle) {
+              obj = obj.parent;
+              if (!obj || obj.userData?.frontIndex === undefined) {
+                continue;
+              }
+            }
+            let cab: THREE.Object3D | null = obj;
+            while (cab && cab.userData?.kind !== 'cab') {
+              cab = cab.parent;
+            }
+            if (!cab) continue;
+            target = { cab, index: obj.userData.frontIndex };
+            break;
           }
-          let cab: THREE.Object3D | null = obj;
-          while (cab && cab.userData?.kind !== 'cab') {
-            cab = cab.parent;
-          }
-          if (!cab) continue;
-          target = { cab, index: obj.userData.frontIndex };
-          break;
+          targetRef.current = target;
+          setShowHint(!!target);
+          setTargetCabinet(target?.cab || null);
+        } else {
+          targetRef.current = null;
+          setShowHint(false);
+          setTargetCabinet(null);
         }
-        targetRef.current = target;
-        setShowHint(!!target);
-        setTargetCabinet(target?.cab || null);
-      } else {
-        targetRef.current = null;
-        setShowHint(false);
-        setTargetCabinet(null);
-      }
+        if (mode) {
+          animId = requestAnimationFrame(detect);
+        }
+      };
       animId = requestAnimationFrame(detect);
-    };
-    animId = requestAnimationFrame(detect);
-    return () => {
-      cancelAnimationFrame(animId);
-    };
-  }, [mode, threeRef]);
+      return () => {
+        cancelAnimationFrame(animId);
+      };
+    }, [mode, threeRef]);
 
-  useEffect(() => {
-    let animId: number;
-    const animate = () => {
-      const three = threeRef.current;
-      if (three && three.group) {
-        const group = three.group as THREE.Group;
-        group.children.forEach((cab) => {
-          if (cab.userData?.kind === 'cab') {
-            const openStates: boolean[] = cab.userData.openStates || [];
-            const openProgress: number[] = cab.userData.openProgress || [];
-            const frontGroups: THREE.Object3D[] =
-              cab.userData.frontGroups || [];
-            openStates.forEach((target, idx) => {
-              let prog = openProgress[idx] ?? 0;
-              const dest = target ? 1 : 0;
-              const diff = dest - prog;
-              if (Math.abs(diff) > 0.001) {
-                const speed = cab.userData.animSpeed || 0.15;
-                prog += diff * speed;
-                if (Math.abs(dest - prog) < 0.02) prog = dest;
-                openProgress[idx] = prog;
-                const fg = frontGroups[idx];
-                if (fg) {
-                  if (fg.userData.type === 'door') {
-                    const hingeSide = fg.userData.hingeSide || 'left';
-                    const sign = hingeSide === 'left' ? -1 : 1;
-                    fg.rotation.y = ((sign * Math.PI) / 2) * prog;
-                  } else if (fg.userData.type === 'drawer') {
-                    const slide = fg.userData.slideDist || 0.45;
-                    fg.position.z = (fg.userData.closedZ ?? 0) - slide * prog;
+    useEffect(() => {
+      if (!mode) return;
+      let animId: number;
+      const animate = () => {
+        const three = threeRef.current;
+        if (three && three.group) {
+          const group = three.group as THREE.Group;
+          group.children.forEach((cab) => {
+            if (cab.userData?.kind === 'cab') {
+              const openStates: boolean[] = cab.userData.openStates || [];
+              const openProgress: number[] = cab.userData.openProgress || [];
+              const frontGroups: THREE.Object3D[] =
+                cab.userData.frontGroups || [];
+              openStates.forEach((target, idx) => {
+                let prog = openProgress[idx] ?? 0;
+                const dest = target ? 1 : 0;
+                const diff = dest - prog;
+                if (Math.abs(diff) > 0.001) {
+                  const speed = cab.userData.animSpeed || 0.15;
+                  prog += diff * speed;
+                  if (Math.abs(dest - prog) < 0.02) prog = dest;
+                  openProgress[idx] = prog;
+                  const fg = frontGroups[idx];
+                  if (fg) {
+                    if (fg.userData.type === 'door') {
+                      const hingeSide = fg.userData.hingeSide || 'left';
+                      const sign = hingeSide === 'left' ? -1 : 1;
+                      fg.rotation.y = ((sign * Math.PI) / 2) * prog;
+                    } else if (fg.userData.type === 'drawer') {
+                      const slide = fg.userData.slideDist || 0.45;
+                      fg.position.z = (fg.userData.closedZ ?? 0) - slide * prog;
+                    }
                   }
                 }
-              }
-            });
-          }
-        });
-      }
+              });
+            }
+          });
+        }
+        if (mode) {
+          animId = requestAnimationFrame(animate);
+        }
+      };
       animId = requestAnimationFrame(animate);
-    };
-    animId = requestAnimationFrame(animate);
-    return () => {
-      cancelAnimationFrame(animId);
-    };
-  }, []);
+      return () => {
+        cancelAnimationFrame(animId);
+      };
+    }, [mode, threeRef]);
 
   const handleZoomIn = () => {
     const controls = threeRef.current?.controls;
