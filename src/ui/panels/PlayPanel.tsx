@@ -1,8 +1,6 @@
 import React from 'react';
 import { usePlannerStore } from '../../state/store';
-import { PlayerMode } from '../types';
-
-type PlayerSubMode = Exclude<PlayerMode, null>;
+import { PlayerMode, PlayerSubMode, PLAYER_MODES } from '../types';
 
 interface Props {
   threeRef: React.MutableRefObject<any>;
@@ -66,13 +64,7 @@ export default function PlayPanel({
           />
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {(
-            [
-              { key: 'build', label: t('play.mode.build') },
-              { key: 'furnish', label: t('play.mode.furnish') },
-              { key: 'decorate', label: t('play.mode.decorate') },
-            ] as { key: PlayerSubMode; label: string }[]
-          ).map(({ key, label }) => (
+          {PLAYER_MODES.map((key) => (
             <button
               key={key}
               className="btnGhost"
@@ -83,7 +75,7 @@ export default function PlayPanel({
               }
               onClick={() => setStartMode(key)}
             >
-              {label}
+              {t(`play.mode.${key}`)}
             </button>
           ))}
         </div>

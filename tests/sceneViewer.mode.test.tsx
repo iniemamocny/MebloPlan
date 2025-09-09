@@ -6,7 +6,7 @@ import ReactDOM from 'react-dom/client';
 import * as THREE from 'three';
 import SceneViewer from '../src/ui/SceneViewer';
 import { usePlannerStore } from '../src/state/store';
-import { PlayerMode } from '../src/ui/types';
+import { PlayerMode, PLAYER_MODES } from '../src/ui/types';
 
 vi.mock('../src/scene/engine', () => {
   return {
@@ -109,7 +109,7 @@ describe('SceneViewer Tab key', () => {
 
   it('cycles through modes when active', () => {
     const threeRef: any = { current: null };
-    let mode: PlayerMode = 'build';
+    let mode: PlayerMode = PLAYER_MODES[0];
     const setMode = vi.fn((updater: any) => {
       mode = typeof updater === 'function' ? updater(mode) : updater;
     });
@@ -123,7 +123,7 @@ describe('SceneViewer Tab key', () => {
       );
     });
 
-    const expected: PlayerMode[] = ['furnish', 'decorate', 'build'];
+    const expected: PlayerMode[] = PLAYER_MODES.slice(1).concat(PLAYER_MODES[0]);
     for (const exp of expected) {
       act(() => {
         window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
@@ -173,7 +173,7 @@ describe('SceneViewer hotbar keys', () => {
     document.body.appendChild(container);
     const root = ReactDOM.createRoot(container);
 
-    const modes: PlayerMode[] = ['build', 'furnish', 'decorate'];
+    const modes = PLAYER_MODES;
     const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
     for (const m of modes) {
       act(() => {

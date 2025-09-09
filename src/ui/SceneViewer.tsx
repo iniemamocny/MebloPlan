@@ -16,7 +16,7 @@ import ItemHotbar, {
 } from './components/ItemHotbar';
 import WallToolSelector from './components/WallToolSelector';
 import TouchJoystick from './components/TouchJoystick';
-import { PlayerMode } from './types';
+import { PlayerMode, PlayerSubMode, PLAYER_MODES } from './types';
 import RoomBuilder from './build/RoomBuilder';
 import RadialMenu from './components/RadialMenu';
 
@@ -53,6 +53,11 @@ interface Props {
 
 const INTERACT_DISTANCE = 1.5;
 const PLATE_HEIGHT = 0.02;
+const MODE_ICONS: Record<PlayerSubMode, string> = {
+  build: '🔨',
+  furnish: '🪑',
+  decorate: '🎨',
+};
 
 export const getLegHeight = (mod: Module3D, globals: Globals): number => {
   if (mod.family !== FAMILY.BASE) return 0;
@@ -306,9 +311,8 @@ const SceneViewer: React.FC<Props> = ({
       if (e.key !== 'Tab') return;
       e.preventDefault();
       setMode((m) => {
-        const modes: PlayerMode[] = ['build', 'furnish', 'decorate'];
-        const idx = modes.indexOf(m ?? 'decorate');
-        return modes[(idx + 1) % modes.length];
+        const idx = PLAYER_MODES.indexOf(m as PlayerSubMode);
+        return PLAYER_MODES[(idx + 1) % PLAYER_MODES.length];
       });
     };
     window.addEventListener('keydown', handleTab);
@@ -814,19 +818,13 @@ const SceneViewer: React.FC<Props> = ({
       )}
       {isMobile && (
         <div className="modeBar">
-          {(
-            [
-              { key: 'build', label: '🔨' },
-              { key: 'furnish', label: '🪑' },
-              { key: 'decorate', label: '🎨' },
-            ] as { key: PlayerMode; label: string }[]
-          ).map(({ key, label }) => (
+          {PLAYER_MODES.map((key) => (
             <div
               key={key}
               className={`modeItem${mode === key ? ' active' : ''}`}
               onClick={() => setMode(key)}
             >
-              {label}
+              {MODE_ICONS[key]}
             </div>
           ))}
           <div
