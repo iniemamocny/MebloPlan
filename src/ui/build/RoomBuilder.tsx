@@ -20,6 +20,10 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   const groupRef = useRef<THREE.Group | null>(null);
   const startRef = useRef<{ x: number; y: number } | null>(null);
   const previewRef = useRef<THREE.Mesh | null>(null);
+  const labelRef = useRef<HTMLDivElement | null>(null);
+  const lengthRef = useRef(0);
+  const inputRef = useRef('');
+  const dirRef = useRef({ dx: 1, dy: 0 });
 
   // draw room elements whenever data changes
   useEffect(() => {
@@ -47,8 +51,14 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     // draw walls
     room.walls.forEach((w) => {
       const len = Math.hypot(w.end.x - w.start.x, w.end.y - w.start.y);
-      const geom = new THREE.BoxGeometry(len, w.height || wallHeight, w.thickness);
-      const mat = new THREE.MeshStandardMaterial({ color: w.color || '#ffffff' });
+      const geom = new THREE.BoxGeometry(
+        len,
+        w.height || wallHeight,
+        w.thickness,
+      );
+      const mat = new THREE.MeshStandardMaterial({
+        color: w.color || '#ffffff',
+      });
       const mesh = new THREE.Mesh(geom, mat);
       const midx = (w.start.x + w.end.x) / 2;
       const midy = (w.start.y + w.end.y) / 2;
@@ -62,9 +72,19 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     const drawOpening = (op: WallOpening, color: number) => {
       const wall = room.walls.find((w) => w.id === op.wallId);
       if (!wall) return;
-      const len = Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
-      const angle = Math.atan2(wall.end.y - wall.start.y, wall.end.x - wall.start.x);
-      const geom = new THREE.BoxGeometry(op.width, op.height, wall.thickness + 0.01);
+      const len = Math.hypot(
+        wall.end.x - wall.start.x,
+        wall.end.y - wall.start.y,
+      );
+      const angle = Math.atan2(
+        wall.end.y - wall.start.y,
+        wall.end.x - wall.start.x,
+      );
+      const geom = new THREE.BoxGeometry(
+        op.width,
+        op.height,
+        wall.thickness + 0.01,
+      );
       const mat = new THREE.MeshStandardMaterial({ color });
       const mesh = new THREE.Mesh(geom, mat);
       const ratio = op.offset / len;
@@ -102,13 +122,18 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   };
 
   const updateWallColor = (id: string, color: string) => {
-    setRoom({ walls: room.walls.map((w) => (w.id === id ? { ...w, color } : w)) });
+    setRoom({
+      walls: room.walls.map((w) => (w.id === id ? { ...w, color } : w)),
+    });
   };
 
   const addWindow = (wallId: string) => {
     const wall = room.walls.find((w) => w.id === wallId);
     if (!wall) return;
-    const len = Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
+    const len = Math.hypot(
+      wall.end.x - wall.start.x,
+      wall.end.y - wall.start.y,
+    );
     const win: WallOpening = {
       id: Math.random().toString(36).slice(2),
       wallId,
@@ -123,7 +148,10 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   const addDoor = (wallId: string) => {
     const wall = room.walls.find((w) => w.id === wallId);
     if (!wall) return;
-    const len = Math.hypot(wall.end.x - wall.start.x, wall.end.y - wall.start.y);
+    const len = Math.hypot(
+      wall.end.x - wall.start.x,
+      wall.end.y - wall.start.y,
+    );
     const door: WallOpening = {
       id: Math.random().toString(36).slice(2),
       wallId,
@@ -153,11 +181,33 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       return { x: pos.x, y: pos.z };
     };
 
-    const onMove = (e: PointerEvent) => {
+    const updateLabel = (
+      midx: number,
+      wallHeight: number,
+      midy: number,
+      len: number,
+    ) => {
+      if (
+        !labelRef.current ||
+        !three.camera ||
+        !(three.camera as any).projectionMatrix ||
+        !(three.camera as any).matrixWorldInverse
+      )
+        return;
+      const pos = new THREE.Vector3(midx, wallHeight, midy);
+      pos.project(three.camera);
+      const rect = dom.getBoundingClientRect();
+      const x = rect.left + ((pos.x + 1) / 2) * rect.width;
+      const y = rect.top + ((-pos.y + 1) / 2) * rect.height;
+      labelRef.current.style.left = `${x}px`;
+      labelRef.current.style.top = `${y}px`;
+      labelRef.current.textContent = `${Math.round(len * 1000)} mm`;
+      labelRef.current.style.display = 'block';
+    };
+
+    const updatePreview = (len: number) => {
       if (!startRef.current) return;
-      const end = getPoint(e);
       const { x: sx, y: sy } = startRef.current;
-      const len = Math.hypot(end.x - sx, end.y - sy);
       const wallHeight = room.height / 1000;
       let mesh = previewRef.current;
       if (!mesh) {
@@ -175,28 +225,17 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
         mesh.geometry.dispose();
         mesh.geometry = new THREE.BoxGeometry(len, wallHeight, 0.1);
       }
-      const midx = (sx + end.x) / 2;
-      const midy = (sy + end.y) / 2;
-      mesh!.position.set(midx, wallHeight / 2, midy);
-      const angle = Math.atan2(end.y - sy, end.x - sx);
-      mesh!.rotation.y = -angle;
+      const { dx, dy } = dirRef.current;
+      const midx = sx + (dx * len) / 2;
+      const midy = sy + (dy * len) / 2;
+      mesh.position.set(midx, wallHeight / 2, midy);
+      const angle = Math.atan2(dy, dx);
+      mesh.rotation.y = -angle;
+      lengthRef.current = len;
+      updateLabel(midx, wallHeight, midy, len);
     };
 
-    const onUp = (e: PointerEvent) => {
-      if (!startRef.current) return;
-      const end = getPoint(e);
-      const { x: sx, y: sy } = startRef.current;
-      const wallHeight = room.height / 1000;
-      const newWall: Wall = {
-        id: Math.random().toString(36).slice(2),
-        start: { x: sx, y: sy },
-        end: { x: end.x, y: end.y },
-        height: wallHeight,
-        thickness: 0.1,
-        color: '#ffffff',
-      };
-      setRoom({ walls: [...room.walls, newWall] });
-      setSelectedTool(null);
+    function cleanup() {
       if (previewRef.current) {
         groupRef.current?.remove(previewRef.current);
         previewRef.current.geometry.dispose();
@@ -205,16 +244,77 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
         else previewRef.current.material.dispose();
         previewRef.current = null;
       }
+      if (labelRef.current) {
+        labelRef.current.style.display = 'none';
+      }
       startRef.current = null;
+      inputRef.current = '';
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
-    };
+      window.removeEventListener('keydown', onKey);
+    }
+
+    function finalize(end: { x: number; y: number }) {
+      if (!startRef.current) return;
+      const { x: sx, y: sy } = startRef.current;
+      const wallHeight = room.height / 1000;
+      const newWall: Wall = {
+        id: Math.random().toString(36).slice(2),
+        start: { x: sx, y: sy },
+        end,
+        height: wallHeight,
+        thickness: 0.1,
+        color: '#ffffff',
+      };
+      setRoom({ walls: [...room.walls, newWall] });
+      setSelectedTool(null);
+      cleanup();
+    }
+
+    function onMove(e: PointerEvent) {
+      if (!startRef.current) return;
+      const end = getPoint(e);
+      const { x: sx, y: sy } = startRef.current;
+      const dx = end.x - sx;
+      const dy = end.y - sy;
+      const len = Math.hypot(dx, dy);
+      dirRef.current = { dx: dx / len, dy: dy / len };
+      if (inputRef.current) updatePreview(lengthRef.current);
+      else updatePreview(len);
+    }
+
+    function onUp(e: PointerEvent) {
+      if (!startRef.current) return;
+      const end = getPoint(e);
+      finalize(end);
+    }
+
+    function onKey(e: KeyboardEvent) {
+      if (!startRef.current) return;
+      if (e.key >= '0' && e.key <= '9') {
+        inputRef.current += e.key;
+        const len = parseFloat(inputRef.current) / 1000;
+        updatePreview(len);
+      } else if (e.key === 'Enter') {
+        const { x: sx, y: sy } = startRef.current;
+        const { dx, dy } = dirRef.current;
+        const len = lengthRef.current;
+        const end = { x: sx + dx * len, y: sy + dy * len };
+        finalize(end);
+      } else if (e.key === 'Escape') {
+        setSelectedTool(null);
+        cleanup();
+      }
+    }
 
     const onDown = (e: PointerEvent) => {
       if (selectedTool !== 'wall') return;
       startRef.current = getPoint(e);
+      inputRef.current = '';
+      lengthRef.current = 0;
       window.addEventListener('pointermove', onMove);
       window.addEventListener('pointerup', onUp);
+      window.addEventListener('keydown', onKey);
     };
 
     window.addEventListener('pointerdown', onDown);
@@ -222,8 +322,16 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       window.removeEventListener('pointerdown', onDown);
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('keydown', onKey);
     };
-  }, [room.height, room.walls, selectedTool, setRoom, setSelectedTool, threeRef]);
+  }, [
+    room.height,
+    room.walls,
+    selectedTool,
+    setRoom,
+    setSelectedTool,
+    threeRef,
+  ]);
 
   useEffect(() => {
     if (!selectedTool) return;
@@ -243,45 +351,61 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   }, [selectedTool, room.walls, setSelectedTool]);
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: 10,
-        right: 10,
-        background: '#fff',
-        padding: 8,
-        borderRadius: 4,
-      }}
-    >
-      <button className="btnGhost" onClick={addWall}>
-        Dodaj ścianę
-      </button>
-      {room.walls.map((w) => (
-        <div key={w.id} style={{ marginTop: 4 }}>
-          <span>Ściana</span>
-          <input
-            type="color"
-            value={w.color || '#ffffff'}
-            onChange={(e) => updateWallColor(w.id, e.target.value)}
-            style={{ marginLeft: 4 }}
-          />
-          <button
-            className="btnGhost"
-            style={{ marginLeft: 4 }}
-            onClick={() => addWindow(w.id)}
-          >
-            +Okno
-          </button>
-          <button
-            className="btnGhost"
-            style={{ marginLeft: 4 }}
-            onClick={() => addDoor(w.id)}
-          >
-            +Drzwi
-          </button>
-        </div>
-      ))}
-    </div>
+    <>
+      <div
+        ref={labelRef}
+        style={{
+          position: 'absolute',
+          pointerEvents: 'none',
+          background: '#000',
+          color: '#fff',
+          padding: '2px 4px',
+          borderRadius: 4,
+          fontSize: 12,
+          transform: 'translate(-50%, -50%)',
+          display: 'none',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          top: 10,
+          right: 10,
+          background: '#fff',
+          padding: 8,
+          borderRadius: 4,
+        }}
+      >
+        <button className="btnGhost" onClick={addWall}>
+          Dodaj ścianę
+        </button>
+        {room.walls.map((w) => (
+          <div key={w.id} style={{ marginTop: 4 }}>
+            <span>Ściana</span>
+            <input
+              type="color"
+              value={w.color || '#ffffff'}
+              onChange={(e) => updateWallColor(w.id, e.target.value)}
+              style={{ marginLeft: 4 }}
+            />
+            <button
+              className="btnGhost"
+              style={{ marginLeft: 4 }}
+              onClick={() => addWindow(w.id)}
+            >
+              +Okno
+            </button>
+            <button
+              className="btnGhost"
+              style={{ marginLeft: 4 }}
+              onClick={() => addDoor(w.id)}
+            >
+              +Drzwi
+            </button>
+          </div>
+        ))}
+      </div>
+    </>
   );
 };
 
