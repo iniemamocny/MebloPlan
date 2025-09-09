@@ -9,11 +9,6 @@
     "undo": "Undo",
     "redo": "Redo",
     "clear": "Clear",
-    "wallLabel": "Wall {{num}} ({{len}} mm)",
-    "autoWall": "Auto for wall",
-    "removeWall": "Remove wall",
-    "editWall": "Edit wall",
-    "moveWall": "Move wall",
     "view2D": "View 2D",
     "view3D": "View 3D",
     "auto": "Auto",
@@ -27,7 +22,6 @@
     },
     "tabs": {
       "cab": "Kitchen",
-      "room": "Room",
       "costs": "Costs",
       "cut": "Cutlist",
       "global": "Settings"
@@ -38,28 +32,6 @@
   },
   "catalog": {
     "choose": "Choose"
-  },
-  "room": {
-    "title": "Room — walls",
-    "height": "Room height (mm)",
-    "wallThickness": "Wall thickness (mm)",
-    "wallType": "Wall type",
-    "wallTypes": {
-      "nosna": "Load-bearing",
-      "dzialowa": "Partition"
-    },
-    "addWindow": "Add window",
-    "addDoor": "Add door",
-    "drawWalls": "Draw walls",
-    "finishDrawing": "Finish drawing",
-    "noWalls": "No walls",
-    "angleToPrev": "Angle to previous (°)",
-    "snapLength": "Length step (mm; hold Alt to disable snapping)",
-    "snapAngle": "Angle step (°) (hold Alt to disable snapping)",
-    "snapRightAngles": "Right angles",
-    "area": "Area (mm²)",
-    "perimeter": "Perimeter (mm)",
-    "invalidLength": "Length must be non-negative"
   },
   "global": {
     "title": "Global settings",
