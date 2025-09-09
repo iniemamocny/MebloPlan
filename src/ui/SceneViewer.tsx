@@ -24,6 +24,8 @@ interface Props {
   addCountertop: boolean;
 }
 
+const INTERACT_DISTANCE = 1.5;
+
 export const getLegHeight = (mod: Module3D, globals: Globals): number => {
   if (mod.family !== FAMILY.BASE) return 0;
   const h =
@@ -39,6 +41,8 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
   const showFronts = store.showFronts;
 
   const [playerMode, setPlayerMode] = useState(false);
+  const targetRef = useRef<{ cab: THREE.Object3D; index: number } | null>(null);
+  const [showHint, setShowHint] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -183,6 +187,17 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
     const group = three.group as THREE.Group;
     const raycaster = new THREE.Raycaster();
     const handlePointer = (event: PointerEvent) => {
+      if (playerMode) {
+        const target = targetRef.current;
+        if (!target) return;
+        const { cab, index } = target;
+        const openStates: boolean[] = cab.userData.openStates || [];
+        if (index >= 0 && index < openStates.length) {
+          openStates[index] = !openStates[index];
+          cab.userData.openStates = openStates;
+        }
+        return;
+      }
       const rect = renderer.domElement.getBoundingClientRect();
       const mouse = new THREE.Vector2(
         ((event.clientX - rect.left) / rect.width) * 2 - 1,
@@ -235,7 +250,63 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
     return () => {
       renderer.domElement.removeEventListener('pointerdown', handlePointer);
     };
-  }, [store.modules]);
+  }, [store.modules, playerMode]);
+
+  useEffect(() => {
+    let animId: number;
+    const raycaster = new THREE.Raycaster();
+    const detect = () => {
+      const three = threeRef.current;
+      if (playerMode && three && three.group) {
+        const camera = three.camera as THREE.PerspectiveCamera;
+        const group = three.group as THREE.Group;
+        const origin = camera.getWorldPosition(new THREE.Vector3());
+        const dir = camera.getWorldDirection(new THREE.Vector3());
+        raycaster.set(origin, dir);
+        raycaster.far = INTERACT_DISTANCE;
+        const intersects = raycaster.intersectObjects(group.children, true);
+        let target: { cab: THREE.Object3D; index: number } | null = null;
+        for (const inter of intersects) {
+          let obj: THREE.Object3D | null = inter.object;
+          let ignore = false;
+          while (obj) {
+            if (obj.userData?.ignoreRaycast) {
+              ignore = true;
+              break;
+            }
+            if (obj.userData?.frontIndex !== undefined) break;
+            obj = obj.parent;
+          }
+          if (ignore || !obj || obj.userData?.frontIndex === undefined) {
+            continue;
+          }
+          if (obj.userData.isHandle) {
+            obj = obj.parent;
+            if (!obj || obj.userData?.frontIndex === undefined) {
+              continue;
+            }
+          }
+          let cab: THREE.Object3D | null = obj;
+          while (cab && cab.userData?.kind !== 'cab') {
+            cab = cab.parent;
+          }
+          if (!cab) continue;
+          target = { cab, index: obj.userData.frontIndex };
+          break;
+        }
+        targetRef.current = target;
+        setShowHint(!!target);
+      } else {
+        targetRef.current = null;
+        setShowHint(false);
+      }
+      animId = requestAnimationFrame(detect);
+    };
+    animId = requestAnimationFrame(detect);
+    return () => {
+      cancelAnimationFrame(animId);
+    };
+  }, [playerMode, threeRef]);
 
   useEffect(() => {
     let animId: number;
@@ -309,6 +380,22 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
           <button className="btnGhost" onClick={handleZoomOut}>
             −
           </button>
+        </div>
+      )}
+      {playerMode && showHint && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            pointerEvents: 'none',
+            color: '#fff',
+            textAlign: 'center',
+          }}
+        >
+          <div style={{ fontSize: 24 }}>✛</div>
+          <div style={{ fontSize: 12 }}>Kliknij, aby otworzyć</div>
         </div>
       )}
       <div style={{ position: 'absolute', top: 10, left: 10 }}>
