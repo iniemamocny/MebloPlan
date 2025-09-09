@@ -20,7 +20,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
   const groupRef = useRef<THREE.Group | null>(null);
   // preview mesh for custom wall placement
-  const [preview, setPreview] = useState<THREE.Mesh | null>(null);
+  const [previewMesh, setPreviewMesh] = useState<THREE.Mesh | null>(null);
 
   // draw room elements whenever data changes
   useEffect(() => {
@@ -161,7 +161,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     if (selectedTool === 'bearingWall' || selectedTool === 'partitionWall') {
       if (!selectedWall?.thickness) return;
 
-      let mesh = preview;
+      let mesh = previewMesh;
       if (!mesh) {
         const geom = new THREE.PlaneGeometry(
           selectedWall.thickness,
@@ -176,7 +176,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
         mesh = new THREE.Mesh(geom, mat);
         mesh.rotation.x = -Math.PI / 2;
         group.add(mesh);
-        setPreview(mesh);
+        setPreviewMesh(mesh);
       }
 
       let animId: number;
@@ -200,16 +200,16 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
           group.remove(mesh);
           mesh.geometry.dispose();
           (mesh.material as THREE.Material).dispose();
-          setPreview(null);
+          setPreviewMesh(null);
         }
       };
     }
 
-    if (preview) {
-      group.remove(preview);
-      preview.geometry.dispose();
-      (preview.material as THREE.Material).dispose();
-      setPreview(null);
+    if (previewMesh) {
+      group.remove(previewMesh);
+      previewMesh.geometry.dispose();
+      (previewMesh.material as THREE.Material).dispose();
+      setPreviewMesh(null);
     }
   }, [selectedTool, selectedWall, threeRef]);
 
