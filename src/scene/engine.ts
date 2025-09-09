@@ -122,7 +122,7 @@ export function setupThree(container: HTMLElement) {
       camera.getWorldDirection(forward);
       forward.y = 0;
       forward.normalize();
-      side.crossVectors(new THREE.Vector3(0, 1, 0), forward).normalize();
+      side.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
       moveDir.set(0, 0, 0);
       if (move.forward) moveDir.add(forward);
       if (move.backward) moveDir.add(forward.clone().multiplyScalar(-1));
