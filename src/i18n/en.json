@@ -195,6 +195,11 @@
     "height": "Player height",
     "speed": "Movement speed"
   },
+  "items": {
+    "cup": "Cup",
+    "plate": "Plate",
+    "bottle": "Bottle"
+  },
   "cutlist": {
     "validation": "Validation for sheet {{width}}×{{height}}",
     "sheets": "Sheets: {{sheets}}",

@@ -9,6 +9,7 @@ import { FAMILY } from '../core/catalog';
 import { usePlannerStore, legCategories } from '../state/store';
 import { Module3D, ModuleAdv, Globals } from '../types';
 import { loadItemModel } from '../scene/itemLoader';
+import ItemHotbar, { hotbarItems } from './components/ItemHotbar';
 
 interface ThreeContext {
   scene: THREE.Scene;
@@ -81,6 +82,18 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       speed: store.playerSpeed,
     });
   }, [store.playerHeight, store.playerSpeed, threeRef]);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (!playerMode) return;
+      const n = Number(e.key);
+      if (n >= 1 && n <= 9) {
+        store.setSelectedItemSlot(n);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [playerMode, store]);
 
   const createCabinetMesh = (mod: Module3D, legHeight: number) => {
     const W = mod.size.w;
@@ -189,13 +202,33 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       }
     });
     store.items.forEach((it) => {
-      loadItemModel(it.type).then((obj) => {
-        obj.position.set(it.position[0], it.position[1], it.position[2]);
-        obj.rotation.set(it.rotation[0], it.rotation[1], it.rotation[2]);
-        obj.userData.kind = 'item';
-        obj.userData.itemId = it.id;
-        group.add(obj);
-      });
+      loadItemModel(it.type)
+        .then((obj) => {
+          obj.position.set(it.position[0], it.position[1], it.position[2]);
+          obj.rotation.set(it.rotation[0], it.rotation[1], it.rotation[2]);
+          obj.userData.kind = 'item';
+          obj.userData.itemId = it.id;
+          group.add(obj);
+        })
+        .catch(() => {
+          const placeholder = new THREE.Mesh(
+            new THREE.BoxGeometry(0.1, 0.1, 0.1),
+            new THREE.MeshBasicMaterial({ color: 0xff00ff }),
+          );
+          placeholder.position.set(
+            it.position[0],
+            it.position[1],
+            it.position[2],
+          );
+          placeholder.rotation.set(
+            it.rotation[0],
+            it.rotation[1],
+            it.rotation[2],
+          );
+          placeholder.userData.kind = 'item';
+          placeholder.userData.itemId = it.id;
+          group.add(placeholder);
+        });
     });
   };
   useEffect(drawScene, [store.modules, store.items, addCountertop, showEdges, showFronts]);
@@ -211,13 +244,31 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
     const handlePointer = (event: PointerEvent) => {
       if (playerMode) {
         const target = targetRef.current;
-        if (!target) return;
-        const { cab, index } = target;
-        const openStates: boolean[] = cab.userData.openStates || [];
-        if (index >= 0 && index < openStates.length) {
-          openStates[index] = !openStates[index];
-          cab.userData.openStates = openStates;
+        if (target) {
+          const { cab, index } = target;
+          const openStates: boolean[] = cab.userData.openStates || [];
+          if (index >= 0 && index < openStates.length) {
+            openStates[index] = !openStates[index];
+            cab.userData.openStates = openStates;
+          }
+          return;
         }
+        const type = hotbarItems[store.selectedItemSlot - 1];
+        if (!type) return;
+        const dir = new THREE.Vector3();
+        camera.getWorldDirection(dir);
+        const pos = camera.position.clone().add(dir.multiplyScalar(0.5));
+        const id = Math.random().toString(36).slice(2);
+        loadItemModel(type)
+          .catch(() => null)
+          .finally(() => {
+            store.addItem({
+              id,
+              type,
+              position: [pos.x, pos.y, pos.z],
+              rotation: [0, 0, 0],
+            });
+          });
         return;
       }
       const rect = renderer.domElement.getBoundingClientRect();
@@ -444,6 +495,7 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
           {playerMode ? 'Tryb edycji' : 'Tryb gracza'}
         </button>
       </div>
+      {playerMode && <ItemHotbar />}
       {!playerMode && (
         <div
           style={{

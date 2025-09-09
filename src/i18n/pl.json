@@ -195,6 +195,11 @@
     "height": "Wysokość człowieka",
     "speed": "Prędkość poruszania"
   },
+  "items": {
+    "cup": "Kubek",
+    "plate": "Talerz",
+    "bottle": "Butelka"
+  },
   "cutlist": {
     "validation": "Walidacja formatu {{width}}×{{height}}",
     "sheets": "Arkusze: {{sheets}}",
