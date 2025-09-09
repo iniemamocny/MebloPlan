@@ -8,6 +8,7 @@ import { createTranslator } from './i18n';
 import MainTabs from './MainTabs';
 import { safeSetItem } from '../utils/storage';
 import { PlayerMode } from './types';
+import RoomDrawBoard, { shapeToWalls } from './build/RoomDrawBoard';
 
 type PlayerSubMode = Exclude<PlayerMode, null>;
 
@@ -46,6 +47,15 @@ export default function App() {
   const [mode, setMode] = useState<PlayerMode>(null);
   const [startMode, setStartMode] = useState<PlayerSubMode>('build');
 
+  const isRoomDrawing = usePlannerStore((s) => s.isRoomDrawing);
+  const roomShape = usePlannerStore((s) => s.roomShape);
+  const room = usePlannerStore((s) => s.room);
+  const wallThickness =
+    usePlannerStore((s) => s.selectedWall?.thickness) ?? 0.1;
+  const setRoom = usePlannerStore((s) => s.setRoom);
+  const setIsRoomDrawing = usePlannerStore((s) => s.setIsRoomDrawing);
+  const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
+
   const undo = store.undo;
   const redo = store.redo;
   useEffect(() => {
@@ -71,8 +81,42 @@ export default function App() {
     if (mode !== null) setStartMode(mode);
   }, [mode]);
 
+  const closeDrawing = () => {
+    const walls = shapeToWalls(roomShape, {
+      height: room.height,
+      thickness: wallThickness,
+    });
+    setRoom({ walls });
+    setIsRoomDrawing(false);
+    setSelectedTool(null);
+  };
+
   return (
     <div className="app">
+      {isRoomDrawing && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+          }}
+        >
+          <div style={{ position: 'relative' }}>
+            <RoomDrawBoard />
+            <button
+              className="btnGhost"
+              style={{ position: 'absolute', top: 10, right: 10 }}
+              onClick={closeDrawing}
+            >
+              {t('global.close')}
+            </button>
+          </div>
+        </div>
+      )}
       {mode === null && (
         <div className="mainTabs">
           <MainTabs
