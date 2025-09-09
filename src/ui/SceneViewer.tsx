@@ -12,6 +12,7 @@ import { loadItemModel } from '../scene/itemLoader';
 import ItemHotbar, {
   hotbarItems,
   furnishHotbarItems,
+  buildHotbarItems,
 } from './components/ItemHotbar';
 import WallToolSelector from './components/WallToolSelector';
 import TouchJoystick from './components/TouchJoystick';
@@ -81,21 +82,9 @@ const SceneViewer: React.FC<Props> = ({
   const [targetCabinet, setTargetCabinet] = useState<THREE.Object3D | null>(null);
   const ghostRef = useRef<THREE.Object3D | null>(null);
 
-  const buildRadialItems: (string | null)[] = [
-    'wall',
-    'window',
-    'door',
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-  ];
-
   const radialItems =
     mode === 'build'
-      ? buildRadialItems
+      ? buildHotbarItems(store.selectedWall)
       : mode === 'furnish'
         ? furnishHotbarItems
         : hotbarItems;
@@ -106,6 +95,17 @@ const SceneViewer: React.FC<Props> = ({
     onSelect: (slot: number) =>
       store.setSelectedWallKind(slot === 1 ? 'bearing' : 'partition'),
   };
+
+  useEffect(() => {
+    if (mode === 'build') {
+      const tool = buildHotbarItems(store.selectedWall)[
+        store.selectedItemSlot - 1
+      ];
+      if (store.selectedTool !== tool) store.setSelectedTool(tool);
+    } else if (store.selectedTool) {
+      store.setSelectedTool(null);
+    }
+  }, [mode, store.selectedItemSlot, store.selectedWall, store.selectedTool]);
 
   const updateGhost = React.useCallback(() => {
     const three = threeRef.current;
@@ -741,16 +741,13 @@ const SceneViewer: React.FC<Props> = ({
       <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
       <RadialMenu
         items={radialItems}
-        selected={
-          mode === 'build' || mode === 'furnish'
-            ? radialItems.findIndex((it) => it === store.selectedTool) + 1
-            : store.selectedItemSlot
-        }
+        selected={store.selectedItemSlot}
         onSelect={(slot) => {
-          if (mode === 'build' || mode === 'furnish') {
+          store.setSelectedItemSlot(slot);
+          if (mode === 'build') {
             store.setSelectedTool(radialItems[slot - 1]);
           } else {
-            store.setSelectedItemSlot(slot);
+            store.setSelectedTool(null);
           }
         }}
         visible={showRadial}
