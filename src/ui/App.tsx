@@ -40,6 +40,7 @@ export default function App() {
   const [boardW, setBoardW] = useState(2070);
   const [boardKerf, setBoardKerf] = useState(3);
   const [boardHasGrain, setBoardHasGrain] = useState(false);
+  const [playerMode, setPlayerMode] = useState(false);
 
   const undo = store.undo;
   const redo = store.redo;
@@ -58,52 +59,64 @@ export default function App() {
     return () => window.removeEventListener('keydown', handler);
   }, [undo, redo]);
 
+  useEffect(() => {
+    if (playerMode) setTab(null);
+  }, [playerMode]);
+
   return (
     <div className="app">
-      <div className="mainTabs">
-        <MainTabs
-          t={t}
-          tab={tab}
-          setTab={setTab}
-          family={family}
-          setFamily={setFamily}
-          kind={kind}
-          setKind={setKind}
-          variant={variant}
-          setVariant={setVariant}
-          widthMM={widthMM}
-          setWidthMM={setWidthMM}
-          gLocal={gLocal}
-          setAdv={setAdv}
-          onAdd={onAdd}
-          initBlenda={initBlenda}
-          initSidePanel={initSidePanel}
-          boardL={boardL}
-          setBoardL={setBoardL}
-          boardW={boardW}
-          setBoardW={setBoardW}
-          boardKerf={boardKerf}
-          setBoardKerf={setBoardKerf}
-          boardHasGrain={boardHasGrain}
-          setBoardHasGrain={setBoardHasGrain}
-          addCountertop={addCountertop}
-          setAddCountertop={setAddCountertop}
-          threeRef={threeRef}
-        />
-      </div>
+      {!playerMode && (
+        <div className="mainTabs">
+          <MainTabs
+            t={t}
+            tab={tab}
+            setTab={setTab}
+            family={family}
+            setFamily={setFamily}
+            kind={kind}
+            setKind={setKind}
+            variant={variant}
+            setVariant={setVariant}
+            widthMM={widthMM}
+            setWidthMM={setWidthMM}
+            gLocal={gLocal}
+            setAdv={setAdv}
+            onAdd={onAdd}
+            initBlenda={initBlenda}
+            initSidePanel={initSidePanel}
+            boardL={boardL}
+            setBoardL={setBoardL}
+            boardW={boardW}
+            setBoardW={setBoardW}
+            boardKerf={boardKerf}
+            setBoardKerf={setBoardKerf}
+            boardHasGrain={boardHasGrain}
+            setBoardHasGrain={setBoardHasGrain}
+            addCountertop={addCountertop}
+            setAddCountertop={setAddCountertop}
+            threeRef={threeRef}
+            playerMode={playerMode}
+            setPlayerMode={setPlayerMode}
+          />
+        </div>
+      )}
       <div className="canvasWrap">
         <SceneViewer
           threeRef={threeRef}
           addCountertop={addCountertop}
+          playerMode={playerMode}
+          setPlayerMode={setPlayerMode}
         />
-        <TopBar
-          t={t}
-          store={store}
-          setVariant={setVariant}
-          setKind={setKind}
-          lang={lang}
-          setLang={setLang}
-        />
+        {!playerMode && (
+          <TopBar
+            t={t}
+            store={store}
+            setVariant={setVariant}
+            setKind={setKind}
+            lang={lang}
+            setLang={setLang}
+          />
+        )}
       </div>
     </div>
   );

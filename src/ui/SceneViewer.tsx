@@ -37,6 +37,8 @@ interface ThreeContext {
 interface Props {
   threeRef: React.MutableRefObject<ThreeContext | null>;
   addCountertop: boolean;
+  playerMode: boolean;
+  setPlayerMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const INTERACT_DISTANCE = 1.5;
@@ -50,13 +52,17 @@ export const getLegHeight = (mod: Module3D, globals: Globals): number => {
   return 0.1;
 };
 
-const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
+const SceneViewer: React.FC<Props> = ({
+  threeRef,
+  addCountertop,
+  playerMode,
+  setPlayerMode,
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const store = usePlannerStore();
   const showEdges = store.role === 'stolarz';
   const showFronts = store.showFronts;
 
-  const [playerMode, setPlayerMode] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const lookVec = useRef({ x: 0, y: 0 });
   const targetRef = useRef<{ cab: THREE.Object3D; index: number } | null>(null);
