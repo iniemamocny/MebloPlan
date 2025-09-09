@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { usePlannerStore } from '../state/store';
-import WallDrawer from '../viewer/WallDrawer';
 import CabinetDragger from '../viewer/CabinetDragger';
 export function setupThree(
   container: HTMLElement,
@@ -60,15 +59,6 @@ export function setupThree(
   scene.add(group);
   const controls = new OrbitControls(perspCamera, renderer.domElement);
   controls.enableDamping = true;
-  const wallDrawer = new WallDrawer(
-    renderer,
-    () => camera,
-    scene,
-    usePlannerStore,
-    callbacks?.onLengthChange,
-    callbacks?.onAngleChange,
-    controls,
-  );
   const cabinetDragger = new CabinetDragger(
     renderer,
     () => camera,
@@ -115,7 +105,6 @@ export function setupThree(
     requestAnimationFrame(animate);
   };
   const enterTopDownMode = () => {
-    wallDrawer.disable();
     cabinetDragger.disable();
     transition(
       perspCamera.position.clone(),
@@ -127,14 +116,12 @@ export function setupThree(
         controls.object = camera as any;
         controls.enableRotate = false;
         onResize();
-        wallDrawer.enable();
         cabinetDragger.enable();
         callbacks?.onEnterTopDownMode?.();
       },
     );
   };
   const exitTopDownMode = () => {
-    wallDrawer.disable();
     cabinetDragger.disable();
     callbacks?.onExitTopDownMode?.();
     perspCamera.position.copy(topPos);
@@ -167,11 +154,7 @@ export function setupThree(
     group,
     enterTopDownMode,
     exitTopDownMode,
-    applyWallLength: (len: number) => {
-      const safeLength = Math.min(len, 99999);
-      wallDrawer.applyLength(safeLength);
-    },
-    setWallMode: (mode: 'draw' | 'edit' | 'move' | 'opening') =>
-      wallDrawer.setMode(mode),
+    applyWallLength: (_len: number) => {},
+    setWallMode: (_mode: 'draw' | 'edit' | 'move' | 'opening') => {},
   };
 }
