@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { usePlannerStore } from '../../state/store';
 import type { Wall, WallOpening } from '../../types';
@@ -20,7 +20,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
   const groupRef = useRef<THREE.Group | null>(null);
   // preview mesh for custom wall placement
-  const previewRef = useRef<THREE.Mesh | null>(null);
+  const [preview, setPreview] = useState<THREE.Mesh | null>(null);
 
   // draw room elements whenever data changes
   useEffect(() => {
@@ -161,7 +161,8 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     if (selectedTool === 'bearingWall' || selectedTool === 'partitionWall') {
       if (!selectedWall?.thickness) return;
 
-      if (!previewRef.current) {
+      let mesh = preview;
+      if (!mesh) {
         const geom = new THREE.PlaneGeometry(
           selectedWall.thickness,
           selectedWall.thickness,
@@ -172,22 +173,22 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
           opacity: 0.5,
           side: THREE.DoubleSide,
         });
-        const mesh = new THREE.Mesh(geom, mat);
+        mesh = new THREE.Mesh(geom, mat);
         mesh.rotation.x = -Math.PI / 2;
         group.add(mesh);
-        previewRef.current = mesh;
+        setPreview(mesh);
       }
 
       let animId: number;
       const update = () => {
-        if (!previewRef.current) return;
+        if (!mesh) return;
         const origin = camera.getWorldPosition(new THREE.Vector3());
         const dir = camera.getWorldDirection(new THREE.Vector3());
         const denom = dir.y;
         if (denom !== 0) {
           const t = -origin.y / denom;
           const pos = origin.add(dir.multiplyScalar(t));
-          previewRef.current.position.set(pos.x, 0.001, pos.z);
+          mesh.position.set(pos.x, 0.001, pos.z);
         }
         animId = requestAnimationFrame(update);
       };
@@ -195,20 +196,20 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
 
       return () => {
         cancelAnimationFrame(animId);
-        if (previewRef.current) {
-          group.remove(previewRef.current);
-          previewRef.current.geometry.dispose();
-          (previewRef.current.material as THREE.Material).dispose();
-          previewRef.current = null;
+        if (mesh) {
+          group.remove(mesh);
+          mesh.geometry.dispose();
+          (mesh.material as THREE.Material).dispose();
+          setPreview(null);
         }
       };
     }
 
-    if (previewRef.current) {
-      group.remove(previewRef.current);
-      previewRef.current.geometry.dispose();
-      (previewRef.current.material as THREE.Material).dispose();
-      previewRef.current = null;
+    if (preview) {
+      group.remove(preview);
+      preview.geometry.dispose();
+      (preview.material as THREE.Material).dispose();
+      setPreview(null);
     }
   }, [selectedTool, selectedWall, threeRef]);
 
