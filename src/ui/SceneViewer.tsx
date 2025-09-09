@@ -60,8 +60,74 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
   const lookVec = useRef({ x: 0, y: 0 });
   const targetRef = useRef<{ cab: THREE.Object3D; index: number } | null>(null);
   const [showHint, setShowHint] = useState(false);
+  const [targetCabinet, setTargetCabinet] = useState<THREE.Object3D | null>(null);
+  const ghostRef = useRef<THREE.Object3D | null>(null);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const availableItems = ['cup', 'plate'];
+
+  const updateGhost = React.useCallback(() => {
+    const three = threeRef.current;
+    if (!three) return;
+    const group = three.group;
+    if (ghostRef.current) {
+      group.remove(ghostRef.current);
+      ghostRef.current.traverse((obj) => {
+        if (obj instanceof THREE.Mesh) {
+          obj.geometry.dispose();
+          if (Array.isArray(obj.material))
+            obj.material.forEach((m) => m.dispose());
+          else obj.material.dispose();
+        }
+      });
+      ghostRef.current = null;
+    }
+    if (!playerMode) return;
+    const type = hotbarItems[store.selectedItemSlot - 1];
+    if (!type) return;
+    const cab = targetCabinet;
+    if (!cab || !cab.userData?.moduleId) return;
+    const surfaces: THREE.Mesh[] = [];
+    cab.traverse((obj) => {
+      if (obj instanceof THREE.Mesh && obj.userData?.placeable) {
+        surfaces.push(obj);
+      }
+    });
+    const cabId = cab.userData.moduleId;
+    const items = store.items.filter((it) => it.cabinetId === cabId);
+    let chosen: THREE.Mesh | null = null;
+    let pos = new THREE.Vector3();
+    let topY = 0;
+    for (const surf of surfaces) {
+      const p = surf.getWorldPosition(new THREE.Vector3());
+      const params = (surf.geometry as any).parameters || {};
+      const h = params.height || 0;
+      const y = p.y + h / 2;
+      const occupied = items.some(
+        (it) =>
+          Math.abs(it.position[0] - p.x) < 0.01 &&
+          Math.abs(it.position[2] - p.z) < 0.01 &&
+          Math.abs(it.position[1] - (y + 0.05)) < 0.01,
+      );
+      if (!occupied) {
+        chosen = surf;
+        pos = p;
+        topY = y;
+        break;
+      }
+    }
+    if (!chosen) return;
+    const ghost = new THREE.Mesh(
+      new THREE.BoxGeometry(0.1, 0.1, 0.1),
+      new THREE.MeshStandardMaterial({
+        color: 0x00ff00,
+        transparent: true,
+        opacity: 0.5,
+      }),
+    );
+    ghost.position.set(pos.x, topY + 0.05, pos.z);
+    group.add(ghost);
+    ghostRef.current = ghost;
+  }, [threeRef, playerMode, store.selectedItemSlot, targetCabinet, store.items]);
 
   useEffect(() => {
     setIsMobile(
@@ -137,6 +203,10 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [playerMode, store]);
+
+  useEffect(() => {
+    updateGhost();
+  }, [updateGhost]);
 
   const createCabinetMesh = (mod: Module3D, legHeight: number) => {
     const W = mod.size.w;
@@ -297,12 +367,12 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
             }
           }
         } else if (event.button === 0) {
+          const ghost = ghostRef.current;
           const type = hotbarItems[store.selectedItemSlot - 1];
-          if (!type) return;
-          const dir = new THREE.Vector3();
-          camera.getWorldDirection(dir);
-          const pos = camera.position.clone().add(dir.multiplyScalar(0.5));
+          if (!ghost || !type) return;
+          const pos = ghost.position.clone();
           const id = Math.random().toString(36).slice(2);
+          const cab = targetCabinet;
           loadItemModel(type)
             .catch(() => null)
             .finally(() => {
@@ -311,8 +381,12 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
                 type,
                 position: [pos.x, pos.y, pos.z],
                 rotation: [0, 0, 0],
+                cabinetId: cab?.userData.moduleId,
               });
+              updateGhost();
             });
+          group.remove(ghost);
+          ghostRef.current = null;
         }
         return;
       }
@@ -391,7 +465,7 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       window.removeEventListener('pointerdown', handlePointer);
       window.removeEventListener('contextmenu', handleContextMenu);
     };
-  }, [store.modules, playerMode]);
+  }, [store.modules, playerMode, targetCabinet, store.selectedItemSlot, store.items, updateGhost]);
 
   useEffect(() => {
     let animId: number;
@@ -437,9 +511,11 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
         }
         targetRef.current = target;
         setShowHint(!!target);
+        setTargetCabinet(target?.cab || null);
       } else {
         targetRef.current = null;
         setShowHint(false);
+        setTargetCabinet(null);
       }
       animId = requestAnimationFrame(detect);
     };
