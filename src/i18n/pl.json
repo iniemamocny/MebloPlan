@@ -24,7 +24,8 @@
       "cab": "Kuchnia",
       "costs": "Koszty",
       "cut": "Formatki",
-      "global": "Ustawienia"
+      "global": "Ustawienia",
+      "play": "Play"
     },
     "cabinetType": "Typ szafki",
     "subcategories": "Podkategorie ({{family}})",
