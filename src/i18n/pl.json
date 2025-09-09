@@ -43,7 +43,13 @@
     "addDoor": "Dodaj drzwi",
     "addDecor": "Dodaj dekorację",
     "noWindows": "Brak okien lub drzwi",
-    "noDecor": "Brak dekoracji"
+    "noDecor": "Brak dekoracji",
+    "board2D": "Plansza 2D",
+    "close": "Zamknij",
+    "drawErrors": {
+      "intersect": "Segmenty nie mogą się przecinać",
+      "tooShort": "Ściana jest za krótka"
+    }
   },
   "catalog": {
     "choose": "Wybierz"

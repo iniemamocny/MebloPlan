@@ -84,13 +84,16 @@ export default function RoomPanel() {
           }}
         >
           <div style={{ position: 'relative' }}>
+            <div style={{ position: 'absolute', top: 10, left: 10 }}>
+              <div className="h1">{t('room.board2D')}</div>
+            </div>
             <RoomDrawBoard />
             <button
               className="btnGhost"
               style={{ position: 'absolute', top: 10, right: 10 }}
               onClick={closeDrawing}
             >
-              {t('global.close')}
+              {t('room.close')}
             </button>
           </div>
         </div>
