@@ -172,10 +172,9 @@ const SceneViewer: React.FC<Props> = ({
   useEffect(() => {
     const three = threeRef.current;
     if (!three) return;
-    if (mode) {
+    if (mode === 'furnish') {
       three.controls.enabled = false;
-      if (mode === 'furnish') three.cabinetDragger.enable();
-      else three.cabinetDragger.disable();
+      three.cabinetDragger.enable();
       if (isMobile) {
         (three.playerControls as any).isLocked = true;
       } else {
@@ -183,13 +182,23 @@ const SceneViewer: React.FC<Props> = ({
       }
       three.camera.position.y = store.playerHeight;
     } else {
-      if (isMobile) {
-        (three.playerControls as any).isLocked = false;
+      three.cabinetDragger.disable();
+      if (mode) {
+        three.controls.enabled = false;
+        if (isMobile) {
+          (three.playerControls as any).isLocked = true;
+        } else {
+          three.playerControls.lock();
+        }
+        three.camera.position.y = store.playerHeight;
       } else {
-        three.playerControls.unlock();
+        if (isMobile) {
+          (three.playerControls as any).isLocked = false;
+        } else {
+          three.playerControls.unlock();
+        }
+        three.controls.enabled = true;
       }
-      three.controls.enabled = true;
-      three.cabinetDragger.enable();
     }
   }, [mode, threeRef, store.playerHeight, isMobile]);
 
