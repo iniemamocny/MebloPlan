@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { usePlannerStore } from '../../state/store';
 import { PlayerMode } from '../types';
 
@@ -16,6 +16,7 @@ export default function PlayPanel({ threeRef, t, setMode, onClose }: Props) {
     setPlayerHeight,
     setPlayerSpeed,
   } = usePlannerStore();
+  const [startMode, setStartMode] = useState<PlayerMode>('build');
 
   const onHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = Number((e.target as HTMLInputElement).value) || 0;
@@ -56,43 +57,36 @@ export default function PlayPanel({ threeRef, t, setMode, onClose }: Props) {
           />
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button
-            className="btnGhost"
-            onClick={() => {
-              setMode('build');
-              onClose();
-            }}
-          >
-            {t('play.mode.build')}
-          </button>
-          <button
-            className="btnGhost"
-            onClick={() => {
-              setMode('furnish');
-              onClose();
-            }}
-          >
-            {t('play.mode.furnish')}
-          </button>
-          <button
-            className="btnGhost"
-            onClick={() => {
-              setMode('decorate');
-              onClose();
-            }}
-          >
-            {t('play.mode.decorate')}
-          </button>
-          <button
-            className="btnGhost"
-            onClick={() => {
-              setMode(null);
-              onClose();
-            }}
-          >
-            Exit play mode
-          </button>
+          {(
+            [
+              { key: 'build', label: t('play.mode.build') },
+              { key: 'furnish', label: t('play.mode.furnish') },
+              { key: 'decorate', label: t('play.mode.decorate') },
+            ] as { key: PlayerMode; label: string }[]
+          ).map(({ key, label }) => (
+            <button
+              key={key}
+              className="btnGhost"
+              style={
+                startMode === key
+                  ? { background: 'var(--accent)', color: 'var(--white)' }
+                  : undefined
+              }
+              onClick={() => setStartMode(key)}
+            >
+              {label}
+            </button>
+          ))}
         </div>
+        <button
+          className="btnGhost"
+          onClick={() => {
+            setMode(startMode);
+            onClose();
+          }}
+        >
+          Enter play mode
+        </button>
       </div>
     </div>
   );
