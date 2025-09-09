@@ -18,6 +18,8 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   const selectedTool = usePlannerStore((s) => s.selectedTool);
   const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
   const groupRef = useRef<THREE.Group | null>(null);
+  const startRef = useRef<{ x: number; y: number } | null>(null);
+  const previewRef = useRef<THREE.Mesh | null>(null);
 
   // draw room elements whenever data changes
   useEffect(() => {
@@ -132,6 +134,96 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     };
     setRoom({ doors: [...room.doors, door] });
   };
+
+  useEffect(() => {
+    const three = threeRef.current;
+    if (!three) return;
+    const dom: HTMLElement = three.renderer.domElement;
+    const raycaster = new THREE.Raycaster();
+    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const pointer = new THREE.Vector2();
+
+    const getPoint = (event: PointerEvent) => {
+      const rect = dom.getBoundingClientRect();
+      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, three.camera);
+      const pos = new THREE.Vector3();
+      raycaster.ray.intersectPlane(plane, pos);
+      return { x: pos.x, y: pos.z };
+    };
+
+    const onMove = (e: PointerEvent) => {
+      if (!startRef.current) return;
+      const end = getPoint(e);
+      const { x: sx, y: sy } = startRef.current;
+      const len = Math.hypot(end.x - sx, end.y - sy);
+      const wallHeight = room.height / 1000;
+      let mesh = previewRef.current;
+      if (!mesh) {
+        const geom = new THREE.BoxGeometry(len, wallHeight, 0.1);
+        const mat = new THREE.MeshStandardMaterial({
+          color: '#ffffff',
+          opacity: 0.5,
+          transparent: true,
+        });
+        mesh = new THREE.Mesh(geom, mat);
+        previewRef.current = mesh;
+        mesh.position.y = wallHeight / 2;
+        groupRef.current?.add(mesh);
+      } else {
+        mesh.geometry.dispose();
+        mesh.geometry = new THREE.BoxGeometry(len, wallHeight, 0.1);
+      }
+      const midx = (sx + end.x) / 2;
+      const midy = (sy + end.y) / 2;
+      mesh!.position.set(midx, wallHeight / 2, midy);
+      const angle = Math.atan2(end.y - sy, end.x - sx);
+      mesh!.rotation.y = -angle;
+    };
+
+    const onUp = (e: PointerEvent) => {
+      if (!startRef.current) return;
+      const end = getPoint(e);
+      const { x: sx, y: sy } = startRef.current;
+      const wallHeight = room.height / 1000;
+      const newWall: Wall = {
+        id: Math.random().toString(36).slice(2),
+        start: { x: sx, y: sy },
+        end: { x: end.x, y: end.y },
+        height: wallHeight,
+        thickness: 0.1,
+        color: '#ffffff',
+      };
+      setRoom({ walls: [...room.walls, newWall] });
+      setSelectedTool(null);
+      if (previewRef.current) {
+        groupRef.current?.remove(previewRef.current);
+        previewRef.current.geometry.dispose();
+        if (Array.isArray(previewRef.current.material))
+          previewRef.current.material.forEach((m) => m.dispose());
+        else previewRef.current.material.dispose();
+        previewRef.current = null;
+      }
+      startRef.current = null;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+
+    const onDown = (e: PointerEvent) => {
+      if (selectedTool !== 'wall') return;
+      startRef.current = getPoint(e);
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    };
+
+    window.addEventListener('pointerdown', onDown);
+    return () => {
+      window.removeEventListener('pointerdown', onDown);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+  }, [room.height, room.walls, selectedTool, setRoom, setSelectedTool, threeRef]);
 
   useEffect(() => {
     if (!selectedTool) return;

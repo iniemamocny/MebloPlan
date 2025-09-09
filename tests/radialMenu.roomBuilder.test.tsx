@@ -82,6 +82,12 @@ describe('RadialMenu integration with RoomBuilder', () => {
       window.dispatchEvent(
         new MouseEvent('pointerdown', { clientX: 10, clientY: 10 }),
       );
+      window.dispatchEvent(
+        new MouseEvent('pointermove', { clientX: 50, clientY: 10 }),
+      );
+      window.dispatchEvent(
+        new MouseEvent('pointerup', { clientX: 50, clientY: 10 }),
+      );
     });
 
     expect(usePlannerStore.getState().room.walls.length).toBe(before + 1);
