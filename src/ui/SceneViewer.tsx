@@ -13,6 +13,7 @@ import ItemHotbar, { hotbarItems } from './components/ItemHotbar';
 import TouchJoystick from './components/TouchJoystick';
 import { PlayerMode } from './types';
 import RoomBuilder from './build/RoomBuilder';
+import RadialMenu from './components/RadialMenu';
 
 interface ThreeContext {
   scene: THREE.Scene;
@@ -66,11 +67,31 @@ const SceneViewer: React.FC<Props> = ({
   const showFronts = store.showFronts;
 
   const [isMobile, setIsMobile] = useState(false);
+  const [showRadial, setShowRadial] = useState(false);
   const lookVec = useRef({ x: 0, y: 0 });
   const targetRef = useRef<{ cab: THREE.Object3D; index: number } | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [targetCabinet, setTargetCabinet] = useState<THREE.Object3D | null>(null);
   const ghostRef = useRef<THREE.Object3D | null>(null);
+
+  const buildRadialItems: (string | null)[] = [
+    'wall',
+    'window',
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+  ];
+  const furnishRadialItems: (string | null)[] = Array(9).fill(null);
+  const radialItems =
+    mode === 'build'
+      ? buildRadialItems
+      : mode === 'furnish'
+        ? furnishRadialItems
+        : hotbarItems;
 
   const updateGhost = React.useCallback(() => {
     const three = threeRef.current;
@@ -222,7 +243,6 @@ const SceneViewer: React.FC<Props> = ({
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (mode !== 'decorate') return;
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'w') {
         e.preventDefault();
         return;
@@ -234,7 +254,28 @@ const SceneViewer: React.FC<Props> = ({
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [mode, store]);
+  }, [store]);
+
+  useEffect(() => {
+    setShowRadial(false);
+    if (!mode) return;
+    const down = (e: KeyboardEvent) => {
+      if (e.code === 'KeyQ') {
+        setShowRadial(true);
+      }
+    };
+    const up = (e: KeyboardEvent) => {
+      if (e.code === 'KeyQ') {
+        setShowRadial(false);
+      }
+    };
+    window.addEventListener('keydown', down);
+    window.addEventListener('keyup', up);
+    return () => {
+      window.removeEventListener('keydown', down);
+      window.removeEventListener('keyup', up);
+    };
+  }, [mode]);
 
   useEffect(() => {
     const handleTab = (e: KeyboardEvent) => {
@@ -629,6 +670,12 @@ const SceneViewer: React.FC<Props> = ({
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
       <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
+      <RadialMenu
+        items={radialItems}
+        selected={store.selectedItemSlot}
+        onSelect={store.setSelectedItemSlot}
+        visible={showRadial}
+      />
       {mode === null && (
         <div className="zoomControls">
           <button className="btnGhost" onClick={handleZoomIn}>
@@ -702,6 +749,14 @@ const SceneViewer: React.FC<Props> = ({
               {label}
             </div>
           ))}
+          <div
+            className="modeItem"
+            onTouchStart={() => setShowRadial(true)}
+            onTouchEnd={() => setShowRadial(false)}
+            onTouchCancel={() => setShowRadial(false)}
+          >
+            ⭮
+          </div>
         </div>
       )}
     </div>
