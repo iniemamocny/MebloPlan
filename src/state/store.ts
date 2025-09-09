@@ -191,8 +191,17 @@ export const usePlannerStore = create<Store>((set, get) => ({
     ? {
         ...persisted.room,
         origin: persisted.room.origin || { x: 0, y: 0 },
+        walls: persisted.room.walls || [],
+        windows: persisted.room.windows || [],
+        doors: persisted.room.doors || [],
       }
-    : { height: 2700, origin: { x: 0, y: 0 } },
+    : {
+        height: 2700,
+        origin: { x: 0, y: 0 },
+        walls: [],
+        windows: [],
+        doors: [],
+      },
   snapAngle: persisted?.snapAngle ?? 90,
   snapLength: persisted?.snapLength ?? 10,
   snapRightAngles: true,
