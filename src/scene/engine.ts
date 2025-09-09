@@ -128,9 +128,8 @@ export function setupThree(container: HTMLElement) {
     'ControlRight',
   ]);
   const onKeyDown = (e: KeyboardEvent) => {
-    if (playerControls.isLocked && e.ctrlKey && e.code === 'KeyW') {
+    if (e.ctrlKey && e.code === 'KeyW') {
       e.preventDefault();
-      e.stopPropagation();
       return;
     }
     if (playerControls.isLocked && movementKeys.has(e.code)) {
@@ -167,6 +166,10 @@ export function setupThree(container: HTMLElement) {
     }
   };
   const onKeyUp = (e: KeyboardEvent) => {
+    if (e.ctrlKey && e.code === 'KeyW') {
+      e.preventDefault();
+      return;
+    }
     if (playerControls.isLocked && movementKeys.has(e.code)) {
       e.preventDefault();
       e.stopPropagation();

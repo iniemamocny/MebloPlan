@@ -251,15 +251,21 @@ const SceneViewer: React.FC<Props> = ({
         e.preventDefault();
         return;
       }
-      const n = Number(e.key);
-      if (n >= 1 && n <= 9) {
-        if (mode === 'decorate') {
-          store.setSelectedItemSlot(n);
+      if (e.type === 'keydown') {
+        const n = Number(e.key);
+        if (n >= 1 && n <= 9) {
+          if (mode === 'decorate') {
+            store.setSelectedItemSlot(n);
+          }
         }
       }
     };
     window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
+    window.addEventListener('keyup', handleKey);
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+      window.removeEventListener('keyup', handleKey);
+    };
   }, [store, mode]);
 
   useEffect(() => {
