@@ -11,6 +11,7 @@ import { Module3D, ModuleAdv, Globals } from '../types';
 import { loadItemModel } from '../scene/itemLoader';
 import ItemHotbar, { hotbarItems } from './components/ItemHotbar';
 import TouchJoystick from './components/TouchJoystick';
+import { PlayerMode } from './types';
 
 interface ThreeContext {
   scene: THREE.Scene;
@@ -37,8 +38,8 @@ interface ThreeContext {
 interface Props {
   threeRef: React.MutableRefObject<ThreeContext | null>;
   addCountertop: boolean;
-  playerMode: boolean;
-  setPlayerMode: React.Dispatch<React.SetStateAction<boolean>>;
+  mode: PlayerMode;
+  setMode: React.Dispatch<React.SetStateAction<PlayerMode>>;
 }
 
 const INTERACT_DISTANCE = 1.5;
@@ -55,8 +56,8 @@ export const getLegHeight = (mod: Module3D, globals: Globals): number => {
 const SceneViewer: React.FC<Props> = ({
   threeRef,
   addCountertop,
-  playerMode,
-  setPlayerMode,
+  mode,
+  setMode,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const store = usePlannerStore();
@@ -88,7 +89,7 @@ const SceneViewer: React.FC<Props> = ({
       });
       ghostRef.current = null;
     }
-    if (!playerMode) return;
+    if (mode !== 'decorate') return;
     const type = hotbarItems[store.selectedItemSlot - 1];
     if (!type) return;
     const cab = targetCabinet;
@@ -145,7 +146,7 @@ const SceneViewer: React.FC<Props> = ({
     (ghost as any).userData.baseY = baseY;
     group.add(ghost);
     ghostRef.current = ghost;
-  }, [threeRef, playerMode, store.selectedItemSlot, targetCabinet, store.items]);
+  }, [threeRef, mode, store.selectedItemSlot, targetCabinet, store.items]);
 
   useEffect(() => {
     setIsMobile(
@@ -158,9 +159,9 @@ const SceneViewer: React.FC<Props> = ({
   useEffect(() => {
     if (!containerRef.current) return;
     threeRef.current = setupThree(containerRef.current) as ThreeContext;
-    (threeRef.current as any).setPlayerMode = setPlayerMode;
+    (threeRef.current as any).setMode = setMode;
     const pc = threeRef.current.playerControls;
-    const onUnlock = () => setPlayerMode(false);
+    const onUnlock = () => setMode(null);
     pc.addEventListener('unlock', onUnlock);
     return () => {
       pc.removeEventListener('unlock', onUnlock);
@@ -170,9 +171,10 @@ const SceneViewer: React.FC<Props> = ({
   useEffect(() => {
     const three = threeRef.current;
     if (!three) return;
-    if (playerMode) {
+    if (mode) {
       three.controls.enabled = false;
-      three.cabinetDragger.disable();
+      if (mode === 'furnish') three.cabinetDragger.enable();
+      else three.cabinetDragger.disable();
       if (isMobile) {
         (three.playerControls as any).isLocked = true;
       } else {
@@ -188,7 +190,7 @@ const SceneViewer: React.FC<Props> = ({
       three.controls.enabled = true;
       three.cabinetDragger.enable();
     }
-  }, [playerMode, threeRef, store.playerHeight, isMobile]);
+  }, [mode, threeRef, store.playerHeight, isMobile]);
 
   useEffect(() => {
     threeRef.current?.setPlayerParams?.({
@@ -212,7 +214,7 @@ const SceneViewer: React.FC<Props> = ({
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (!playerMode) return;
+      if (mode !== 'decorate') return;
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'w') {
         e.preventDefault();
         return;
@@ -224,7 +226,7 @@ const SceneViewer: React.FC<Props> = ({
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [playerMode, store]);
+  }, [mode, store]);
 
   useEffect(() => {
     updateGhost();
@@ -377,7 +379,7 @@ const SceneViewer: React.FC<Props> = ({
     const group = three.group as THREE.Group;
     const raycaster = new THREE.Raycaster();
     const handlePointer = (event: PointerEvent) => {
-      if (playerMode) {
+      if (mode) {
         if (event.button === 2) {
           const target = targetRef.current;
           if (target) {
@@ -388,7 +390,7 @@ const SceneViewer: React.FC<Props> = ({
               cab.userData.openStates = openStates;
             }
           }
-        } else if (event.button === 0) {
+        } else if (event.button === 0 && mode === 'decorate') {
           const ghost = ghostRef.current;
           const type = hotbarItems[store.selectedItemSlot - 1];
           const cab = targetCabinet;
@@ -524,14 +526,14 @@ const SceneViewer: React.FC<Props> = ({
       window.removeEventListener('pointerdown', handlePointer);
       window.removeEventListener('contextmenu', handleContextMenu);
     };
-  }, [store.modules, playerMode, targetCabinet, store.selectedItemSlot, store.items, updateGhost]);
+  }, [store.modules, mode, targetCabinet, store.selectedItemSlot, store.items, updateGhost]);
 
   useEffect(() => {
     let animId: number;
     const raycaster = new THREE.Raycaster();
     const detect = () => {
       const three = threeRef.current;
-      if (playerMode && three && three.group) {
+      if (mode && three && three.group) {
         const camera = three.camera as THREE.PerspectiveCamera;
         const group = three.group as THREE.Group;
         const origin = camera.getWorldPosition(new THREE.Vector3());
@@ -582,7 +584,7 @@ const SceneViewer: React.FC<Props> = ({
     return () => {
       cancelAnimationFrame(animId);
     };
-  }, [playerMode, threeRef]);
+  }, [mode, threeRef]);
 
   useEffect(() => {
     let animId: number;
@@ -648,7 +650,7 @@ const SceneViewer: React.FC<Props> = ({
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
       <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
-      {!playerMode && (
+      {mode === null && (
         <div className="zoomControls">
           <button className="btnGhost" onClick={handleZoomIn}>
             +
@@ -658,7 +660,7 @@ const SceneViewer: React.FC<Props> = ({
           </button>
         </div>
       )}
-      {playerMode && showHint && (
+      {mode && showHint && (
         <div
           style={{
             position: 'absolute',
@@ -675,12 +677,12 @@ const SceneViewer: React.FC<Props> = ({
         </div>
       )}
       <div style={{ position: 'absolute', top: 10, left: 10 }}>
-        <button className="btnGhost" onClick={() => setPlayerMode((p) => !p)}>
-          {playerMode ? 'Tryb edycji' : 'Tryb gracza'}
+        <button className="btnGhost" onClick={() => setMode((m) => (m ? null : 'furnish'))}>
+          {mode ? 'Tryb edycji' : 'Tryb gracza'}
         </button>
       </div>
-      {playerMode && <ItemHotbar />}
-      {playerMode && isMobile && (
+      {mode === 'decorate' && <ItemHotbar />}
+      {mode && isMobile && (
         <>
           <TouchJoystick
             style={{ left: 16, bottom: 16 }}
@@ -703,7 +705,7 @@ const SceneViewer: React.FC<Props> = ({
           </button>
         </>
       )}
-      {!playerMode && (
+      {mode === null && (
         <div
           style={{
             position: 'absolute',

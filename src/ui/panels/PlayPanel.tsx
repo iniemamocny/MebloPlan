@@ -1,14 +1,15 @@
 import React from 'react';
 import { usePlannerStore } from '../../state/store';
+import { PlayerMode } from '../types';
 
 interface Props {
   threeRef: React.MutableRefObject<any>;
   t: (key: string, opts?: any) => string;
-  setPlayerMode: (v: boolean) => void;
+  setMode: (v: PlayerMode) => void;
   onClose: () => void;
 }
 
-export default function PlayPanel({ threeRef, t, setPlayerMode, onClose }: Props) {
+export default function PlayPanel({ threeRef, t, setMode, onClose }: Props) {
   const {
     playerHeight,
     playerSpeed,
@@ -54,17 +55,41 @@ export default function PlayPanel({ threeRef, t, setPlayerMode, onClose }: Props
             onChange={onSpeedChange}
           />
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button
             className="btnGhost"
             onClick={() => {
-              setPlayerMode(true);
+              setMode('build');
               onClose();
             }}
           >
-            Enter play mode
+            {t('play.mode.build')}
           </button>
-          <button className="btnGhost" onClick={() => setPlayerMode(false)}>
+          <button
+            className="btnGhost"
+            onClick={() => {
+              setMode('furnish');
+              onClose();
+            }}
+          >
+            {t('play.mode.furnish')}
+          </button>
+          <button
+            className="btnGhost"
+            onClick={() => {
+              setMode('decorate');
+              onClose();
+            }}
+          >
+            {t('play.mode.decorate')}
+          </button>
+          <button
+            className="btnGhost"
+            onClick={() => {
+              setMode(null);
+              onClose();
+            }}
+          >
             Exit play mode
           </button>
         </div>

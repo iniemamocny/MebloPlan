@@ -5,7 +5,7 @@ import TypePicker, { KindTabs, VariantList } from './panels/CatalogPicker';
 import CabinetConfigurator from './CabinetConfigurator';
 import CostsTab from './panels/CostsTab';
 import CutlistTab from './panels/CutlistTab';
-import { CabinetConfig } from './types';
+import { CabinetConfig, PlayerMode } from './types';
 import SlidingPanel from './components/SlidingPanel';
 import GlobalSettings from './panels/GlobalSettings';
 import PlayPanel from './panels/PlayPanel';
@@ -43,8 +43,8 @@ interface MainTabsProps {
   addCountertop: boolean;
   setAddCountertop: (v: boolean) => void;
   threeRef: React.MutableRefObject<any>;
-  playerMode: boolean;
-  setPlayerMode: (v: boolean) => void;
+  mode: PlayerMode;
+  setMode: (v: PlayerMode) => void;
 }
 
 export default function MainTabs({
@@ -75,7 +75,7 @@ export default function MainTabs({
   addCountertop,
   setAddCountertop,
   threeRef,
-  setPlayerMode,
+  setMode,
 }: MainTabsProps) {
   const toggleTab = (name: 'cab' | 'costs' | 'cut' | 'global' | 'play') => {
     setTab(tab === name ? null : name);
@@ -204,7 +204,7 @@ export default function MainTabs({
           <PlayPanel
             threeRef={threeRef}
             t={t}
-            setPlayerMode={setPlayerMode}
+            setMode={setMode}
             onClose={() => setTab(null)}
           />
         )}

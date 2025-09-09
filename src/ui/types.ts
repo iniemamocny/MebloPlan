@@ -34,3 +34,5 @@ export interface CabinetConfig {
   hardware?: any;
   legs?: { type: string; height: number; category?: string; legsOffset?: number };
 }
+
+export type PlayerMode = 'build' | 'furnish' | 'decorate' | null;

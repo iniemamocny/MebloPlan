@@ -193,7 +193,12 @@
   },
   "play": {
     "height": "Player height",
-    "speed": "Movement speed"
+    "speed": "Movement speed",
+    "mode": {
+      "build": "Build mode",
+      "furnish": "Furnish mode",
+      "decorate": "Decorate mode"
+    }
   },
   "items": {
     "cup": "Cup",

@@ -193,7 +193,12 @@
   },
   "play": {
     "height": "Wysokość człowieka",
-    "speed": "Prędkość poruszania"
+    "speed": "Prędkość poruszania",
+    "mode": {
+      "build": "Budowanie",
+      "furnish": "Meblowanie",
+      "decorate": "Dekoracje"
+    }
   },
   "items": {
     "cup": "Kubek",

@@ -7,6 +7,7 @@ import TopBar from './TopBar';
 import { createTranslator } from './i18n';
 import MainTabs from './MainTabs';
 import { safeSetItem } from '../utils/storage';
+import { PlayerMode } from './types';
 
 export default function App() {
   const store = usePlannerStore();
@@ -40,7 +41,7 @@ export default function App() {
   const [boardW, setBoardW] = useState(2070);
   const [boardKerf, setBoardKerf] = useState(3);
   const [boardHasGrain, setBoardHasGrain] = useState(false);
-  const [playerMode, setPlayerMode] = useState(false);
+  const [mode, setMode] = useState<PlayerMode>(null);
 
   const undo = store.undo;
   const redo = store.redo;
@@ -60,12 +61,12 @@ export default function App() {
   }, [undo, redo]);
 
   useEffect(() => {
-    if (playerMode) setTab(null);
-  }, [playerMode]);
+    if (mode !== null) setTab(null);
+  }, [mode]);
 
   return (
     <div className="app">
-      {!playerMode && (
+      {mode === null && (
         <div className="mainTabs">
           <MainTabs
             t={t}
@@ -95,8 +96,8 @@ export default function App() {
             addCountertop={addCountertop}
             setAddCountertop={setAddCountertop}
             threeRef={threeRef}
-            playerMode={playerMode}
-            setPlayerMode={setPlayerMode}
+            mode={mode}
+            setMode={setMode}
           />
         </div>
       )}
@@ -104,10 +105,10 @@ export default function App() {
         <SceneViewer
           threeRef={threeRef}
           addCountertop={addCountertop}
-          playerMode={playerMode}
-          setPlayerMode={setPlayerMode}
+          mode={mode}
+          setMode={setMode}
         />
-        {!playerMode && (
+        {mode === null && (
           <TopBar
             t={t}
             store={store}
