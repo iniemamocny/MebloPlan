@@ -18,12 +18,17 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   const selectedTool = usePlannerStore((s) => s.selectedTool);
   const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
   const groupRef = useRef<THREE.Group | null>(null);
+  const roomRef = useRef(room);
   const startRef = useRef<{ x: number; y: number } | null>(null);
   const previewRef = useRef<THREE.Mesh | null>(null);
   const labelRef = useRef<HTMLDivElement | null>(null);
   const lengthRef = useRef(0);
   const inputRef = useRef('');
   const dirRef = useRef({ dx: 1, dy: 0 });
+
+  useEffect(() => {
+    roomRef.current = room;
+  }, [room]);
 
   // draw room elements whenever data changes
   useEffect(() => {
@@ -67,6 +72,21 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       mesh.rotation.y = -angle;
       mesh.userData.wallId = w.id;
       g.add(mesh);
+
+      const createHandle = (
+        p: { x: number; y: number },
+        handle: 'start' | 'end' | 'mid',
+      ) => {
+        const hGeom = new THREE.SphereGeometry(0.05, 16, 16);
+        const hMat = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+        const hMesh = new THREE.Mesh(hGeom, hMat);
+        hMesh.position.set(p.x, (w.height || wallHeight) / 2, p.y);
+        hMesh.userData = { wallId: w.id, handle };
+        g.add(hMesh);
+      };
+      createHandle(w.start, 'start');
+      createHandle(w.end, 'end');
+      createHandle({ x: midx, y: midy }, 'mid');
     });
     // helper to draw openings (windows/doors)
     const drawOpening = (op: WallOpening, color: number) => {
@@ -107,6 +127,83 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       }
     };
   }, [threeRef]);
+
+  useEffect(() => {
+    const three = threeRef.current;
+    if (!three || selectedTool) return;
+    const dom: HTMLElement = three.renderer.domElement;
+    const raycaster = new THREE.Raycaster();
+    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const pointer = new THREE.Vector2();
+    let drag: { wallId: string; handle: 'start' | 'end' | 'mid' } | null = null;
+
+    const getPoint = (event: PointerEvent) => {
+      const rect = dom.getBoundingClientRect();
+      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, three.camera);
+      const pos = new THREE.Vector3();
+      raycaster.ray.intersectPlane(plane, pos);
+      return { x: pos.x, y: pos.z };
+    };
+
+    const onDown = (e: PointerEvent) => {
+      const rect = dom.getBoundingClientRect();
+      pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, three.camera);
+      const intersects = raycaster.intersectObjects(
+        groupRef.current?.children || [],
+        true,
+      );
+      const hit = intersects.find((i) => i.object.userData?.handle);
+      if (!hit) return;
+      drag = {
+        wallId: hit.object.userData.wallId,
+        handle: hit.object.userData.handle,
+      };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    };
+
+    const onMove = (e: PointerEvent) => {
+      if (!drag) return;
+      const p = getPoint(e);
+      setRoom({
+        walls: roomRef.current.walls.map((w) => {
+          if (w.id !== drag!.wallId) return w;
+          if (drag!.handle === 'start') {
+            return { ...w, start: { x: p.x, y: p.y } };
+          }
+          if (drag!.handle === 'end') {
+            return { ...w, end: { x: p.x, y: p.y } };
+          }
+          const midx = (w.start.x + w.end.x) / 2;
+          const midy = (w.start.y + w.end.y) / 2;
+          const dx = p.x - midx;
+          const dy = p.y - midy;
+          return {
+            ...w,
+            start: { x: w.start.x + dx, y: w.start.y + dy },
+            end: { x: w.end.x + dx, y: w.end.y + dy },
+          };
+        }),
+      });
+    };
+
+    const onUp = () => {
+      drag = null;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+
+    window.addEventListener('pointerdown', onDown);
+    return () => {
+      window.removeEventListener('pointerdown', onDown);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+  }, [selectedTool, setRoom, threeRef]);
 
   const addWall = () => {
     const wallHeight = room.height / 1000;
