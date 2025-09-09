@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { FAMILY } from '../core/catalog';
-import { Module3D, Room, Globals, Prices, Gaps } from '../types';
+import { Module3D, Room, Globals, Prices, Gaps, RoomShape } from '../types';
 import { safeSetItem } from '../utils/storage';
 
 export const defaultGaps: Gaps = {
@@ -138,6 +138,7 @@ type Store = {
   past: { modules: Module3D[]; items: Item[]; room: Room }[];
   future: { modules: Module3D[]; items: Item[]; room: Room }[];
   room: Room;
+  roomShape: RoomShape;
   snapAngle: number;
   snapLength: number;
   snapRightAngles: boolean;
@@ -168,6 +169,7 @@ type Store = {
   undo: () => void;
   redo: () => void;
   setRoom: (patch: Partial<Room>) => void;
+  setRoomShape: (shape: RoomShape) => void;
   setShowFronts: (v: boolean) => void;
   setSnapAngle: (v: number) => void;
   setSnapLength: (v: number) => void;
@@ -206,8 +208,9 @@ export const usePlannerStore = create<Store>((set, get) => ({
         origin: { x: 0, y: 0 },
         walls: [],
         windows: [],
-        doors: [],
+      doors: [],
       },
+  roomShape: persisted?.roomShape || { points: [], segments: [] },
   snapAngle: persisted?.snapAngle ?? 90,
   snapLength: persisted?.snapLength ?? 10,
   snapRightAngles: true,
@@ -439,6 +442,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
         future: [],
       };
     }),
+  setRoomShape: (shape) => set({ roomShape: shape }),
   setShowFronts: (v) => set({ showFronts: v }),
   setSnapAngle: (v) => set({ snapAngle: v }),
   setSnapLength: (v) => set({ snapLength: v }),
@@ -466,6 +470,7 @@ const persistSelector = (s: Store) => ({
   modules: s.modules,
   items: s.items,
   room: s.room,
+  roomShape: s.roomShape,
   snapAngle: s.snapAngle,
   snapLength: s.snapLength,
   angleToPrev: s.angleToPrev,

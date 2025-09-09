@@ -212,3 +212,18 @@ export interface PricingData {
   prices: Prices;
   globals: Globals;
 }
+
+export interface ShapePoint {
+  x: number;
+  y: number;
+}
+
+export interface ShapeSegment {
+  start: ShapePoint;
+  end: ShapePoint;
+}
+
+export interface RoomShape {
+  points: ShapePoint[];
+  segments: ShapeSegment[];
+}
