@@ -71,8 +71,6 @@ const SceneViewer: React.FC<Props> = ({
   const [showHint, setShowHint] = useState(false);
   const [targetCabinet, setTargetCabinet] = useState<THREE.Object3D | null>(null);
   const ghostRef = useRef<THREE.Object3D | null>(null);
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const availableItems = ['cup', 'plate'];
 
   const updateGhost = React.useCallback(() => {
     const three = threeRef.current;
@@ -459,50 +457,7 @@ const SceneViewer: React.FC<Props> = ({
       );
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects(group.children, true);
-      if (intersects.length === 0) return;
-      if (event.button === 0 && selectedItem) {
-        const inter = intersects[0];
-        let cab: THREE.Object3D | null = inter.object;
-        while (cab && cab.userData?.kind !== 'cab') {
-          cab = cab.parent;
-        }
-        if (!cab || !cab.userData?.moduleId) return;
-        let surfaceObj: THREE.Object3D | null = inter.object;
-        while (surfaceObj && !surfaceObj.userData?.placeable) {
-          surfaceObj = surfaceObj.parent;
-        }
-        if (!surfaceObj) return;
-        const surfaces: THREE.Mesh[] = [];
-        cab.traverse((obj) => {
-          if (obj instanceof THREE.Mesh && obj.userData?.placeable) {
-            surfaces.push(obj);
-          }
-        });
-        const surfaceIndex = surfaces.indexOf(surfaceObj as THREE.Mesh);
-        if (surfaceIndex === -1) return;
-        const existing = store.itemsBySurface(cab.userData.moduleId, surfaceIndex);
-        if (
-          existing.length > 0 &&
-          (selectedItem !== 'plate' || existing.some((it) => it.type !== 'plate'))
-        )
-          return;
-        const point = inter.point.clone();
-        const baseY = point.y + 0.05;
-        const y =
-          baseY + (selectedItem === 'plate' ? PLATE_HEIGHT * existing.length : 0);
-        const id = Math.random().toString(36).slice(2);
-        store.addItem({
-          id,
-          type: selectedItem,
-          position: [point.x, y, point.z],
-          rotation: [0, 0, 0],
-          cabinetId: cab.userData.moduleId,
-          shelfIndex: surfaceIndex,
-        });
-        setSelectedItem(null);
-        return;
-      }
-      if (event.button !== 2) return;
+      if (intersects.length === 0 || event.button !== 2) return;
       let obj: THREE.Object3D | null = null;
       for (const inter of intersects) {
         obj = inter.object;
@@ -706,7 +661,7 @@ const SceneViewer: React.FC<Props> = ({
         </button>
       </div>
       {mode === 'build' && <RoomBuilder threeRef={threeRef} />}
-      {mode === 'decorate' && <ItemHotbar />}
+      {mode === 'decorate' && <ItemHotbar mode={mode} />}
       {mode && isMobile && (
         <>
           <TouchJoystick
@@ -746,32 +701,6 @@ const SceneViewer: React.FC<Props> = ({
             >
               {label}
             </div>
-          ))}
-        </div>
-      )}
-      {mode === null && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 10,
-            left: 10,
-            display: 'flex',
-            gap: 8,
-          }}
-        >
-          {availableItems.map((it) => (
-            <button
-              key={it}
-              className="btnGhost"
-              style={
-                selectedItem === it
-                  ? { border: '2px solid #fff' }
-                  : undefined
-              }
-              onClick={() => setSelectedItem(it)}
-            >
-              {it}
-            </button>
           ))}
         </div>
       )}
