@@ -2,14 +2,9 @@ import React from 'react';
 import { usePlannerStore } from '../../state/store';
 
 const WallToolSelector: React.FC = () => {
-  const selectedWall = usePlannerStore((s) => s.selectedWall);
-  const setKind = usePlannerStore((s) => s.setSelectedWallKind);
+  const thickness =
+    usePlannerStore((s) => s.selectedWall?.thickness) ?? 0.1;
   const setThickness = usePlannerStore((s) => s.setSelectedWallThickness);
-
-  const kind = selectedWall?.kind ?? 'partition';
-  const thickness = selectedWall?.thickness ?? (kind === 'bearing' ? 0.3 : 0.1);
-  const min = kind === 'bearing' ? 0.2 : 0.05;
-  const max = kind === 'bearing' ? 0.5 : 0.15;
 
   return (
     <div
@@ -25,31 +20,11 @@ const WallToolSelector: React.FC = () => {
         pointerEvents: 'auto',
       }}
     >
-      <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-        <button
-          className="btnGhost"
-          onClick={() => setKind('bearing')}
-          style={{
-            background: kind === 'bearing' ? 'rgba(255,255,255,0.3)' : 'transparent',
-          }}
-        >
-          Load-bearing
-        </button>
-        <button
-          className="btnGhost"
-          onClick={() => setKind('partition')}
-          style={{
-            background: kind === 'partition' ? 'rgba(255,255,255,0.3)' : 'transparent',
-          }}
-        >
-          Partition
-        </button>
-      </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <input
           type="range"
-          min={min}
-          max={max}
+          min={0.08}
+          max={0.25}
           step={0.01}
           value={thickness}
           onChange={(e) => setThickness(parseFloat(e.target.value))}
