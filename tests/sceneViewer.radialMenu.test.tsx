@@ -46,7 +46,12 @@ vi.mock('../src/scene/engine', () => {
   };
 });
 
-vi.mock('../src/ui/components/ItemHotbar', () => ({ default: () => null, hotbarItems: [] }));
+vi.mock('../src/ui/components/ItemHotbar', () => ({
+  default: () => null,
+  hotbarItems: [],
+  buildHotbarItems: [],
+  furnishHotbarItems: [],
+}));
 vi.mock('../src/ui/components/TouchJoystick', () => ({ default: () => null }));
 vi.mock('../src/ui/build/RoomBuilder', () => ({ default: () => null }));
 vi.mock('../src/ui/components/RadialMenu', () => ({

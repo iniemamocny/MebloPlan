@@ -46,7 +46,12 @@ vi.mock('../src/scene/engine', () => {
   };
 });
 
-vi.mock('../src/ui/components/ItemHotbar', () => ({ default: () => null, hotbarItems: [] }));
+vi.mock('../src/ui/components/ItemHotbar', () => ({
+  default: () => null,
+  hotbarItems: [],
+  buildHotbarItems: [],
+  furnishHotbarItems: [],
+}));
 vi.mock('../src/ui/components/TouchJoystick', () => ({ default: () => null }));
 vi.mock('../src/ui/build/RoomBuilder', () => ({ default: () => null }));
 
@@ -131,14 +136,44 @@ describe('SceneViewer Tab key', () => {
 });
 
 describe('SceneViewer hotbar keys', () => {
-  it('does not change selectedItemSlot when mode is not decorate', () => {
+  it('does not change selectedItemSlot when mode is null', () => {
     const threeRef: any = { current: null };
     const setMode = vi.fn();
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = ReactDOM.createRoot(container);
 
-    const modes: (PlayerMode | null)[] = [null, 'build', 'furnish'];
+    act(() => {
+      usePlannerStore.setState({ selectedItemSlot: 5 });
+      root.render(
+        <SceneViewer
+          threeRef={threeRef}
+          addCountertop={false}
+          mode={null}
+          setMode={setMode}
+        />,
+      );
+    });
+
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    for (const key of keys) {
+      act(() => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { key }));
+      });
+      expect(usePlannerStore.getState().selectedItemSlot).toBe(5);
+    }
+
+    root.unmount();
+  });
+
+  it('changes selectedItemSlot when mode is active', () => {
+    const threeRef: any = { current: null };
+    const setMode = vi.fn();
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+
+    const modes: PlayerMode[] = ['build', 'furnish', 'decorate'];
     const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
     for (const m of modes) {
       act(() => {
@@ -149,14 +184,14 @@ describe('SceneViewer hotbar keys', () => {
             addCountertop={false}
             mode={m}
             setMode={setMode}
-          />, 
+          />,
         );
       });
-      for (const key of keys) {
+      for (let i = 0; i < keys.length; i++) {
         act(() => {
-          window.dispatchEvent(new KeyboardEvent('keydown', { key }));
+          window.dispatchEvent(new KeyboardEvent('keydown', { key: keys[i] }));
         });
-        expect(usePlannerStore.getState().selectedItemSlot).toBe(5);
+        expect(usePlannerStore.getState().selectedItemSlot).toBe(i + 1);
       }
     }
 

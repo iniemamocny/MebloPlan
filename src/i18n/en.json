@@ -203,7 +203,10 @@
   "items": {
     "cup": "Cup",
     "plate": "Plate",
-    "bottle": "Bottle"
+    "bottle": "Bottle",
+    "wall": "Wall",
+    "window": "Window",
+    "door": "Door"
   },
   "radial": {
     "wall": "Wall",

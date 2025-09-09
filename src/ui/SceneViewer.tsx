@@ -9,7 +9,11 @@ import { FAMILY } from '../core/catalog';
 import { usePlannerStore, legCategories } from '../state/store';
 import { Module3D, ModuleAdv, Globals } from '../types';
 import { loadItemModel } from '../scene/itemLoader';
-import ItemHotbar, { hotbarItems } from './components/ItemHotbar';
+import ItemHotbar, {
+  hotbarItems,
+  buildHotbarItems,
+  furnishHotbarItems,
+} from './components/ItemHotbar';
 import TouchJoystick from './components/TouchJoystick';
 import { PlayerMode } from './types';
 import RoomBuilder from './build/RoomBuilder';
@@ -77,23 +81,11 @@ const SceneViewer: React.FC<Props> = ({
   const [targetCabinet, setTargetCabinet] = useState<THREE.Object3D | null>(null);
   const ghostRef = useRef<THREE.Object3D | null>(null);
 
-  const buildRadialItems: (string | null)[] = [
-    'wall',
-    'window',
-    'door',
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-  ];
-  const furnishRadialItems: (string | null)[] = Array(9).fill(null);
   const radialItems =
     mode === 'build'
-      ? buildRadialItems
+      ? buildHotbarItems
       : mode === 'furnish'
-        ? furnishRadialItems
+        ? furnishHotbarItems
         : hotbarItems;
 
   const updateGhost = React.useCallback(() => {
@@ -253,10 +245,8 @@ const SceneViewer: React.FC<Props> = ({
       }
       if (e.type === 'keydown') {
         const n = Number(e.key);
-        if (n >= 1 && n <= 9) {
-          if (mode === 'decorate') {
-            store.setSelectedItemSlot(n);
-          }
+        if (n >= 1 && n <= 9 && mode) {
+          store.setSelectedItemSlot(n);
         }
       }
     };
@@ -731,7 +721,7 @@ const SceneViewer: React.FC<Props> = ({
         </button>
       </div>
       {mode === 'build' && <RoomBuilder threeRef={threeRef} />}
-      {mode === 'decorate' && <ItemHotbar mode={mode} />}
+      {mode && <ItemHotbar mode={mode} />}
       {mode && isMobile && (
         <>
           <TouchJoystick
