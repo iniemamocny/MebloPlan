@@ -149,6 +149,7 @@ type Store = {
   measurementUnit: 'mm' | 'cm';
   playerHeight: number;
   playerSpeed: number;
+  selectedItemSlot: number;
   setRole: (r: 'stolarz' | 'klient') => void;
   updateGlobals: (fam: FAMILY, patch: Partial<Globals[FAMILY]>) => void;
   updatePrices: (patch: Partial<Prices>) => void;
@@ -173,6 +174,7 @@ type Store = {
   setMeasurementUnit: (u: 'mm' | 'cm') => void;
   setPlayerHeight: (v: number) => void;
   setPlayerSpeed: (v: number) => void;
+  setSelectedItemSlot: (slot: number) => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -199,6 +201,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   measurementUnit: persisted?.measurementUnit || 'mm',
   playerHeight: persisted?.playerHeight ?? 1.6,
   playerSpeed: persisted?.playerSpeed ?? 0.1,
+  selectedItemSlot: 1,
   showFronts: true,
   setRole: (r) => set({ role: r }),
   updateGlobals: (fam, patch) =>
@@ -412,6 +415,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setMeasurementUnit: (v) => set({ measurementUnit: v }),
   setPlayerHeight: (v) => set({ playerHeight: v }),
   setPlayerSpeed: (v) => set({ playerSpeed: v }),
+  setSelectedItemSlot: (slot) => set({ selectedItemSlot: slot }),
 }));
 
 const persistSelector = (s: Store) => ({
