@@ -1,23 +1,32 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { usePlannerStore } from '../../state/store';
 import { PlayerMode } from '../types';
+
+type PlayerSubMode = Exclude<PlayerMode, null>;
 
 interface Props {
   threeRef: React.MutableRefObject<any>;
   t: (key: string, opts?: any) => string;
   setMode: (v: PlayerMode) => void;
+  startMode: PlayerSubMode;
+  setStartMode: (v: PlayerSubMode) => void;
   onClose: () => void;
 }
 
-export default function PlayPanel({ threeRef, t, setMode, onClose }: Props) {
+export default function PlayPanel({
+  threeRef,
+  t,
+  setMode,
+  startMode,
+  setStartMode,
+  onClose,
+}: Props) {
   const {
     playerHeight,
     playerSpeed,
     setPlayerHeight,
     setPlayerSpeed,
   } = usePlannerStore();
-  const [startMode, setStartMode] = useState<PlayerMode>('build');
-
   const onHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = Number((e.target as HTMLInputElement).value) || 0;
     setPlayerHeight(v);
@@ -62,7 +71,7 @@ export default function PlayPanel({ threeRef, t, setMode, onClose }: Props) {
               { key: 'build', label: t('play.mode.build') },
               { key: 'furnish', label: t('play.mode.furnish') },
               { key: 'decorate', label: t('play.mode.decorate') },
-            ] as { key: PlayerMode; label: string }[]
+            ] as { key: PlayerSubMode; label: string }[]
           ).map(({ key, label }) => (
             <button
               key={key}

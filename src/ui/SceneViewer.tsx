@@ -43,6 +43,7 @@ interface Props {
   addCountertop: boolean;
   mode: PlayerMode;
   setMode: React.Dispatch<React.SetStateAction<PlayerMode>>;
+  startMode: Exclude<PlayerMode, null>;
 }
 
 const INTERACT_DISTANCE = 1.5;
@@ -61,6 +62,7 @@ const SceneViewer: React.FC<Props> = ({
   addCountertop,
   mode,
   setMode,
+  startMode,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const store = usePlannerStore();
@@ -718,7 +720,7 @@ const SceneViewer: React.FC<Props> = ({
         </div>
       )}
       <div style={{ position: 'absolute', top: 10, left: 10 }}>
-        <button className="btnGhost" onClick={() => setMode((m) => (m ? null : 'furnish'))}>
+        <button className="btnGhost" onClick={() => setMode((m) => (m ? null : startMode))}>
           {mode ? 'Tryb edycji' : 'Tryb gracza'}
         </button>
       </div>
