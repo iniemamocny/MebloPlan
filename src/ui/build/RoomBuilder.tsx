@@ -140,16 +140,14 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     if (!selectedTool) return;
     if (selectedTool === 'wall') {
       addWall();
-      setSelectedTool(null);
     } else if (selectedTool === 'window') {
       const lastWall = room.walls[room.walls.length - 1];
       if (lastWall) addWindow(lastWall.id);
-      setSelectedTool(null);
     } else if (selectedTool === 'door') {
       const lastWall = room.walls[room.walls.length - 1];
       if (lastWall) addDoor(lastWall.id);
-      setSelectedTool(null);
     }
+    setSelectedTool(null);
   }, [selectedTool, room.walls, setSelectedTool]);
 
   useEffect(() => {
