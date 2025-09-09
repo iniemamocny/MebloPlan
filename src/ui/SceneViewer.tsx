@@ -19,6 +19,7 @@ import TouchJoystick from './components/TouchJoystick';
 import { PlayerMode, PlayerSubMode, PLAYER_MODES } from './types';
 import RoomBuilder from './build/RoomBuilder';
 import RadialMenu from './components/RadialMenu';
+import RoomPanel from './panels/RoomPanel';
 
 interface ThreeContext {
   scene: THREE.Scene;
@@ -808,6 +809,11 @@ const SceneViewer: React.FC<Props> = ({
       </div>
       {mode === 'build' && isRoomDrawing && <RoomBuilder threeRef={threeRef} />}
       {mode === 'build' && !isRoomDrawing && <WallToolSelector />}
+      {mode === 'build' && (
+        <div style={{ position: 'absolute', top: 60, left: 10 }}>
+          <RoomPanel />
+        </div>
+      )}
       <ItemHotbar mode={mode} />
       {mode && isMobile && (
         <>

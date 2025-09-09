@@ -1,6 +1,7 @@
 import React from 'react';
 import { usePlannerStore } from '../../state/store';
 import { PlayerMode, PlayerSubMode, PLAYER_MODES } from '../types';
+import RoomPanel from './RoomPanel';
 
 interface Props {
   threeRef: React.MutableRefObject<any>;
@@ -38,57 +39,60 @@ export default function PlayPanel({
   };
 
   return (
-    <div className="section">
-      <div className="hd">
-        <div><div className="h1">{t('app.tabs.play')}</div></div>
+    <>
+      <div className="section">
+        <div className="hd">
+          <div><div className="h1">{t('app.tabs.play')}</div></div>
+        </div>
+        <div className="bd" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div>
+            <div className="small">{t('play.height')}</div>
+            <input
+              className="input"
+              type="number"
+              step="0.1"
+              value={playerHeight}
+              onChange={onHeightChange}
+            />
+          </div>
+          <div>
+            <div className="small">{t('play.speed')}</div>
+            <input
+              className="input"
+              type="number"
+              step="0.01"
+              value={playerSpeed}
+              onChange={onSpeedChange}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {PLAYER_MODES.map((key) => (
+              <button
+                key={key}
+                className="btnGhost"
+                style={
+                  startMode === key
+                    ? { background: 'var(--accent)', color: 'var(--white)' }
+                    : undefined
+                }
+                onClick={() => setStartMode(key)}
+              >
+                {t(`play.mode.${key}`)}
+              </button>
+            ))}
+          </div>
+          <button
+            className="btnGhost"
+            onClick={() => {
+              setMode(startMode);
+              onClose();
+            }}
+          >
+            Enter play mode
+          </button>
+        </div>
       </div>
-      <div className="bd" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <div>
-          <div className="small">{t('play.height')}</div>
-          <input
-            className="input"
-            type="number"
-            step="0.1"
-            value={playerHeight}
-            onChange={onHeightChange}
-          />
-        </div>
-        <div>
-          <div className="small">{t('play.speed')}</div>
-          <input
-            className="input"
-            type="number"
-            step="0.01"
-            value={playerSpeed}
-            onChange={onSpeedChange}
-          />
-        </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {PLAYER_MODES.map((key) => (
-            <button
-              key={key}
-              className="btnGhost"
-              style={
-                startMode === key
-                  ? { background: 'var(--accent)', color: 'var(--white)' }
-                  : undefined
-              }
-              onClick={() => setStartMode(key)}
-            >
-              {t(`play.mode.${key}`)}
-            </button>
-          ))}
-        </div>
-        <button
-          className="btnGhost"
-          onClick={() => {
-            setMode(startMode);
-            onClose();
-          }}
-        >
-          Enter play mode
-        </button>
-      </div>
-    </div>
+      <RoomPanel />
+    </>
   );
 }
