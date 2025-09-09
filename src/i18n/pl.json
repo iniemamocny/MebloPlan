@@ -25,11 +25,18 @@
       "costs": "Koszty",
       "cut": "Formatki",
       "global": "Ustawienia",
-      "play": "Play"
+      "play": "Play",
+      "room": "Pomieszczenie"
     },
     "cabinetType": "Typ szafki",
     "subcategories": "Podkategorie ({{family}})",
     "variant": "Wariant"
+  },
+  "room": {
+    "walls": "Ściany",
+    "windowsDoors": "Okna i drzwi",
+    "decor": "Elementy dekoracyjne",
+    "draw": "Rysuj"
   },
   "catalog": {
     "choose": "Wybierz"

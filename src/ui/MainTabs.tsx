@@ -9,11 +9,12 @@ import { CabinetConfig, PlayerMode } from './types';
 import SlidingPanel from './components/SlidingPanel';
 import GlobalSettings from './panels/GlobalSettings';
 import PlayPanel from './panels/PlayPanel';
+import RoomPanel from './panels/RoomPanel';
 
 interface MainTabsProps {
   t: (key: string, opts?: any) => string;
-  tab: 'cab' | 'costs' | 'cut' | 'global' | 'play' | null;
-  setTab: (t: 'cab' | 'costs' | 'cut' | 'global' | 'play' | null) => void;
+  tab: 'cab' | 'costs' | 'cut' | 'global' | 'play' | 'room' | null;
+  setTab: (t: 'cab' | 'costs' | 'cut' | 'global' | 'play' | 'room' | null) => void;
   family: FAMILY;
   setFamily: (f: FAMILY) => void;
   kind: Kind | null;
@@ -80,7 +81,9 @@ export default function MainTabs({
   startMode,
   setStartMode,
 }: MainTabsProps) {
-  const toggleTab = (name: 'cab' | 'costs' | 'cut' | 'global' | 'play') => {
+  const toggleTab = (
+    name: 'cab' | 'costs' | 'cut' | 'global' | 'play' | 'room',
+  ) => {
     setTab(tab === name ? null : name);
   };
 
@@ -101,6 +104,9 @@ export default function MainTabs({
         </button>
         <button className={`tabBtn ${tab === 'play' ? 'active' : ''}`} onClick={() => toggleTab('play')}>
           {t('app.tabs.play')}
+        </button>
+        <button className={`tabBtn ${tab === 'room' ? 'active' : ''}`} onClick={() => toggleTab('room')}>
+          {t('app.tabs.room')}
         </button>
       </div>
 
@@ -213,6 +219,7 @@ export default function MainTabs({
             onClose={() => setTab(null)}
           />
         )}
+        {tab === 'room' && <RoomPanel />}
       </SlidingPanel>
     </>
   );

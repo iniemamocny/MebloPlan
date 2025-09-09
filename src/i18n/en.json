@@ -25,11 +25,18 @@
       "costs": "Costs",
       "cut": "Cutlist",
       "global": "Settings",
-      "play": "Play"
+      "play": "Play",
+      "room": "Room"
     },
     "cabinetType": "Cabinet type",
     "subcategories": "Subcategories ({{family}})",
     "variant": "Variant"
+  },
+  "room": {
+    "walls": "Walls",
+    "windowsDoors": "Windows and doors",
+    "decor": "Decorative elements",
+    "draw": "Draw"
   },
   "catalog": {
     "choose": "Choose"
