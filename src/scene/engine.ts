@@ -289,6 +289,16 @@ export function setupThree(container: HTMLElement) {
     if (typeof speed === 'number') playerSpeed = speed;
   };
 
+  const dispose = () => {
+    document.removeEventListener('keydown', onKeyDown, { capture: true });
+    document.removeEventListener('keyup', onKeyUp, { capture: true });
+    window.removeEventListener('pointerdown', onPointerDown);
+    window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerup', onPointerUp);
+    window.removeEventListener('pointercancel', onPointerUp);
+    window.removeEventListener('resize', onResize);
+  };
+
   return {
     scene,
     camera,
@@ -304,5 +314,6 @@ export function setupThree(container: HTMLElement) {
     resetCameraRotation,
     onJump,
     onCrouch,
+    dispose,
   };
 }
