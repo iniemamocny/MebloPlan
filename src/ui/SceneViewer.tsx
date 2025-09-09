@@ -13,14 +13,11 @@ interface ThreeContext {
   renderer: THREE.WebGLRenderer;
   controls: OrbitControls;
   group: THREE.Group;
-  onLengthChange?: (len: number) => void;
-  onAngleChange?: (angle: number) => void;
 }
 
 interface Props {
   threeRef: React.MutableRefObject<ThreeContext | null>;
   addCountertop: boolean;
-  setIsDrawingWalls: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const getLegHeight = (mod: Module3D, globals: Globals): number => {
@@ -31,11 +28,7 @@ export const getLegHeight = (mod: Module3D, globals: Globals): number => {
   return 0.1;
 };
 
-const SceneViewer: React.FC<Props> = ({
-  threeRef,
-  addCountertop,
-  setIsDrawingWalls,
-}) => {
+const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const store = usePlannerStore();
   const showEdges = store.role === 'stolarz';
@@ -43,17 +36,8 @@ const SceneViewer: React.FC<Props> = ({
 
   useEffect(() => {
     if (!containerRef.current) return;
-    threeRef.current = setupThree(containerRef.current, {
-      onEnterTopDownMode: () => setIsDrawingWalls(true),
-      onExitTopDownMode: () => {
-        setIsDrawingWalls(false);
-        threeRef.current?.onLengthChange?.(0);
-        threeRef.current?.onAngleChange?.(0);
-      },
-      onLengthChange: (len) => threeRef.current?.onLengthChange?.(len),
-      onAngleChange: (angle) => threeRef.current?.onAngleChange?.(angle),
-    });
-  }, [threeRef, setIsDrawingWalls]);
+    threeRef.current = setupThree(containerRef.current);
+  }, [threeRef]);
 
   const createCabinetMesh = (mod: Module3D, legHeight: number) => {
     const W = mod.size.w;
