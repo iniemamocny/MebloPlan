@@ -9,6 +9,8 @@ import MainTabs from './MainTabs';
 import { safeSetItem } from '../utils/storage';
 import { PlayerMode } from './types';
 
+type PlayerSubMode = Exclude<PlayerMode, null>;
+
 export default function App() {
   const store = usePlannerStore();
   const [family, setFamily] = useState<FAMILY>(FAMILY.BASE);
@@ -42,6 +44,7 @@ export default function App() {
   const [boardKerf, setBoardKerf] = useState(3);
   const [boardHasGrain, setBoardHasGrain] = useState(false);
   const [mode, setMode] = useState<PlayerMode>(null);
+  const [startMode, setStartMode] = useState<PlayerSubMode>('build');
 
   const undo = store.undo;
   const redo = store.redo;
@@ -62,6 +65,10 @@ export default function App() {
 
   useEffect(() => {
     if (mode !== null) setTab(null);
+  }, [mode]);
+
+  useEffect(() => {
+    if (mode !== null) setStartMode(mode);
   }, [mode]);
 
   return (
@@ -96,8 +103,9 @@ export default function App() {
             addCountertop={addCountertop}
             setAddCountertop={setAddCountertop}
             threeRef={threeRef}
-            mode={mode}
             setMode={setMode}
+            startMode={startMode}
+            setStartMode={setStartMode}
           />
         </div>
       )}
@@ -107,6 +115,7 @@ export default function App() {
           addCountertop={addCountertop}
           mode={mode}
           setMode={setMode}
+          startMode={startMode}
         />
         {mode === null && (
           <TopBar

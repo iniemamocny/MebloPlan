@@ -43,8 +43,9 @@ interface MainTabsProps {
   addCountertop: boolean;
   setAddCountertop: (v: boolean) => void;
   threeRef: React.MutableRefObject<any>;
-  mode: PlayerMode;
   setMode: (v: PlayerMode) => void;
+  startMode: Exclude<PlayerMode, null>;
+  setStartMode: (v: Exclude<PlayerMode, null>) => void;
 }
 
 export default function MainTabs({
@@ -76,6 +77,8 @@ export default function MainTabs({
   setAddCountertop,
   threeRef,
   setMode,
+  startMode,
+  setStartMode,
 }: MainTabsProps) {
   const toggleTab = (name: 'cab' | 'costs' | 'cut' | 'global' | 'play') => {
     setTab(tab === name ? null : name);
@@ -204,6 +207,8 @@ export default function MainTabs({
           <PlayPanel
             threeRef={threeRef}
             t={t}
+            startMode={startMode}
+            setStartMode={setStartMode}
             setMode={setMode}
             onClose={() => setTab(null)}
           />
