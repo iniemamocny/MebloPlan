@@ -46,6 +46,20 @@ export function setupThree(container: HTMLElement) {
   controls.enableDamping = true;
 
   const playerControls = new PointerLockControls(camera, renderer.domElement);
+  const isMobile =
+    typeof window !== 'undefined' &&
+    ('ontouchstart' in window ||
+      (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0));
+  if (isMobile) {
+    (playerControls as any).lock = () => {
+      (playerControls as any).isLocked = true;
+      playerControls.dispatchEvent({ type: 'lock' });
+    };
+    (playerControls as any).unlock = () => {
+      (playerControls as any).isLocked = false;
+      playerControls.dispatchEvent({ type: 'unlock' });
+    };
+  }
 
   const cabinetDragger = new CabinetDragger(
     renderer,
