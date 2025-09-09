@@ -74,6 +74,27 @@ export function setupThree(container: HTMLElement) {
     move.left = left;
     move.right = right;
   };
+  const setMoveFromJoystick = ({ x = 0, y = 0 }: { x?: number; y?: number }) => {
+    const t = 0.3;
+    setMove({
+      forward: y < -t,
+      backward: y > t,
+      left: x < -t,
+      right: x > t,
+    });
+  };
+  const updateCameraRotation = (dx: number, dy: number) => {
+    const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+    euler.setFromQuaternion(camera.quaternion);
+    euler.y -= dx * 0.002;
+    euler.x -= dy * 0.002;
+    const PI_2 = Math.PI / 2;
+    euler.x = Math.max(-PI_2, Math.min(PI_2, euler.x));
+    camera.quaternion.setFromEuler(euler);
+  };
+  const resetCameraRotation = () => {
+    camera.rotation.set(0, 0, 0);
+  };
   const onJump = () => {
     move.jump = true;
     if (camera.position.y <= (move.crouch ? crouchHeight : playerHeight) + 0.01)
@@ -273,6 +294,9 @@ export function setupThree(container: HTMLElement) {
     cabinetDragger,
     setPlayerParams,
     setMove,
+    setMoveFromJoystick,
+    updateCameraRotation,
+    resetCameraRotation,
     onJump,
     onCrouch,
   };
