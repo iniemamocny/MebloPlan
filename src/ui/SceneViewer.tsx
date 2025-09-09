@@ -213,6 +213,10 @@ const SceneViewer: React.FC<Props> = ({
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (!playerMode) return;
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'w') {
+        e.preventDefault();
+        return;
+      }
       const n = Number(e.key);
       if (n >= 1 && n <= 9) {
         store.setSelectedItemSlot(n);
