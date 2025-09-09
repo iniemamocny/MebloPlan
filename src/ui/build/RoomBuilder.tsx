@@ -149,7 +149,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       if (lastWall) addDoor(lastWall.id);
       setSelectedTool(null);
     }
-  }, [selectedTool]);
+  }, [selectedTool, room.walls, setSelectedTool]);
 
   useEffect(() => {
     const three = threeRef.current;
