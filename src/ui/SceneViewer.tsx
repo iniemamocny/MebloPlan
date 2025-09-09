@@ -35,6 +35,7 @@ interface ThreeContext {
   resetCameraRotation?: () => void;
   onJump?: () => void;
   onCrouch?: (active: boolean) => void;
+  dispose?: () => void;
 }
 
 interface Props {
@@ -185,6 +186,7 @@ const SceneViewer: React.FC<Props> = ({
     pc.addEventListener('unlock', onUnlock);
     return () => {
       pc.removeEventListener('unlock', onUnlock);
+      threeRef.current?.dispose?.();
     };
   }, [threeRef]);
 
