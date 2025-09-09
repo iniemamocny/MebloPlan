@@ -8,6 +8,7 @@ import { buildCabinetMesh } from '../scene/cabinetBuilder';
 import { FAMILY } from '../core/catalog';
 import { usePlannerStore, legCategories } from '../state/store';
 import { Module3D, ModuleAdv, Globals } from '../types';
+import { loadItemModel } from '../scene/itemLoader';
 
 interface ThreeContext {
   scene: THREE.Scene;
@@ -43,6 +44,8 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
   const [playerMode, setPlayerMode] = useState(false);
   const targetRef = useRef<{ cab: THREE.Object3D; index: number } | null>(null);
   const [showHint, setShowHint] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const availableItems = ['cup', 'plate'];
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -128,6 +131,7 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       showFronts,
     });
     group.userData.kind = 'cab';
+    group.userData.moduleId = mod.id;
     const fg = group.userData.frontGroups || [];
     group.userData.openStates =
       mod.openStates?.slice(0, fg.length) || new Array(fg.length).fill(false);
@@ -141,7 +145,7 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
     const group = threeRef.current?.group;
     if (!group) return;
     [...group.children].forEach((c) => {
-      if (c.userData?.kind === 'cab' || c.userData?.kind === 'top') {
+      if (c.userData?.kind === 'cab' || c.userData?.kind === 'top' || c.userData?.kind === 'item') {
         group.remove(c);
         c.traverse((obj) => {
           if (obj instanceof THREE.Mesh) {
@@ -175,8 +179,17 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
         group.add(top);
       }
     });
+    store.items.forEach((it) => {
+      loadItemModel(it.type).then((obj) => {
+        obj.position.set(it.position[0], it.position[1], it.position[2]);
+        obj.rotation.set(it.rotation[0], it.rotation[1], it.rotation[2]);
+        obj.userData.kind = 'item';
+        obj.userData.itemId = it.id;
+        group.add(obj);
+      });
+    });
   };
-  useEffect(drawScene, [store.modules, addCountertop, showEdges, showFronts]);
+  useEffect(drawScene, [store.modules, store.items, addCountertop, showEdges, showFronts]);
 
 
   useEffect(() => {
@@ -206,6 +219,25 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects(group.children, true);
       if (intersects.length === 0) return;
+      if (selectedItem) {
+        const inter = intersects[0];
+        let cab: THREE.Object3D | null = inter.object;
+        while (cab && cab.userData?.kind !== 'cab') {
+          cab = cab.parent;
+        }
+        if (!cab || !cab.userData?.moduleId) return;
+        const point = inter.point.clone();
+        const id = Math.random().toString(36).slice(2);
+        store.addItem({
+          id,
+          type: selectedItem,
+          position: [point.x, point.y + 0.05, point.z],
+          rotation: [0, 0, 0],
+          cabinetId: cab.userData.moduleId,
+        });
+        setSelectedItem(null);
+        return;
+      }
       let obj: THREE.Object3D | null = null;
       for (const inter of intersects) {
         obj = inter.object;
@@ -403,6 +435,32 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
           {playerMode ? 'Tryb edycji' : 'Tryb gracza'}
         </button>
       </div>
+      {!playerMode && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 10,
+            left: 10,
+            display: 'flex',
+            gap: 8,
+          }}
+        >
+          {availableItems.map((it) => (
+            <button
+              key={it}
+              className="btnGhost"
+              style={
+                selectedItem === it
+                  ? { border: '2px solid #fff' }
+                  : undefined
+              }
+              onClick={() => setSelectedItem(it)}
+            >
+              {it}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
