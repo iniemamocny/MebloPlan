@@ -205,6 +205,13 @@
     "plate": "Talerz",
     "bottle": "Butelka"
   },
+  "radial": {
+    "wall": "Ściana",
+    "window": "Okno",
+    "cup": "Kubek",
+    "plate": "Talerz",
+    "bottle": "Butelka"
+  },
   "cutlist": {
     "validation": "Walidacja formatu {{width}}×{{height}}",
     "sheets": "Arkusze: {{sheets}}",

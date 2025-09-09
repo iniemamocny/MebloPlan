@@ -205,6 +205,13 @@
     "plate": "Plate",
     "bottle": "Bottle"
   },
+  "radial": {
+    "wall": "Wall",
+    "window": "Window",
+    "cup": "Cup",
+    "plate": "Plate",
+    "bottle": "Bottle"
+  },
   "cutlist": {
     "validation": "Validation for sheet {{width}}×{{height}}",
     "sheets": "Sheets: {{sheets}}",
