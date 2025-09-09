@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePlannerStore } from '../../state/store';
+import { PlayerMode } from '../types';
 
 export const hotbarItems: (string | null)[] = [
   'cup',
@@ -14,10 +15,16 @@ export const hotbarItems: (string | null)[] = [
   null,
 ];
 
-const ItemHotbar: React.FC = () => {
+interface Props {
+  mode: PlayerMode | null;
+}
+
+const ItemHotbar: React.FC<Props> = ({ mode }) => {
   const { t } = useTranslation();
   const selected = usePlannerStore((s) => s.selectedItemSlot);
   const setSelected = usePlannerStore((s) => s.setSelectedItemSlot);
+
+  if (mode !== 'decorate') return null;
 
   return (
     <div
