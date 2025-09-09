@@ -16,11 +16,13 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   const room = usePlannerStore((s) => s.room);
   const setRoom = usePlannerStore((s) => s.setRoom);
   const selectedTool = usePlannerStore((s) => s.selectedTool);
+  const selectedWall = usePlannerStore((s) => s.selectedWall);
   const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
   const groupRef = useRef<THREE.Group | null>(null);
   const roomRef = useRef(room);
   const startRef = useRef<{ x: number; y: number } | null>(null);
   const previewRef = useRef<THREE.Mesh | null>(null);
+  const wallPreviewRef = useRef<THREE.Mesh | null>(null);
   const labelRef = useRef<HTMLDivElement | null>(null);
   const lengthRef = useRef(0);
   const inputRef = useRef('');
@@ -204,6 +206,54 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       window.removeEventListener('pointerup', onUp);
     };
   }, [selectedTool, setRoom, threeRef]);
+
+  useEffect(() => {
+    const three = threeRef.current;
+    if (!three || selectedTool !== 'wall' || !selectedWall?.thickness)
+      return;
+
+    const size = selectedWall.thickness;
+    const geom = new THREE.BoxGeometry(size, 0.01, size);
+    const mat = new THREE.MeshStandardMaterial({
+      color: '#ffffff',
+      opacity: 0.5,
+      transparent: true,
+    });
+    const mesh = new THREE.Mesh(geom, mat);
+    mesh.position.y = 0.005;
+    wallPreviewRef.current = mesh;
+    three.group.add(mesh);
+
+    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const raycaster = new THREE.Raycaster();
+    const dir = new THREE.Vector3();
+    const pos = new THREE.Vector3();
+
+    const update = () => {
+      three.camera.getWorldDirection(dir);
+      raycaster.set(three.camera.position, dir);
+      raycaster.ray.intersectPlane(plane, pos);
+      mesh.position.set(pos.x, 0.005, pos.z);
+      mesh.rotation.y = Math.atan2(dir.x, dir.z);
+    };
+
+    update();
+    window.addEventListener('pointermove', update);
+
+    return () => {
+      window.removeEventListener('pointermove', update);
+      if (wallPreviewRef.current) {
+        three.group.remove(wallPreviewRef.current);
+        wallPreviewRef.current.geometry.dispose();
+        if (Array.isArray(wallPreviewRef.current.material)) {
+          wallPreviewRef.current.material.forEach((m) => m.dispose());
+        } else {
+          wallPreviewRef.current.material.dispose();
+        }
+        wallPreviewRef.current = null;
+      }
+    };
+  }, [selectedTool, selectedWall?.thickness, threeRef]);
 
   const addWall = () => {
     const wallHeight = room.height / 1000;
