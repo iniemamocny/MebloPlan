@@ -262,7 +262,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       start: { x: 0, y: 0 },
       end: { x: 2, y: 0 },
       height: wallHeight,
-      thickness: 0.1,
+      thickness: selectedWall?.thickness ?? 0.1,
       color: '#ffffff',
     };
     setRoom({ walls: [...room.walls, newWall] });
@@ -358,7 +358,11 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       const wallHeight = room.height / 1000;
       let mesh = previewRef.current;
       if (!mesh) {
-        const geom = new THREE.BoxGeometry(len, wallHeight, 0.1);
+        const geom = new THREE.BoxGeometry(
+          len,
+          wallHeight,
+          selectedWall?.thickness ?? 0.1,
+        );
         const mat = new THREE.MeshStandardMaterial({
           color: '#ffffff',
           opacity: 0.5,
@@ -370,7 +374,11 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
         groupRef.current?.add(mesh);
       } else {
         mesh.geometry.dispose();
-        mesh.geometry = new THREE.BoxGeometry(len, wallHeight, 0.1);
+        mesh.geometry = new THREE.BoxGeometry(
+          len,
+          wallHeight,
+          selectedWall?.thickness ?? 0.1,
+        );
       }
       const { dx, dy } = dirRef.current;
       const midx = sx + (dx * len) / 2;
@@ -410,7 +418,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
         start: { x: sx, y: sy },
         end,
         height: wallHeight,
-        thickness: 0.1,
+        thickness: selectedWall?.thickness ?? 0.1,
         color: '#ffffff',
       };
       setRoom({ walls: [...room.walls, newWall] });
@@ -475,6 +483,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     room.height,
     room.walls,
     selectedTool,
+    selectedWall?.thickness,
     setRoom,
     setSelectedTool,
     threeRef,
