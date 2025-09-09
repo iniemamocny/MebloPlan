@@ -15,6 +15,8 @@ interface Props {
 const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   const room = usePlannerStore((s) => s.room);
   const setRoom = usePlannerStore((s) => s.setRoom);
+  const selectedTool = usePlannerStore((s) => s.selectedTool);
+  const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
   const groupRef = useRef<THREE.Group | null>(null);
 
   // draw room elements whenever data changes
@@ -130,6 +132,20 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     };
     setRoom({ doors: [...room.doors, door] });
   };
+
+  useEffect(() => {
+    if (!selectedTool) return;
+    if (selectedTool === 'wall') {
+      addWall();
+    } else if (selectedTool === 'window') {
+      const lastWall = room.walls[room.walls.length - 1];
+      if (lastWall) addWindow(lastWall.id);
+    } else if (selectedTool === 'door') {
+      const lastWall = room.walls[room.walls.length - 1];
+      if (lastWall) addDoor(lastWall.id);
+    }
+    setSelectedTool(null);
+  }, [selectedTool]);
 
   return (
     <div

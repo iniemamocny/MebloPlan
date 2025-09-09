@@ -208,6 +208,7 @@
   "radial": {
     "wall": "Ściana",
     "window": "Okno",
+    "door": "Drzwi",
     "cup": "Kubek",
     "plate": "Talerz",
     "bottle": "Butelka"

@@ -77,7 +77,7 @@ const SceneViewer: React.FC<Props> = ({
   const buildRadialItems: (string | null)[] = [
     'wall',
     'window',
-    null,
+    'door',
     null,
     null,
     null,
@@ -675,8 +675,18 @@ const SceneViewer: React.FC<Props> = ({
       <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
       <RadialMenu
         items={radialItems}
-        selected={store.selectedItemSlot}
-        onSelect={store.setSelectedItemSlot}
+        selected={
+          mode === 'build' || mode === 'furnish'
+            ? radialItems.findIndex((it) => it === store.selectedTool) + 1
+            : store.selectedItemSlot
+        }
+        onSelect={(slot) => {
+          if (mode === 'build' || mode === 'furnish') {
+            store.setSelectedTool(radialItems[slot - 1]);
+          } else {
+            store.setSelectedItemSlot(slot);
+          }
+        }}
         visible={showRadial}
       />
       {mode === null && (
