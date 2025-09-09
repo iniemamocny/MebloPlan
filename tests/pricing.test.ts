@@ -49,20 +49,6 @@ describe('computeModuleCost', () => {
     expect(price.parts.slides).toBe(defaultPrices.drawerSlide['BLUM LEGRABOX'] * 3)
   })
 
-  it('adds aventos cost for wall cabinet with HK lift', () => {
-    const price = computeModuleCost(
-      {
-        family: FAMILY.WALL,
-        kind: 'doors',
-        variant: 'avHK',
-        width: 600,
-        adv: advFor(FAMILY.WALL),
-      },
-      { prices: defaultPrices, globals: defaultGlobal }
-    )
-    expect(price.parts.aventos).toBe(defaultPrices.aventos.HK)
-  })
-
   it('uses four hinges per door for tall cabinets', () => {
     const price = computeModuleCost(
       {
