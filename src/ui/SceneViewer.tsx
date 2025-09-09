@@ -18,6 +18,7 @@ interface ThreeContext {
   playerControls: PointerLockControls;
   group: THREE.Group;
   cabinetDragger: CabinetDragger;
+  setPlayerParams?: (p: { height?: number; speed?: number }) => void;
 }
 
 interface Props {
@@ -66,13 +67,20 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       three.controls.enabled = false;
       three.cabinetDragger.disable();
       three.playerControls.lock();
-      three.camera.position.y = 1.6;
+      three.camera.position.y = store.playerHeight;
     } else {
       three.playerControls.unlock();
       three.controls.enabled = true;
       three.cabinetDragger.enable();
     }
-  }, [playerMode, threeRef]);
+  }, [playerMode, threeRef, store.playerHeight]);
+
+  useEffect(() => {
+    threeRef.current?.setPlayerParams?.({
+      height: store.playerHeight,
+      speed: store.playerSpeed,
+    });
+  }, [store.playerHeight, store.playerSpeed, threeRef]);
 
   const createCabinetMesh = (mod: Module3D, legHeight: number) => {
     const W = mod.size.w;

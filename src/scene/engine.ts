@@ -65,8 +65,9 @@ export function setupThree(container: HTMLElement) {
   };
   let velocityY = 0;
   const gravity = 0.01;
-  const standHeight = 1.6;
-  const crouchHeight = 1.0;
+  let playerHeight = usePlannerStore.getState().playerHeight;
+  let crouchHeight = playerHeight - 0.6;
+  let playerSpeed = usePlannerStore.getState().playerSpeed;
   const onKeyDown = (e: KeyboardEvent) => {
     switch (e.code) {
       case 'ArrowUp':
@@ -87,11 +88,12 @@ export function setupThree(container: HTMLElement) {
         break;
       case 'Space':
         move.jump = true;
-        if (camera.position.y <= (move.crouch ? crouchHeight : standHeight) + 0.01) velocityY = 0.2;
+        if (camera.position.y <= (move.crouch ? crouchHeight : playerHeight) + 0.01)
+          velocityY = 0.2;
         break;
       case 'ControlLeft':
         move.crouch = true;
-        if (camera.position.y <= standHeight + 0.01) camera.position.y = crouchHeight;
+        if (camera.position.y <= playerHeight + 0.01) camera.position.y = crouchHeight;
         break;
     }
   };
@@ -118,7 +120,7 @@ export function setupThree(container: HTMLElement) {
         break;
       case 'ControlLeft':
         move.crouch = false;
-        camera.position.y = Math.max(camera.position.y, standHeight);
+        camera.position.y = Math.max(camera.position.y, playerHeight);
         break;
     }
   };
@@ -136,7 +138,6 @@ export function setupThree(container: HTMLElement) {
 
   const run = true;
   const floorHalf = 5;
-  const speed = 0.1;
   const forward = new THREE.Vector3();
   const side = new THREE.Vector3();
   const moveDir = new THREE.Vector3();
@@ -155,9 +156,9 @@ export function setupThree(container: HTMLElement) {
       if (move.left) moveDir.add(side.clone().multiplyScalar(-1));
       if (move.right) moveDir.add(side);
       if (moveDir.lengthSq() > 0) {
-        moveDir.normalize().multiplyScalar(speed);
+        moveDir.normalize().multiplyScalar(playerSpeed);
         const collisionPos = oldPos.clone().add(moveDir);
-        collisionPos.y = standHeight;
+        collisionPos.y = playerHeight;
         collisionPos.x = Math.max(-floorHalf, Math.min(floorHalf, collisionPos.x));
         collisionPos.z = Math.max(-floorHalf, Math.min(floorHalf, collisionPos.z));
         let blocked = false;
@@ -172,7 +173,7 @@ export function setupThree(container: HTMLElement) {
         }
       }
       camera.position.y += velocityY;
-      const minY = move.crouch ? crouchHeight : standHeight;
+      const minY = move.crouch ? crouchHeight : playerHeight;
       if (camera.position.y <= minY) {
         camera.position.y = minY;
         velocityY = 0;
@@ -187,6 +188,14 @@ export function setupThree(container: HTMLElement) {
   };
   loop();
 
+  const setPlayerParams = ({ height, speed }: { height?: number; speed?: number }) => {
+    if (typeof height === 'number') {
+      playerHeight = height;
+      crouchHeight = height - 0.6;
+    }
+    if (typeof speed === 'number') playerSpeed = speed;
+  };
+
   return {
     scene,
     camera,
@@ -195,5 +204,6 @@ export function setupThree(container: HTMLElement) {
     playerControls,
     group,
     cabinetDragger,
+    setPlayerParams,
   };
 }

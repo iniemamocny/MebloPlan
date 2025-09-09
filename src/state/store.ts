@@ -147,6 +147,8 @@ type Store = {
   gridSize: number;
   snapToGrid: boolean;
   measurementUnit: 'mm' | 'cm';
+  playerHeight: number;
+  playerSpeed: number;
   setRole: (r: 'stolarz' | 'klient') => void;
   updateGlobals: (fam: FAMILY, patch: Partial<Globals[FAMILY]>) => void;
   updatePrices: (patch: Partial<Prices>) => void;
@@ -169,6 +171,8 @@ type Store = {
   setGridSize: (v: number) => void;
   setSnapToGrid: (v: boolean) => void;
   setMeasurementUnit: (u: 'mm' | 'cm') => void;
+  setPlayerHeight: (v: number) => void;
+  setPlayerSpeed: (v: number) => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -193,6 +197,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
   gridSize: persisted?.gridSize ?? 50,
   snapToGrid: persisted?.snapToGrid ?? false,
   measurementUnit: persisted?.measurementUnit || 'mm',
+  playerHeight: persisted?.playerHeight ?? 1.6,
+  playerSpeed: persisted?.playerSpeed ?? 0.1,
   showFronts: true,
   setRole: (r) => set({ role: r }),
   updateGlobals: (fam, patch) =>
@@ -404,6 +410,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setGridSize: (v) => set({ gridSize: v }),
   setSnapToGrid: (v) => set({ snapToGrid: v }),
   setMeasurementUnit: (v) => set({ measurementUnit: v }),
+  setPlayerHeight: (v) => set({ playerHeight: v }),
+  setPlayerSpeed: (v) => set({ playerSpeed: v }),
 }));
 
 const persistSelector = (s: Store) => ({
@@ -420,6 +428,8 @@ const persistSelector = (s: Store) => ({
   gridSize: s.gridSize,
   snapToGrid: s.snapToGrid,
   measurementUnit: s.measurementUnit,
+  playerHeight: s.playerHeight,
+  playerSpeed: s.playerSpeed,
 });
 
 let persistTimeout = 0;
