@@ -26,7 +26,12 @@ const RoomDrawBoard: React.FC<Props> = ({ width = 600, height = 400 }) => {
   const draw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    let ctx: CanvasRenderingContext2D | null = null;
+    try {
+      ctx = canvas.getContext('2d');
+    } catch {
+      return;
+    }
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     // grid

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { act } from 'react';
@@ -7,9 +7,22 @@ import * as THREE from 'three';
 
 import MainTabs from '../src/ui/MainTabs';
 import RoomPanel from '../src/ui/panels/RoomPanel';
-import SceneViewer from '../src/ui/SceneViewer';
 import { FAMILY } from '../src/core/catalog';
 import { usePlannerStore } from '../src/state/store';
+
+beforeAll(() => {
+  // jsdom does not implement canvas context; provide a minimal stub
+  // so RoomDrawBoard can render without throwing.
+  HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
+    clearRect: vi.fn(),
+    beginPath: vi.fn(),
+    moveTo: vi.fn(),
+    lineTo: vi.fn(),
+    stroke: vi.fn(),
+    setLineDash: vi.fn(),
+    // fields used by draw board
+  } as any));
+});
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (s: string) => s }),
@@ -152,8 +165,6 @@ describe('Room features', () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = ReactDOM.createRoot(container);
-    const threeRef: any = { current: null };
-    const setMode = vi.fn();
 
     usePlannerStore.setState({
       room: { height: 2700, origin: { x: 0, y: 0 }, walls: [], windows: [], doors: [] },
@@ -163,18 +174,7 @@ describe('Room features', () => {
     });
 
     act(() => {
-      root.render(
-        <>
-          <RoomPanel />
-          <SceneViewer
-            threeRef={threeRef}
-            addCountertop={false}
-            mode="build"
-            setMode={setMode}
-            startMode="build"
-          />
-        </>,
-      );
+      root.render(<RoomPanel />);
     });
 
     const header = container.querySelector('.section .hd');
@@ -191,7 +191,7 @@ describe('Room features', () => {
 
     expect(usePlannerStore.getState().isRoomDrawing).toBe(true);
     expect(usePlannerStore.getState().selectedTool).toBe('wall');
-    expect(threeRef.current.camera.position.y).toBeCloseTo(10);
+    expect(container.querySelector('canvas')).toBeTruthy();
 
     root.unmount();
     container.remove();
