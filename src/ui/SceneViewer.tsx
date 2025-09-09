@@ -263,8 +263,7 @@ const SceneViewer: React.FC<Props> = ({
   }, [store, mode]);
 
   useEffect(() => {
-    setShowRadial(false);
-    if (!mode) return;
+    if (mode === null) return;
     const down = (e: KeyboardEvent) => {
       if (e.code === 'KeyQ') {
         setShowRadial(true);
@@ -280,6 +279,7 @@ const SceneViewer: React.FC<Props> = ({
     return () => {
       window.removeEventListener('keydown', down);
       window.removeEventListener('keyup', up);
+      setShowRadial(false);
     };
   }, [mode]);
 
