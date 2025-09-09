@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { FAMILY } from '../core/catalog';
-import { Module3D, Room, Globals, Prices, Gaps, RoomShape } from '../types';
+import { Module3D, Room, Globals, Prices, Gaps, RoomShape, Wall } from '../types';
 import { safeSetItem } from '../utils/storage';
 
 export const defaultGaps: Gaps = {
@@ -111,6 +111,17 @@ export const defaultPrices: Prices = {
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(Math.max(v, min), max);
+
+const wallsToShape = (walls: Wall[]): RoomShape => ({
+  points: walls.flatMap((w) => [
+    { ...w.start },
+    { ...w.end },
+  ]),
+  segments: walls.map((w) => ({
+    start: { ...w.start },
+    end: { ...w.end },
+  })),
+});
 
 const persisted = (() => {
   try {
@@ -390,6 +401,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
         modules: previous.modules,
         items: previous.items,
         room: previous.room,
+        roomShape: wallsToShape(previous.room.walls || []),
         past: s.past.slice(0, -1),
         future: [
           ...s.future,
@@ -409,6 +421,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
         modules: next.modules,
         items: next.items,
         room: next.room,
+        roomShape: wallsToShape(next.room.walls || []),
         past: [
           ...s.past,
           {
@@ -429,6 +442,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
           thickness: clamp(w.thickness, 0.08, 0.25),
         }));
       }
+      const updatedRoom = { ...s.room, ...newPatch };
       return {
         past: [
           ...s.past,
@@ -438,7 +452,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
             room: JSON.parse(JSON.stringify(s.room)),
           },
         ],
-        room: { ...s.room, ...newPatch },
+        room: updatedRoom,
+        roomShape: patch.walls ? wallsToShape(updatedRoom.walls) : s.roomShape,
         future: [],
       };
     }),

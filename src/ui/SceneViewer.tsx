@@ -20,6 +20,7 @@ import { PlayerMode, PlayerSubMode, PLAYER_MODES } from './types';
 import RoomBuilder from './build/RoomBuilder';
 import RadialMenu from './components/RadialMenu';
 import RoomPanel from './panels/RoomPanel';
+import { shapeToWalls } from './build/RoomDrawBoard';
 
 interface ThreeContext {
   scene: THREE.Scene;
@@ -406,7 +407,12 @@ const SceneViewer: React.FC<Props> = ({
     const group = threeRef.current?.group;
     if (!group) return;
     [...group.children].forEach((c) => {
-      if (c.userData?.kind === 'cab' || c.userData?.kind === 'top' || c.userData?.kind === 'item') {
+      if (
+        c.userData?.kind === 'cab' ||
+        c.userData?.kind === 'top' ||
+        c.userData?.kind === 'item' ||
+        c.userData?.kind === 'wall'
+      ) {
         group.remove(c);
         c.traverse((obj) => {
           if (obj instanceof THREE.Mesh) {
@@ -440,6 +446,26 @@ const SceneViewer: React.FC<Props> = ({
         group.add(top);
       }
     });
+    // draw walls from room shape
+    const walls = shapeToWalls(store.roomShape, {
+      height: store.room.height / 1000,
+      thickness: store.selectedWall?.thickness ?? 0.1,
+    });
+    walls.forEach((w) => {
+      const len = Math.hypot(w.end.x - w.start.x, w.end.y - w.start.y);
+      const geom = new THREE.BoxGeometry(len, w.height, w.thickness);
+      const mat = new THREE.MeshStandardMaterial({ color: w.color || '#ffffff' });
+      const mesh = new THREE.Mesh(geom, mat);
+      const midx = (w.start.x + w.end.x) / 2;
+      const midy = (w.start.y + w.end.y) / 2;
+      mesh.position.set(midx, w.height / 2, midy);
+      const angle = Math.atan2(w.end.y - w.start.y, w.end.x - w.start.x);
+      mesh.rotation.y = -angle;
+      mesh.userData.kind = 'wall';
+      mesh.userData.wallId = w.id;
+      group.add(mesh);
+    });
+
     store.items.forEach((it) => {
       loadItemModel(it.type)
         .then((obj) => {
@@ -470,7 +496,16 @@ const SceneViewer: React.FC<Props> = ({
         });
     });
   };
-  useEffect(drawScene, [store.modules, store.items, addCountertop, showEdges, showFronts]);
+  useEffect(drawScene, [
+    store.modules,
+    store.items,
+    addCountertop,
+    showEdges,
+    showFronts,
+    store.roomShape,
+    store.room.height,
+    store.selectedWall?.thickness,
+  ]);
 
 
   useEffect(() => {
