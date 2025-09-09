@@ -182,9 +182,30 @@ export interface Module3D {
   openStates?: boolean[];
 }
 
+export interface Wall {
+  id: string;
+  start: { x: number; y: number };
+  end: { x: number; y: number };
+  height: number;
+  thickness: number;
+  color?: string;
+}
+
+export interface WallOpening {
+  id: string;
+  wallId: string;
+  offset: number;
+  width: number;
+  height: number;
+  bottom: number;
+}
+
 export interface Room {
   height: number;
   origin: { x: number; y: number };
+  walls: Wall[];
+  windows: WallOpening[];
+  doors: WallOpening[];
 }
 
 export interface PricingData {

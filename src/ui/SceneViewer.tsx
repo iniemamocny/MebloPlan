@@ -12,6 +12,7 @@ import { loadItemModel } from '../scene/itemLoader';
 import ItemHotbar, { hotbarItems } from './components/ItemHotbar';
 import TouchJoystick from './components/TouchJoystick';
 import { PlayerMode } from './types';
+import RoomBuilder from './build/RoomBuilder';
 
 interface ThreeContext {
   scene: THREE.Scene;
@@ -695,6 +696,7 @@ const SceneViewer: React.FC<Props> = ({
           {mode ? 'Tryb edycji' : 'Tryb gracza'}
         </button>
       </div>
+      {mode === 'build' && <RoomBuilder threeRef={threeRef} />}
       {mode === 'decorate' && <ItemHotbar />}
       {mode && isMobile && (
         <>
