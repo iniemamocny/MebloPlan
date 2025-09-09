@@ -36,7 +36,12 @@
     "walls": "Walls",
     "windowsDoors": "Windows and doors",
     "decor": "Decorative elements",
-    "draw": "Draw"
+    "draw": "Draw",
+    "addWindow": "Add window",
+    "addDoor": "Add door",
+    "addDecor": "Add decoration",
+    "noWindows": "No windows or doors",
+    "noDecor": "No decorations"
   },
   "catalog": {
     "choose": "Choose"

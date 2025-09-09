@@ -136,7 +136,7 @@ describe('SceneViewer Tab key', () => {
 });
 
 describe('SceneViewer hotbar keys', () => {
-  it('does not change selectedItemSlot when mode is null', () => {
+  it('changes selectedItemSlot when mode is null', () => {
     const threeRef: any = { current: null };
     const setMode = vi.fn();
     const container = document.createElement('div');
@@ -156,11 +156,11 @@ describe('SceneViewer hotbar keys', () => {
     });
 
     const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
-    for (const key of keys) {
+    for (let i = 0; i < keys.length; i++) {
       act(() => {
-        window.dispatchEvent(new KeyboardEvent('keydown', { key }));
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: keys[i] }));
       });
-      expect(usePlannerStore.getState().selectedItemSlot).toBe(5);
+      expect(usePlannerStore.getState().selectedItemSlot).toBe(i + 1);
     }
 
     root.unmount();

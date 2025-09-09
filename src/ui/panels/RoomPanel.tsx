@@ -34,6 +34,9 @@ export default function RoomPanel() {
 
   const room = usePlannerStore((s) => s.room);
   const setRoom = usePlannerStore((s) => s.setRoom);
+  const windows = usePlannerStore((s) => s.room.windows);
+  const doors = usePlannerStore((s) => s.room.doors);
+  const items = usePlannerStore((s) => s.items);
   const wallThickness =
     usePlannerStore((s) => s.selectedWall?.thickness) ?? 0.1;
   const setThickness = usePlannerStore((s) => s.setSelectedWallThickness);
@@ -90,12 +93,46 @@ export default function RoomPanel() {
         title={t('room.windowsDoors')}
         open={windowsOpen}
         setOpen={setWindowsOpen}
-      />
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div>
+            {windows.length + doors.length === 0 ? (
+              <div>{t('room.noWindows')}</div>
+            ) : (
+              <ul>
+                {windows.map((_, idx) => (
+                  <li key={`w-${idx}`}>{t('items.window')} {idx + 1}</li>
+                ))}
+                {doors.map((_, idx) => (
+                  <li key={`d-${idx}`}>{t('items.door')} {idx + 1}</li>
+                ))}
+              </ul>
+            )}
+            <div style={{ display: 'flex', gap: 4 }}>
+              <button className="btnGhost">{t('room.addWindow')}</button>
+              <button className="btnGhost">{t('room.addDoor')}</button>
+            </div>
+          </div>
+        </div>
+      </Section>
       <Section
         title={t('room.decor')}
         open={decorOpen}
         setOpen={setDecorOpen}
-      />
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {items.length === 0 ? (
+            <div>{t('room.noDecor')}</div>
+          ) : (
+            <ul>
+              {items.map((it) => (
+                <li key={it.id}>{t(`items.${it.type}`)}</li>
+              ))}
+            </ul>
+          )}
+          <button className="btnGhost">{t('room.addDecor')}</button>
+        </div>
+      </Section>
     </>
   );
 }

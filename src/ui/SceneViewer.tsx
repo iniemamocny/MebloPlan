@@ -97,8 +97,14 @@ const SceneViewer: React.FC<Props> = ({
         : hotbarItems;
 
   useEffect(() => {
-    if (mode === 'build') {
-      const tool = buildHotbarItems()[store.selectedItemSlot - 1];
+    const items =
+      mode === 'build'
+        ? buildHotbarItems()
+        : mode === 'furnish'
+          ? furnishHotbarItems
+          : hotbarItems;
+    const tool = items[store.selectedItemSlot - 1];
+    if (tool === 'wall' || tool === 'window' || tool === 'door') {
       if (store.selectedTool !== tool) store.setSelectedTool(tool);
     } else if (store.selectedTool) {
       store.setSelectedTool(null);
@@ -268,9 +274,7 @@ const SceneViewer: React.FC<Props> = ({
     }, [threeRef, mode]);
 
   useEffect(() => {
-    if (!mode) return;
     const handleKey = (e: KeyboardEvent) => {
-      if (!mode) return;
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'w') {
         e.preventDefault();
         return;
@@ -288,7 +292,7 @@ const SceneViewer: React.FC<Props> = ({
       window.removeEventListener('keydown', handleKey);
       window.removeEventListener('keyup', handleKey);
     };
-  }, [store, mode]);
+  }, [store]);
 
   useEffect(() => {
     if (mode === null) return;
@@ -762,8 +766,9 @@ const SceneViewer: React.FC<Props> = ({
         selected={store.selectedItemSlot}
         onSelect={(slot) => {
           store.setSelectedItemSlot(slot);
-          if (mode === 'build') {
-            store.setSelectedTool(radialItems[slot - 1]);
+          const tool = radialItems[slot - 1];
+          if (tool === 'wall' || tool === 'window' || tool === 'door') {
+            store.setSelectedTool(tool);
           } else {
             store.setSelectedTool(null);
           }
@@ -803,7 +808,7 @@ const SceneViewer: React.FC<Props> = ({
       </div>
       {mode === 'build' && isRoomDrawing && <RoomBuilder threeRef={threeRef} />}
       {mode === 'build' && !isRoomDrawing && <WallToolSelector />}
-      {mode && <ItemHotbar mode={mode} />}
+      <ItemHotbar mode={mode} />
       {mode && isMobile && (
         <>
           <TouchJoystick
