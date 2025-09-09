@@ -114,13 +114,26 @@ export function setupThree(container: HTMLElement) {
   let playerHeight = usePlannerStore.getState().playerHeight;
   let crouchHeight = playerHeight - 0.6;
   let playerSpeed = usePlannerStore.getState().playerSpeed;
+  const movementKeys = new Set([
+    'ArrowUp',
+    'ArrowDown',
+    'ArrowLeft',
+    'ArrowRight',
+    'KeyW',
+    'KeyA',
+    'KeyS',
+    'KeyD',
+    'Space',
+    'ControlLeft',
+    'ControlRight',
+  ]);
   const onKeyDown = (e: KeyboardEvent) => {
     if (playerControls.isLocked && e.ctrlKey && e.code === 'KeyW') {
       e.preventDefault();
       e.stopPropagation();
       return;
     }
-    if (playerControls.isLocked) {
+    if (playerControls.isLocked && movementKeys.has(e.code)) {
       e.preventDefault();
       e.stopPropagation();
     }
@@ -154,7 +167,7 @@ export function setupThree(container: HTMLElement) {
     }
   };
   const onKeyUp = (e: KeyboardEvent) => {
-    if (playerControls.isLocked) {
+    if (playerControls.isLocked && movementKeys.has(e.code)) {
       e.preventDefault();
       e.stopPropagation();
     }
