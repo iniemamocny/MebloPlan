@@ -1,7 +1,6 @@
 import React from 'react';
 import { usePlannerStore } from '../../state/store';
 import { PlayerMode, PlayerSubMode, PLAYER_MODES } from '../types';
-import RoomPanel from './RoomPanel';
 
 interface Props {
   threeRef: React.MutableRefObject<any>;
@@ -25,6 +24,8 @@ export default function PlayPanel({
     playerSpeed,
     setPlayerHeight,
     setPlayerSpeed,
+    setIsRoomDrawing,
+    setSelectedTool,
   } = usePlannerStore();
   const onHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = Number((e.target as HTMLInputElement).value) || 0;
@@ -36,6 +37,11 @@ export default function PlayPanel({
     const v = Number((e.target as HTMLInputElement).value) || 0;
     setPlayerSpeed(v);
     threeRef.current?.setPlayerParams?.({ speed: v });
+  };
+
+  const startDrawing = () => {
+    setIsRoomDrawing(true);
+    setSelectedTool('wall');
   };
 
   return (
@@ -65,6 +71,9 @@ export default function PlayPanel({
               onChange={onSpeedChange}
             />
           </div>
+          <button className="btnGhost" onClick={startDrawing}>
+            {t('room.draw')}
+          </button>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {PLAYER_MODES.map((key) => (
               <button
@@ -92,7 +101,6 @@ export default function PlayPanel({
           </button>
         </div>
       </div>
-      <RoomPanel />
     </>
   );
 }
