@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { FAMILY, Kind, Variant, KIND_SETS } from '../core/catalog';
 import { computeModuleCost } from '../core/pricing';
 import { usePlannerStore, legCategories } from '../state/store';
-import { autoWidthsForRun } from '../utils/auto';
 import { Module3D, ModuleAdv } from '../types';
 import { CabinetConfig } from './types';
 
@@ -11,7 +10,6 @@ export function useCabinetConfig(
   family: FAMILY,
   kind: Kind | null,
   variant: Variant | null,
-  selWall: string,
   setVariant: (v: Variant | null) => void,
 ) {
   const store = usePlannerStore();
@@ -201,86 +199,6 @@ export function useCabinetConfig(
     setVariant(null);
   };
 
-  const doAutoOnSelectedWall = () => {
-    const wall = store.room.walls.find((w) => w.id === selWall);
-    if (!wall) return alert(t('room.noWalls'));
-    const len = wall.length || 0;
-    const widths = autoWidthsForRun(len);
-    const g = store.globals[family];
-    const h = g.height / 1000,
-      d = g.depth / 1000;
-    let cursor = 0;
-    widths.forEach((wmm, i) => {
-      const w = wmm / 1000;
-      const id = `auto_${Date.now()}_${i}_${Math.floor(Math.random() * 1e6)}`;
-      const price = computeModuleCost(
-        {
-          family,
-          kind: KIND_SETS[family][0]?.key || 'doors',
-          variant: 'doors',
-          width: wmm,
-          adv: {
-            height: g.height,
-            depth: g.depth,
-            boardType: g.boardType,
-            frontType: g.frontType,
-            frontFoldable: g.frontFoldable,
-            gaps: g.gaps,
-            backPanel: g.backPanel,
-            topPanel: g.topPanel,
-            bottomPanel: g.bottomPanel,
-            topPanelEdgeBanding: {},
-            bottomPanelEdgeBanding: {},
-            rightSideEdgeBanding: {
-              front: true,
-              back: true,
-            },
-            leftSideEdgeBanding: {
-              front: true,
-              back: true,
-            },
-            shelfEdgeBanding: {},
-            sidePanels: {},
-            carcassType: g.carcassType,
-            legsType: g.legsType,
-          },
-          doorsCount: 1,
-          drawersCount: 0,
-        },
-        { prices: store.prices, globals: store.globals },
-      );
-      let mod: Module3D = {
-        id,
-        label: t('app.auto'),
-        family,
-        kind: KIND_SETS[family][0]?.key || 'doors',
-        size: { w, h, d },
-        position: [cursor / 1000 + w / 2, h / 2, 0],
-        rotationY: 0,
-        segIndex: null,
-        price,
-        adv: {
-          ...g,
-          doorCount: 1,
-          topPanelEdgeBanding: {},
-          bottomPanelEdgeBanding: {},
-          rightSideEdgeBanding: {
-            front: true,
-            back: true,
-          },
-          leftSideEdgeBanding: {
-            front: true,
-            back: true,
-          },
-          shelfEdgeBanding: {},
-          sidePanels: {},
-        } as ModuleAdv,
-      };
-      mod = resolveCollisions(mod);
-      store.addModule(mod);
-      cursor += wmm + 5;
-    });
-  };
 
   const gLocal: CabinetConfig = (() => {
     const g = store.globals[family];
@@ -359,7 +277,6 @@ export function useCabinetConfig(
     setAdv,
     gLocal,
     onAdd,
-    doAutoOnSelectedWall,
     initSidePanel,
     initBlenda,
   };
