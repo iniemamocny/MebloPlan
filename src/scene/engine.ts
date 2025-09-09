@@ -55,7 +55,18 @@ export function setupThree(container: HTMLElement) {
   );
   cabinetDragger.enable?.();
 
-  const move = { forward: false, backward: false, left: false, right: false };
+  const move = {
+    forward: false,
+    backward: false,
+    left: false,
+    right: false,
+    jump: false,
+    crouch: false,
+  };
+  let velocityY = 0;
+  const gravity = 0.01;
+  const standHeight = 1.6;
+  const crouchHeight = 1.0;
   const onKeyDown = (e: KeyboardEvent) => {
     switch (e.code) {
       case 'ArrowUp':
@@ -73,6 +84,14 @@ export function setupThree(container: HTMLElement) {
       case 'ArrowRight':
       case 'KeyD':
         move.right = true;
+        break;
+      case 'Space':
+        move.jump = true;
+        if (camera.position.y <= (move.crouch ? crouchHeight : standHeight) + 0.01) velocityY = 0.2;
+        break;
+      case 'ControlLeft':
+        move.crouch = true;
+        if (camera.position.y <= standHeight + 0.01) camera.position.y = crouchHeight;
         break;
     }
   };
@@ -93,6 +112,13 @@ export function setupThree(container: HTMLElement) {
       case 'ArrowRight':
       case 'KeyD':
         move.right = false;
+        break;
+      case 'Space':
+        move.jump = false;
+        break;
+      case 'ControlLeft':
+        move.crouch = false;
+        camera.position.y = Math.max(camera.position.y, standHeight);
         break;
     }
   };
@@ -130,19 +156,29 @@ export function setupThree(container: HTMLElement) {
       if (move.right) moveDir.add(side);
       if (moveDir.lengthSq() > 0) {
         moveDir.normalize().multiplyScalar(speed);
-        const newPos = oldPos.clone().add(moveDir);
-        newPos.y = 1.6;
-        newPos.x = Math.max(-floorHalf, Math.min(floorHalf, newPos.x));
-        newPos.z = Math.max(-floorHalf, Math.min(floorHalf, newPos.z));
+        const collisionPos = oldPos.clone().add(moveDir);
+        collisionPos.y = standHeight;
+        collisionPos.x = Math.max(-floorHalf, Math.min(floorHalf, collisionPos.x));
+        collisionPos.z = Math.max(-floorHalf, Math.min(floorHalf, collisionPos.z));
         let blocked = false;
         const box = new THREE.Box3();
         group.children.forEach((child) => {
           box.setFromObject(child);
-          if (box.containsPoint(newPos)) blocked = true;
+          if (box.containsPoint(collisionPos)) blocked = true;
         });
-        if (!blocked) camera.position.copy(newPos);
+        if (!blocked) {
+          camera.position.x = collisionPos.x;
+          camera.position.z = collisionPos.z;
+        }
       }
-      camera.position.y = 1.6;
+      camera.position.y += velocityY;
+      const minY = move.crouch ? crouchHeight : standHeight;
+      if (camera.position.y <= minY) {
+        camera.position.y = minY;
+        velocityY = 0;
+      } else {
+        velocityY -= gravity;
+      }
     } else {
       controls.update();
     }
