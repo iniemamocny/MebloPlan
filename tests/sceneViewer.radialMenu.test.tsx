@@ -94,4 +94,41 @@ describe('SceneViewer RadialMenu visibility', () => {
 
     root.unmount();
   });
+
+  it('is accessible in all player modes', () => {
+    const modes = ['build', 'furnish', 'decorate'] as const;
+    for (const m of modes) {
+      visibleStates.length = 0;
+      const threeRef: any = { current: null };
+      const setMode = vi.fn();
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+      const root = ReactDOM.createRoot(container);
+
+      act(() => {
+        root.render(
+          <SceneViewer
+            threeRef={threeRef}
+            addCountertop={false}
+            mode={m}
+            setMode={setMode}
+          />,
+        );
+      });
+      expect(visibleStates[visibleStates.length - 1]).toBe(false);
+
+      act(() => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyQ' }));
+      });
+      expect(visibleStates[visibleStates.length - 1]).toBe(true);
+
+      act(() => {
+        window.dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyQ' }));
+      });
+      expect(visibleStates[visibleStates.length - 1]).toBe(false);
+
+      root.unmount();
+      container.remove();
+    }
+  });
 });

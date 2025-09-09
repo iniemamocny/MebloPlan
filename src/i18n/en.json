@@ -43,7 +43,13 @@
     "addDoor": "Add door",
     "addDecor": "Add decoration",
     "noWindows": "No windows or doors",
-    "noDecor": "No decorations"
+    "noDecor": "No decorations",
+    "board2D": "2D Board",
+    "close": "Close",
+    "drawErrors": {
+      "intersect": "Segments cannot intersect",
+      "tooShort": "Wall is too short"
+    }
   },
   "catalog": {
     "choose": "Choose"

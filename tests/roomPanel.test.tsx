@@ -13,6 +13,7 @@ import { usePlannerStore } from '../src/state/store';
 beforeAll(() => {
   // jsdom does not implement canvas context; provide a minimal stub
   // so RoomDrawBoard can render without throwing.
+  (global as any).PointerEvent = MouseEvent;
   HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
     clearRect: vi.fn(),
     beginPath: vi.fn(),
@@ -44,6 +45,13 @@ vi.mock('../src/scene/engine', () => {
         toJSON() {},
       });
       const camera = new THREE.PerspectiveCamera();
+      const group: any = {
+        children: [],
+        add: (obj: any) => group.children.push(obj),
+        remove: (obj: any) => {
+          group.children = group.children.filter((o: any) => o !== obj);
+        },
+      };
       return {
         scene: {},
         camera,
@@ -56,7 +64,7 @@ vi.mock('../src/scene/engine', () => {
           removeEventListener: vi.fn(),
           isLocked: false,
         },
-        group: { children: [], add: () => {}, remove: () => {} },
+        group,
         cabinetDragger: { enable: vi.fn(), disable: vi.fn() },
       };
     },
@@ -191,6 +199,7 @@ describe('Room features', () => {
 
     expect(usePlannerStore.getState().isRoomDrawing).toBe(true);
     expect(usePlannerStore.getState().selectedTool).toBe('wall');
+    expect(container.textContent).toContain('room.board2D');
     expect(container.querySelector('canvas')).toBeTruthy();
 
     root.unmount();
@@ -226,7 +235,7 @@ describe('Room features', () => {
     });
 
     const btn = Array.from(container.querySelectorAll('button')).find(
-      (b) => b.textContent === 'global.close',
+      (b) => b.textContent === 'room.close',
     );
     act(() => {
       btn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -234,6 +243,42 @@ describe('Room features', () => {
 
     const state = usePlannerStore.getState();
     expect(state.isRoomDrawing).toBe(false);
+    expect(state.room.walls.length).toBe(1);
+
+    root.unmount();
+    container.remove();
+  });
+
+  it('draws wall and saves it for 3D scene', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+
+    usePlannerStore.setState({
+      room: { height: 2700, origin: { x: 0, y: 0 }, walls: [], windows: [], doors: [] },
+      selectedWall: { thickness: 0.1 },
+      roomShape: {
+        points: [
+          { x: 0, y: 0 },
+          { x: 1, y: 0 },
+        ],
+        segments: [{ start: { x: 0, y: 0 }, end: { x: 1, y: 0 } }],
+      },
+      isRoomDrawing: true,
+    });
+
+    act(() => {
+      root.render(<RoomPanel />);
+    });
+
+    const closeBtn = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent === 'room.close',
+    );
+    act(() => {
+      closeBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    const state = usePlannerStore.getState();
     expect(state.room.walls.length).toBe(1);
 
     root.unmount();
