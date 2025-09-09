@@ -50,6 +50,7 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
   useEffect(() => {
     if (!containerRef.current) return;
     threeRef.current = setupThree(containerRef.current) as ThreeContext;
+    (threeRef.current as any).setPlayerMode = setPlayerMode;
     const pc = threeRef.current.playerControls;
     const onUnlock = () => setPlayerMode(false);
     pc.addEventListener('unlock', onUnlock);

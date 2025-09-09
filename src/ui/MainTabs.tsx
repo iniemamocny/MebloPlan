@@ -8,11 +8,12 @@ import CutlistTab from './panels/CutlistTab';
 import { CabinetConfig } from './types';
 import SlidingPanel from './components/SlidingPanel';
 import GlobalSettings from './panels/GlobalSettings';
+import PlayPanel from './panels/PlayPanel';
 
 interface MainTabsProps {
   t: (key: string, opts?: any) => string;
-  tab: 'cab' | 'costs' | 'cut' | 'global' | null;
-  setTab: (t: 'cab' | 'costs' | 'cut' | 'global' | null) => void;
+  tab: 'cab' | 'costs' | 'cut' | 'global' | 'play' | null;
+  setTab: (t: 'cab' | 'costs' | 'cut' | 'global' | 'play' | null) => void;
   family: FAMILY;
   setFamily: (f: FAMILY) => void;
   kind: Kind | null;
@@ -41,6 +42,7 @@ interface MainTabsProps {
   setBoardHasGrain: (v: boolean) => void;
   addCountertop: boolean;
   setAddCountertop: (v: boolean) => void;
+  threeRef: React.MutableRefObject<any>;
 }
 
 export default function MainTabs({
@@ -70,8 +72,9 @@ export default function MainTabs({
   setBoardHasGrain,
   addCountertop,
   setAddCountertop,
+  threeRef,
 }: MainTabsProps) {
-  const toggleTab = (name: 'cab' | 'costs' | 'cut' | 'global') => {
+  const toggleTab = (name: 'cab' | 'costs' | 'cut' | 'global' | 'play') => {
     setTab(tab === name ? null : name);
   };
 
@@ -89,6 +92,9 @@ export default function MainTabs({
         </button>
         <button className={`tabBtn ${tab === 'global' ? 'active' : ''}`} onClick={() => toggleTab('global')}>
           {t('app.tabs.global')}
+        </button>
+        <button className={`tabBtn ${tab === 'play' ? 'active' : ''}`} onClick={() => toggleTab('play')}>
+          {t('app.tabs.play')}
         </button>
       </div>
 
@@ -191,6 +197,7 @@ export default function MainTabs({
           />
         )}
         {tab === 'global' && <GlobalSettings />}
+        {tab === 'play' && <PlayPanel threeRef={threeRef} t={t} />}
       </SlidingPanel>
     </>
   );
