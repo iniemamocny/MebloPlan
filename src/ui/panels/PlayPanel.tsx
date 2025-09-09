@@ -4,9 +4,11 @@ import { usePlannerStore } from '../../state/store';
 interface Props {
   threeRef: React.MutableRefObject<any>;
   t: (key: string, opts?: any) => string;
+  setPlayerMode: (v: boolean) => void;
+  onClose: () => void;
 }
 
-export default function PlayPanel({ threeRef, t }: Props) {
+export default function PlayPanel({ threeRef, t, setPlayerMode, onClose }: Props) {
   const {
     playerHeight,
     playerSpeed,
@@ -53,10 +55,16 @@ export default function PlayPanel({ threeRef, t }: Props) {
           />
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btnGhost" onClick={() => threeRef.current?.setPlayerMode?.(true)}>
+          <button
+            className="btnGhost"
+            onClick={() => {
+              setPlayerMode(true);
+              onClose();
+            }}
+          >
             Enter play mode
           </button>
-          <button className="btnGhost" onClick={() => threeRef.current?.setPlayerMode?.(false)}>
+          <button className="btnGhost" onClick={() => setPlayerMode(false)}>
             Exit play mode
           </button>
         </div>

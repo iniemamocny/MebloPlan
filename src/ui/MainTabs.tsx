@@ -43,6 +43,8 @@ interface MainTabsProps {
   addCountertop: boolean;
   setAddCountertop: (v: boolean) => void;
   threeRef: React.MutableRefObject<any>;
+  playerMode: boolean;
+  setPlayerMode: (v: boolean) => void;
 }
 
 export default function MainTabs({
@@ -73,6 +75,7 @@ export default function MainTabs({
   addCountertop,
   setAddCountertop,
   threeRef,
+  setPlayerMode,
 }: MainTabsProps) {
   const toggleTab = (name: 'cab' | 'costs' | 'cut' | 'global' | 'play') => {
     setTab(tab === name ? null : name);
@@ -197,7 +200,14 @@ export default function MainTabs({
           />
         )}
         {tab === 'global' && <GlobalSettings />}
-        {tab === 'play' && <PlayPanel threeRef={threeRef} t={t} />}
+        {tab === 'play' && (
+          <PlayPanel
+            threeRef={threeRef}
+            t={t}
+            setPlayerMode={setPlayerMode}
+            onClose={() => setTab(null)}
+          />
+        )}
       </SlidingPanel>
     </>
   );
