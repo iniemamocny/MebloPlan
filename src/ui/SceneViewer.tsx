@@ -278,6 +278,7 @@ const SceneViewer: React.FC<Props> = ({
   }, [mode]);
 
   useEffect(() => {
+    if (mode === null) return;
     const handleTab = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return;
       e.preventDefault();
@@ -289,7 +290,7 @@ const SceneViewer: React.FC<Props> = ({
     };
     window.addEventListener('keydown', handleTab);
     return () => window.removeEventListener('keydown', handleTab);
-  }, [setMode]);
+  }, [mode, setMode]);
 
   useEffect(() => {
     updateGhost();
