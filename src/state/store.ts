@@ -1,7 +1,6 @@
 import { create } from 'zustand';
-import * as THREE from 'three';
 import { FAMILY } from '../core/catalog';
-import { Module3D, Room, Globals, Prices, Opening, Gaps, WallArc } from '../types';
+import { Module3D, Room, Globals, Prices, Gaps } from '../types';
 import { safeSetItem } from '../utils/storage';
 
 export const defaultGaps: Gaps = {
@@ -110,11 +109,6 @@ export const defaultPrices: Prices = {
   margin: 0.15,
 };
 
-export const wallRanges = {
-  nosna: { min: 150, max: 250 },
-  dzialowa: { min: 60, max: 120 },
-};
-
 const clamp = (v: number, min: number, max: number) =>
   Math.min(Math.max(v, min), max);
 
@@ -134,8 +128,6 @@ type Store = {
   past: { modules: Module3D[]; room: Room }[];
   future: { modules: Module3D[]; room: Room }[];
   room: Room;
-  wallType: 'nosna' | 'dzialowa';
-  wallThickness: number;
   snapAngle: number;
   snapLength: number;
   snapRightAngles: boolean;
@@ -145,7 +137,6 @@ type Store = {
   gridSize: number;
   snapToGrid: boolean;
   measurementUnit: 'mm' | 'cm';
-  openingDefaults: { width: number; height: number; bottom: number; kind: number };
   setRole: (r: 'stolarz' | 'klient') => void;
   updateGlobals: (fam: FAMILY, patch: Partial<Globals[FAMILY]>) => void;
   updatePrices: (patch: Partial<Prices>) => void;
@@ -156,25 +147,7 @@ type Store = {
   undo: () => void;
   redo: () => void;
   setRoom: (patch: Partial<Room>) => void;
-  addWall: (
-    w: { length: number; angle: number; thickness: number; arc?: WallArc },
-  ) => string;
-  removeWall: (id: string) => void;
-  updateWall: (
-    id: string,
-    patch: Partial<{
-      length: number;
-      angle: number;
-      thickness: number;
-      arc: Partial<WallArc>;
-    }>,
-  ) => void;
-  addOpening: (op: Omit<Opening, 'id'>) => void;
-  updateOpening: (id: string, patch: Partial<Omit<Opening, 'id'>>) => void;
-  removeOpening: (id: string) => void;
   setShowFronts: (v: boolean) => void;
-  setWallType: (t: 'nosna' | 'dzialowa') => void;
-  setWallThickness: (v: number) => void;
   setSnapAngle: (v: number) => void;
   setSnapLength: (v: number) => void;
   setSnapRightAngles: (v: boolean) => void;
@@ -183,9 +156,6 @@ type Store = {
   setGridSize: (v: number) => void;
   setSnapToGrid: (v: boolean) => void;
   setMeasurementUnit: (u: 'mm' | 'cm') => void;
-  setOpeningDefaults: (
-    patch: Partial<{ width: number; height: number; bottom: number; kind: number }>,
-  ) => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -199,25 +169,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
     ? {
         ...persisted.room,
         origin: persisted.room.origin || { x: 0, y: 0 },
-        walls:
-          persisted.room.walls?.map((w: any) => ({
-            id: w.id || crypto.randomUUID(),
-            thickness: 100,
-            ...w,
-          })) || [],
-        openings:
-          persisted.room.openings?.map((o: any) => ({
-            id: o.id || crypto.randomUUID(),
-            ...o,
-          })) || [],
       }
-    : { walls: [], openings: [], height: 2700, origin: { x: 0, y: 0 } },
-  wallType: persisted?.wallType || 'dzialowa',
-  wallThickness: clamp(
-    persisted?.wallThickness ?? 100,
-    wallRanges[persisted?.wallType || 'dzialowa'].min,
-    wallRanges[persisted?.wallType || 'dzialowa'].max,
-  ),
+    : { height: 2700, origin: { x: 0, y: 0 } },
   snapAngle: persisted?.snapAngle ?? 90,
   snapLength: persisted?.snapLength ?? 10,
   snapRightAngles: true,
@@ -226,9 +179,6 @@ export const usePlannerStore = create<Store>((set, get) => ({
   gridSize: persisted?.gridSize ?? 50,
   snapToGrid: persisted?.snapToGrid ?? false,
   measurementUnit: persisted?.measurementUnit || 'mm',
-  openingDefaults:
-    persisted?.openingDefaults ||
-    { width: 900, height: 2100, bottom: 0, kind: 0 },
   showFronts: true,
   setRole: (r) => set({ role: r }),
   updateGlobals: (fam, patch) =>
@@ -382,255 +332,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
       room: { ...s.room, ...patch },
       future: [],
     })),
-  addWall: (w) => {
-    const { wallType } = get();
-    const { min, max } = wallRanges[wallType];
-
-    if (w.length <= 0) {
-      throw new Error('Wall length must be positive');
-    }
-    if (w.thickness <= 0) {
-      throw new Error('Wall thickness must be positive');
-    }
-
-    let length = clamp(w.length, min, max);
-    const thickness = clamp(w.thickness, min, max);
-    const angle = ((w.angle % 360) + 360) % 360;
-
-    let arc: WallArc | undefined;
-    if (w.arc) {
-      if (w.arc.radius === undefined || w.arc.radius <= 0) {
-        throw new Error('Arc radius must be positive');
-      }
-      if (w.arc.angle === undefined || w.arc.angle === 0) {
-        throw new Error('Arc angle must be non-zero');
-      }
-      let ang = w.arc.angle % 360;
-      if (ang === 0) ang = 360;
-      arc = { radius: w.arc.radius, angle: ang };
-      length = Math.abs(arc.radius * THREE.MathUtils.degToRad(arc.angle));
-    }
-
-    const id = crypto.randomUUID();
-    set((s) => ({
-      past: [
-        ...s.past,
-        {
-          modules: JSON.parse(JSON.stringify(s.modules)),
-          room: JSON.parse(JSON.stringify(s.room)),
-        },
-      ],
-      room: {
-        ...s.room,
-        walls: [
-          ...s.room.walls,
-          { id, length, angle, thickness, ...(arc ? { arc } : {}) },
-        ],
-      },
-      future: [],
-    }));
-    return id;
-  },
-  removeWall: (id) =>
-    set((s) => ({
-      past: [
-        ...s.past,
-        {
-          modules: JSON.parse(JSON.stringify(s.modules)),
-          room: JSON.parse(JSON.stringify(s.room)),
-        },
-      ],
-      room: {
-        ...s.room,
-        walls: s.room.walls.filter((w) => w.id !== id),
-        openings: s.room.openings.filter((o) => o.wallId !== id),
-      },
-      future: [],
-    })),
-  updateWall: (id, patch) => {
-    const { wallType } = get();
-    const { min, max } = wallRanges[wallType];
-    const wall = get().room.walls.find((w) => w.id === id);
-    const validated: Partial<{
-      length: number;
-      angle: number;
-      thickness: number;
-      arc: WallArc;
-    }> = {};
-
-    if (patch.length !== undefined) {
-      if (patch.length <= 0) {
-        throw new Error('Wall length must be positive');
-      }
-      validated.length = clamp(patch.length, min, max);
-    }
-
-    if (patch.thickness !== undefined) {
-      if (patch.thickness <= 0) {
-        throw new Error('Wall thickness must be positive');
-      }
-      validated.thickness = clamp(patch.thickness, min, max);
-    }
-
-    if (patch.angle !== undefined) {
-      validated.angle = ((patch.angle % 360) + 360) % 360;
-    }
-
-    if (patch.arc !== undefined) {
-      const arc: WallArc = { ...(wall?.arc || {}), ...patch.arc } as WallArc;
-      if (arc.radius === undefined || arc.radius <= 0) {
-        throw new Error('Arc radius must be positive');
-      }
-      if (arc.angle === undefined || arc.angle === 0) {
-        throw new Error('Arc angle must be non-zero');
-      }
-      let ang = arc.angle % 360;
-      if (ang === 0) ang = 360;
-      arc.angle = ang;
-      validated.arc = arc;
-      if (patch.arc.radius !== undefined || patch.arc.angle !== undefined) {
-        validated.length = Math.abs(
-          arc.radius * THREE.MathUtils.degToRad(arc.angle),
-        );
-      }
-    }
-
-    if (Object.keys(validated).length === 0) return;
-
-    set((s) => ({
-      past: [
-        ...s.past,
-        {
-          modules: JSON.parse(JSON.stringify(s.modules)),
-          room: JSON.parse(JSON.stringify(s.room)),
-        },
-      ],
-      room: {
-        ...s.room,
-        walls: s.room.walls.map((w) =>
-          w.id === id ? { ...w, ...validated } : w,
-        ),
-      },
-      future: [],
-    }));
-  },
-  addOpening: (op) => {
-    const { room } = get();
-    const wall = room.walls.find((w) => w.id === op.wallId);
-    if (
-      !wall ||
-      op.offset < 0 ||
-      op.width <= 0 ||
-      op.height <= 0 ||
-      op.bottom < 0 ||
-      op.offset + op.width > wall.length ||
-      op.bottom + op.height > room.height
-    ) {
-      throw new Error('Invalid opening dimensions');
-    }
-    if (
-      room.openings.some(
-        (o) =>
-          o.wallId === op.wallId &&
-          op.offset < o.offset + o.width &&
-          o.offset < op.offset + op.width,
-      )
-    ) {
-      throw new Error('Opening overlaps with existing opening');
-    }
-    set((s) => ({
-      past: [
-        ...s.past,
-        {
-          modules: JSON.parse(JSON.stringify(s.modules)),
-          room: JSON.parse(JSON.stringify(s.room)),
-        },
-      ],
-      room: {
-        ...s.room,
-        openings: [...s.room.openings, { id: crypto.randomUUID(), ...op }],
-      },
-      future: [],
-    }));
-  },
-  updateOpening: (id, patch) => {
-    const { room } = get();
-    const existing = room.openings.find((o) => o.id === id);
-    if (!existing) return;
-    const wallId = patch.wallId ?? existing.wallId;
-    const wall = room.walls.find((w) => w.id === wallId);
-    const offset = patch.offset ?? existing.offset;
-    const width = patch.width ?? existing.width;
-    const bottom = patch.bottom ?? existing.bottom;
-    const height = patch.height ?? existing.height;
-    if (
-      !wall ||
-      offset < 0 ||
-      width <= 0 ||
-      height <= 0 ||
-      bottom < 0 ||
-      offset + width > wall.length ||
-      bottom + height > room.height
-    ) {
-      throw new Error('Invalid opening dimensions');
-    }
-    if (
-      room.openings.some(
-        (o) =>
-          o.wallId === wallId &&
-          o.id !== id &&
-          offset < o.offset + o.width &&
-          o.offset < offset + width,
-      )
-    ) {
-      throw new Error('Opening overlaps with existing opening');
-    }
-    set((s) => ({
-      past: [
-        ...s.past,
-        {
-          modules: JSON.parse(JSON.stringify(s.modules)),
-          room: JSON.parse(JSON.stringify(s.room)),
-        },
-      ],
-      room: {
-        ...s.room,
-        openings: s.room.openings.map((o) =>
-          o.id === id ? { ...o, ...patch } : o,
-        ),
-      },
-      future: [],
-    }));
-  },
-  removeOpening: (id) =>
-    set((s) => ({
-      past: [
-        ...s.past,
-        {
-          modules: JSON.parse(JSON.stringify(s.modules)),
-          room: JSON.parse(JSON.stringify(s.room)),
-        },
-      ],
-      room: {
-        ...s.room,
-        openings: s.room.openings.filter((o) => o.id !== id),
-      },
-      future: [],
-    })),
   setShowFronts: (v) => set({ showFronts: v }),
-  setWallType: (t) =>
-    set((s) => {
-      const { min, max } = wallRanges[t];
-      return {
-        wallType: t,
-        wallThickness: clamp(s.wallThickness, min, max),
-      };
-    }),
-  setWallThickness: (v) =>
-    set((s) => {
-      const { min, max } = wallRanges[s.wallType];
-      return { wallThickness: clamp(v, min, max) };
-    }),
   setSnapAngle: (v) => set({ snapAngle: v }),
   setSnapLength: (v) => set({ snapLength: v }),
   setSnapRightAngles: (v) => set({ snapRightAngles: v, snapAngle: v ? 90 : 0 }),
@@ -639,8 +341,6 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setGridSize: (v) => set({ gridSize: v }),
   setSnapToGrid: (v) => set({ snapToGrid: v }),
   setMeasurementUnit: (v) => set({ measurementUnit: v }),
-  setOpeningDefaults: (patch) =>
-    set((s) => ({ openingDefaults: { ...s.openingDefaults, ...patch } })),
 }));
 
 const persistSelector = (s: Store) => ({
@@ -649,8 +349,6 @@ const persistSelector = (s: Store) => ({
   prices: s.prices,
   modules: s.modules,
   room: s.room,
-  wallType: s.wallType,
-  wallThickness: s.wallThickness,
   snapAngle: s.snapAngle,
   snapLength: s.snapLength,
   angleToPrev: s.angleToPrev,
@@ -658,7 +356,6 @@ const persistSelector = (s: Store) => ({
   gridSize: s.gridSize,
   snapToGrid: s.snapToGrid,
   measurementUnit: s.measurementUnit,
-  openingDefaults: s.openingDefaults,
 });
 
 let persistTimeout = 0;

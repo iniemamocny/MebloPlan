@@ -1,39 +1,16 @@
 import React from 'react';
 import type { Kind, Variant } from '../core/catalog';
-import { wallRanges, usePlannerStore } from '../state/store';
 
 interface TopBarProps {
   t: (key: string, opts?: any) => string;
   store: any;
   setVariant: (v: Variant | null) => void;
   setKind: (k: Kind | null) => void;
-  selWall: string;
-  setSelWall: (n: string) => void;
-  doAutoOnSelectedWall: () => void;
   lang: string;
   setLang: (l: string) => void;
 }
 
-export default function TopBar({ t, store, setVariant, setKind, selWall, setSelWall, doAutoOnSelectedWall, lang, setLang }: TopBarProps) {
-  const onRemoveWall = () => {
-    store.removeWall(selWall);
-    const first = usePlannerStore.getState().room.walls[0];
-    setSelWall(first ? first.id : '');
-  };
-  const onEditWall = () => {
-    const w = store.room.walls.find((ww: any) => ww.id === selWall);
-    if (!w) return;
-    const length = Number(prompt('Length (mm)', String(w.length))) || w.length;
-    const angle = Number(prompt('Angle (deg)', String(w.angle))) || w.angle;
-    const thickness =
-      Number(prompt('Thickness (mm)', String(w.thickness))) || w.thickness;
-    const { min, max } = wallRanges[store.wallType];
-    if (thickness < min || thickness > max) {
-      alert(`Thickness must be between ${min} and ${max}mm`);
-      return;
-    }
-    store.updateWall(selWall, { length, angle, thickness });
-  };
+export default function TopBar({ t, store, setVariant, setKind, lang, setLang }: TopBarProps) {
   return (
     <div className="topbar row">
       <button className="btnGhost" onClick={() => store.setRole(store.role === 'stolarz' ? 'klient' : 'stolarz')}>
@@ -50,34 +27,6 @@ export default function TopBar({ t, store, setVariant, setKind, selWall, setSelW
       </button>
       <button className="btnGhost" onClick={() => store.clear()}>
         {t('app.clear')}
-      </button>
-      <select
-        className="btnGhost"
-        value={selWall}
-        onChange={e => setSelWall((e.target as HTMLSelectElement).value)}
-      >
-        {store.room.walls.map((w: any, i: number) => (
-          <option key={w.id} value={w.id}>
-            {t('app.wallLabel', { num: i + 1, len: Math.round(w.length) })}
-          </option>
-        ))}
-      </select>
-      <button
-        className="btnGhost"
-        onClick={onRemoveWall}
-        disabled={store.room.walls.length === 0}
-      >
-        {t('app.removeWall')}
-      </button>
-      <button
-        className="btnGhost"
-        onClick={onEditWall}
-        disabled={store.room.walls.length === 0}
-      >
-        {t('app.editWall')}
-      </button>
-      <button className="btn" onClick={doAutoOnSelectedWall}>
-        {t('app.autoWall')}
       </button>
       <select className="btnGhost" value={lang} onChange={e => setLang((e.target as HTMLSelectElement).value)}>
         <option value="pl">PL</option>
