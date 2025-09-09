@@ -10,6 +10,7 @@ import { usePlannerStore, legCategories } from '../state/store';
 import { Module3D, ModuleAdv, Globals } from '../types';
 import { loadItemModel } from '../scene/itemLoader';
 import ItemHotbar, { hotbarItems } from './components/ItemHotbar';
+import TouchJoystick from './components/TouchJoystick';
 
 interface ThreeContext {
   scene: THREE.Scene;
@@ -20,6 +21,14 @@ interface ThreeContext {
   group: THREE.Group;
   cabinetDragger: CabinetDragger;
   setPlayerParams?: (p: { height?: number; speed?: number }) => void;
+  setMove?: (m: {
+    forward: boolean;
+    backward: boolean;
+    left: boolean;
+    right: boolean;
+  }) => void;
+  onJump?: () => void;
+  onCrouch?: (active: boolean) => void;
 }
 
 interface Props {
@@ -44,10 +53,19 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
   const showFronts = store.showFronts;
 
   const [playerMode, setPlayerMode] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const targetRef = useRef<{ cab: THREE.Object3D; index: number } | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const availableItems = ['cup', 'plate'];
+
+  useEffect(() => {
+    setIsMobile(
+      typeof window !== 'undefined' &&
+        (('ontouchstart' in window) ||
+          (typeof navigator !== 'undefined' && /Mobi/i.test(navigator.userAgent))),
+    );
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -67,14 +85,22 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
     if (playerMode) {
       three.controls.enabled = false;
       three.cabinetDragger.disable();
-      three.playerControls.lock();
+      if (isMobile) {
+        (three.playerControls as any).isLocked = true;
+      } else {
+        three.playerControls.lock();
+      }
       three.camera.position.y = store.playerHeight;
     } else {
-      three.playerControls.unlock();
+      if (isMobile) {
+        (three.playerControls as any).isLocked = false;
+      } else {
+        three.playerControls.unlock();
+      }
       three.controls.enabled = true;
       three.cabinetDragger.enable();
     }
-  }, [playerMode, threeRef, store.playerHeight]);
+  }, [playerMode, threeRef, store.playerHeight, isMobile]);
 
   useEffect(() => {
     threeRef.current?.setPlayerParams?.({
@@ -496,6 +522,43 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
         </button>
       </div>
       {playerMode && <ItemHotbar />}
+      {playerMode && isMobile && (
+        <>
+          <TouchJoystick
+            onMove={(dir) =>
+              threeRef.current?.setMove?.({ ...dir })
+            }
+          />
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 20,
+              right: 20,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+            }}
+          >
+            <button
+              className="btnGhost"
+              onClick={() => threeRef.current?.onJump?.()}
+            >
+              Skok
+            </button>
+            <button
+              className="btnGhost"
+              onPointerDown={() => threeRef.current?.onCrouch?.(true)}
+              onPointerUp={() => threeRef.current?.onCrouch?.(false)}
+              onPointerCancel={() => threeRef.current?.onCrouch?.(false)}
+            >
+              Kucaj
+            </button>
+            <button className="btnGhost" onClick={() => setPlayerMode(false)}>
+              Wyjdz
+            </button>
+          </div>
+        </>
+      )}
       {!playerMode && (
         <div
           style={{

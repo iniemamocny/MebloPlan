@@ -63,6 +63,31 @@ export function setupThree(container: HTMLElement) {
     jump: false,
     crouch: false,
   };
+  const setMove = ({
+    forward = false,
+    backward = false,
+    left = false,
+    right = false,
+  }) => {
+    move.forward = forward;
+    move.backward = backward;
+    move.left = left;
+    move.right = right;
+  };
+  const onJump = () => {
+    move.jump = true;
+    if (camera.position.y <= (move.crouch ? crouchHeight : playerHeight) + 0.01)
+      velocityY = 0.2;
+    setTimeout(() => (move.jump = false), 100);
+  };
+  const onCrouch = (active: boolean) => {
+    move.crouch = active;
+    if (active) {
+      if (camera.position.y <= playerHeight + 0.01) camera.position.y = crouchHeight;
+    } else {
+      camera.position.y = Math.max(camera.position.y, playerHeight);
+    }
+  };
   let velocityY = 0;
   const gravity = 0.01;
   let playerHeight = usePlannerStore.getState().playerHeight;
@@ -126,6 +151,38 @@ export function setupThree(container: HTMLElement) {
   };
   document.addEventListener('keydown', onKeyDown);
   document.addEventListener('keyup', onKeyUp);
+
+  let lookId: number | null = null;
+  let lastX = 0;
+  let lastY = 0;
+  const onPointerDown = (e: PointerEvent) => {
+    if (e.clientX > window.innerWidth / 2) {
+      lookId = e.pointerId;
+      lastX = e.clientX;
+      lastY = e.clientY;
+    }
+  };
+  const onPointerMove = (e: PointerEvent) => {
+    if (lookId !== e.pointerId || !playerControls.isLocked) return;
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+    euler.setFromQuaternion(camera.quaternion);
+    euler.y -= dx * 0.002;
+    euler.x -= dy * 0.002;
+    const PI_2 = Math.PI / 2;
+    euler.x = Math.max(-PI_2, Math.min(PI_2, euler.x));
+    camera.quaternion.setFromEuler(euler);
+  };
+  const onPointerUp = (e: PointerEvent) => {
+    if (lookId === e.pointerId) lookId = null;
+  };
+  window.addEventListener('pointerdown', onPointerDown);
+  window.addEventListener('pointermove', onPointerMove);
+  window.addEventListener('pointerup', onPointerUp);
+  window.addEventListener('pointercancel', onPointerUp);
 
   const onResize = () => {
     const w = container.clientWidth,
@@ -205,5 +262,8 @@ export function setupThree(container: HTMLElement) {
     group,
     cabinetDragger,
     setPlayerParams,
+    setMove,
+    onJump,
+    onCrouch,
   };
 }
