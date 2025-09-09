@@ -1,6 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import type { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
+import type CabinetDragger from '../viewer/CabinetDragger';
 import { setupThree } from '../scene/engine';
 import { buildCabinetMesh } from '../scene/cabinetBuilder';
 import { FAMILY } from '../core/catalog';
@@ -12,7 +14,9 @@ interface ThreeContext {
   camera: THREE.PerspectiveCamera;
   renderer: THREE.WebGLRenderer;
   controls: OrbitControls;
+  playerControls: PointerLockControls;
   group: THREE.Group;
+  cabinetDragger: CabinetDragger;
 }
 
 interface Props {
@@ -34,10 +38,33 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
   const showEdges = store.role === 'stolarz';
   const showFronts = store.showFronts;
 
+  const [playerMode, setPlayerMode] = useState(false);
+
   useEffect(() => {
     if (!containerRef.current) return;
-    threeRef.current = setupThree(containerRef.current);
+    threeRef.current = setupThree(containerRef.current) as ThreeContext;
+    const pc = threeRef.current.playerControls;
+    const onUnlock = () => setPlayerMode(false);
+    pc.addEventListener('unlock', onUnlock);
+    return () => {
+      pc.removeEventListener('unlock', onUnlock);
+    };
   }, [threeRef]);
+
+  useEffect(() => {
+    const three = threeRef.current;
+    if (!three) return;
+    if (playerMode) {
+      three.controls.enabled = false;
+      three.cabinetDragger.disable();
+      three.playerControls.lock();
+      three.camera.position.y = 1.6;
+    } else {
+      three.playerControls.unlock();
+      three.controls.enabled = true;
+      three.cabinetDragger.enable();
+    }
+  }, [playerMode, threeRef]);
 
   const createCabinetMesh = (mod: Module3D, legHeight: number) => {
     const W = mod.size.w;
@@ -274,12 +301,19 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
       <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
-      <div className="zoomControls">
-        <button className="btnGhost" onClick={handleZoomIn}>
-          +
-        </button>
-        <button className="btnGhost" onClick={handleZoomOut}>
-          −
+      {!playerMode && (
+        <div className="zoomControls">
+          <button className="btnGhost" onClick={handleZoomIn}>
+            +
+          </button>
+          <button className="btnGhost" onClick={handleZoomOut}>
+            −
+          </button>
+        </div>
+      )}
+      <div style={{ position: 'absolute', top: 10, left: 10 }}>
+        <button className="btnGhost" onClick={() => setPlayerMode((p) => !p)}>
+          {playerMode ? 'Tryb edycji' : 'Tryb gracza'}
         </button>
       </div>
     </div>
