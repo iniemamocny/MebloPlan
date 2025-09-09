@@ -27,6 +27,9 @@ interface ThreeContext {
     left: boolean;
     right: boolean;
   }) => void;
+  setMoveFromJoystick?: (v: { x: number; y: number }) => void;
+  updateCameraRotation?: (dx: number, dy: number) => void;
+  resetCameraRotation?: () => void;
   onJump?: () => void;
   onCrouch?: (active: boolean) => void;
 }
@@ -54,6 +57,7 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
 
   const [playerMode, setPlayerMode] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const lookVec = useRef({ x: 0, y: 0 });
   const targetRef = useRef<{ cab: THREE.Object3D; index: number } | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
@@ -62,8 +66,8 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
   useEffect(() => {
     setIsMobile(
       typeof window !== 'undefined' &&
-        (('ontouchstart' in window) ||
-          (typeof navigator !== 'undefined' && /Mobi/i.test(navigator.userAgent))),
+        ("ontouchstart" in window ||
+          (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0)),
     );
   }, []);
 
@@ -108,6 +112,19 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       speed: store.playerSpeed,
     });
   }, [store.playerHeight, store.playerSpeed, threeRef]);
+
+  useEffect(() => {
+    let id = 0;
+    const loop = () => {
+      const { x, y } = lookVec.current;
+      if (x !== 0 || y !== 0) {
+        threeRef.current?.updateCameraRotation?.(x * 2, y * 2);
+      }
+      id = requestAnimationFrame(loop);
+    };
+    loop();
+    return () => cancelAnimationFrame(id);
+  }, [threeRef]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -525,38 +542,24 @@ const SceneViewer: React.FC<Props> = ({ threeRef, addCountertop }) => {
       {playerMode && isMobile && (
         <>
           <TouchJoystick
-            onMove={(dir) =>
-              threeRef.current?.setMove?.({ ...dir })
+            style={{ left: 16, bottom: 16 }}
+            onMove={(x, y, _a) =>
+              threeRef.current?.setMoveFromJoystick?.({ x, y })
             }
           />
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 20,
-              right: 20,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 8,
+          <TouchJoystick
+            style={{ right: 16, bottom: 16 }}
+            onMove={(x, y, active) => {
+              lookVec.current = active ? { x, y } : { x: 0, y: 0 };
             }}
+          />
+          <button
+            className="btnGhost"
+            style={{ position: 'absolute', right: 96, bottom: 16 }}
+            onClick={() => threeRef.current?.resetCameraRotation?.()}
           >
-            <button
-              className="btnGhost"
-              onClick={() => threeRef.current?.onJump?.()}
-            >
-              Skok
-            </button>
-            <button
-              className="btnGhost"
-              onPointerDown={() => threeRef.current?.onCrouch?.(true)}
-              onPointerUp={() => threeRef.current?.onCrouch?.(false)}
-              onPointerCancel={() => threeRef.current?.onCrouch?.(false)}
-            >
-              Kucaj
-            </button>
-            <button className="btnGhost" onClick={() => setPlayerMode(false)}>
-              Wyjdz
-            </button>
-          </div>
+            Centrum
+          </button>
         </>
       )}
       {!playerMode && (

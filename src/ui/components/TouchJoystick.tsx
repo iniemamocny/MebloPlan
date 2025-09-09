@@ -1,81 +1,76 @@
-import React, { useRef } from 'react';
-
-interface Move {
-  forward: boolean;
-  backward: boolean;
-  left: boolean;
-  right: boolean;
-}
+import React, { useRef, useState } from 'react';
 
 interface Props {
-  onMove: (m: Move) => void;
+  onMove: (x: number, y: number, active: boolean) => void;
+  style?: React.CSSProperties;
 }
 
-const TouchJoystick: React.FC<Props> = ({ onMove }) => {
-  const activeId = useRef<number | null>(null);
-  const start = useRef<{ x: number; y: number } | null>(null);
+const TouchJoystick: React.FC<Props> = ({ onMove, style }) => {
+  const active = useRef<number | null>(null);
+  const start = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const radius = 40;
+  const [pos, setPos] = useState({ x: 0, y: 0 });
 
   const reset = () => {
-    onMove({ forward: false, backward: false, left: false, right: false });
-    activeId.current = null;
-    start.current = null;
+    setPos({ x: 0, y: 0 });
+    onMove(0, 0, false);
+    active.current = null;
   };
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    activeId.current = e.pointerId;
+    active.current = e.pointerId;
     start.current = { x: e.clientX, y: e.clientY };
-    e.stopPropagation();
+    onMove(0, 0, true);
     e.preventDefault();
+    e.stopPropagation();
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerId !== activeId.current || !start.current) return;
+    if (active.current !== e.pointerId) return;
     const dx = e.clientX - start.current.x;
     const dy = e.clientY - start.current.y;
-    const t = 20;
-    onMove({
-      forward: dy < -t,
-      backward: dy > t,
-      left: dx < -t,
-      right: dx > t,
-    });
-    e.stopPropagation();
+    const len = Math.sqrt(dx * dx + dy * dy);
+    const clampedLen = Math.min(len, radius);
+    const nx = len === 0 ? 0 : (dx / len) * clampedLen;
+    const ny = len === 0 ? 0 : (dy / len) * clampedLen;
+    setPos({ x: nx, y: ny });
+    onMove(nx / radius, ny / radius, true);
     e.preventDefault();
+    e.stopPropagation();
   };
 
   const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerId !== activeId.current) return;
+    if (active.current !== e.pointerId) return;
     reset();
-    e.stopPropagation();
     e.preventDefault();
+    e.stopPropagation();
   };
 
   return (
     <div
-      style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
+      style={{
+        position: 'absolute',
+        width: radius * 2,
+        height: radius * 2,
+        borderRadius: radius,
+        border: '2px solid #999',
+        touchAction: 'none',
+        ...style,
+      }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
     >
       <div
         style={{
           position: 'absolute',
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: '50%',
-          pointerEvents: 'auto',
-        }}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          right: 0,
-          top: 0,
-          bottom: 0,
-          width: '50%',
-          pointerEvents: 'none',
+          left: radius + pos.x - 20,
+          top: radius + pos.y - 20,
+          width: 40,
+          height: 40,
+          borderRadius: 20,
+          background: '#ccc',
         }}
       />
     </div>
