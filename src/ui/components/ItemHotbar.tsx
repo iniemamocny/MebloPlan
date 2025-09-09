@@ -15,6 +15,20 @@ export const hotbarItems: (string | null)[] = [
   null,
 ];
 
+export const buildHotbarItems: (string | null)[] = [
+  'wall',
+  'window',
+  'door',
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+];
+
+export const furnishHotbarItems: (string | null)[] = Array(9).fill(null);
+
 interface Props {
   mode: PlayerMode | null;
 }
@@ -23,8 +37,14 @@ const ItemHotbar: React.FC<Props> = ({ mode }) => {
   const { t } = useTranslation();
   const selected = usePlannerStore((s) => s.selectedItemSlot);
   const setSelected = usePlannerStore((s) => s.setSelectedItemSlot);
+  if (!mode) return null;
 
-  if (mode !== 'decorate') return null;
+  const items =
+    mode === 'build'
+      ? buildHotbarItems
+      : mode === 'furnish'
+        ? furnishHotbarItems
+        : hotbarItems;
 
   return (
     <div
@@ -38,7 +58,7 @@ const ItemHotbar: React.FC<Props> = ({ mode }) => {
         padding: 4,
       }}
     >
-      {hotbarItems.map((item, idx) => (
+      {items.map((item, idx) => (
         <div
           key={idx}
           onClick={() => setSelected(idx + 1)}

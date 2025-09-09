@@ -203,7 +203,10 @@
   "items": {
     "cup": "Kubek",
     "plate": "Talerz",
-    "bottle": "Butelka"
+    "bottle": "Butelka",
+    "wall": "Ściana",
+    "window": "Okno",
+    "door": "Drzwi"
   },
   "radial": {
     "wall": "Ściana",
