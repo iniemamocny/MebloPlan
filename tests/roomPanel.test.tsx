@@ -196,5 +196,48 @@ describe('Room features', () => {
     root.unmount();
     container.remove();
   });
+
+  it('saves room and exits drawing when closing', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+
+    usePlannerStore.setState({
+      room: {
+        height: 2700,
+        origin: { x: 0, y: 0 },
+        walls: [],
+        windows: [],
+        doors: [],
+      },
+      roomShape: {
+        points: [
+          { x: 0, y: 0 },
+          { x: 1, y: 0 },
+        ],
+        segments: [{ start: { x: 0, y: 0 }, end: { x: 1, y: 0 } }],
+      },
+      selectedWall: { thickness: 0.1 },
+      isRoomDrawing: true,
+    });
+
+    act(() => {
+      root.render(<RoomPanel />);
+    });
+
+    const btn = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent === 'global.close',
+    );
+    act(() => {
+      btn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    const state = usePlannerStore.getState();
+    expect(state.isRoomDrawing).toBe(false);
+    expect(state.room.walls.length).toBe(1);
+
+    root.unmount();
+    container.remove();
+  });
 });
 
