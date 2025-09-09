@@ -115,6 +115,11 @@ export function setupThree(container: HTMLElement) {
   let crouchHeight = playerHeight - 0.6;
   let playerSpeed = usePlannerStore.getState().playerSpeed;
   const onKeyDown = (e: KeyboardEvent) => {
+    if (playerControls.isLocked && e.ctrlKey && e.code === 'KeyW') {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
     if (playerControls.isLocked) {
       e.preventDefault();
       e.stopPropagation();
@@ -180,8 +185,8 @@ export function setupThree(container: HTMLElement) {
         break;
     }
   };
-  document.addEventListener('keydown', onKeyDown);
-  document.addEventListener('keyup', onKeyUp);
+  document.addEventListener('keydown', onKeyDown, { capture: true });
+  document.addEventListener('keyup', onKeyUp, { capture: true });
 
   let lookId: number | null = null;
   let lastX = 0;
