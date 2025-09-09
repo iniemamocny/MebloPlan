@@ -37,6 +37,8 @@
     "windowsDoors": "Windows and doors",
     "decor": "Decorative elements",
     "draw": "Draw",
+    "height": "Height",
+    "wallThickness": "Thickness",
     "addWindow": "Add window",
     "addDoor": "Add door",
     "addDecor": "Add decoration",
