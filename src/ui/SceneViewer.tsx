@@ -91,28 +91,19 @@ const SceneViewer: React.FC<Props> = ({
 
   const radialItems =
     mode === 'build'
-      ? buildHotbarItems(store.selectedWall)
+      ? buildHotbarItems()
       : mode === 'furnish'
         ? furnishHotbarItems
         : hotbarItems;
 
-  const wallSubMenu = {
-    items: ['bearing', 'partition'] as (string | null)[],
-    selected: store.selectedWall?.kind === 'bearing' ? 1 : 2,
-    onSelect: (slot: number) =>
-      store.setSelectedWallKind(slot === 1 ? 'bearing' : 'partition'),
-  };
-
   useEffect(() => {
     if (mode === 'build') {
-      const tool = buildHotbarItems(store.selectedWall)[
-        store.selectedItemSlot - 1
-      ];
+      const tool = buildHotbarItems()[store.selectedItemSlot - 1];
       if (store.selectedTool !== tool) store.setSelectedTool(tool);
     } else if (store.selectedTool) {
       store.setSelectedTool(null);
     }
-  }, [mode, store.selectedItemSlot, store.selectedWall, store.selectedTool]);
+  }, [mode, store.selectedItemSlot, store.selectedTool]);
 
   useEffect(() => {
     const three = threeRef.current;
@@ -778,7 +769,6 @@ const SceneViewer: React.FC<Props> = ({
           }
         }}
         visible={showRadial}
-        subMenu={wallSubMenu}
       />
       {mode === null && (
         <div className="zoomControls">

@@ -59,6 +59,7 @@ describe('RadialMenu integration with RoomBuilder', () => {
 
     usePlannerStore.setState({
       selectedTool: null,
+      selectedWall: { thickness: 0.1 },
       room: { height: 2700, origin: { x: 0, y: 0 }, walls: [], windows: [], doors: [] },
     });
 

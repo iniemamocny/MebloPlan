@@ -66,7 +66,11 @@ describe('SceneViewer radial menu selection', () => {
     const root = ReactDOM.createRoot(container);
 
     act(() => {
-      usePlannerStore.setState({ selectedItemSlot: 1, selectedTool: null, selectedWall: null });
+      usePlannerStore.setState({
+        selectedItemSlot: 1,
+        selectedTool: null,
+        selectedWall: { thickness: 0.1 },
+      });
       root.render(
         <SceneViewer threeRef={threeRef} addCountertop={false} mode="build" setMode={setMode} />,
       );
