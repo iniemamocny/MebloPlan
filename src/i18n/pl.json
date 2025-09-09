@@ -53,6 +53,7 @@
     "settings": "Ustawienia — {{family}}",
     "collapse": "Zwiń",
     "expand": "Rozwiń",
+    "close": "Zamknij",
     "margin": "Marża (0–1)",
     "labor": "Robocizna (zł)",
     "cut": "Cięcie (zł/mb)",

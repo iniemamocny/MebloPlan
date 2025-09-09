@@ -53,6 +53,7 @@
     "settings": "Settings — {{family}}",
     "collapse": "Collapse",
     "expand": "Expand",
+    "close": "Close",
     "margin": "Margin (0–1)",
     "labor": "Labor (PLN)",
     "cut": "Cut (PLN/m)",
