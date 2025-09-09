@@ -152,6 +152,7 @@ type Store = {
   selectedItemSlot: number;
   selectedTool: string | null;
   selectedWall: { kind: 'bearing' | 'partition'; thickness: number } | null;
+  isRoomDrawing: boolean;
   itemsByCabinet: (cabinetId: string) => Item[];
   itemsBySurface: (cabinetId: string, surfaceIndex: number) => Item[];
   setRole: (r: 'stolarz' | 'klient') => void;
@@ -182,6 +183,7 @@ type Store = {
   setSelectedTool: (tool: string | null) => void;
   setSelectedWallKind: (kind: 'bearing' | 'partition') => void;
   setSelectedWallThickness: (thickness: number) => void;
+  setIsRoomDrawing: (v: boolean) => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -220,6 +222,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   selectedItemSlot: 1,
   selectedTool: null,
   selectedWall: null,
+  isRoomDrawing: false,
   showFronts: true,
   itemsByCabinet: (cabinetId) =>
     get().items.filter((it) => it.cabinetId === cabinetId),
@@ -416,18 +419,27 @@ export const usePlannerStore = create<Store>((set, get) => ({
       };
     }),
   setRoom: (patch) =>
-    set((s) => ({
-      past: [
-        ...s.past,
-        {
-          modules: JSON.parse(JSON.stringify(s.modules)),
-          items: JSON.parse(JSON.stringify(s.items)),
-          room: JSON.parse(JSON.stringify(s.room)),
-        },
-      ],
-      room: { ...s.room, ...patch },
-      future: [],
-    })),
+    set((s) => {
+      const newPatch: Partial<Room> = { ...patch };
+      if (patch.walls) {
+        newPatch.walls = patch.walls.map((w) => ({
+          ...w,
+          thickness: clamp(w.thickness, 0.08, 0.25),
+        }));
+      }
+      return {
+        past: [
+          ...s.past,
+          {
+            modules: JSON.parse(JSON.stringify(s.modules)),
+            items: JSON.parse(JSON.stringify(s.items)),
+            room: JSON.parse(JSON.stringify(s.room)),
+          },
+        ],
+        room: { ...s.room, ...newPatch },
+        future: [],
+      };
+    }),
   setShowFronts: (v) => set({ showFronts: v }),
   setSnapAngle: (v) => set({ snapAngle: v }),
   setSnapLength: (v) => set({ snapLength: v }),
@@ -453,9 +465,10 @@ export const usePlannerStore = create<Store>((set, get) => ({
     set((s) => ({
       selectedWall: {
         kind: s.selectedWall?.kind ?? 'partition',
-        thickness,
+        thickness: clamp(thickness, 0.08, 0.25),
       },
     })),
+  setIsRoomDrawing: (v) => set({ isRoomDrawing: v }),
 }));
 
 const persistSelector = (s: Store) => ({

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { usePlannerStore } from '../../state/store';
 
 export default function RoomPanel() {
   const { t } = useTranslation();
@@ -11,10 +12,12 @@ export default function RoomPanel() {
     title,
     open,
     setOpen,
+    children,
   }: {
     title: string;
     open: boolean;
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    children?: React.ReactNode;
   }) => (
     <div className="section">
       <div className="hd" onClick={() => setOpen((o) => !o)}>
@@ -25,13 +28,30 @@ export default function RoomPanel() {
           {open ? t('global.collapse') : t('global.expand')}
         </button>
       </div>
-      {open && (
-        <div className="bd">
-          <button className="btnGhost">{t('room.draw')}</button>
-        </div>
-      )}
+      {open && <div className="bd">{children}</div>}
     </div>
   );
+
+  const room = usePlannerStore((s) => s.room);
+  const setRoom = usePlannerStore((s) => s.setRoom);
+  const wallThickness =
+    usePlannerStore((s) => s.selectedWall?.thickness) ?? 0.1;
+  const setThickness = usePlannerStore((s) => s.setSelectedWallThickness);
+  const setIsRoomDrawing = usePlannerStore((s) => s.setIsRoomDrawing);
+  const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
+
+  const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRoom({ height: parseInt(e.target.value, 10) });
+  };
+
+  const handleThicknessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setThickness(parseFloat(e.target.value));
+  };
+
+  const startDrawing = () => {
+    setIsRoomDrawing(true);
+    setSelectedTool('wall');
+  };
 
   return (
     <>
@@ -39,7 +59,33 @@ export default function RoomPanel() {
         title={t('room.walls')}
         open={wallsOpen}
         setOpen={setWallsOpen}
-      />
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <label>
+            {t('room.height')}
+            <input
+              type="number"
+              value={room.height}
+              onChange={handleHeightChange}
+            />
+          </label>
+          <label>
+            {t('room.wallThickness')}
+            <input
+              type="range"
+              min={0.08}
+              max={0.25}
+              step={0.01}
+              value={wallThickness}
+              onChange={handleThicknessChange}
+            />
+            <span>{Math.round(wallThickness * 1000)} mm</span>
+          </label>
+          <button className="btnGhost" onClick={startDrawing}>
+            {t('room.draw')}
+          </button>
+        </div>
+      </Section>
       <Section
         title={t('room.windowsDoors')}
         open={windowsOpen}
