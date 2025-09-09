@@ -8,6 +8,7 @@ describe('updateGlobals legs handling', () => {
     usePlannerStore.setState({
     globals: JSON.parse(JSON.stringify(defaultGlobal)),
     modules: [],
+    items: [],
     });
   });
 

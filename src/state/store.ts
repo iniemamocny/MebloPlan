@@ -120,13 +120,23 @@ const persisted = (() => {
   }
 })();
 
+export interface Item {
+  id: string;
+  type: string;
+  position: [number, number, number];
+  rotation: [number, number, number];
+  cabinetId?: string;
+  shelfIndex?: number;
+}
+
 type Store = {
   role: 'stolarz' | 'klient';
   globals: Globals;
   prices: Prices;
   modules: Module3D[];
-  past: { modules: Module3D[]; room: Room }[];
-  future: { modules: Module3D[]; room: Room }[];
+  items: Item[];
+  past: { modules: Module3D[]; items: Item[]; room: Room }[];
+  future: { modules: Module3D[]; items: Item[]; room: Room }[];
   room: Room;
   snapAngle: number;
   snapLength: number;
@@ -143,6 +153,9 @@ type Store = {
   addModule: (m: Module3D) => void;
   updateModule: (id: string, patch: Partial<Module3D>) => void;
   removeModule: (id: string) => void;
+  addItem: (i: Item) => void;
+  updateItem: (id: string, patch: Partial<Item>) => void;
+  removeItem: (id: string) => void;
   clear: () => void;
   undo: () => void;
   redo: () => void;
@@ -163,6 +176,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   globals: persisted?.globals || JSON.parse(JSON.stringify(defaultGlobal)),
   prices: persisted?.prices || JSON.parse(JSON.stringify(defaultPrices)),
   modules: persisted?.modules || [],
+  items: persisted?.items || [],
   past: [],
   future: [],
   room: persisted?.room
@@ -244,6 +258,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
         ...s.past,
         {
           modules: JSON.parse(JSON.stringify(s.modules)),
+          items: JSON.parse(JSON.stringify(s.items)),
           room: JSON.parse(JSON.stringify(s.room)),
         },
       ],
@@ -256,6 +271,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
         ...s.past,
         {
           modules: JSON.parse(JSON.stringify(s.modules)),
+          items: JSON.parse(JSON.stringify(s.items)),
           room: JSON.parse(JSON.stringify(s.room)),
         },
       ],
@@ -268,10 +284,50 @@ export const usePlannerStore = create<Store>((set, get) => ({
         ...s.past,
         {
           modules: JSON.parse(JSON.stringify(s.modules)),
+          items: JSON.parse(JSON.stringify(s.items)),
           room: JSON.parse(JSON.stringify(s.room)),
         },
       ],
       modules: s.modules.filter((x) => x.id !== id),
+      future: [],
+    })),
+  addItem: (i) =>
+    set((s) => ({
+      past: [
+        ...s.past,
+        {
+          modules: JSON.parse(JSON.stringify(s.modules)),
+          items: JSON.parse(JSON.stringify(s.items)),
+          room: JSON.parse(JSON.stringify(s.room)),
+        },
+      ],
+      items: [...s.items, i],
+      future: [],
+    })),
+  updateItem: (id, patch) =>
+    set((s) => ({
+      past: [
+        ...s.past,
+        {
+          modules: JSON.parse(JSON.stringify(s.modules)),
+          items: JSON.parse(JSON.stringify(s.items)),
+          room: JSON.parse(JSON.stringify(s.room)),
+        },
+      ],
+      items: s.items.map((x) => (x.id === id ? { ...x, ...patch } : x)),
+      future: [],
+    })),
+  removeItem: (id) =>
+    set((s) => ({
+      past: [
+        ...s.past,
+        {
+          modules: JSON.parse(JSON.stringify(s.modules)),
+          items: JSON.parse(JSON.stringify(s.items)),
+          room: JSON.parse(JSON.stringify(s.room)),
+        },
+      ],
+      items: s.items.filter((x) => x.id !== id),
       future: [],
     })),
   clear: () =>
@@ -280,10 +336,12 @@ export const usePlannerStore = create<Store>((set, get) => ({
         ...s.past,
         {
           modules: JSON.parse(JSON.stringify(s.modules)),
+          items: JSON.parse(JSON.stringify(s.items)),
           room: JSON.parse(JSON.stringify(s.room)),
         },
       ],
       modules: [],
+      items: [],
       future: [],
     })),
   undo: () =>
@@ -292,12 +350,14 @@ export const usePlannerStore = create<Store>((set, get) => ({
       const previous = s.past[s.past.length - 1];
       return {
         modules: previous.modules,
+        items: previous.items,
         room: previous.room,
         past: s.past.slice(0, -1),
         future: [
           ...s.future,
           {
             modules: JSON.parse(JSON.stringify(s.modules)),
+            items: JSON.parse(JSON.stringify(s.items)),
             room: JSON.parse(JSON.stringify(s.room)),
           },
         ],
@@ -309,11 +369,13 @@ export const usePlannerStore = create<Store>((set, get) => ({
       const next = s.future[s.future.length - 1];
       return {
         modules: next.modules,
+        items: next.items,
         room: next.room,
         past: [
           ...s.past,
           {
             modules: JSON.parse(JSON.stringify(s.modules)),
+            items: JSON.parse(JSON.stringify(s.items)),
             room: JSON.parse(JSON.stringify(s.room)),
           },
         ],
@@ -326,6 +388,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
         ...s.past,
         {
           modules: JSON.parse(JSON.stringify(s.modules)),
+          items: JSON.parse(JSON.stringify(s.items)),
           room: JSON.parse(JSON.stringify(s.room)),
         },
       ],
@@ -348,6 +411,7 @@ const persistSelector = (s: Store) => ({
   globals: s.globals,
   prices: s.prices,
   modules: s.modules,
+  items: s.items,
   room: s.room,
   snapAngle: s.snapAngle,
   snapLength: s.snapLength,
