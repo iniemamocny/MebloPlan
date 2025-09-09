@@ -178,7 +178,6 @@ export interface Module3D {
   rotationY?: number;
   price?: Price;
   fittings?: Record<string, number>;
-  segIndex?: number | null;
   adv?: ModuleAdv;
   openStates?: boolean[];
 }

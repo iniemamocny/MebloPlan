@@ -9,11 +9,6 @@
     "undo": "Cofnij",
     "redo": "Ponów",
     "clear": "Wyczyść",
-    "wallLabel": "Ściana {{num}} ({{len}} mm)",
-    "autoWall": "Auto pod ścianę",
-    "removeWall": "Usuń ścianę",
-    "editWall": "Edytuj ścianę",
-    "moveWall": "Przesuń ścianę",
     "view2D": "Widok 2D",
     "view3D": "Widok 3D",
     "auto": "Auto",
@@ -27,7 +22,6 @@
     },
     "tabs": {
       "cab": "Kuchnia",
-      "room": "Pomieszczenie",
       "costs": "Koszty",
       "cut": "Formatki",
       "global": "Ustawienia"
@@ -38,28 +32,6 @@
   },
   "catalog": {
     "choose": "Wybierz"
-  },
-  "room": {
-    "title": "Pomieszczenie — ściany",
-    "height": "Wysokość pomieszczenia (mm)",
-    "wallThickness": "Grubość ściany (mm)",
-    "wallType": "Typ ściany",
-    "wallTypes": {
-      "nosna": "Nośna",
-      "dzialowa": "Działowa"
-    },
-    "addWindow": "Dodaj okno",
-    "addDoor": "Dodaj drzwi",
-    "drawWalls": "Rysuj ściany",
-    "finishDrawing": "Zakończ rysowanie",
-    "noWalls": "Brak ścian",
-    "angleToPrev": "Kąt do poprzedniej (°)",
-    "snapLength": "Krok długości (mm; Alt tymczasowo wyłącza przyciąganie)",
-    "snapAngle": "Krok kąta (°) (Alt: chwilowe wyłączenie)",
-    "snapRightAngles": "Kąty proste",
-    "area": "Powierzchnia (mm²)",
-    "perimeter": "Obwód (mm)",
-    "invalidLength": "Długość nie może być ujemna"
   },
   "global": {
     "title": "Ustawienia ogólne",

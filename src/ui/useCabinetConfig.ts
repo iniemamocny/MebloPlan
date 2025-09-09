@@ -55,7 +55,7 @@ export function useCabinetConfig(
     });
   }, [family, store.globals]);
 
-  const snapToWalls = (
+  const computePlacement = (
     mSize: { w: number; h: number; d: number },
     _fam: FAMILY,
   ) => {
@@ -66,7 +66,6 @@ export function useCabinetConfig(
         0,
       ] as [number, number, number],
       rot: 0,
-      segIndex: null as number | null,
     };
   };
 
@@ -89,8 +88,7 @@ export function useCabinetConfig(
       ];
       loops++;
     }
-    const { segIndex, ...rest } = tryMod as any;
-    return rest as Module3D;
+    return tryMod as Module3D;
   };
 
   const onAdd = (
@@ -138,7 +136,7 @@ export function useCabinetConfig(
       },
       { prices: store.prices, globals: store.globals },
     );
-    const snap = snapToWalls({ w, h, d }, family);
+    const placement = computePlacement({ w, h, d }, family);
     const advAugmented: ModuleAdv & {
       hinge?: string;
       drawerSlide?: string;
@@ -182,9 +180,8 @@ export function useCabinetConfig(
       family,
       kind: kind.key,
       size: { w, h, d },
-      position: snap.pos,
-      rotationY: snap.rot,
-      segIndex: snap.segIndex,
+      position: placement.pos,
+      rotationY: placement.rot,
       price,
       adv: advAugmented,
     };
