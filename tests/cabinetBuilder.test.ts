@@ -21,7 +21,7 @@ describe('buildCabinetMesh', () => {
       family: FAMILY.BASE,
     });
     expect(g).toBeInstanceOf(THREE.Group);
-    expect(g.children.length).toBe(7);
+    expect(g.children.length).toBe(9);
   });
 
   it('creates provided number of drawer groups', () => {
@@ -37,6 +37,43 @@ describe('buildCabinetMesh', () => {
       (c) => c instanceof THREE.Group && (c as any).userData.type === 'drawer',
     );
     expect(drawers.length).toBe(3);
+  });
+
+  it('marks bottom and shelves as placeable', () => {
+    const g = buildCabinetMesh({
+      width: 1,
+      height: 0.9,
+      depth: 0.5,
+      drawers: 0,
+      shelves: 1,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+    });
+    const bottom = g.children.find(
+      (c) => c instanceof THREE.Mesh && (c as any).userData.part === 'bottom',
+    ) as THREE.Mesh | undefined;
+    const shelf = g.children.find(
+      (c) => c instanceof THREE.Mesh && (c as any).userData.part === 'shelf',
+    ) as THREE.Mesh | undefined;
+    expect(bottom?.userData.placeable).toBe(true);
+    expect(shelf?.userData.placeable).toBe(true);
+  });
+
+  it('creates placeable drawer interiors', () => {
+    const g = buildCabinetMesh({
+      width: 1,
+      height: 0.9,
+      depth: 0.5,
+      drawers: 2,
+      gaps: { top: 0, bottom: 0 },
+      family: FAMILY.BASE,
+    });
+    const interiors = g.children.filter(
+      (c) =>
+        c instanceof THREE.Mesh && (c as any).userData.part === 'drawerInterior',
+    );
+    expect(interiors.length).toBe(2);
+    interiors.forEach((m) => expect((m as any).userData.placeable).toBe(true));
   });
 
   it('returns group with expected children for doors', () => {

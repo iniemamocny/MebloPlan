@@ -462,6 +462,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
     bottom.position.set(W / 2, legHeight + T / 2, bottomZ);
     bottom.userData.part = 'bottom';
     bottom.userData.originalMaterial = bottom.material;
+    bottom.userData.placeable = true;
+    bottom.userData.ignoreRaycast = true;
     addEdges(bottom);
     group.add(bottom);
     if (shouldBand(bottomPanelEdgeBanding, 'horizontal', 'front')) {
@@ -845,6 +847,8 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
       shelf.position.set(W / 2, y, -D / 2);
       shelf.userData.part = 'shelf';
       shelf.userData.originalMaterial = shelf.material;
+      shelf.userData.placeable = true;
+      shelf.userData.ignoreRaycast = true;
       addEdges(shelf);
       group.add(shelf);
       if (shouldBand(shelfEdgeBanding, 'horizontal', 'front')) {
@@ -943,6 +947,20 @@ export function buildCabinetMesh(opts: CabinetOptions): THREE.Group {
           frontMesh.add(handle);
         }
         group.add(fg);
+        const drawerBottom = new THREE.Mesh(
+          new THREE.BoxGeometry(availW, T, D),
+          carcMat,
+        );
+        drawerBottom.position.set(
+          gapLeft / 1000 + availW / 2,
+          currentY + T / 2,
+          -D / 2,
+        );
+        drawerBottom.visible = false;
+        drawerBottom.userData.part = 'drawerInterior';
+        drawerBottom.userData.placeable = true;
+        drawerBottom.userData.ignoreRaycast = true;
+        group.add(drawerBottom);
         currentY += h;
       }
     } else {
