@@ -77,3 +77,26 @@ describe('SceneViewer cabinetDragger mode control', () => {
     root.unmount();
   });
 });
+
+describe('SceneViewer Tab key', () => {
+  it('does nothing when mode is null', () => {
+    const threeRef: any = { current: null };
+    const setMode = vi.fn();
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+
+    act(() => {
+      root.render(
+        <SceneViewer threeRef={threeRef} addCountertop={false} mode={null} setMode={setMode} />
+      );
+    });
+
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+    });
+    expect(setMode).not.toHaveBeenCalled();
+
+    root.unmount();
+  });
+});
