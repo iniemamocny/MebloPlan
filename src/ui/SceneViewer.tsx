@@ -7,7 +7,7 @@ import { setupThree } from '../scene/engine';
 import { buildCabinetMesh } from '../scene/cabinetBuilder';
 import { FAMILY } from '../core/catalog';
 import { usePlannerStore, legCategories } from '../state/store';
-import { Module3D, ModuleAdv, Globals } from '../types';
+import { Module3D, ModuleAdv, Globals, Wall } from '../types';
 import { loadItemModel } from '../scene/itemLoader';
 import ItemHotbar, {
   hotbarItems,
@@ -465,7 +465,44 @@ const SceneViewer: React.FC<Props> = ({
     const raycaster = new THREE.Raycaster();
     const handlePointer = (event: PointerEvent) => {
       if (mode) {
-        if (event.button === 2) {
+        if (event.button === 0 && mode === 'build' && store.selectedTool === 'wall') {
+          const rect = renderer.domElement.getBoundingClientRect();
+          const mouse = new THREE.Vector2(
+            ((event.clientX - rect.left) / rect.width) * 2 - 1,
+            -((event.clientY - rect.top) / rect.height) * 2 + 1,
+          );
+          raycaster.setFromCamera(mouse, camera);
+          const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+          const point = new THREE.Vector3();
+          const hit = raycaster.ray.intersectPlane(plane, point);
+          if (hit) {
+            const thickness = store.selectedWall?.thickness ?? 0.1;
+            const dir = camera.getWorldDirection(new THREE.Vector3());
+            dir.y = 0;
+            dir.normalize();
+            const orientation =
+              Math.abs(dir.x) > Math.abs(dir.z)
+                ? new THREE.Vector2(Math.sign(dir.x), 0)
+                : new THREE.Vector2(0, Math.sign(dir.z));
+            const half = thickness / 2;
+            const start = {
+              x: point.x - orientation.x * half,
+              y: point.z - orientation.y * half,
+            };
+            const end = {
+              x: point.x + orientation.x * half,
+              y: point.z + orientation.y * half,
+            };
+            const wall: Wall = {
+              id: Math.random().toString(36).slice(2),
+              start,
+              end,
+              height: store.room.height / 1000,
+              thickness,
+            };
+            store.setRoom({ walls: [...store.room.walls, wall] });
+          }
+        } else if (event.button === 2) {
           const target = targetRef.current;
           if (target) {
             const { cab, index } = target;
@@ -568,7 +605,17 @@ const SceneViewer: React.FC<Props> = ({
       window.removeEventListener('pointerdown', handlePointer);
       window.removeEventListener('contextmenu', handleContextMenu);
     };
-  }, [store.modules, mode, targetCabinet, store.selectedItemSlot, store.items, updateGhost]);
+  }, [
+    store.modules,
+    mode,
+    targetCabinet,
+    store.selectedItemSlot,
+    store.items,
+    updateGhost,
+    store.selectedTool,
+    store.selectedWall,
+    store.room,
+  ]);
 
   useEffect(() => {
     let animId: number;
