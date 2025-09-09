@@ -101,6 +101,33 @@ describe('SceneViewer Tab key', () => {
 
     root.unmount();
   });
+
+  it('cycles through modes when active', () => {
+    const threeRef: any = { current: null };
+    let mode: PlayerMode = 'build';
+    const setMode = vi.fn((updater: any) => {
+      mode = typeof updater === 'function' ? updater(mode) : updater;
+    });
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+
+    act(() => {
+      root.render(
+        <SceneViewer threeRef={threeRef} addCountertop={false} mode={mode} setMode={setMode} />
+      );
+    });
+
+    const expected: PlayerMode[] = ['furnish', 'decorate', 'build'];
+    for (const exp of expected) {
+      act(() => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+      });
+      expect(mode).toBe(exp);
+    }
+
+    root.unmount();
+  });
 });
 
 describe('SceneViewer hotbar keys', () => {
@@ -112,6 +139,7 @@ describe('SceneViewer hotbar keys', () => {
     const root = ReactDOM.createRoot(container);
 
     const modes: (PlayerMode | null)[] = [null, 'build', 'furnish'];
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
     for (const m of modes) {
       act(() => {
         usePlannerStore.setState({ selectedItemSlot: 5 });
@@ -121,13 +149,15 @@ describe('SceneViewer hotbar keys', () => {
             addCountertop={false}
             mode={m}
             setMode={setMode}
-          />,
+          />, 
         );
       });
-      act(() => {
-        window.dispatchEvent(new KeyboardEvent('keydown', { key: '1' }));
-      });
-      expect(usePlannerStore.getState().selectedItemSlot).toBe(5);
+      for (const key of keys) {
+        act(() => {
+          window.dispatchEvent(new KeyboardEvent('keydown', { key }));
+        });
+        expect(usePlannerStore.getState().selectedItemSlot).toBe(5);
+      }
     }
 
     root.unmount();
