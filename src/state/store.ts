@@ -150,6 +150,7 @@ type Store = {
   playerHeight: number;
   playerSpeed: number;
   selectedItemSlot: number;
+  selectedTool: string | null;
   itemsByCabinet: (cabinetId: string) => Item[];
   itemsBySurface: (cabinetId: string, surfaceIndex: number) => Item[];
   setRole: (r: 'stolarz' | 'klient') => void;
@@ -177,6 +178,7 @@ type Store = {
   setPlayerHeight: (v: number) => void;
   setPlayerSpeed: (v: number) => void;
   setSelectedItemSlot: (slot: number) => void;
+  setSelectedTool: (tool: string | null) => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -213,6 +215,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   playerHeight: persisted?.playerHeight ?? 1.6,
   playerSpeed: persisted?.playerSpeed ?? 0.1,
   selectedItemSlot: 1,
+  selectedTool: null,
   showFronts: true,
   itemsByCabinet: (cabinetId) =>
     get().items.filter((it) => it.cabinetId === cabinetId),
@@ -433,6 +436,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setPlayerHeight: (v) => set({ playerHeight: v }),
   setPlayerSpeed: (v) => set({ playerSpeed: v }),
   setSelectedItemSlot: (slot) => set({ selectedItemSlot: slot }),
+  setSelectedTool: (tool) => set({ selectedTool: tool }),
 }));
 
 const persistSelector = (s: Store) => ({

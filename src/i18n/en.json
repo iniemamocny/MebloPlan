@@ -208,6 +208,7 @@
   "radial": {
     "wall": "Wall",
     "window": "Window",
+    "door": "Door",
     "cup": "Cup",
     "plate": "Plate",
     "bottle": "Bottle"
