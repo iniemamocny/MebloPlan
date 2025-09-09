@@ -2,7 +2,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FaPencilAlt } from 'react-icons/fa';
 import { usePlannerStore } from '../state/store';
-import { getAreaAndPerimeter, getWallSegments } from '../utils/walls';
 
 const ranges = {
   nosna: { min: 150, max: 250 },
@@ -28,8 +27,11 @@ export default function WallDrawPanel({
   const [lengthError, setLengthError] = React.useState(false);
   const [mode, setMode] = React.useState<'draw' | 'edit' | 'move' | 'opening'>('draw');
   const { area, perimeter } = React.useMemo(() => {
-    const segs = getWallSegments(store.room, undefined, undefined, true);
-    return getAreaAndPerimeter(segs);
+    const perimeter = store.room.walls.reduce(
+      (sum: number, w: any) => sum + (w.length || 0),
+      0,
+    );
+    return { area: 0, perimeter };
   }, [store.room.walls]);
   React.useEffect(() => {
     threeRef.current.onLengthChange = setWallLength;

@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import { useTranslation } from 'react-i18next';
 import { usePlannerStore } from '../../state/store';
 import RoomUploader from '../RoomUploader';
-import { createWallGeometry, createWallMaterial } from '../../viewer/wall';
 import { Opening } from '../../types';
 
 interface RoomTabProps {
@@ -95,42 +94,7 @@ export default function RoomTab({
     floor.rotation.x = -Math.PI / 2;
     (floor as any).userData.kind = 'room';
     group.add(floor);
-    const origin = store.room.origin || { x: 0, y: 0 };
-    let cursor = new THREE.Vector2(origin.x / 1000, origin.y / 1000);
-    const h = store.room.height || 2700;
-    store.room.walls.forEach((w) => {
-      const len = (w.length || 0) / 1000;
-      const ang = ((w.angle || 0) * Math.PI) / 180;
-      const dir = new THREE.Vector2(Math.cos(ang), Math.sin(ang));
-      const next = new THREE.Vector2(
-        cursor.x + dir.x * len,
-        cursor.y + dir.y * len,
-      );
-      const mid = new THREE.Vector2(
-        (cursor.x + next.x) / 2,
-        (cursor.y + next.y) / 2,
-      );
-      const geom = createWallGeometry(
-        w.length || 0,
-        h,
-        w.thickness || 0,
-        store.room.openings.filter((o) => o.wallId === w.id),
-      );
-      const mat = createWallMaterial(store.wallType);
-      const box = new THREE.Mesh(geom, mat);
-      box.position.set(mid.x, h / 2000, mid.y);
-      box.rotation.y = -ang;
-      (box as any).userData.kind = 'room';
-      group.add(box);
-      cursor = next;
-    });
-  }, [
-    store.room.walls,
-    store.room.height,
-    store.room.openings,
-    store.wallType,
-    three,
-  ]);
+  }, [store.room.walls, store.room.height, store.room.openings, store.wallType, three]);
   return (
     <>
       <div className="section">

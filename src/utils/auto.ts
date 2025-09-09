@@ -1,4 +1,9 @@
-import { Segment } from './walls'
+export interface Segment {
+  a: { x: number; y: number };
+  b: { x: number; y: number };
+  length: number;
+  angle: number;
+}
 export function autoWidthsForRun(lengthMM:number, prefs:number[] = [600,800,400,500,300]){
   const result:number[] = []
   let remaining = Math.max(0, Math.floor(lengthMM))

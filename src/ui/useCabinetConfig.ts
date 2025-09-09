@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { FAMILY, Kind, Variant, KIND_SETS } from '../core/catalog';
 import { computeModuleCost } from '../core/pricing';
 import { usePlannerStore, legCategories } from '../state/store';
-import { getWallSegments, projectPointToSegment } from '../utils/walls';
-import { autoWidthsForRun, placeAlongWall } from '../utils/auto';
+import { autoWidthsForRun } from '../utils/auto';
 import { Module3D, ModuleAdv } from '../types';
 import { CabinetConfig } from './types';
 
@@ -60,44 +59,16 @@ export function useCabinetConfig(
 
   const snapToWalls = (
     mSize: { w: number; h: number; d: number },
-    fam: FAMILY,
+    _fam: FAMILY,
   ) => {
-    const segs = getWallSegments(store.room);
-    if (segs.length === 0)
-      return {
-        pos: [
-          store.modules.reduce((s, x) => s + x.size.w, 0) + mSize.w / 2,
-          mSize.h / 2,
-          0,
-        ] as [number, number, number],
-        rot: 0,
-        segIndex: null as number | null,
-      };
-    let best: {
-      seg: ReturnType<typeof getWallSegments>[number];
-      pr: ReturnType<typeof projectPointToSegment>;
-      i: number;
-    } | null = null;
-    const guess = store.room.origin || { x: 0, y: 0 };
-    segs.forEach((seg, i) => {
-      const pr = projectPointToSegment(guess.x, guess.y, seg);
-      if (!best || pr.dist < best.pr.dist) best = { seg, pr, i };
-    });
-    const gl = store.globals[fam];
-    const offset = (gl.offsetWall || 0) / 1000;
-    const nx = best.seg.b.y - best.seg.a.y;
-    const ny = -(best.seg.b.x - best.seg.a.x);
-    const nlen = Math.hypot(nx, ny) || 1;
-    const ux = nx / nlen,
-      uy = ny / nlen;
-    const x = best.pr.x / 1000 + ux * offset;
-    const z = best.pr.y / 1000 + uy * offset;
-    const rot = -best.seg.angle;
-    const y = mSize.h / 2;
     return {
-      pos: [x, y, z] as [number, number, number],
-      rot,
-      segIndex: best.i,
+      pos: [
+        store.modules.reduce((s, x) => s + x.size.w, 0) + mSize.w / 2,
+        mSize.h / 2,
+        0,
+      ] as [number, number, number],
+      rot: 0,
+      segIndex: null as number | null,
     };
   };
 
@@ -111,14 +82,7 @@ export function useCabinetConfig(
     const tryMod: Module3D = { ...mod };
     let loops = 0;
     const step = 0.02;
-    const segs = getWallSegments(store.room);
-    const seg = typeof mod.segIndex === 'number' ? segs[mod.segIndex] : null;
-    const tangent = seg
-      ? {
-          x: (seg.b.x - seg.a.x) / seg.length,
-          y: (seg.b.y - seg.a.y) / seg.length,
-        }
-      : { x: 1, y: 0 };
+    const tangent = { x: 1, y: 0 };
     while (store.modules.some((m) => collides(tryMod, m)) && loops < 500) {
       tryMod.position = [
         tryMod.position[0] + tangent.x * step,
@@ -127,7 +91,7 @@ export function useCabinetConfig(
       ];
       loops++;
     }
-    const { segIndex, ...rest } = tryMod;
+    const { segIndex, ...rest } = tryMod as any;
     return rest as Module3D;
   };
 
@@ -238,18 +202,15 @@ export function useCabinetConfig(
   };
 
   const doAutoOnSelectedWall = () => {
-    const segs = getWallSegments(store.room);
-    if (segs.length === 0) return alert(t('room.noWalls'));
-    const wallIndex = store.room.walls.findIndex(w => w.id === selWall);
-    const seg = segs[0 + ((wallIndex >= 0 ? wallIndex : 0) % segs.length)];
-    const len = seg.length;
+    const wall = store.room.walls.find((w) => w.id === selWall);
+    if (!wall) return alert(t('room.noWalls'));
+    const len = wall.length || 0;
     const widths = autoWidthsForRun(len);
     const g = store.globals[family];
     const h = g.height / 1000,
       d = g.depth / 1000;
-    const placed = placeAlongWall(widths, seg, 5);
-    placed.forEach((pl, i) => {
-      const wmm = widths[i];
+    let cursor = 0;
+    widths.forEach((wmm, i) => {
       const w = wmm / 1000;
       const id = `auto_${Date.now()}_${i}_${Math.floor(Math.random() * 1e6)}`;
       const price = computeModuleCost(
@@ -294,9 +255,9 @@ export function useCabinetConfig(
         family,
         kind: KIND_SETS[family][0]?.key || 'doors',
         size: { w, h, d },
-        position: [pl.center[0] / 1000, h / 2, pl.center[1] / 1000],
-        rotationY: pl.rot,
-        segIndex: wallIndex >= 0 ? wallIndex : 0,
+        position: [cursor / 1000 + w / 2, h / 2, 0],
+        rotationY: 0,
+        segIndex: null,
         price,
         adv: {
           ...g,
@@ -317,6 +278,7 @@ export function useCabinetConfig(
       };
       mod = resolveCollisions(mod);
       store.addModule(mod);
+      cursor += wmm + 5;
     });
   };
 

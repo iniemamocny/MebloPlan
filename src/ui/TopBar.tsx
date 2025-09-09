@@ -1,5 +1,4 @@
 import React from 'react';
-import { getWallSegments } from '../utils/walls';
 import type { Kind, Variant } from '../core/catalog';
 import { FaCube, FaRegSquare } from 'react-icons/fa';
 import { wallRanges, usePlannerStore } from '../state/store';
@@ -60,9 +59,9 @@ export default function TopBar({ t, store, setVariant, setKind, selWall, setSelW
         value={selWall}
         onChange={e => setSelWall((e.target as HTMLSelectElement).value)}
       >
-        {getWallSegments(store.room).map((s, i) => (
-          <option key={store.room.walls[i]?.id} value={store.room.walls[i]?.id}>
-            {t('app.wallLabel', { num: i + 1, len: Math.round(s.length) })}
+        {store.room.walls.map((w: any, i: number) => (
+          <option key={w.id} value={w.id}>
+            {t('app.wallLabel', { num: i + 1, len: Math.round(w.length) })}
           </option>
         ))}
       </select>
