@@ -94,6 +94,10 @@ export function setupThree(container: HTMLElement) {
   let crouchHeight = playerHeight - 0.6;
   let playerSpeed = usePlannerStore.getState().playerSpeed;
   const onKeyDown = (e: KeyboardEvent) => {
+    if (playerControls.isLocked) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     switch (e.code) {
       case 'ArrowUp':
       case 'KeyW':
@@ -117,12 +121,17 @@ export function setupThree(container: HTMLElement) {
           velocityY = 0.2;
         break;
       case 'ControlLeft':
+      case 'ControlRight':
         move.crouch = true;
         if (camera.position.y <= playerHeight + 0.01) camera.position.y = crouchHeight;
         break;
     }
   };
   const onKeyUp = (e: KeyboardEvent) => {
+    if (playerControls.isLocked) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     switch (e.code) {
       case 'ArrowUp':
       case 'KeyW':
@@ -144,6 +153,7 @@ export function setupThree(container: HTMLElement) {
         move.jump = false;
         break;
       case 'ControlLeft':
+      case 'ControlRight':
         move.crouch = false;
         camera.position.y = Math.max(camera.position.y, playerHeight);
         break;
