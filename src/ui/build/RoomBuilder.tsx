@@ -16,8 +16,10 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   const room = usePlannerStore((s) => s.room);
   const setRoom = usePlannerStore((s) => s.setRoom);
   const selectedTool = usePlannerStore((s) => s.selectedTool);
+  const selectedWall = usePlannerStore((s) => s.selectedWall);
   const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
   const groupRef = useRef<THREE.Group | null>(null);
+  const previewRef = useRef<THREE.Mesh | null>(null);
 
   // draw room elements whenever data changes
   useEffect(() => {
@@ -137,15 +139,77 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     if (!selectedTool) return;
     if (selectedTool === 'wall') {
       addWall();
+      setSelectedTool(null);
     } else if (selectedTool === 'window') {
       const lastWall = room.walls[room.walls.length - 1];
       if (lastWall) addWindow(lastWall.id);
+      setSelectedTool(null);
     } else if (selectedTool === 'door') {
       const lastWall = room.walls[room.walls.length - 1];
       if (lastWall) addDoor(lastWall.id);
+      setSelectedTool(null);
     }
-    setSelectedTool(null);
   }, [selectedTool]);
+
+  useEffect(() => {
+    const three = threeRef.current;
+    if (!three || !three.camera || !three.group) return;
+    const camera = three.camera as THREE.PerspectiveCamera;
+    const group = three.group as THREE.Group;
+
+    if (selectedTool === 'bearingWall' || selectedTool === 'partitionWall') {
+      if (!selectedWall?.thickness) return;
+
+      if (!previewRef.current) {
+        const geom = new THREE.PlaneGeometry(
+          selectedWall.thickness,
+          selectedWall.thickness,
+        );
+        const mat = new THREE.MeshBasicMaterial({
+          color: 0x00ff00,
+          transparent: true,
+          opacity: 0.5,
+          side: THREE.DoubleSide,
+        });
+        const mesh = new THREE.Mesh(geom, mat);
+        mesh.rotation.x = -Math.PI / 2;
+        group.add(mesh);
+        previewRef.current = mesh;
+      }
+
+      let animId: number;
+      const update = () => {
+        if (!previewRef.current) return;
+        const origin = camera.getWorldPosition(new THREE.Vector3());
+        const dir = camera.getWorldDirection(new THREE.Vector3());
+        const denom = dir.y;
+        if (denom !== 0) {
+          const t = -origin.y / denom;
+          const pos = origin.add(dir.multiplyScalar(t));
+          previewRef.current.position.set(pos.x, 0.001, pos.z);
+        }
+        animId = requestAnimationFrame(update);
+      };
+      update();
+
+      return () => {
+        cancelAnimationFrame(animId);
+        if (previewRef.current) {
+          group.remove(previewRef.current);
+          previewRef.current.geometry.dispose();
+          (previewRef.current.material as THREE.Material).dispose();
+          previewRef.current = null;
+        }
+      };
+    }
+
+    if (previewRef.current) {
+      group.remove(previewRef.current);
+      previewRef.current.geometry.dispose();
+      (previewRef.current.material as THREE.Material).dispose();
+      previewRef.current = null;
+    }
+  }, [selectedTool, selectedWall, threeRef]);
 
   return (
     <div
