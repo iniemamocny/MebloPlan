@@ -35,4 +35,6 @@ export interface CabinetConfig {
   legs?: { type: string; height: number; category?: string; legsOffset?: number };
 }
 
-export type PlayerMode = 'build' | 'furnish' | 'decorate' | null;
+export const PLAYER_MODES = ['build', 'furnish', 'decorate'] as const;
+export type PlayerSubMode = (typeof PLAYER_MODES)[number];
+export type PlayerMode = PlayerSubMode | null;
