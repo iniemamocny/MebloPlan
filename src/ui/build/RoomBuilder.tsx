@@ -19,6 +19,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   const selectedWall = usePlannerStore((s) => s.selectedWall);
   const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
   const groupRef = useRef<THREE.Group | null>(null);
+  // preview mesh for custom wall placement
   const previewRef = useRef<THREE.Mesh | null>(null);
 
   // draw room elements whenever data changes
