@@ -448,10 +448,13 @@ const RoomDrawBoard: React.FC<Props> = ({
       movingPointRef.current.x = p.x;
       movingPointRef.current.y = p.y;
       const points = mergePointIfNeeded(movingPointRef.current);
-      setRoomShape({
-        points: [...points],
-        segments: [...roomShape.segments],
-      });
+      setRoomShape(
+        {
+          points: [...points],
+          segments: [...roomShape.segments],
+        },
+        { pushHistory: false },
+      );
       return;
     }
     if (movingSegmentRef.current) {
@@ -464,10 +467,13 @@ const RoomDrawBoard: React.FC<Props> = ({
       segment.end.x += dx;
       segment.end.y += dy;
       movingSegmentRef.current.last = p;
-      setRoomShape({
-        points: [...roomShape.points],
-        segments: [...roomShape.segments],
-      });
+      setRoomShape(
+        {
+          points: [...roomShape.points],
+          segments: [...roomShape.segments],
+        },
+        { pushHistory: false },
+      );
       return;
     }
     if (!drawingRef.current || !start) {
@@ -489,14 +495,24 @@ const RoomDrawBoard: React.FC<Props> = ({
     }
     if (movingPointRef.current) {
       const points = mergePointIfNeeded(movingPointRef.current);
-      setRoomShape({
-        points: [...points],
-        segments: [...roomShape.segments],
-      });
+      setRoomShape(
+        {
+          points: [...points],
+          segments: [...roomShape.segments],
+        },
+        { pushHistory: true },
+      );
       movingPointRef.current = null;
       return;
     }
     if (movingSegmentRef.current) {
+      setRoomShape(
+        {
+          points: [...roomShape.points],
+          segments: [...roomShape.segments],
+        },
+        { pushHistory: true },
+      );
       movingSegmentRef.current = null;
       return;
     }

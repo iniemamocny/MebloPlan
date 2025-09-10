@@ -176,29 +176,38 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     const onMove = (e: PointerEvent) => {
       if (!drag) return;
       const p = getPoint(e);
-      setRoom({
-        walls: roomRef.current.walls.map((w) => {
-          if (w.id !== drag!.wallId) return w;
-          if (drag!.handle === 'start') {
-            return { ...w, start: { x: p.x, y: p.y } };
-          }
-          if (drag!.handle === 'end') {
-            return { ...w, end: { x: p.x, y: p.y } };
-          }
-          const midx = (w.start.x + w.end.x) / 2;
-          const midy = (w.start.y + w.end.y) / 2;
-          const dx = p.x - midx;
-          const dy = p.y - midy;
-          return {
-            ...w,
-            start: { x: w.start.x + dx, y: w.start.y + dy },
-            end: { x: w.end.x + dx, y: w.end.y + dy },
-          };
-        }),
-      });
+      setRoom(
+        {
+          walls: roomRef.current.walls.map((w) => {
+            if (w.id !== drag!.wallId) return w;
+            if (drag!.handle === 'start') {
+              return { ...w, start: { x: p.x, y: p.y } };
+            }
+            if (drag!.handle === 'end') {
+              return { ...w, end: { x: p.x, y: p.y } };
+            }
+            const midx = (w.start.x + w.end.x) / 2;
+            const midy = (w.start.y + w.end.y) / 2;
+            const dx = p.x - midx;
+            const dy = p.y - midy;
+            return {
+              ...w,
+              start: { x: w.start.x + dx, y: w.start.y + dy },
+              end: { x: w.end.x + dx, y: w.end.y + dy },
+            };
+          }),
+        },
+        { pushHistory: false },
+      );
     };
 
     const onUp = () => {
+      if (drag) {
+        setRoom(
+          { walls: [...roomRef.current.walls] },
+          { pushHistory: true },
+        );
+      }
       drag = null;
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);

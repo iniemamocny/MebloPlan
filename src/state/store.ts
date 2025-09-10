@@ -200,8 +200,8 @@ type Store = {
   clear: () => void;
   undo: () => void;
   redo: () => void;
-  setRoom: (patch: Partial<Room>) => void;
-  setRoomShape: (shape: RoomShape) => void;
+  setRoom: (patch: Partial<Room>, opts?: { pushHistory?: boolean }) => void;
+  setRoomShape: (shape: RoomShape, opts?: { pushHistory?: boolean }) => void;
   setShowFronts: (v: boolean) => void;
   setSnapAngle: (v: number) => void;
   setSnapLength: (v: number) => void;
@@ -454,8 +454,9 @@ export const usePlannerStore = create<Store>((set, get) => ({
         future: s.future.slice(0, -1),
       };
     }),
-  setRoom: (patch) =>
+  setRoom: (patch, opts = {}) =>
     set((s) => {
+      const { pushHistory = true } = opts as { pushHistory?: boolean };
       const newPatch: Partial<Room> = { ...patch };
       if (patch.walls) {
         const defaultThickness = s.selectedWall?.thickness ?? 0.1;
@@ -465,6 +466,11 @@ export const usePlannerStore = create<Store>((set, get) => ({
         }));
       }
       const updatedRoom = { ...s.room, ...newPatch };
+      const base = {
+        room: updatedRoom,
+        roomShape: patch.walls ? wallsToShape(updatedRoom.walls) : s.roomShape,
+      };
+      if (!pushHistory) return base;
       return {
         past: [
           ...s.past,
@@ -474,18 +480,20 @@ export const usePlannerStore = create<Store>((set, get) => ({
             room: JSON.parse(JSON.stringify(s.room)),
           },
         ],
-        room: updatedRoom,
-        roomShape: patch.walls ? wallsToShape(updatedRoom.walls) : s.roomShape,
         future: [],
+        ...base,
       };
     }),
-  setRoomShape: (shape) =>
+  setRoomShape: (shape, opts = {}) =>
     set((s) => {
+      const { pushHistory = true } = opts as { pushHistory?: boolean };
       const walls = shapeToWalls(shape, {
         height: s.room.height / 1000,
         thickness: s.selectedWall?.thickness ?? 0.1,
       });
       const updatedRoom = { ...s.room, walls };
+      const base = { roomShape: shape, room: updatedRoom };
+      if (!pushHistory) return base;
       return {
         past: [
           ...s.past,
@@ -495,9 +503,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
             room: JSON.parse(JSON.stringify(s.room)),
           },
         ],
-        roomShape: shape,
-        room: updatedRoom,
         future: [],
+        ...base,
       };
     }),
   setShowFronts: (v) => set({ showFronts: v }),
