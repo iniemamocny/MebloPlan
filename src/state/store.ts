@@ -1,8 +1,18 @@
 import { create } from 'zustand';
 import { FAMILY } from '../core/catalog';
-import { Module3D, Room, Globals, Prices, Gaps, RoomShape, Wall } from '../types';
+import {
+  Module3D,
+  Room,
+  Globals,
+  Prices,
+  Gaps,
+  RoomShape,
+  Wall,
+  ShapePoint,
+} from '../types';
 import { shapeToWalls } from '../utils/roomShape';
 import { safeSetItem } from '../utils/storage';
+import uuid from '../utils/uuid';
 
 export const defaultGaps: Gaps = {
   left: 2,
@@ -113,16 +123,26 @@ export const defaultPrices: Prices = {
 const clamp = (v: number, min: number, max: number) =>
   Math.min(Math.max(v, min), max);
 
-const wallsToShape = (walls: Wall[]): RoomShape => ({
-  points: walls.flatMap((w) => [
-    { ...w.start },
-    { ...w.end },
-  ]),
-  segments: walls.map((w) => ({
-    start: { ...w.start },
-    end: { ...w.end },
-  })),
-});
+const wallsToShape = (walls: Wall[]): RoomShape => {
+  const pointMap = new Map<string, ShapePoint>();
+
+  const getPoint = ({ x, y }: { x: number; y: number }): ShapePoint => {
+    const key = `${x}:${y}`;
+    let point = pointMap.get(key);
+    if (!point) {
+      point = { id: uuid(), x, y };
+      pointMap.set(key, point);
+    }
+    return point;
+  };
+
+  const segments = walls.map((w) => ({
+    start: getPoint(w.start),
+    end: getPoint(w.end),
+  }));
+
+  return { points: Array.from(pointMap.values()), segments };
+};
 
 const persisted = (() => {
   try {
