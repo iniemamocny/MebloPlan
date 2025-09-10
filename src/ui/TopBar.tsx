@@ -8,9 +8,11 @@ interface TopBarProps {
   setKind: (k: Kind | null) => void;
   lang: string;
   setLang: (l: string) => void;
+  viewMode: '3d' | '2d';
+  toggleViewMode: () => void;
 }
 
-export default function TopBar({ t, store, setVariant, setKind, lang, setLang }: TopBarProps) {
+export default function TopBar({ t, store, setVariant, setKind, lang, setLang, viewMode, toggleViewMode }: TopBarProps) {
   return (
     <div className="topbar row">
       <button className="btnGhost" onClick={() => store.setRole(store.role === 'stolarz' ? 'klient' : 'stolarz')}>
@@ -27,6 +29,9 @@ export default function TopBar({ t, store, setVariant, setKind, lang, setLang }:
       </button>
       <button className="btnGhost" onClick={() => store.clear()}>
         {t('app.clear')}
+      </button>
+      <button className="btnGhost" onClick={toggleViewMode}>
+        {viewMode === '3d' ? '2D' : '3D'}
       </button>
       <select className="btnGhost" value={lang} onChange={e => setLang((e.target as HTMLSelectElement).value)}>
         <option value="pl">PL</option>

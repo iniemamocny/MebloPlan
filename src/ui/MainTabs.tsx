@@ -47,6 +47,7 @@ interface MainTabsProps {
   setMode: (v: PlayerMode) => void;
   startMode: Exclude<PlayerMode, null>;
   setStartMode: (v: Exclude<PlayerMode, null>) => void;
+  setViewMode: (v: '3d' | '2d') => void;
 }
 
 export default function MainTabs({
@@ -80,6 +81,7 @@ export default function MainTabs({
   setMode,
   startMode,
   setStartMode,
+  setViewMode,
 }: MainTabsProps) {
   const toggleTab = (
     name: 'cab' | 'costs' | 'cut' | 'global' | 'play' | 'room',
@@ -217,9 +219,10 @@ export default function MainTabs({
             setStartMode={setStartMode}
             setMode={setMode}
             onClose={() => setTab(null)}
+            setViewMode={setViewMode}
           />
         )}
-        {tab === 'room' && <RoomPanel />}
+        {tab === 'room' && <RoomPanel setViewMode={setViewMode} />}
       </SlidingPanel>
     </>
   );
