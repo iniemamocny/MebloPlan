@@ -379,4 +379,52 @@ describe('RoomDrawBoard editing', () => {
     root.unmount();
     container.remove();
   });
+
+  it('updates label text during drawing', async () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+    act(() => root.render(<RoomDrawBoard width={200} height={100} />));
+    const canvas = container.querySelector('canvas')!;
+    const label = container.querySelector('[data-testid="draw-label"]') as HTMLDivElement;
+
+    act(() => {
+      canvas.dispatchEvent(
+        new PointerEvent('pointerdown', {
+          bubbles: true,
+          clientX: 10,
+          clientY: 10,
+          pointerId: 1,
+        }),
+      );
+    });
+    act(() => {
+      canvas.dispatchEvent(
+        new PointerEvent('pointermove', {
+          bubbles: true,
+          clientX: 60,
+          clientY: 40,
+          pointerId: 1,
+        }),
+      );
+    });
+
+    await Promise.resolve();
+
+    expect(label.textContent).not.toBe('');
+
+    act(() => {
+      canvas.dispatchEvent(
+        new PointerEvent('pointerup', {
+          bubbles: true,
+          clientX: 60,
+          clientY: 40,
+          pointerId: 1,
+        }),
+      );
+    });
+
+    root.unmount();
+    container.remove();
+  });
 });
