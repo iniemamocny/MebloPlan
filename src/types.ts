@@ -214,6 +214,7 @@ export interface PricingData {
 }
 
 export interface ShapePoint {
+  id?: string;
   x: number;
   y: number;
 }

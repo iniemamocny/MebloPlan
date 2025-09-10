@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { usePlannerStore } from '../../state/store';
 import type { RoomShape, ShapePoint, Wall } from '../../types';
 import uuid from '../../utils/uuid';
+import addSegmentToShape from '../../utils/roomShape';
 
 interface Props {
   width?: number;
@@ -108,10 +109,7 @@ const RoomDrawBoard: React.FC<Props> = ({ width = 600, height = 400 }) => {
     const distance = Math.hypot(end.x - start.x, end.y - start.y);
     if (distance >= 1) {
       const segment = { start, end };
-      setRoomShape({
-        points: [...roomShape.points, start, end],
-        segments: [...roomShape.segments, segment],
-      });
+      setRoomShape(addSegmentToShape(roomShape, segment));
     }
     drawingRef.current = false;
     setStart(null);
