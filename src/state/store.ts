@@ -438,9 +438,10 @@ export const usePlannerStore = create<Store>((set, get) => ({
     set((s) => {
       const newPatch: Partial<Room> = { ...patch };
       if (patch.walls) {
+        const defaultThickness = s.selectedWall?.thickness ?? 0.1;
         newPatch.walls = patch.walls.map((w) => ({
           ...w,
-          thickness: clamp(w.thickness, 0.08, 0.25),
+          thickness: clamp(w.thickness ?? defaultThickness, 0.08, 0.25),
         }));
       }
       const updatedRoom = { ...s.room, ...newPatch };
