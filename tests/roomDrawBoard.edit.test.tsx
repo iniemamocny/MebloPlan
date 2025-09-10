@@ -50,6 +50,7 @@ beforeEach(() => {
     },
     roomShape: { points: [], segments: [] },
     snapToGrid: false,
+    measurementUnit: 'mm',
   });
 });
 
@@ -218,6 +219,89 @@ describe('RoomDrawBoard editing', () => {
     const pt = usePlannerStore.getState().roomShape.points[0];
     expect(pt.x).toBe(100);
     expect(pt.y).toBe(100);
+
+    root.unmount();
+    container.remove();
+  });
+
+  it('uses millimeters for keyboard input', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+    act(() => root.render(<RoomDrawBoard width={200} height={100} />));
+    const canvas = container.querySelector('canvas')!;
+    const label = container.querySelector('[data-testid="draw-label"]')!;
+
+    act(() => {
+      canvas.dispatchEvent(
+        new PointerEvent('pointerdown', {
+          bubbles: true,
+          clientX: 10,
+          clientY: 10,
+          pointerId: 1,
+        }),
+      );
+    });
+
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '5' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '0' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '9' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '0' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '°' }));
+    });
+
+    expect(label.textContent).toBe('50 mm / 90°');
+
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    });
+
+    const seg = usePlannerStore.getState().roomShape.segments[0];
+    expect(seg.end.y).toBeCloseTo(60);
+
+    root.unmount();
+    container.remove();
+  });
+
+  it('uses centimeters for keyboard input', () => {
+    usePlannerStore.setState({ measurementUnit: 'cm' });
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+    act(() => root.render(<RoomDrawBoard width={200} height={100} />));
+    const canvas = container.querySelector('canvas')!;
+    const label = container.querySelector('[data-testid="draw-label"]')!;
+
+    act(() => {
+      canvas.dispatchEvent(
+        new PointerEvent('pointerdown', {
+          bubbles: true,
+          clientX: 10,
+          clientY: 10,
+          pointerId: 1,
+        }),
+      );
+    });
+
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '5' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '0' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '9' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '0' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '°' }));
+    });
+
+    expect(label.textContent).toBe('50 cm / 90°');
+
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    });
+
+    const seg = usePlannerStore.getState().roomShape.segments[0];
+    expect(seg.end.y).toBeCloseTo(510);
 
     root.unmount();
     container.remove();

@@ -241,7 +241,8 @@ const RoomDrawBoard: React.FC<Props> = ({
   const parseInput = (str: string) => {
     const cleaned = str.replace(/°/g, '').trim();
     const [lenStr, angleStr] = cleaned.split(/\s+/);
-    const length = parseFloat(lenStr);
+    const raw = parseFloat(lenStr);
+    const length = measurementUnit === 'cm' ? raw * 10 : raw;
     let angle: number | undefined = undefined;
     if (angleStr !== undefined) {
       const a = parseFloat(angleStr);

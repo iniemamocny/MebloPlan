@@ -22,6 +22,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   const snapAngle = usePlannerStore((s) => s.snapAngle);
   const snapLength = usePlannerStore((s) => s.snapLength);
   const snapRightAngles = usePlannerStore((s) => s.snapRightAngles);
+  const measurementUnit = usePlannerStore((s) => s.measurementUnit);
   const groupRef = useRef<THREE.Group | null>(null);
   const roomRef = useRef(room);
   const startRef = useRef<{ x: number; y: number } | null>(null);
@@ -376,7 +377,9 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       const y = rect.top + ((-pos.y + 1) / 2) * rect.height;
       labelRef.current.style.left = `${x}px`;
       labelRef.current.style.top = `${y}px`;
-      labelRef.current.textContent = `${Math.round(len * 1000)} mm`;
+      const displayLen =
+        measurementUnit === 'cm' ? len * 100 : len * 1000;
+      labelRef.current.textContent = `${Math.round(displayLen)} ${measurementUnit}`;
       labelRef.current.style.display = 'block';
     };
 
@@ -479,7 +482,9 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       if (!startRef.current) return;
       if (e.key >= '0' && e.key <= '9') {
         inputRef.current += e.key;
-        const len = parseFloat(inputRef.current) / 1000;
+        const len =
+          parseFloat(inputRef.current) /
+          (measurementUnit === 'cm' ? 100 : 1000);
         updatePreview(len);
       } else if (e.key === 'Enter') {
         const { x: sx, y: sy } = startRef.current;
