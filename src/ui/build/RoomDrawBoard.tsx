@@ -13,11 +13,15 @@ const RoomDrawBoard: React.FC<Props> = ({ width = 600, height = 400 }) => {
   const [start, setStart] = useState<ShapePoint | null>(null);
   const [preview, setPreview] = useState<ShapePoint | null>(null);
   const drawingRef = useRef(false);
+  const pointerIdRef = useRef<number | null>(null);
 
-  const snap = (v: number) => (snapToGrid ? Math.round(v / gridSize) * gridSize : v);
+  const snap = (v: number) =>
+    snapToGrid ? Math.round(v / gridSize) * gridSize : v;
 
   const getPoint = (e: React.PointerEvent): ShapePoint => {
-    const rect = (canvasRef.current as HTMLCanvasElement).getBoundingClientRect();
+    const rect = (
+      canvasRef.current as HTMLCanvasElement
+    ).getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     return { x: snap(x), y: snap(y) };
@@ -78,6 +82,8 @@ const RoomDrawBoard: React.FC<Props> = ({ width = 600, height = 400 }) => {
     const p = getPoint(e);
     setStart(p);
     drawingRef.current = true;
+    pointerIdRef.current = e.pointerId;
+    e.currentTarget.setPointerCapture(e.pointerId);
   };
 
   const onPointerMove = (e: React.PointerEvent) => {
@@ -87,13 +93,32 @@ const RoomDrawBoard: React.FC<Props> = ({ width = 600, height = 400 }) => {
   };
 
   const onPointerUp = (e: React.PointerEvent) => {
-    if (!drawingRef.current || !start) return;
+    if (pointerIdRef.current !== null) {
+      e.currentTarget.releasePointerCapture(pointerIdRef.current);
+      pointerIdRef.current = null;
+    }
+    if (!drawingRef.current || !start) {
+      drawingRef.current = false;
+      setStart(null);
+      setPreview(null);
+      return;
+    }
     const end = getPoint(e);
     const segment = { start, end };
     setRoomShape({
       points: [...roomShape.points, start, end],
       segments: [...roomShape.segments, segment],
     });
+    drawingRef.current = false;
+    setStart(null);
+    setPreview(null);
+  };
+
+  const onPointerCancel = (e: React.PointerEvent) => {
+    if (pointerIdRef.current !== null) {
+      e.currentTarget.releasePointerCapture(pointerIdRef.current);
+      pointerIdRef.current = null;
+    }
     drawingRef.current = false;
     setStart(null);
     setPreview(null);
@@ -108,6 +133,7 @@ const RoomDrawBoard: React.FC<Props> = ({ width = 600, height = 400 }) => {
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
     />
   );
 };
