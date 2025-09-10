@@ -255,7 +255,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   playerSpeed: persisted?.playerSpeed ?? 0.1,
   selectedItemSlot: 1,
   selectedTool: null,
-  selectedWall: null,
+  selectedWall: { thickness: 0.1 },
   isRoomDrawing: false,
   showFronts: true,
   itemsByCabinet: (cabinetId) =>

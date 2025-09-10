@@ -223,10 +223,9 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
 
   useEffect(() => {
     const three = threeRef.current;
-    if (!three || selectedTool !== 'wall' || !selectedWall?.thickness)
-      return;
+    if (!three || selectedTool !== 'wall') return;
 
-    const size = selectedWall.thickness;
+    const size = selectedWall?.thickness ?? 0.1;
     const geom = new THREE.BoxGeometry(size, 0.01, size);
     const mat = new THREE.MeshStandardMaterial({
       color: '#ffffff',
