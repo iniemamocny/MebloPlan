@@ -104,11 +104,14 @@ const RoomDrawBoard: React.FC<Props> = ({ width = 600, height = 400 }) => {
       return;
     }
     const end = getPoint(e);
-    const segment = { start, end };
-    setRoomShape({
-      points: [...roomShape.points, start, end],
-      segments: [...roomShape.segments, segment],
-    });
+    const distance = Math.hypot(end.x - start.x, end.y - start.y);
+    if (distance >= 1) {
+      const segment = { start, end };
+      setRoomShape({
+        points: [...roomShape.points, start, end],
+        segments: [...roomShape.segments, segment],
+      });
+    }
     drawingRef.current = false;
     setStart(null);
     setPreview(null);
