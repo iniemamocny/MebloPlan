@@ -1,6 +1,11 @@
 import type { RoomShape, ShapePoint, ShapeSegment, Wall } from '../types';
 import uuid from './uuid';
 
+const EPSILON = 1e-6;
+
+const pointsEqual = (pt: ShapePoint, p: ShapePoint, eps = EPSILON) =>
+  Math.abs(pt.x - p.x) < eps && Math.abs(pt.y - p.y) < eps;
+
 /**
  * Adds a segment to the given room shape, ensuring start/end points are unique.
  * If a point with the same coordinates already exists, it's reused instead of creating a duplicate.
@@ -10,7 +15,7 @@ export const addSegmentToShape = (
   segment: ShapeSegment,
 ): RoomShape => {
   const findPoint = (p: ShapePoint) =>
-    shape.points.find((pt) => pt.x === p.x && pt.y === p.y);
+    shape.points.find((pt) => pointsEqual(pt, p));
 
   const points: ShapePoint[] = [...shape.points];
 
