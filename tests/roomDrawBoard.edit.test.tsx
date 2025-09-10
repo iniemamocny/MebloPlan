@@ -405,6 +405,47 @@ describe('RoomDrawBoard editing', () => {
     container.remove();
   });
 
+  it('inserts a point on segment alt-click', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+    act(() => root.render(<RoomDrawBoard width={200} height={100} />));
+    const canvas = container.querySelector('canvas')!;
+
+    drawSegment(canvas, 10, 10, 110, 10);
+    const shape = usePlannerStore.getState().roomShape;
+    expect(shape.points.length).toBe(2);
+    expect(shape.segments.length).toBe(1);
+
+    act(() => {
+      canvas.dispatchEvent(
+        new PointerEvent('pointerdown', {
+          bubbles: true,
+          clientX: 60,
+          clientY: 10,
+          altKey: true,
+          pointerId: 1,
+        }),
+      );
+      canvas.dispatchEvent(
+        new PointerEvent('pointerup', {
+          bubbles: true,
+          clientX: 60,
+          clientY: 10,
+          altKey: true,
+          pointerId: 1,
+        }),
+      );
+    });
+
+    const updated = usePlannerStore.getState().roomShape;
+    expect(updated.points.length).toBe(3);
+    expect(updated.segments.length).toBe(2);
+
+    root.unmount();
+    container.remove();
+  });
+
   it('merges points when moved onto another', () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
