@@ -147,7 +147,7 @@ export default function App() {
             startMode={startMode}
           />
         ) : (
-          <RoomDrawBoard />
+          <RoomDrawBoard mode={mode} />
         )}
         {mode === null && (
           <TopBar

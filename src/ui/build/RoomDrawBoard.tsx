@@ -3,15 +3,28 @@ import { usePlannerStore } from '../../state/store';
 import type { RoomShape, ShapePoint, ShapeSegment, Wall } from '../../types';
 import uuid from '../../utils/uuid';
 import { addSegmentToShape, removeSegmentFromShape } from '../../utils/roomShape';
+import ItemHotbar, {
+  hotbarItems,
+  furnishHotbarItems,
+  buildHotbarItems,
+} from '../components/ItemHotbar';
+import WallToolSelector from '../components/WallToolSelector';
+import type { PlayerMode } from '../types';
 
 interface Props {
   width?: number;
   height?: number;
+  mode?: PlayerMode | null;
 }
 
-const RoomDrawBoard: React.FC<Props> = ({ width = 600, height = 400 }) => {
+const RoomDrawBoard: React.FC<Props> = ({
+  width = 600,
+  height = 400,
+  mode = 'build',
+}) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { roomShape, setRoomShape, gridSize, snapToGrid } = usePlannerStore();
+  const store = usePlannerStore();
+  const { roomShape, setRoomShape, gridSize, snapToGrid } = store;
   const [start, setStart] = useState<ShapePoint | null>(null);
   const [preview, setPreview] = useState<ShapePoint | null>(null);
   const drawingRef = useRef(false);
@@ -27,6 +40,43 @@ const RoomDrawBoard: React.FC<Props> = ({ width = 600, height = 400 }) => {
     segment: ShapeSegment;
     last: ShapePoint;
   } | null>(null);
+
+  const items =
+    mode === 'build'
+      ? buildHotbarItems()
+      : mode === 'furnish'
+        ? furnishHotbarItems
+        : hotbarItems;
+
+  useEffect(() => {
+    const tool = items[store.selectedItemSlot - 1];
+    if (tool === 'wall' || tool === 'window' || tool === 'door') {
+      if (store.selectedTool !== tool) store.setSelectedTool(tool);
+    } else if (store.selectedTool) {
+      store.setSelectedTool(null);
+    }
+  }, [items, store.selectedItemSlot, store.selectedTool, store]);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'w') {
+        e.preventDefault();
+        return;
+      }
+      if (e.type === 'keydown') {
+        const n = Number(e.key);
+        if (n >= 1 && n <= 9) {
+          store.setSelectedItemSlot(n);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    window.addEventListener('keyup', handleKey);
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+      window.removeEventListener('keyup', handleKey);
+    };
+  }, [store]);
 
   const snap = (v: number) =>
     snapToGrid ? Math.round(v / gridSize) * gridSize : v;
@@ -190,6 +240,25 @@ const RoomDrawBoard: React.FC<Props> = ({ width = 600, height = 400 }) => {
     pointerIdRef.current = e.pointerId;
     e.currentTarget.setPointerCapture(e.pointerId);
 
+    const tool = store.selectedTool;
+    const itemType = items[store.selectedItemSlot - 1];
+    if (tool !== 'wall') {
+      if (
+        itemType &&
+        itemType !== 'wall' &&
+        itemType !== 'window' &&
+        itemType !== 'door'
+      ) {
+        store.addItem({
+          id: uuid(),
+          type: itemType,
+          position: [p.x, 0, p.y],
+          rotation: [0, 0, 0],
+        });
+      }
+      return;
+    }
+
     const pt = pointAt(p);
     if (pt) {
       setSelectedPoint(pt);
@@ -290,13 +359,19 @@ const RoomDrawBoard: React.FC<Props> = ({ width = 600, height = 400 }) => {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'z' && e.ctrlKey) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
         e.preventDefault();
-        if (e.shiftKey) redo();
-        else undo();
-      } else if (e.key === 'y' && e.ctrlKey) {
+        if (history.length > 0) {
+          if (e.shiftKey) redo();
+          else undo();
+        } else {
+          if (e.shiftKey) store.redo();
+          else store.undo();
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
         e.preventDefault();
-        redo();
+        if (future.length > 0) redo();
+        else store.redo();
       } else if (e.key === 'Delete') {
         e.preventDefault();
         deleteSelected();
@@ -304,10 +379,10 @@ const RoomDrawBoard: React.FC<Props> = ({ width = 600, height = 400 }) => {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [undo, redo, deleteSelected]);
+  }, [undo, redo, deleteSelected, history.length, future.length, store]);
 
   return (
-    <div>
+    <div style={{ position: 'relative' }}>
       <div style={{ marginBottom: 4 }}>
         <button onClick={undo} disabled={!history.length}>
           Undo
@@ -329,6 +404,8 @@ const RoomDrawBoard: React.FC<Props> = ({ width = 600, height = 400 }) => {
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerCancel}
       />
+      {mode === 'build' && <WallToolSelector />}
+      <ItemHotbar mode={mode} />
     </div>
   );
 };
