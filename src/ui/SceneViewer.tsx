@@ -89,6 +89,7 @@ const SceneViewer: React.FC<Props> = ({
   const [showHint, setShowHint] = useState(false);
   const [targetCabinet, setTargetCabinet] = useState<THREE.Object3D | null>(null);
   const ghostRef = useRef<THREE.Object3D | null>(null);
+  const wallStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const radialItems =
     mode === 'build'
@@ -503,31 +504,47 @@ const SceneViewer: React.FC<Props> = ({
           const point = new THREE.Vector3();
           const hit = raycaster.ray.intersectPlane(plane, point);
           if (hit) {
-            const thickness = store.selectedWall?.thickness ?? 0.1;
-            const dir = camera.getWorldDirection(new THREE.Vector3());
-            dir.y = 0;
-            dir.normalize();
-            const orientation =
-              Math.abs(dir.x) > Math.abs(dir.z)
-                ? new THREE.Vector2(Math.sign(dir.x), 0)
-                : new THREE.Vector2(0, Math.sign(dir.z));
-            const half = thickness / 2;
-            const start = {
-              x: point.x - orientation.x * half,
-              y: point.z - orientation.y * half,
-            };
-            const end = {
-              x: point.x + orientation.x * half,
-              y: point.z + orientation.y * half,
-            };
-            const wall: Wall = {
-              id: uuid(),
-              start,
-              end,
-              height: store.room.height / 1000,
-              thickness,
-            };
-            store.setRoom({ walls: [...store.room.walls, wall] });
+            const pos = { x: point.x, y: point.z };
+            if (!wallStartRef.current && event.type === 'pointerdown') {
+              wallStartRef.current = pos;
+            } else if (
+              wallStartRef.current &&
+              (event.type === 'pointerup' || event.type === 'pointerdown')
+            ) {
+              let start = wallStartRef.current;
+              let end = pos;
+              const dx = end.x - start.x;
+              const dy = end.y - start.y;
+              const len = Math.hypot(dx, dy);
+              if (len === 0) {
+                const thickness = store.selectedWall?.thickness ?? 0.1;
+                const dir = camera.getWorldDirection(new THREE.Vector3());
+                dir.y = 0;
+                dir.normalize();
+                const orientation =
+                  Math.abs(dir.x) > Math.abs(dir.z)
+                    ? new THREE.Vector2(Math.sign(dir.x), 0)
+                    : new THREE.Vector2(0, Math.sign(dir.z));
+                const half = thickness / 2;
+                start = {
+                  x: point.x - orientation.x * half,
+                  y: point.z - orientation.y * half,
+                };
+                end = {
+                  x: point.x + orientation.x * half,
+                  y: point.z + orientation.y * half,
+                };
+              }
+              const wall: Wall = {
+                id: uuid(),
+                start,
+                end,
+                height: store.room.height / 1000,
+                thickness: store.selectedWall?.thickness ?? 0.1,
+              };
+              store.setRoom({ walls: [...store.room.walls, wall] });
+              wallStartRef.current = null;
+            }
           }
         } else if (event.button === 2) {
           const target = targetRef.current;
@@ -627,9 +644,11 @@ const SceneViewer: React.FC<Props> = ({
     };
     const handleContextMenu = (event: MouseEvent) => event.preventDefault();
     window.addEventListener('pointerdown', handlePointer);
+    window.addEventListener('pointerup', handlePointer);
     window.addEventListener('contextmenu', handleContextMenu);
     return () => {
       window.removeEventListener('pointerdown', handlePointer);
+      window.removeEventListener('pointerup', handlePointer);
       window.removeEventListener('contextmenu', handleContextMenu);
     };
   }, [
