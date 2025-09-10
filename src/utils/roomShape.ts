@@ -57,8 +57,8 @@ export const shapeToWalls = (
   const { height = 2.7, thickness = 0.1 } = opts || {};
   return shape.segments.map((seg) => ({
     id: uuid(),
-    start: { ...seg.start },
-    end: { ...seg.end },
+    start: { x: seg.start.x, y: seg.start.y },
+    end: { x: seg.end.x, y: seg.end.y },
     height,
     thickness,
   }));
