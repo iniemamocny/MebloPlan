@@ -47,13 +47,49 @@ vi.mock('../src/scene/engine', () => {
 });
 
 vi.mock('../src/ui/components/ItemHotbar', () => ({
-  default: () => null,
+  default: (props: any) => <div data-testid="item-hotbar" data-mode={props.mode}></div>,
   hotbarItems: [],
   buildHotbarItems: () => [],
   furnishHotbarItems: [],
 }));
 vi.mock('../src/ui/components/TouchJoystick', () => ({ default: () => null }));
 vi.mock('../src/ui/build/RoomBuilder', () => ({ default: () => null }));
+
+describe('SceneViewer hotbar visibility', () => {
+  it('renders hotbar only when mode is not null', () => {
+    const threeRef: any = { current: null };
+    const setMode = vi.fn();
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+
+    act(() => {
+      root.render(
+        <SceneViewer
+          threeRef={threeRef}
+          addCountertop={false}
+          mode={null}
+          setMode={setMode}
+        />, 
+      );
+    });
+    expect(container.querySelector('[data-testid="item-hotbar"]')).toBeNull();
+
+    act(() => {
+      root.render(
+        <SceneViewer
+          threeRef={threeRef}
+          addCountertop={false}
+          mode="build"
+          setMode={setMode}
+        />,
+      );
+    });
+    expect(container.querySelector('[data-testid="item-hotbar"]')).not.toBeNull();
+
+    root.unmount();
+  });
+});
 
 describe('SceneViewer cabinetDragger mode control', () => {
   it('enables cabinetDragger only in furnish mode', () => {
@@ -136,7 +172,7 @@ describe('SceneViewer Tab key', () => {
 });
 
 describe('SceneViewer hotbar keys', () => {
-  it('changes selectedItemSlot when mode is null', () => {
+  it('does not change selectedItemSlot when mode is null', () => {
     const threeRef: any = { current: null };
     const setMode = vi.fn();
     const container = document.createElement('div');
@@ -160,7 +196,7 @@ describe('SceneViewer hotbar keys', () => {
       act(() => {
         window.dispatchEvent(new KeyboardEvent('keydown', { key: keys[i] }));
       });
-      expect(usePlannerStore.getState().selectedItemSlot).toBe(i + 1);
+      expect(usePlannerStore.getState().selectedItemSlot).toBe(5);
     }
 
     root.unmount();
