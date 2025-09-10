@@ -46,14 +46,12 @@ export default function App() {
   const [boardHasGrain, setBoardHasGrain] = useState(false);
   const [mode, setMode] = useState<PlayerMode>(null);
   const [startMode, setStartMode] = useState<PlayerSubMode>('build');
-
-  const isRoomDrawing = usePlannerStore((s) => s.isRoomDrawing);
+  const [viewMode, setViewMode] = useState<'3d' | '2d'>('3d');
   const roomShape = usePlannerStore((s) => s.roomShape);
   const room = usePlannerStore((s) => s.room);
   const wallThickness =
     usePlannerStore((s) => s.selectedWall?.thickness) ?? 0.1;
   const setRoom = usePlannerStore((s) => s.setRoom);
-  const setIsRoomDrawing = usePlannerStore((s) => s.setIsRoomDrawing);
   const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
 
   const undo = store.undo;
@@ -87,36 +85,21 @@ export default function App() {
       thickness: wallThickness,
     });
     setRoom({ walls });
-    setIsRoomDrawing(false);
     setSelectedTool(null);
+    setViewMode('3d');
+  };
+
+  const handleSetViewMode = (v: '3d' | '2d') => {
+    if (v === '3d') closeDrawing();
+    else setViewMode('2d');
+  };
+
+  const toggleViewMode = () => {
+    handleSetViewMode(viewMode === '3d' ? '2d' : '3d');
   };
 
   return (
     <div className="app">
-      {isRoomDrawing && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 100,
-          }}
-        >
-          <div style={{ position: 'relative' }}>
-            <RoomDrawBoard />
-            <button
-              className="btnGhost"
-              style={{ position: 'absolute', top: 10, right: 10 }}
-              onClick={closeDrawing}
-            >
-              {t('global.close')}
-            </button>
-          </div>
-        </div>
-      )}
       {mode === null && (
         <div className="mainTabs">
           <MainTabs
@@ -150,17 +133,22 @@ export default function App() {
             setMode={setMode}
             startMode={startMode}
             setStartMode={setStartMode}
+            setViewMode={handleSetViewMode}
           />
         </div>
       )}
       <div className="canvasWrap">
-        <SceneViewer
-          threeRef={threeRef}
-          addCountertop={addCountertop}
-          mode={mode}
-          setMode={setMode}
-          startMode={startMode}
-        />
+        {viewMode === '3d' ? (
+          <SceneViewer
+            threeRef={threeRef}
+            addCountertop={addCountertop}
+            mode={mode}
+            setMode={setMode}
+            startMode={startMode}
+          />
+        ) : (
+          <RoomDrawBoard />
+        )}
         {mode === null && (
           <TopBar
             t={t}
@@ -169,6 +157,8 @@ export default function App() {
             setKind={setKind}
             lang={lang}
             setLang={setLang}
+            viewMode={viewMode}
+            toggleViewMode={toggleViewMode}
           />
         )}
       </div>

@@ -9,6 +9,7 @@ interface Props {
   startMode: PlayerSubMode;
   setStartMode: (v: PlayerSubMode) => void;
   onClose: () => void;
+  setViewMode: (v: '3d' | '2d') => void;
 }
 
 export default function PlayPanel({
@@ -18,13 +19,13 @@ export default function PlayPanel({
   startMode,
   setStartMode,
   onClose,
+  setViewMode,
 }: Props) {
   const {
     playerHeight,
     playerSpeed,
     setPlayerHeight,
     setPlayerSpeed,
-    setIsRoomDrawing,
     setSelectedTool,
   } = usePlannerStore();
   const onHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,7 +41,7 @@ export default function PlayPanel({
   };
 
   const startDrawing = () => {
-    setIsRoomDrawing(true);
+    setViewMode('2d');
     setSelectedTool('wall');
   };
 

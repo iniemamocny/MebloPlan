@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePlannerStore } from '../../state/store';
-import RoomDrawBoard, { shapeToWalls } from '../build/RoomDrawBoard';
 
-export default function RoomPanel() {
+interface Props {
+  setViewMode: (v: '3d' | '2d') => void;
+}
+
+export default function RoomPanel({ setViewMode }: Props) {
   const { t } = useTranslation();
   const [wallsOpen, setWallsOpen] = useState(false);
   const [windowsOpen, setWindowsOpen] = useState(false);
@@ -41,10 +44,7 @@ export default function RoomPanel() {
   const wallThickness =
     usePlannerStore((s) => s.selectedWall?.thickness) ?? 0.1;
   const setThickness = usePlannerStore((s) => s.setSelectedWallThickness);
-  const setIsRoomDrawing = usePlannerStore((s) => s.setIsRoomDrawing);
   const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
-  const isRoomDrawing = usePlannerStore((s) => s.isRoomDrawing);
-  const roomShape = usePlannerStore((s) => s.roomShape);
 
   const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRoom({ height: parseInt(e.target.value, 10) });
@@ -55,49 +55,12 @@ export default function RoomPanel() {
   };
 
   const startDrawing = () => {
-    setIsRoomDrawing(true);
+    setViewMode('2d');
     setSelectedTool('wall');
-  };
-
-  const closeDrawing = () => {
-    const walls = shapeToWalls(roomShape, {
-      height: room.height,
-      thickness: wallThickness,
-    });
-    setRoom({ walls });
-    setIsRoomDrawing(false);
-    setSelectedTool(null);
   };
 
   return (
     <>
-      {isRoomDrawing && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 100,
-          }}
-        >
-          <div style={{ position: 'relative' }}>
-            <div style={{ position: 'absolute', top: 10, left: 10 }}>
-              <div className="h1">{t('room.board2D')}</div>
-            </div>
-            <RoomDrawBoard />
-            <button
-              className="btnGhost"
-              style={{ position: 'absolute', top: 10, right: 10 }}
-              onClick={closeDrawing}
-            >
-              {t('room.close')}
-            </button>
-          </div>
-        </div>
-      )}
       <Section
         title={t('room.walls')}
         open={wallsOpen}

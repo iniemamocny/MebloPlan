@@ -123,6 +123,7 @@ describe('Room features', () => {
           setMode={() => {}}
           startMode="build"
           setStartMode={() => {}}
+          setViewMode={() => {}}
         />,
       );
     });
@@ -144,7 +145,7 @@ describe('Room features', () => {
     });
 
     act(() => {
-      root.render(<RoomPanel />);
+      root.render(<RoomPanel setViewMode={() => {}} />);
     });
 
     const header = container.querySelector('.section .hd');
@@ -182,8 +183,9 @@ describe('Room features', () => {
       selectedTool: null,
     });
 
+    const setViewMode = vi.fn();
     act(() => {
-      root.render(<RoomPanel />);
+      root.render(<RoomPanel setViewMode={setViewMode} />);
     });
 
     const header = container.querySelector('.section .hd');
@@ -198,91 +200,8 @@ describe('Room features', () => {
       btn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
 
-    expect(usePlannerStore.getState().isRoomDrawing).toBe(true);
+    expect(setViewMode).toHaveBeenCalledWith('2d');
     expect(usePlannerStore.getState().selectedTool).toBe('wall');
-    expect(container.textContent).toContain('room.board2D');
-    expect(container.querySelector('canvas')).toBeTruthy();
-
-    root.unmount();
-    container.remove();
-  });
-
-  it('saves room and exits drawing when closing', () => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const root = ReactDOM.createRoot(container);
-
-    usePlannerStore.setState({
-      room: {
-        height: 2700,
-        origin: { x: 0, y: 0 },
-        walls: [],
-        windows: [],
-        doors: [],
-      },
-      roomShape: {
-        points: [
-          { x: 0, y: 0 },
-          { x: 1, y: 0 },
-        ],
-        segments: [{ start: { x: 0, y: 0 }, end: { x: 1, y: 0 } }],
-      },
-      selectedWall: { thickness: 0.1 },
-      isRoomDrawing: true,
-    });
-
-    act(() => {
-      root.render(<RoomPanel />);
-    });
-
-    const btn = Array.from(container.querySelectorAll('button')).find(
-      (b) => b.textContent === 'room.close',
-    );
-    act(() => {
-      btn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-
-    const state = usePlannerStore.getState();
-    expect(state.isRoomDrawing).toBe(false);
-    expect(state.room.walls.length).toBe(1);
-    expect(state.room.walls[0].id).toBe('test-uuid');
-
-    root.unmount();
-    container.remove();
-  });
-
-  it('draws wall and saves it for 3D scene', () => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const root = ReactDOM.createRoot(container);
-
-    usePlannerStore.setState({
-      room: { height: 2700, origin: { x: 0, y: 0 }, walls: [], windows: [], doors: [] },
-      selectedWall: { thickness: 0.1 },
-      roomShape: {
-        points: [
-          { x: 0, y: 0 },
-          { x: 1, y: 0 },
-        ],
-        segments: [{ start: { x: 0, y: 0 }, end: { x: 1, y: 0 } }],
-      },
-      isRoomDrawing: true,
-    });
-
-    act(() => {
-      root.render(<RoomPanel />);
-    });
-
-    const closeBtn = Array.from(container.querySelectorAll('button')).find(
-      (b) => b.textContent === 'room.close',
-    );
-    act(() => {
-      closeBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-
-    const state = usePlannerStore.getState();
-    expect(state.room.walls.length).toBe(1);
-    expect(state.room.walls[0].id).toBe('test-uuid');
 
     root.unmount();
     container.remove();
