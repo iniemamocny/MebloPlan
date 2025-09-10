@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { usePlannerStore } from '../../state/store';
-import type { RoomShape, ShapePoint, ShapeSegment, Wall } from '../../types';
+import type { RoomShape, ShapePoint, ShapeSegment } from '../../types';
 import uuid from '../../utils/uuid';
 import { addSegmentToShape, removeSegmentFromShape } from '../../utils/roomShape';
 import ItemHotbar, {
@@ -411,17 +411,3 @@ const RoomDrawBoard: React.FC<Props> = ({
 };
 
 export default RoomDrawBoard;
-
-export const shapeToWalls = (
-  shape: RoomShape,
-  opts?: { height?: number; thickness?: number },
-): Wall[] => {
-  const { height = 2700, thickness = 0.1 } = opts || {};
-  return shape.segments.map((seg) => ({
-    id: uuid(),
-    start: { ...seg.start },
-    end: { ...seg.end },
-    height,
-    thickness,
-  }));
-};

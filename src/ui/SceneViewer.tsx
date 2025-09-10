@@ -20,7 +20,6 @@ import { PlayerMode, PlayerSubMode, PLAYER_MODES } from './types';
 import RoomBuilder from './build/RoomBuilder';
 import RadialMenu from './components/RadialMenu';
 import RoomPanel from './panels/RoomPanel';
-import { shapeToWalls } from './build/RoomDrawBoard';
 import uuid from '../utils/uuid';
 
 interface ThreeContext {
@@ -425,11 +424,8 @@ const SceneViewer: React.FC<Props> = ({
         group.add(top);
       }
     });
-    // draw walls from room shape
-    const walls = shapeToWalls(store.roomShape, {
-      height: store.room.height / 1000,
-      thickness: store.selectedWall?.thickness ?? 0.1,
-    });
+    // draw walls from room data
+    const walls = store.room.walls;
     walls.forEach((w) => {
       const len = Math.hypot(w.end.x - w.start.x, w.end.y - w.start.y);
       const geom = new THREE.BoxGeometry(len, w.height, w.thickness);
@@ -481,9 +477,8 @@ const SceneViewer: React.FC<Props> = ({
     addCountertop,
     showEdges,
     showFronts,
-    store.roomShape,
+    store.room.walls,
     store.room.height,
-    store.selectedWall?.thickness,
   ]);
 
 

@@ -8,7 +8,7 @@ import { createTranslator } from './i18n';
 import MainTabs from './MainTabs';
 import { safeSetItem } from '../utils/storage';
 import { PlayerMode } from './types';
-import RoomDrawBoard, { shapeToWalls } from './build/RoomDrawBoard';
+import RoomDrawBoard from './build/RoomDrawBoard';
 
 type PlayerSubMode = Exclude<PlayerMode, null>;
 
@@ -47,12 +47,6 @@ export default function App() {
   const [mode, setMode] = useState<PlayerMode>(null);
   const [startMode, setStartMode] = useState<PlayerSubMode>('build');
   const [viewMode, setViewMode] = useState<'3d' | '2d'>('3d');
-  const roomShape = usePlannerStore((s) => s.roomShape);
-  const room = usePlannerStore((s) => s.room);
-  const wallThickness =
-    usePlannerStore((s) => s.selectedWall?.thickness) ?? 0.1;
-  const setRoom = usePlannerStore((s) => s.setRoom);
-  const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
 
   const undo = store.undo;
   const redo = store.redo;
@@ -79,19 +73,8 @@ export default function App() {
     if (mode !== null) setStartMode(mode);
   }, [mode]);
 
-  const closeDrawing = () => {
-    const walls = shapeToWalls(roomShape, {
-      height: room.height,
-      thickness: wallThickness,
-    });
-    setRoom({ walls });
-    setSelectedTool(null);
-    setViewMode('3d');
-  };
-
   const handleSetViewMode = (v: '3d' | '2d') => {
-    if (v === '3d') closeDrawing();
-    else setViewMode('2d');
+    setViewMode(v);
   };
 
   const toggleViewMode = () => {
