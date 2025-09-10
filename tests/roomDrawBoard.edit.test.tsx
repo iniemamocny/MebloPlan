@@ -134,6 +134,44 @@ describe('RoomDrawBoard editing', () => {
     container.remove();
   });
 
+  it('draws segment using keyboard only', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+    act(() => root.render(<RoomDrawBoard width={200} height={100} />));
+    const canvas = container.querySelector('canvas')!;
+
+    act(() => {
+      canvas.dispatchEvent(
+        new PointerEvent('pointerdown', {
+          bubbles: true,
+          clientX: 10,
+          clientY: 10,
+          pointerId: 1,
+        }),
+      );
+    });
+
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '5' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '0' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '9' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '0' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '°' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    });
+
+    const seg = usePlannerStore.getState().roomShape.segments[0];
+    expect(seg.start.x).toBe(10);
+    expect(seg.start.y).toBe(10);
+    expect(seg.end.x).toBeCloseTo(10);
+    expect(seg.end.y).toBeCloseTo(60);
+
+    root.unmount();
+    container.remove();
+  });
+
   it('allows moving existing points with grid snapping', () => {
     usePlannerStore.setState({
       snapToGrid: true,
