@@ -124,20 +124,33 @@ const RoomDrawBoard: React.FC<Props> = ({ width = 600, height = 400 }) => {
       return;
     }
     if (!ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+
+    const canvasWidth = canvas.width / dpr;
+    const canvasHeight = canvas.height / dpr;
+    if (typeof ctx.scale === 'function') {
+      ctx.scale(dpr, dpr);
+    }
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
     // grid
     ctx.strokeStyle = '#eee';
     ctx.lineWidth = 1;
-    for (let x = 0; x <= canvas.width; x += gridSize) {
+    for (let x = 0; x <= canvasWidth; x += gridSize) {
       ctx.beginPath();
       ctx.moveTo(x + 0.5, 0);
-      ctx.lineTo(x + 0.5, canvas.height);
+      ctx.lineTo(x + 0.5, canvasHeight);
       ctx.stroke();
     }
-    for (let y = 0; y <= canvas.height; y += gridSize) {
+    for (let y = 0; y <= canvasHeight; y += gridSize) {
       ctx.beginPath();
       ctx.moveTo(0, y + 0.5);
-      ctx.lineTo(canvas.width, y + 0.5);
+      ctx.lineTo(canvasWidth, y + 0.5);
       ctx.stroke();
     }
     // segments
