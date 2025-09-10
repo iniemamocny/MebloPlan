@@ -434,7 +434,9 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       const dx = end.x - sx;
       const dy = end.y - sy;
       const len = Math.hypot(dx, dy);
-      dirRef.current = { dx: dx / len, dy: dy / len };
+      if (len > 0) {
+        dirRef.current = { dx: dx / len, dy: dy / len };
+      }
       if (inputRef.current) updatePreview(lengthRef.current);
       else updatePreview(len);
     }
