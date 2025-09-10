@@ -42,6 +42,8 @@ const RoomDrawBoard: React.FC<Props> = ({
   const [preview, setPreview] = useState<ShapePoint | null>(null);
   const drawingRef = useRef(false);
   const pointerIdRef = useRef<number | null>(null);
+  const pointerAngleRef = useRef(0);
+  const inputRef = useRef('');
   const [selectedPoint, setSelectedPoint] = useState<ShapePoint | null>(null);
   const [selectedSegment, setSelectedSegment] = useState<ShapeSegment | null>(
     null,
@@ -78,6 +80,7 @@ const RoomDrawBoard: React.FC<Props> = ({
         e.preventDefault();
         return;
       }
+      if (drawingRef.current) return;
       if (e.type === 'keydown') {
         const n = Number(e.key);
         if (n >= 1 && n <= 9) {
@@ -215,6 +218,51 @@ const RoomDrawBoard: React.FC<Props> = ({
     return roomShape.points.filter((p) => p !== pt);
   };
 
+  const parseInput = (str: string) => {
+    const cleaned = str.replace(/°/g, '').trim();
+    const [lenStr, angleStr] = cleaned.split(/\s+/);
+    const length = parseFloat(lenStr);
+    let angle: number | undefined = undefined;
+    if (angleStr !== undefined) {
+      const a = parseFloat(angleStr);
+      if (!isNaN(a)) angle = a;
+    }
+    return { length, angle };
+  };
+
+  const updatePreviewFromInput = () => {
+    if (!start) return;
+    const { length, angle } = parseInput(inputRef.current);
+    if (isNaN(length)) return;
+    const ang =
+      angle !== undefined
+        ? (angle * Math.PI) / 180
+        : pointerAngleRef.current;
+    const end = {
+      x: start.x + Math.cos(ang) * length,
+      y: start.y + Math.sin(ang) * length,
+    };
+    setPreview(end);
+  };
+
+  const finalizeSegment = (end: ShapePoint) => {
+    if (!start) return;
+    if (pointerIdRef.current !== null) {
+      canvasRef.current?.releasePointerCapture(pointerIdRef.current);
+      pointerIdRef.current = null;
+    }
+    const distance = Math.hypot(end.x - start.x, end.y - start.y);
+    if (distance >= 1) {
+      pushHistory();
+      const segment = { start, end };
+      setRoomShape(addSegmentToShape(roomShape, segment));
+    }
+    drawingRef.current = false;
+    setStart(null);
+    setPreview(null);
+    inputRef.current = '';
+  };
+
   const draw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -338,6 +386,8 @@ const RoomDrawBoard: React.FC<Props> = ({
     setSelectedSegment(null);
     setStart(p);
     drawingRef.current = true;
+    pointerAngleRef.current = 0;
+    inputRef.current = '';
   };
 
   const onPointerMove = (e: React.PointerEvent) => {
@@ -368,8 +418,10 @@ const RoomDrawBoard: React.FC<Props> = ({
       });
       return;
     }
-    if (!drawingRef.current) return;
+    if (!drawingRef.current || !start) return;
     const p = getPoint(e);
+    pointerAngleRef.current = Math.atan2(p.y - start.y, p.x - start.x);
+    if (inputRef.current) inputRef.current = '';
     setPreview(p);
   };
 
@@ -395,18 +447,11 @@ const RoomDrawBoard: React.FC<Props> = ({
       drawingRef.current = false;
       setStart(null);
       setPreview(null);
+      inputRef.current = '';
       return;
     }
     const end = getPoint(e);
-    const distance = Math.hypot(end.x - start.x, end.y - start.y);
-    if (distance >= 1) {
-      pushHistory();
-      const segment = { start, end };
-      setRoomShape(addSegmentToShape(roomShape, segment));
-    }
-    drawingRef.current = false;
-    setStart(null);
-    setPreview(null);
+    finalizeSegment(end);
   };
 
   const onPointerCancel = (e: React.PointerEvent) => {
@@ -419,7 +464,39 @@ const RoomDrawBoard: React.FC<Props> = ({
     drawingRef.current = false;
     setStart(null);
     setPreview(null);
+    inputRef.current = '';
   };
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!drawingRef.current || !start) return;
+      if (e.key === 'Enter') {
+        if (!inputRef.current) return;
+        e.preventDefault();
+        const { length, angle } = parseInput(inputRef.current);
+        if (isNaN(length)) return;
+        const ang =
+          angle !== undefined
+            ? (angle * Math.PI) / 180
+            : pointerAngleRef.current;
+        const end = {
+          x: start.x + Math.cos(ang) * length,
+          y: start.y + Math.sin(ang) * length,
+        };
+        finalizeSegment(end);
+      } else if (e.key === 'Backspace') {
+        e.preventDefault();
+        inputRef.current = inputRef.current.slice(0, -1);
+        updatePreviewFromInput();
+      } else if (/^[0-9]$/.test(e.key) || e.key === ' ' || e.key === '°') {
+        e.preventDefault();
+        inputRef.current += e.key;
+        updatePreviewFromInput();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [start, roomShape]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
