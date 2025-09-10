@@ -185,6 +185,40 @@ describe('RoomDrawBoard editing', () => {
     container.remove();
   });
 
+  it('snaps segment length and angle', () => {
+    usePlannerStore.setState({
+      snapToGrid: false,
+      snapLength: 50,
+      snapAngle: 90,
+      snapRightAngles: true,
+      roomShape: { points: [], segments: [] },
+    });
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+    act(() => root.render(<RoomDrawBoard width={200} height={100} />));
+    const canvas = container.querySelector('canvas')!;
+
+    drawSegment(canvas, 0, 0, 80, 10);
+    drawSegment(canvas, 150, 0, 160, 40);
+    const segments = usePlannerStore.getState().roomShape.segments;
+    const len1 = Math.hypot(
+      segments[0].end.x - segments[0].start.x,
+      segments[0].end.y - segments[0].start.y,
+    );
+    const len2 = Math.hypot(
+      segments[1].end.x - segments[1].start.x,
+      segments[1].end.y - segments[1].start.y,
+    );
+    expect(len1).toBe(100);
+    expect(segments[0].start.y).toBe(segments[0].end.y);
+    expect(len2).toBe(50);
+    expect(segments[1].start.x).toBe(segments[1].end.x);
+
+    root.unmount();
+    container.remove();
+  });
+
   it('deletes selected segment', () => {
     const container = document.createElement('div');
     document.body.appendChild(container);

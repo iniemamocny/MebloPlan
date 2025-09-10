@@ -29,7 +29,15 @@ const RoomDrawBoard: React.FC<Props> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const store = usePlannerStore();
-  const { roomShape, setRoomShape, gridSize, snapToGrid } = store;
+  const {
+    roomShape,
+    setRoomShape,
+    gridSize,
+    snapToGrid,
+    snapAngle,
+    snapLength,
+    snapRightAngles,
+  } = store;
   const [start, setStart] = useState<ShapePoint | null>(null);
   const [preview, setPreview] = useState<ShapePoint | null>(null);
   const drawingRef = useRef(false);
@@ -92,9 +100,31 @@ const RoomDrawBoard: React.FC<Props> = ({
     const rect = (
       canvasRef.current as HTMLCanvasElement
     ).getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    return { x: snap(x), y: snap(y) };
+    let x = snap(e.clientX - rect.left);
+    let y = snap(e.clientY - rect.top);
+    if (drawingRef.current && start) {
+      const dx = x - start.x;
+      const dy = y - start.y;
+      let angle = Math.atan2(dy, dx);
+      const rad = (snapAngle * Math.PI) / 180;
+      if (rad > 0) {
+        if (snapRightAngles && roomShape.segments.length > 0) {
+          const last = roomShape.segments[roomShape.segments.length - 1];
+          const lastAngle = Math.atan2(
+            last.end.y - last.start.y,
+            last.end.x - last.start.x,
+          );
+          angle = lastAngle + Math.round((angle - lastAngle) / rad) * rad;
+        } else {
+          angle = Math.round(angle / rad) * rad;
+        }
+      }
+      let len = Math.hypot(dx, dy);
+      if (snapLength > 0) len = Math.round(len / snapLength) * snapLength;
+      x = start.x + Math.cos(angle) * len;
+      y = start.y + Math.sin(angle) * len;
+    }
+    return { x, y };
   };
 
   const cloneShape = (shape: RoomShape): RoomShape => ({
