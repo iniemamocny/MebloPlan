@@ -1,4 +1,4 @@
-import type { RoomShape, ShapePoint, ShapeSegment } from '../types';
+import type { RoomShape, ShapePoint, ShapeSegment, Wall } from '../types';
 import uuid from './uuid';
 
 /**
@@ -48,3 +48,18 @@ export const removeSegmentFromShape = (
 };
 
 export default addSegmentToShape;
+
+/** Converts a room shape to an array of walls. */
+export const shapeToWalls = (
+  shape: RoomShape,
+  opts?: { height?: number; thickness?: number },
+): Wall[] => {
+  const { height = 2.7, thickness = 0.1 } = opts || {};
+  return shape.segments.map((seg) => ({
+    id: uuid(),
+    start: { ...seg.start },
+    end: { ...seg.end },
+    height,
+    thickness,
+  }));
+};

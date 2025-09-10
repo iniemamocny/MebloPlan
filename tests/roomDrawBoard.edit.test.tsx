@@ -40,6 +40,7 @@ beforeEach(() => {
   HTMLCanvasElement.prototype.setPointerCapture = () => {};
   HTMLCanvasElement.prototype.releasePointerCapture = () => {};
   usePlannerStore.setState({
+    room: { height: 2700, origin: { x: 0, y: 0 }, walls: [], windows: [], doors: [] },
     roomShape: { points: [], segments: [] },
     snapToGrid: false,
   });

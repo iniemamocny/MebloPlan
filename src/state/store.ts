@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { FAMILY } from '../core/catalog';
 import { Module3D, Room, Globals, Prices, Gaps, RoomShape, Wall } from '../types';
+import { shapeToWalls } from '../utils/roomShape';
 import { safeSetItem } from '../utils/storage';
 
 export const defaultGaps: Gaps = {
@@ -457,7 +458,27 @@ export const usePlannerStore = create<Store>((set, get) => ({
         future: [],
       };
     }),
-  setRoomShape: (shape) => set({ roomShape: shape }),
+  setRoomShape: (shape) =>
+    set((s) => {
+      const walls = shapeToWalls(shape, {
+        height: s.room.height / 1000,
+        thickness: s.selectedWall?.thickness ?? 0.1,
+      });
+      const updatedRoom = { ...s.room, walls };
+      return {
+        past: [
+          ...s.past,
+          {
+            modules: JSON.parse(JSON.stringify(s.modules)),
+            items: JSON.parse(JSON.stringify(s.items)),
+            room: JSON.parse(JSON.stringify(s.room)),
+          },
+        ],
+        roomShape: shape,
+        room: updatedRoom,
+        future: [],
+      };
+    }),
   setShowFronts: (v) => set({ showFronts: v }),
   setSnapAngle: (v) => set({ snapAngle: v }),
   setSnapLength: (v) => set({ snapLength: v }),
