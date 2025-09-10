@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { usePlannerStore } from '../../state/store';
 import type { Wall, WallOpening } from '../../types';
+import uuid from '../../utils/uuid';
 
 interface Props {
   threeRef: React.MutableRefObject<any>;
@@ -258,7 +259,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   const addWall = () => {
     const wallHeight = room.height / 1000;
     const newWall: Wall = {
-      id: Math.random().toString(36).slice(2),
+      id: uuid(),
       start: { x: 0, y: 0 },
       end: { x: 2, y: 0 },
       height: wallHeight,
@@ -282,7 +283,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       wall.end.y - wall.start.y,
     );
     const win: WallOpening = {
-      id: Math.random().toString(36).slice(2),
+      id: uuid(),
       wallId,
       offset: len / 2,
       width: 1,
@@ -300,7 +301,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       wall.end.y - wall.start.y,
     );
     const door: WallOpening = {
-      id: Math.random().toString(36).slice(2),
+      id: uuid(),
       wallId,
       offset: len / 3,
       width: 0.9,
@@ -414,7 +415,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       const { x: sx, y: sy } = startRef.current;
       const wallHeight = room.height / 1000;
       const newWall: Wall = {
-        id: Math.random().toString(36).slice(2),
+        id: uuid(),
         start: { x: sx, y: sy },
         end,
         height: wallHeight,

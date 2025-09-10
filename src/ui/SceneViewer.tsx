@@ -21,6 +21,7 @@ import RoomBuilder from './build/RoomBuilder';
 import RadialMenu from './components/RadialMenu';
 import RoomPanel from './panels/RoomPanel';
 import { shapeToWalls } from './build/RoomDrawBoard';
+import uuid from '../utils/uuid';
 
 interface ThreeContext {
   scene: THREE.Scene;
@@ -524,7 +525,7 @@ const SceneViewer: React.FC<Props> = ({
               y: point.z + orientation.y * half,
             };
             const wall: Wall = {
-              id: Math.random().toString(36).slice(2),
+              id: uuid(),
               start,
               end,
               height: store.room.height / 1000,

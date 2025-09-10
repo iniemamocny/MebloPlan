@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { usePlannerStore } from '../../state/store';
 import type { RoomShape, ShapePoint, Wall } from '../../types';
+import uuid from '../../utils/uuid';
 
 interface Props {
   width?: number;
@@ -148,8 +149,8 @@ export const shapeToWalls = (
   opts?: { height?: number; thickness?: number },
 ): Wall[] => {
   const { height = 2700, thickness = 0.1 } = opts || {};
-  return shape.segments.map((seg, i) => ({
-    id: `w${i}`,
+  return shape.segments.map((seg) => ({
+    id: uuid(),
     start: { ...seg.start },
     end: { ...seg.end },
     height,
