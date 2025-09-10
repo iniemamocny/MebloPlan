@@ -32,4 +32,19 @@ export const addSegmentToShape = (
   };
 };
 
+/** Removes a segment and any orphaned points from a room shape. */
+export const removeSegmentFromShape = (
+  shape: RoomShape,
+  seg: ShapeSegment,
+): RoomShape => {
+  const segments = shape.segments.filter((s) => s !== seg);
+  const used = new Set<string>();
+  segments.forEach((s) => {
+    used.add(s.start.id);
+    used.add(s.end.id);
+  });
+  const points = shape.points.filter((p) => used.has(p.id));
+  return { points, segments };
+};
+
 export default addSegmentToShape;
