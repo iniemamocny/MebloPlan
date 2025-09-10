@@ -411,10 +411,26 @@ const RoomDrawBoard: React.FC<Props> = ({
     }
     const seg = segmentAt(p);
     if (seg) {
-      setSelectedSegment(seg);
-      setSelectedPoint(null);
-      movingSegmentRef.current = { segment: seg, last: p };
-      pushHistory();
+      if (e.altKey || e.detail > 1) {
+        pushHistory();
+        const newPoint: ShapePoint = { id: uuid(), x: p.x, y: p.y };
+        const segments = roomShape.segments.flatMap((s) =>
+          s === seg
+            ? [
+                { start: seg.start, end: newPoint },
+                { start: newPoint, end: seg.end },
+              ]
+            : [s],
+        );
+        setRoomShape({ points: [...roomShape.points, newPoint], segments });
+        setSelectedPoint(newPoint);
+        setSelectedSegment(null);
+      } else {
+        setSelectedSegment(seg);
+        setSelectedPoint(null);
+        movingSegmentRef.current = { segment: seg, last: p };
+        pushHistory();
+      }
       return;
     }
 
