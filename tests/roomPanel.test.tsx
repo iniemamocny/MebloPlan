@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeAll } from 'vitest';
+vi.mock('../src/utils/uuid', () => ({ default: () => 'test-uuid', uuid: () => 'test-uuid' }));
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { act } from 'react';
@@ -244,6 +245,7 @@ describe('Room features', () => {
     const state = usePlannerStore.getState();
     expect(state.isRoomDrawing).toBe(false);
     expect(state.room.walls.length).toBe(1);
+    expect(state.room.walls[0].id).toBe('test-uuid');
 
     root.unmount();
     container.remove();
@@ -280,6 +282,7 @@ describe('Room features', () => {
 
     const state = usePlannerStore.getState();
     expect(state.room.walls.length).toBe(1);
+    expect(state.room.walls[0].id).toBe('test-uuid');
 
     root.unmount();
     container.remove();

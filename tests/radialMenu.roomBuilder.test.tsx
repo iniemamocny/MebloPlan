@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi } from 'vitest';
+vi.mock('../src/utils/uuid', () => ({ default: () => 'test-uuid', uuid: () => 'test-uuid' }));
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { act } from 'react';
@@ -92,6 +93,7 @@ describe('RadialMenu integration with RoomBuilder', () => {
     });
 
     expect(usePlannerStore.getState().room.walls.length).toBe(before + 1);
+    expect(usePlannerStore.getState().room.walls[0].id).toBe('test-uuid');
 
     root.unmount();
   });
