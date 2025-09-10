@@ -4,6 +4,9 @@ vi.mock('../src/utils/uuid', () => ({
   default: () => 'test-uuid',
   uuid: () => 'test-uuid',
 }));
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (s: string) => s }),
+}));
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { act } from 'react';
