@@ -1,9 +1,9 @@
 import type { RoomShape, ShapePoint, ShapeSegment, Wall } from '../types';
 import uuid from './uuid';
 
-const EPSILON = 1e-6;
+export const EPSILON = 1e-6;
 
-const pointsEqual = (pt: ShapePoint, p: ShapePoint, eps = EPSILON) =>
+export const pointsEqual = (pt: ShapePoint, p: ShapePoint, eps = EPSILON) =>
   Math.abs(pt.x - p.x) < eps && Math.abs(pt.y - p.y) < eps;
 
 /**

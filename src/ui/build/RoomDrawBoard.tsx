@@ -2,7 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { usePlannerStore } from '../../state/store';
 import type { RoomShape, ShapePoint, ShapeSegment } from '../../types';
 import uuid from '../../utils/uuid';
-import { addSegmentToShape, removeSegmentFromShape } from '../../utils/roomShape';
+import {
+  addSegmentToShape,
+  removeSegmentFromShape,
+  pointsEqual,
+  EPSILON,
+} from '../../utils/roomShape';
 import ItemHotbar, {
   hotbarItems,
   furnishHotbarItems,
@@ -166,6 +171,20 @@ const RoomDrawBoard: React.FC<Props> = ({
     return roomShape.segments.find((seg) => distToSeg(seg) <= 5) || null;
   };
 
+  const mergePointIfNeeded = (pt: ShapePoint): ShapePoint[] => {
+    const match = roomShape.points.find(
+      (p) => p !== pt && pointsEqual(p, pt, EPSILON),
+    );
+    if (!match) return roomShape.points;
+    roomShape.segments.forEach((seg) => {
+      if (seg.start === pt) seg.start = match;
+      if (seg.end === pt) seg.end = match;
+    });
+    if (selectedPoint === pt) setSelectedPoint(match);
+    movingPointRef.current = match;
+    return roomShape.points.filter((p) => p !== pt);
+  };
+
   const draw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -235,7 +254,14 @@ const RoomDrawBoard: React.FC<Props> = ({
 
   useEffect(() => {
     draw();
-  }, [roomShape, preview, gridSize, snapToGrid, selectedPoint, selectedSegment]);
+  }, [
+    roomShape,
+    preview,
+    gridSize,
+    snapToGrid,
+    selectedPoint,
+    selectedSegment,
+  ]);
 
   const onPointerDown = (e: React.PointerEvent) => {
     const p = getPoint(e);
@@ -289,8 +315,9 @@ const RoomDrawBoard: React.FC<Props> = ({
       const p = getPoint(e);
       movingPointRef.current.x = p.x;
       movingPointRef.current.y = p.y;
+      const points = mergePointIfNeeded(movingPointRef.current);
       setRoomShape({
-        points: [...roomShape.points],
+        points: [...points],
         segments: [...roomShape.segments],
       });
       return;
@@ -322,6 +349,11 @@ const RoomDrawBoard: React.FC<Props> = ({
       pointerIdRef.current = null;
     }
     if (movingPointRef.current) {
+      const points = mergePointIfNeeded(movingPointRef.current);
+      setRoomShape({
+        points: [...points],
+        segments: [...roomShape.segments],
+      });
       movingPointRef.current = null;
       return;
     }
@@ -392,9 +424,7 @@ const RoomDrawBoard: React.FC<Props> = ({
         <button onClick={redo} disabled={!future.length}>
           Redo
         </button>
-        {selectedSegment && (
-          <button onClick={deleteSelected}>Delete</button>
-        )}
+        {selectedSegment && <button onClick={deleteSelected}>Delete</button>}
       </div>
       <canvas
         ref={canvasRef}
