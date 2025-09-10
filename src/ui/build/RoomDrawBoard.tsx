@@ -37,6 +37,7 @@ const RoomDrawBoard: React.FC<Props> = ({
     snapAngle,
     snapLength,
     snapRightAngles,
+    measurementUnit,
   } = store;
   const [start, setStart] = useState<ShapePoint | null>(null);
   const [preview, setPreview] = useState<ShapePoint | null>(null);
@@ -55,6 +56,25 @@ const RoomDrawBoard: React.FC<Props> = ({
     segment: ShapeSegment;
     last: ShapePoint;
   } | null>(null);
+  const labelRef = useRef<HTMLDivElement | null>(null);
+
+  const formatLength = (len: number) =>
+    measurementUnit === 'cm'
+      ? `${Math.round(len / 10)} cm`
+      : `${Math.round(len)} mm`;
+
+  const updateLabel = (pos: ShapePoint, len: number, ang: number) => {
+    if (!labelRef.current) return;
+    const deg = (ang * 180) / Math.PI;
+    labelRef.current.style.left = `${pos.x}px`;
+    labelRef.current.style.top = `${pos.y}px`;
+    labelRef.current.textContent = `${formatLength(len)} / ${Math.round(deg)}°`;
+    labelRef.current.style.display = 'block';
+  };
+
+  const hideLabel = () => {
+    if (labelRef.current) labelRef.current.style.display = 'none';
+  };
 
   const items =
     mode === 'build'
@@ -233,7 +253,10 @@ const RoomDrawBoard: React.FC<Props> = ({
   const updatePreviewFromInput = () => {
     if (!start) return;
     const { length, angle } = parseInput(inputRef.current);
-    if (isNaN(length)) return;
+    if (isNaN(length)) {
+      hideLabel();
+      return;
+    }
     const ang =
       angle !== undefined
         ? (angle * Math.PI) / 180
@@ -243,6 +266,8 @@ const RoomDrawBoard: React.FC<Props> = ({
       y: start.y + Math.sin(ang) * length,
     };
     setPreview(end);
+    const len = Math.hypot(end.x - start.x, end.y - start.y);
+    updateLabel(end, len, Math.atan2(end.y - start.y, end.x - start.x));
   };
 
   const finalizeSegment = (end: ShapePoint) => {
@@ -261,6 +286,7 @@ const RoomDrawBoard: React.FC<Props> = ({
     setStart(null);
     setPreview(null);
     inputRef.current = '';
+    hideLabel();
   };
 
   const draw = () => {
@@ -341,7 +367,16 @@ const RoomDrawBoard: React.FC<Props> = ({
     selectedSegment,
   ]);
 
+  useEffect(() => {
+    if (drawingRef.current && start && preview) {
+      const len = Math.hypot(preview.x - start.x, preview.y - start.y);
+      const ang = Math.atan2(preview.y - start.y, preview.x - start.x);
+      updateLabel(preview, len, ang);
+    }
+  }, [preview, start, measurementUnit]);
+
   const onPointerDown = (e: React.PointerEvent) => {
+    hideLabel();
     const p = getPoint(e);
     pointerIdRef.current = e.pointerId;
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -418,11 +453,16 @@ const RoomDrawBoard: React.FC<Props> = ({
       });
       return;
     }
-    if (!drawingRef.current || !start) return;
+    if (!drawingRef.current || !start) {
+      hideLabel();
+      return;
+    }
     const p = getPoint(e);
     pointerAngleRef.current = Math.atan2(p.y - start.y, p.x - start.x);
+    const len = Math.hypot(p.x - start.x, p.y - start.y);
     if (inputRef.current) inputRef.current = '';
     setPreview(p);
+    updateLabel(p, len, pointerAngleRef.current);
   };
 
   const onPointerUp = (e: React.PointerEvent) => {
@@ -448,6 +488,7 @@ const RoomDrawBoard: React.FC<Props> = ({
       setStart(null);
       setPreview(null);
       inputRef.current = '';
+      hideLabel();
       return;
     }
     const end = getPoint(e);
@@ -465,6 +506,7 @@ const RoomDrawBoard: React.FC<Props> = ({
     setStart(null);
     setPreview(null);
     inputRef.current = '';
+    hideLabel();
   };
 
   useEffect(() => {
@@ -542,6 +584,21 @@ const RoomDrawBoard: React.FC<Props> = ({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerCancel}
+      />
+      <div
+        ref={labelRef}
+        data-testid="draw-label"
+        style={{
+          position: 'absolute',
+          pointerEvents: 'none',
+          background: '#000',
+          color: '#fff',
+          padding: '2px 4px',
+          borderRadius: 4,
+          fontSize: 12,
+          transform: 'translate(-50%, -50%)',
+          display: 'none',
+        }}
       />
       {mode === 'build' && <WallToolSelector />}
       {mode && <ItemHotbar mode={mode} />}
