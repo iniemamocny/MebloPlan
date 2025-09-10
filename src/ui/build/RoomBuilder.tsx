@@ -461,7 +461,10 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
         color: '#ffffff',
       };
       setRoom({ walls: [...room.walls, newWall] });
-      setSelectedTool(null);
+      // Keep wall tool active to allow drawing consecutive walls
+      if (selectedTool !== 'wall') {
+        setSelectedTool(null);
+      }
       cleanup();
     }
 
