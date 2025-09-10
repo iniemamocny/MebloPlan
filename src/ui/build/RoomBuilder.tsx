@@ -19,6 +19,9 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   const selectedTool = usePlannerStore((s) => s.selectedTool);
   const selectedWall = usePlannerStore((s) => s.selectedWall);
   const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
+  const snapAngle = usePlannerStore((s) => s.snapAngle);
+  const snapLength = usePlannerStore((s) => s.snapLength);
+  const snapRightAngles = usePlannerStore((s) => s.snapRightAngles);
   const groupRef = useRef<THREE.Group | null>(null);
   const roomRef = useRef(room);
   const startRef = useRef<{ x: number; y: number } | null>(null);
@@ -329,6 +332,30 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       return { x: pos.x, y: pos.z };
     };
 
+    const applySnap = (p: { x: number; y: number }) => {
+      if (!startRef.current) return p;
+      const { x: sx, y: sy } = startRef.current;
+      const dx = p.x - sx;
+      const dy = p.y - sy;
+      let angle = Math.atan2(dy, dx);
+      const rad = (snapAngle * Math.PI) / 180;
+      if (rad > 0) {
+        if (snapRightAngles && room.walls.length > 0) {
+          const last = room.walls[room.walls.length - 1];
+          const lastAngle = Math.atan2(
+            last.end.y - last.start.y,
+            last.end.x - last.start.x,
+          );
+          angle = lastAngle + Math.round((angle - lastAngle) / rad) * rad;
+        } else {
+          angle = Math.round(angle / rad) * rad;
+        }
+      }
+      let len = Math.hypot(dx, dy);
+      if (snapLength > 0) len = Math.round(len / snapLength) * snapLength;
+      return { x: sx + Math.cos(angle) * len, y: sy + Math.sin(angle) * len };
+    };
+
     const updateLabel = (
       midx: number,
       wallHeight: number,
@@ -429,7 +456,8 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
 
     function onMove(e: PointerEvent) {
       if (!startRef.current) return;
-      const end = getPoint(e);
+      const raw = getPoint(e);
+      const end = applySnap(raw);
       const { x: sx, y: sy } = startRef.current;
       const dx = end.x - sx;
       const dy = end.y - sy;
@@ -443,7 +471,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
 
     function onUp(e: PointerEvent) {
       if (!startRef.current) return;
-      const end = getPoint(e);
+      const end = applySnap(getPoint(e));
       finalize(end);
     }
 
@@ -490,6 +518,9 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     setRoom,
     setSelectedTool,
     threeRef,
+    snapAngle,
+    snapLength,
+    snapRightAngles,
   ]);
 
   useEffect(() => {
