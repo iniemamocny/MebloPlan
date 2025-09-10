@@ -254,6 +254,7 @@ const SceneViewer: React.FC<Props> = ({
     }, [threeRef, mode]);
 
   useEffect(() => {
+    if (!mode) return;
     const handleKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'w') {
         e.preventDefault();
@@ -272,7 +273,7 @@ const SceneViewer: React.FC<Props> = ({
       window.removeEventListener('keydown', handleKey);
       window.removeEventListener('keyup', handleKey);
     };
-  }, [store]);
+  }, [store, mode]);
 
   useEffect(() => {
     if (mode === null) return;
@@ -823,7 +824,7 @@ const SceneViewer: React.FC<Props> = ({
           <RoomPanel />
         </div>
       )}
-      <ItemHotbar mode={mode} />
+      {mode && <ItemHotbar mode={mode} />}
       {mode && isMobile && (
         <>
           <TouchJoystick

@@ -58,6 +58,8 @@ const RoomDrawBoard: React.FC<Props> = ({
   }, [items, store.selectedItemSlot, store.selectedTool, store]);
 
   useEffect(() => {
+    if (!mode) return;
+
     const handleKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'w') {
         e.preventDefault();
@@ -76,7 +78,7 @@ const RoomDrawBoard: React.FC<Props> = ({
       window.removeEventListener('keydown', handleKey);
       window.removeEventListener('keyup', handleKey);
     };
-  }, [store]);
+  }, [store, mode]);
 
   const snap = (v: number) =>
     snapToGrid ? Math.round(v / gridSize) * gridSize : v;
@@ -405,7 +407,7 @@ const RoomDrawBoard: React.FC<Props> = ({
         onPointerCancel={onPointerCancel}
       />
       {mode === 'build' && <WallToolSelector />}
-      <ItemHotbar mode={mode} />
+      {mode && <ItemHotbar mode={mode} />}
     </div>
   );
 };
