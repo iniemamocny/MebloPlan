@@ -87,4 +87,72 @@ describe('RoomBuilder snapping', () => {
     root.unmount();
     container.remove();
   });
+
+  it('snaps wall angle relative to previous wall', () => {
+    const canvas = document.createElement('canvas');
+    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    camera.position.set(0, 5, 5);
+    camera.lookAt(0, 0, 0);
+    const threeRef: any = {
+      current: {
+        renderer: { domElement: canvas },
+        camera,
+        group: { children: [], add: () => {}, remove: () => {} },
+      },
+    };
+
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+    act(() => root.render(<RoomBuilder threeRef={threeRef} />));
+
+    // first wall
+    act(() => {
+      window.dispatchEvent(
+        new PointerEvent('pointerdown', { bubbles: true, clientX: 50, clientY: 50 }),
+      );
+    });
+    act(() => {
+      window.dispatchEvent(
+        new PointerEvent('pointermove', { bubbles: true, clientX: 80, clientY: 60 }),
+      );
+    });
+    act(() => {
+      window.dispatchEvent(
+        new PointerEvent('pointerup', { bubbles: true, clientX: 80, clientY: 60 }),
+      );
+    });
+
+    act(() => usePlannerStore.setState({ selectedTool: 'wall' }));
+
+    // second wall at roughly vertical direction
+    act(() => {
+      window.dispatchEvent(
+        new PointerEvent('pointerdown', { bubbles: true, clientX: 80, clientY: 60 }),
+      );
+    });
+    act(() => {
+      window.dispatchEvent(
+        new PointerEvent('pointermove', { bubbles: true, clientX: 90, clientY: 80 }),
+      );
+    });
+    act(() => {
+      window.dispatchEvent(
+        new PointerEvent('pointerup', { bubbles: true, clientX: 90, clientY: 80 }),
+      );
+    });
+
+    const walls = usePlannerStore.getState().room.walls;
+    expect(walls.length).toBe(2);
+    const w1 = walls[0];
+    const w2 = walls[1];
+    const ang1 = Math.atan2(w1.end.y - w1.start.y, w1.end.x - w1.start.x);
+    const ang2 = Math.atan2(w2.end.y - w2.start.y, w2.end.x - w2.start.x);
+    expect(Math.abs(ang2 - ang1)).toBeCloseTo(Math.PI / 2);
+    const len2 = Math.hypot(w2.end.x - w2.start.x, w2.end.y - w2.start.y);
+    expect(len2).toBeCloseTo(Math.round(len2));
+
+    root.unmount();
+    container.remove();
+  });
 });

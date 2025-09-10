@@ -257,6 +257,30 @@ describe('RoomDrawBoard editing', () => {
     container.remove();
   });
 
+  it('snaps to angle increments without right-angle mode', () => {
+    usePlannerStore.setState({
+      snapToGrid: false,
+      snapLength: 10,
+      snapAngle: 45,
+      snapRightAngles: false,
+      roomShape: { points: [], segments: [] },
+    });
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+    act(() => root.render(<RoomDrawBoard width={200} height={100} />));
+    const canvas = container.querySelector('canvas')!;
+
+    drawSegment(canvas, 0, 0, 60, 40);
+    const seg = usePlannerStore.getState().roomShape.segments[0];
+    const len = Math.hypot(seg.end.x - seg.start.x, seg.end.y - seg.start.y);
+    expect(len).toBeCloseTo(70);
+    expect(seg.end.x).toBeCloseTo(seg.end.y);
+
+    root.unmount();
+    container.remove();
+  });
+
   it('deletes selected segment', () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
