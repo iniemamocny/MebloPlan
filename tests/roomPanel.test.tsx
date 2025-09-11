@@ -169,7 +169,7 @@ describe('Room features', () => {
       room: { height: 2700, origin: { x: 0, y: 0 }, walls: [], windows: [], doors: [] },
       selectedWall: { thickness: 0.1 },
       isRoomDrawing: false,
-      selectedTool: null,
+      wallTool: 'edit',
     });
 
     const setViewMode = vi.fn();
@@ -190,7 +190,8 @@ describe('Room features', () => {
     });
 
     expect(setViewMode).toHaveBeenCalledWith('2d');
-    expect(usePlannerStore.getState().selectedTool).toBe('wall');
+    expect(usePlannerStore.getState().isRoomDrawing).toBe(true);
+    expect(usePlannerStore.getState().wallTool).toBe('draw');
 
     root.unmount();
     container.remove();
