@@ -6,6 +6,13 @@ import ReactDOM from 'react-dom/client';
 import * as THREE from 'three';
 import SceneViewer from '../src/ui/SceneViewer';
 
+vi.mock('../src/ui/components/ItemHotbar', () => ({
+  default: () => null,
+  hotbarItems: [],
+  furnishHotbarItems: [],
+}));
+vi.mock('../src/ui/components/TouchJoystick', () => ({ default: () => null }));
+
 vi.mock('three/examples/jsm/controls/OrbitControls.js', () => ({
   OrbitControls: vi.fn().mockImplementation(() => ({
     target: new THREE.Vector3(),
@@ -84,7 +91,7 @@ describe('SceneViewer view mode', () => {
         <SceneViewer
           threeRef={threeRef}
           addCountertop={false}
-          mode="build"
+          mode="furnish"
           setMode={setMode}
           viewMode="2d"
           setViewMode={setViewMode}
@@ -100,7 +107,7 @@ describe('SceneViewer view mode', () => {
         <SceneViewer
           threeRef={threeRef}
           addCountertop={false}
-          mode="build"
+          mode="furnish"
           setMode={setMode}
           viewMode="3d"
           setViewMode={setViewMode}

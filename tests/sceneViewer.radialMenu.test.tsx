@@ -73,11 +73,9 @@ vi.mock('../src/scene/engine', () => {
 vi.mock('../src/ui/components/ItemHotbar', () => ({
   default: () => null,
   hotbarItems: [],
-  buildHotbarItems: () => [],
   furnishHotbarItems: [],
 }));
 vi.mock('../src/ui/components/TouchJoystick', () => ({ default: () => null }));
-vi.mock('../src/ui/build/RoomBuilder', () => ({ default: () => null }));
 vi.mock('../src/ui/components/RadialMenu', () => ({
   default: (props: any) => {
     visibleStates.push(props.visible);
@@ -99,7 +97,7 @@ describe('SceneViewer RadialMenu visibility', () => {
         <SceneViewer
           threeRef={threeRef}
           addCountertop={false}
-          mode="build"
+          mode="furnish"
           setMode={setMode}
         />,
       );
@@ -120,7 +118,7 @@ describe('SceneViewer RadialMenu visibility', () => {
   });
 
   it('is accessible in all player modes', () => {
-    const modes = ['build', 'furnish', 'decorate'] as const;
+    const modes = ['furnish', 'decorate'] as const;
     for (const m of modes) {
       visibleStates.length = 0;
       const threeRef: any = { current: null };
