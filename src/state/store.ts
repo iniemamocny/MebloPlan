@@ -231,7 +231,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   snapRightAngles: true,
   angleToPrev: persisted?.angleToPrev ?? 0,
   defaultSquareAngle: persisted?.defaultSquareAngle ?? 0,
-  gridSize: persisted?.gridSize ?? 50,
+  gridSize: persisted?.gridSize ?? 100,
   snapToGrid: persisted?.snapToGrid ?? false,
   measurementUnit: persisted?.measurementUnit || 'mm',
   playerHeight: persisted?.playerHeight ?? 1.6,

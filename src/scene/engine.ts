@@ -6,7 +6,7 @@ import CabinetDragger from '../viewer/CabinetDragger';
 
 export function setupThree(container: HTMLElement) {
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf3f4f6);
+  scene.background = new THREE.Color(0xf9fafc);
 
   const perspectiveCamera = new THREE.PerspectiveCamera(
     45,
@@ -46,31 +46,51 @@ export function setupThree(container: HTMLElement) {
   dir.position.set(6, 8, 4);
   scene.add(dir);
 
-  const gridSize = 10;
-  let grid: THREE.GridHelper | null = null;
-  let currentGridDivisions = 0;
+  const boardWidth = 16;
+  const boardHeight = 9;
+  let grid: THREE.LineSegments | null = null;
+  let currentDivX = 0;
+  let currentDivY = 0;
   const updateGrid = (divisions: number) => {
-    const d = Math.max(1, Math.round(divisions));
-    if (d === currentGridDivisions) return;
+    const divX = Math.max(1, Math.round(divisions));
+    const divY = Math.max(
+      1,
+      Math.round(divisions * (boardHeight / boardWidth)),
+    );
+    if (divX === currentDivX && divY === currentDivY) return;
     if (grid) {
       scene.remove(grid);
       grid.geometry.dispose();
-      if (Array.isArray((grid as any).material))
-        (grid.material as THREE.Material[]).forEach((m) => m.dispose());
-      else (grid.material as THREE.Material).dispose();
+      (grid.material as THREE.Material).dispose();
     }
-    grid = new THREE.GridHelper(gridSize, d, 0xdddddd, 0xcccccc);
+    const vertices: number[] = [];
+    for (let i = 0; i <= divX; i++) {
+      const x = -boardWidth / 2 + (i * boardWidth) / divX;
+      vertices.push(x, 0, -boardHeight / 2, x, 0, boardHeight / 2);
+    }
+    for (let j = 0; j <= divY; j++) {
+      const z = -boardHeight / 2 + (j * boardHeight) / divY;
+      vertices.push(-boardWidth / 2, 0, z, boardWidth / 2, 0, z);
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute(
+      'position',
+      new THREE.Float32BufferAttribute(vertices, 3),
+    );
+    const material = new THREE.LineBasicMaterial({ color: 0x515152 });
+    grid = new THREE.LineSegments(geometry, material);
     scene.add(grid);
-    currentGridDivisions = d;
+    currentDivX = divX;
+    currentDivY = divY;
   };
   const baseDivisions = Math.max(
     1,
-    Math.round(gridSize / (usePlannerStore.getState().gridSize / 100)),
+    Math.round(boardWidth / (usePlannerStore.getState().gridSize / 100)),
   );
   updateGrid(baseDivisions);
   const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(10, 10),
-    new THREE.MeshStandardMaterial({ color: 0xeeeeee, side: THREE.DoubleSide }),
+    new THREE.PlaneGeometry(boardWidth, boardHeight),
+    new THREE.MeshStandardMaterial({ color: 0xf9fafc, side: THREE.DoubleSide }),
   );
   floor.rotation.x = -Math.PI / 2;
   scene.add(floor);
