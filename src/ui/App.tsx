@@ -127,6 +127,7 @@ export default function App() {
           setMode={setMode}
           startMode={startMode}
           viewMode={viewMode}
+          setViewMode={handleSetViewMode}
         />
         {mode === null && (
           <TopBar

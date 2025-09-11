@@ -57,6 +57,7 @@ interface Props {
   setMode: React.Dispatch<React.SetStateAction<PlayerMode>>;
   startMode: Exclude<PlayerMode, null>;
   viewMode: '3d' | '2d';
+  setViewMode: (v: '3d' | '2d') => void;
 }
 
 const INTERACT_DISTANCE = 1.5;
@@ -82,6 +83,7 @@ const SceneViewer: React.FC<Props> = ({
   setMode,
   startMode,
   viewMode = '3d',
+  setViewMode,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const store = usePlannerStore();
@@ -905,7 +907,7 @@ const SceneViewer: React.FC<Props> = ({
       {mode === 'build' && !isRoomDrawing && <WallToolSelector />}
       {mode === 'build' && (
         <div style={{ position: 'absolute', top: 60, left: 10 }}>
-          <RoomPanel />
+          <RoomPanel setViewMode={setViewMode} />
         </div>
       )}
       {mode && <ItemHotbar mode={mode} />}
