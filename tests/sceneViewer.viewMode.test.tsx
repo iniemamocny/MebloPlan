@@ -12,6 +12,8 @@ vi.mock('three/examples/jsm/controls/OrbitControls.js', () => ({
     enableRotate: true,
     update: vi.fn(),
     dispose: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
   })),
 }));
 
