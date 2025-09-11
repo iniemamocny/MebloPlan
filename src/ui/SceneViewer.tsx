@@ -931,7 +931,7 @@ const SceneViewer: React.FC<Props> = ({
       {mode === 'build' && !isRoomDrawing && <WallToolSelector />}
       {mode === 'build' && (
         <div style={{ position: 'absolute', top: 60, left: 10 }}>
-          <RoomPanel setViewMode={setViewMode} />
+          <RoomPanel setViewMode={setViewMode} setMode={setMode} />
         </div>
       )}
       {mode && <ItemHotbar mode={mode} />}
