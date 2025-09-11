@@ -34,6 +34,7 @@ beforeEach(() => {
     room: { height: 2700, origin: { x: 0, y: 0 }, walls: [], windows: [], doors: [] },
     selectedTool: 'wall',
     measurementUnit: 'mm',
+    isRoomDrawing: true,
   });
 });
 
