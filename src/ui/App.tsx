@@ -84,7 +84,7 @@ export default function App() {
     const next = viewMode === '3d' ? '2d' : '3d';
     handleSetViewMode(next);
     if (next === '3d' && store.isRoomDrawing) {
-      store.setIsRoomDrawing(false);
+      store.finishDrawing();
     }
   };
 
