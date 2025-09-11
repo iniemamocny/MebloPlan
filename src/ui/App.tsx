@@ -72,12 +72,9 @@ export default function App() {
     if (mode !== null) setStartMode(mode);
   }, [mode]);
 
-  useEffect(() => {
-    if (mode !== null && store.isRoomDrawing) {
-      setViewMode('3d');
-      store.setIsRoomDrawing(false);
-    }
-  }, [mode, store]);
+  // allow drawing to continue even when a play mode is active
+  // drawing will now be terminated only when the user explicitly exits
+  // drawing mode (e.g. via the "Finish" action in SceneViewer)
 
   const handleSetViewMode = (v: '3d' | '2d') => {
     setViewMode(v);
