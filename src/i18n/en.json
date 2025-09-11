@@ -24,6 +24,7 @@
       "cab": "Kitchen",
       "costs": "Costs",
       "cut": "Cutlist",
+      "room": "Room",
       "global": "Settings",
       "play": "Play"
     },
@@ -199,6 +200,27 @@
       "furnish": "Furnish mode",
       "decorate": "Decorate mode"
     }
+  },
+  "room": {
+    "walls": "Walls",
+    "drawWalls": "Draw",
+    "windows": "Windows",
+    "windowSingle": "Single window",
+    "windowDouble": "Double window",
+    "windowTriple": "Triple window",
+    "doors": "Doors",
+    "doorSingle": "Single door",
+    "doorDouble": "Double door",
+    "doorSliding": "Sliding door",
+    "openings": "Openings",
+    "height": "Height",
+    "width": "Width",
+    "thickness": "Thickness",
+    "floorHeight": "Floor height",
+    "insert": "Insert",
+    "dropCeiling": "Drop ceiling",
+    "length": "Length",
+    "place": "Place"
   },
   "items": {
     "cup": "Cup",
