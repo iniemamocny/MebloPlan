@@ -7,7 +7,7 @@ import { setupThree } from '../scene/engine';
 import { buildCabinetMesh } from '../scene/cabinetBuilder';
 import { FAMILY } from '../core/catalog';
 import { usePlannerStore, legCategories } from '../state/store';
-import { Module3D, ModuleAdv, Globals, Wall } from '../types';
+import { Module3D, ModuleAdv, Globals } from '../types';
 import { loadItemModel } from '../scene/itemLoader';
 import ItemHotbar, {
   hotbarItems,
@@ -471,8 +471,7 @@ const SceneViewer: React.FC<Props> = ({
       if (
         c.userData?.kind === 'cab' ||
         c.userData?.kind === 'top' ||
-        c.userData?.kind === 'item' ||
-        c.userData?.kind === 'wall'
+        c.userData?.kind === 'item'
       ) {
         group.remove(c);
         c.traverse((obj) => {
@@ -506,22 +505,6 @@ const SceneViewer: React.FC<Props> = ({
         top.userData.kind = 'top';
         group.add(top);
       }
-    });
-    // draw walls from room data
-    const walls = store.room.walls;
-    walls.forEach((w) => {
-      const len = Math.hypot(w.end.x - w.start.x, w.end.y - w.start.y);
-      const geom = new THREE.BoxGeometry(len, w.height, w.thickness);
-      const mat = new THREE.MeshStandardMaterial({ color: w.color || '#ffffff' });
-      const mesh = new THREE.Mesh(geom, mat);
-      const midx = (w.start.x + w.end.x) / 2;
-      const midy = (w.start.y + w.end.y) / 2;
-      mesh.position.set(midx, w.height / 2, midy);
-      const angle = Math.atan2(w.end.y - w.start.y, w.end.x - w.start.x);
-      mesh.rotation.y = -angle;
-      mesh.userData.kind = 'wall';
-      mesh.userData.wallId = w.id;
-      group.add(mesh);
     });
 
     store.items.forEach((it) => {
@@ -560,7 +543,6 @@ const SceneViewer: React.FC<Props> = ({
     addCountertop,
     showEdges,
     showFronts,
-    store.room.walls,
     store.room.height,
   ]);
 
@@ -822,7 +804,7 @@ const SceneViewer: React.FC<Props> = ({
         onSelect={(slot) => {
           store.setSelectedItemSlot(slot);
           const tool = radialItems[slot - 1];
-          if (tool === 'wall' || tool === 'window' || tool === 'door') {
+          if (tool === 'window' || tool === 'door') {
             store.setSelectedTool(tool);
           } else {
             store.setSelectedTool(null);
