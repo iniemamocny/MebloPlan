@@ -110,6 +110,7 @@ describe('SceneViewer room drawing in 2D view', () => {
 
     expect(container.querySelector('[data-testid="wall-toolbar"]')).not.toBeNull();
     expect(container.querySelector('[data-testid="item-hotbar"]')).toBeNull();
+    expect(setMode).not.toHaveBeenCalled();
 
     root.unmount();
     container.remove();
