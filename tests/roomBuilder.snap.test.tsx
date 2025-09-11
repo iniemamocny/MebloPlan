@@ -37,6 +37,7 @@ beforeEach(() => {
     snapLength: 1,
     snapAngle: 90,
     snapRightAngles: true,
+    isRoomDrawing: true,
   });
 });
 

@@ -21,6 +21,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
   const wallTool = usePlannerStore((s) => s.wallTool);
   const setWallTool = usePlannerStore((s) => s.setWallTool);
+  const isRoomDrawing = usePlannerStore((s) => s.isRoomDrawing);
   const setIsRoomDrawing = usePlannerStore((s) => s.setIsRoomDrawing);
   const snapAngle = usePlannerStore((s) => s.snapAngle);
   const snapLength = usePlannerStore((s) => s.snapLength);
@@ -226,7 +227,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
 
   useEffect(() => {
     const three = threeRef.current;
-    if (!three || wallTool !== 'draw') return;
+    if (!three || wallTool !== 'draw' || !isRoomDrawing) return;
 
     const size = selectedWall?.thickness ?? 0.1;
     const geom = new THREE.BoxGeometry(size, 0.01, size);
@@ -269,7 +270,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
         wallPreviewRef.current = null;
       }
     };
-  }, [wallTool, selectedWall?.thickness, threeRef]);
+  }, [wallTool, selectedWall?.thickness, threeRef, isRoomDrawing]);
 
   const addWall = () => {
     const wallHeight = roomRef.current.height / 1000;
@@ -330,7 +331,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
 
   useEffect(() => {
     const three = threeRef.current;
-    if (!three || wallTool !== 'draw') return;
+    if (!three || wallTool !== 'draw' || !isRoomDrawing) return;
     const dom: HTMLElement = three.renderer.domElement;
     const raycaster = new THREE.Raycaster();
     const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -559,6 +560,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     snapRightAngles,
     setWallTool,
     setIsRoomDrawing,
+    isRoomDrawing,
   ]);
 
   useEffect(() => {

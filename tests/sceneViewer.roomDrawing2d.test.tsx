@@ -159,5 +159,41 @@ describe('SceneViewer room drawing in 2D view', () => {
     root.unmount();
     container.remove();
   });
+
+  it('enables drawing when wall tool was already set to draw', () => {
+    const threeRef: any = { current: null };
+    const setMode = vi.fn();
+    const setViewMode = vi.fn();
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+
+    usePlannerStore.setState({ wallTool: 'draw', isRoomDrawing: false });
+
+    act(() => {
+      root.render(
+        <SceneViewer
+          threeRef={threeRef}
+          addCountertop={false}
+          mode="build"
+          setMode={setMode}
+          viewMode="2d"
+          setViewMode={setViewMode}
+        />, 
+      );
+    });
+
+    expect(container.querySelector('[data-testid="wall-toolbar"]')).toBeNull();
+
+    act(() => {
+      usePlannerStore.getState().setIsRoomDrawing(true);
+    });
+
+    expect(container.querySelector('[data-testid="wall-toolbar"]')).not.toBeNull();
+
+    root.unmount();
+    container.remove();
+    usePlannerStore.setState({ isRoomDrawing: false, wallTool: 'edit' });
+  });
 });
 
