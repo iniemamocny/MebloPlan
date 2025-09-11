@@ -301,9 +301,21 @@ const SceneViewer: React.FC<Props> = ({
     (threeRef.current as any).setMode = setMode;
     const pc = threeRef.current.playerControls;
     const onUnlock = () => setMode(null);
+    const onLock = () => {
+      // pointer lock acquired
+      return;
+    };
+    const onPointerlockError = () => {
+      setMode(null);
+      alert('Pointer lock failed');
+    };
     pc.addEventListener('unlock', onUnlock);
+    pc.addEventListener('lock', onLock);
+    pc.addEventListener('pointerlockerror', onPointerlockError);
     return () => {
       pc.removeEventListener('unlock', onUnlock);
+      pc.removeEventListener('lock', onLock);
+      pc.removeEventListener('pointerlockerror', onPointerlockError);
       threeRef.current?.dispose?.();
     };
   }, [threeRef]);
@@ -320,13 +332,11 @@ const SceneViewer: React.FC<Props> = ({
     if (mode === 'furnish') {
       three.controls.enabled = false;
       three.cabinetDragger.enable();
-      three.playerControls.lock();
       three.camera.position.y = store.playerHeight;
     } else {
       three.cabinetDragger.disable();
       if (mode) {
         three.controls.enabled = false;
-        three.playerControls.lock();
         three.camera.position.y = store.playerHeight;
       } else {
         three.playerControls.unlock();
