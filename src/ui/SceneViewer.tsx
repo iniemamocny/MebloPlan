@@ -103,6 +103,13 @@ const SceneViewer: React.FC<Props> = ({
   const wallStartRef = useRef<{ x: number; y: number } | null>(null);
   const savedView = useRef<{ pos: THREE.Vector3; target: THREE.Vector3 } | null>(null);
 
+  // reset wall creation state when room drawing mode is active
+  useEffect(() => {
+    if (store.isRoomDrawing) {
+      wallStartRef.current = null;
+    }
+  }, [store.isRoomDrawing]);
+
   const radialItems =
     mode === 'build'
       ? buildHotbarItems()
