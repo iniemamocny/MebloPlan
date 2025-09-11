@@ -73,7 +73,7 @@ export default function App() {
   }, [mode]);
 
   useEffect(() => {
-    if (mode !== null) {
+    if (mode !== null && store.isRoomDrawing) {
       setViewMode('3d');
       store.setIsRoomDrawing(false);
     }
@@ -84,7 +84,11 @@ export default function App() {
   };
 
   const toggleViewMode = () => {
-    handleSetViewMode(viewMode === '3d' ? '2d' : '3d');
+    const next = viewMode === '3d' ? '2d' : '3d';
+    handleSetViewMode(next);
+    if (next === '3d' && store.isRoomDrawing) {
+      store.setIsRoomDrawing(false);
+    }
   };
 
   return (
