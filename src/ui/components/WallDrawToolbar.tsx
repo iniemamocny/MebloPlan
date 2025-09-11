@@ -11,11 +11,11 @@ const WallDrawToolbar: React.FC = () => {
   const tools: {
     id: 'draw' | 'erase' | 'edit';
     icon: React.ReactNode;
-    label: string;
+    labelKey: string;
   }[] = [
-    { id: 'draw', icon: <Pencil size={16} />, label: t('drawWall') },
-    { id: 'erase', icon: <Eraser size={16} />, label: t('eraseWall') },
-    { id: 'edit', icon: <Hammer size={16} />, label: t('editWall') },
+    { id: 'draw', icon: <Pencil size={16} />, labelKey: 'drawWall' },
+    { id: 'erase', icon: <Eraser size={16} />, labelKey: 'eraseWall' },
+    { id: 'edit', icon: <Hammer size={16} />, labelKey: 'editWall' },
   ];
 
   return (
@@ -35,24 +35,27 @@ const WallDrawToolbar: React.FC = () => {
         pointerEvents: 'auto',
       }}
     >
-      {tools.map((t) => (
-        <button
-          onPointerDown={(e) => e.stopPropagation()}
-          key={t.id}
-          data-tool={t.id}
-          className="btnGhost"
-          aria-label={t.label}
-          title={t.label}
-          style={
-            wallTool === t.id
-              ? { background: 'var(--accent)', color: 'var(--white)' }
-              : undefined
-          }
-          onClick={() => setWallTool(t.id)}
-        >
-          {t.icon}
-        </button>
-      ))}
+      {tools.map((tool) => {
+        const label = t(tool.labelKey);
+        return (
+          <button
+            onPointerDown={(e) => e.stopPropagation()}
+            key={tool.id}
+            data-tool={tool.id}
+            className="btnGhost"
+            aria-label={label}
+            title={label}
+            style={
+              wallTool === tool.id
+                ? { background: 'var(--accent)', color: 'var(--white)' }
+                : undefined
+            }
+            onClick={() => setWallTool(tool.id)}
+          >
+            {tool.icon}
+          </button>
+        );
+      })}
     </div>
   );
 };
