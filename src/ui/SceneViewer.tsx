@@ -945,13 +945,13 @@ const SceneViewer: React.FC<Props> = ({
           {mode ? 'Tryb edycji' : 'Tryb gracza'}
         </button>
       </div>
-      {mode === 'build' && isRoomDrawing && (
+      {isRoomDrawing && (
         <>
           <RoomBuilder threeRef={threeRef} />
           <WallDrawToolbar />
         </>
       )}
-      {mode === 'build' && !isRoomDrawing && <WallToolSelector />}
+      {!isRoomDrawing && mode === null && <WallToolSelector />}
       {mode === 'build' && (
         <div style={{ position: 'absolute', top: 60, left: 10 }}>
           <RoomPanel setViewMode={setViewMode} />
