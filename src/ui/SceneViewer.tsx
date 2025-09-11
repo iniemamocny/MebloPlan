@@ -939,7 +939,7 @@ const SceneViewer: React.FC<Props> = ({
           {mode ? 'Tryb edycji' : 'Tryb gracza'}
         </button>
       </div>
-      {isRoomDrawing && (
+      {mode === 'build' && isRoomDrawing && (
         <>
           <RoomBuilder threeRef={threeRef} />
           <WallDrawToolbar />

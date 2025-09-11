@@ -58,6 +58,7 @@ export default function RoomPanel({ setViewMode, setMode }: Props) {
   };
 
   const startDrawing = () => {
+    setMode('build');
     setViewMode('2d');
     setIsRoomDrawing(true);
     setWallTool('draw');
