@@ -38,6 +38,7 @@ beforeEach(() => {
     snapAngle: 90,
     snapRightAngles: true,
     isRoomDrawing: true,
+    wallTool: 'draw',
   });
 });
 

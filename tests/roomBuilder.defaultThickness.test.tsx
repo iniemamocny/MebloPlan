@@ -35,6 +35,7 @@ beforeEach(() => {
     selectedTool: 'wall',
     measurementUnit: 'mm',
     isRoomDrawing: true,
+    wallTool: 'draw',
   });
 });
 

@@ -131,6 +131,7 @@ describe('Room features', () => {
     usePlannerStore.setState({
       room: { height: 2700, origin: { x: 0, y: 0 }, walls: [], windows: [], doors: [] },
       selectedWall: { thickness: 0.1 },
+      wallTool: 'edit',
     });
 
     act(() => {

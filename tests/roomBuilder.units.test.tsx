@@ -36,6 +36,7 @@ beforeEach(() => {
     selectedWall: { thickness: 0.1 },
     measurementUnit: 'mm',
     isRoomDrawing: true,
+    wallTool: 'draw',
   });
 });
 

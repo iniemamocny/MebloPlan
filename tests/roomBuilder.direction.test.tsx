@@ -37,6 +37,7 @@ beforeEach(() => {
     selectedTool: 'wall',
     selectedWall: { thickness: 0.1 },
     isRoomDrawing: true,
+    wallTool: 'draw',
   });
 });
 
