@@ -532,7 +532,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setIsRoomDrawing: (v) => set({ isRoomDrawing: v }),
   setWallTool: (t) => set({ wallTool: t }),
   startDrawing: () => set({ isRoomDrawing: true, wallTool: 'draw' }),
-  finishDrawing: () => set({ isRoomDrawing: false, wallTool: 'edit' }),
+  finishDrawing: () =>
+    set({ isRoomDrawing: false, wallTool: 'edit', selectedTool: null }),
 }));
 
 const persistSelector = (s: Store) => ({

@@ -532,6 +532,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       cleanup();
       setIsRoomDrawing(false);
       setWallTool('edit');
+      setSelectedTool(null);
     }
 
     usePlannerStore.setState({ finishDrawing });
@@ -546,6 +547,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
         finishDrawing: () => {
           setIsRoomDrawing(false);
           setWallTool('edit');
+          setSelectedTool(null);
         },
       });
     };
