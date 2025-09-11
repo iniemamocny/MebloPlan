@@ -6,15 +6,22 @@ import { act } from 'react';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (s: string) => ({ drawWall: 'Draw wall', editWall: 'Edit wall' }[s] || s),
+    t: (s: string) =>
+      ({
+        drawWall: 'Draw wall',
+        eraseWall: 'Erase wall',
+        editWall: 'Edit wall',
+      }[s] || s),
   }),
 }));
 
 vi.mock('lucide-react', () => ({
-  Hammer: () => null,
-  User: () => null,
+  Pencil: vi.fn(() => null),
+  Eraser: vi.fn(() => null),
+  Hammer: vi.fn(() => null),
 }));
 
+import { Pencil, Eraser, Hammer } from 'lucide-react';
 import WallDrawToolbar from '../src/ui/components/WallDrawToolbar';
 import { usePlannerStore } from '../src/state/store';
 
@@ -35,7 +42,16 @@ describe('WallDrawToolbar', () => {
     });
 
     const drawBtn = container.querySelector('button[aria-label="Draw wall"]');
+    const eraseBtn = container.querySelector('button[aria-label="Erase wall"]');
     const editBtn = container.querySelector('button[aria-label="Edit wall"]');
+
+    expect(Pencil).toHaveBeenCalled();
+    expect(Eraser).toHaveBeenCalled();
+    expect(Hammer).toHaveBeenCalled();
+    expect(Pencil.mock.calls[0][0].size).toBe(16);
+    expect(Eraser.mock.calls[0][0].size).toBe(16);
+    expect(Hammer.mock.calls[0][0].size).toBe(16);
+    expect(container.querySelectorAll('button').length).toBe(3);
 
     act(() => {
       editBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -44,10 +60,16 @@ describe('WallDrawToolbar', () => {
     expect(usePlannerStore.getState().wallTool).not.toBe('draw');
 
     act(() => {
+      eraseBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    expect(usePlannerStore.getState().wallTool).toBe('erase');
+    expect(usePlannerStore.getState().wallTool).not.toBe('edit');
+
+    act(() => {
       drawBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
     expect(usePlannerStore.getState().wallTool).toBe('draw');
-    expect(usePlannerStore.getState().wallTool).not.toBe('edit');
+    expect(usePlannerStore.getState().wallTool).not.toBe('erase');
 
     root.unmount();
     container.remove();
