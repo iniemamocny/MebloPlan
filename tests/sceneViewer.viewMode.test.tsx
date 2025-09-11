@@ -6,8 +6,6 @@ import ReactDOM from 'react-dom/client';
 import * as THREE from 'three';
 import SceneViewer from '../src/ui/SceneViewer';
 
-const visibleStates: boolean[] = [];
-
 vi.mock('three/examples/jsm/controls/OrbitControls.js', () => ({
   OrbitControls: vi.fn().mockImplementation(() => ({
     target: new THREE.Vector3(),
@@ -70,24 +68,8 @@ vi.mock('../src/scene/engine', () => {
   };
 });
 
-vi.mock('../src/ui/components/ItemHotbar', () => ({
-  default: () => null,
-  hotbarItems: [],
-  buildHotbarItems: () => [],
-  furnishHotbarItems: [],
-}));
-vi.mock('../src/ui/components/TouchJoystick', () => ({ default: () => null }));
-vi.mock('../src/ui/build/RoomBuilder', () => ({ default: () => null }));
-vi.mock('../src/ui/components/RadialMenu', () => ({
-  default: (props: any) => {
-    visibleStates.push(props.visible);
-    return null;
-  },
-}));
-
-describe('SceneViewer RadialMenu visibility', () => {
-  it('shows on Q down and hides on Q up', () => {
-    visibleStates.length = 0;
+describe('SceneViewer view mode', () => {
+  it('uses orthographic camera in 2d mode', () => {
     const threeRef: any = { current: null };
     const setMode = vi.fn();
     const container = document.createElement('div');
@@ -101,58 +83,29 @@ describe('SceneViewer RadialMenu visibility', () => {
           addCountertop={false}
           mode="build"
           setMode={setMode}
+          viewMode="2d"
         />,
       );
     });
-    expect(visibleStates[visibleStates.length - 1]).toBe(false);
+
+    expect(threeRef.current.camera).toBe(threeRef.current.orthographicCamera);
+    expect(threeRef.current.controls.enableRotate).toBe(false);
 
     act(() => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyQ' }));
+      root.render(
+        <SceneViewer
+          threeRef={threeRef}
+          addCountertop={false}
+          mode="build"
+          setMode={setMode}
+          viewMode="3d"
+        />,
+      );
     });
-    expect(visibleStates[visibleStates.length - 1]).toBe(true);
 
-    act(() => {
-      window.dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyQ' }));
-    });
-    expect(visibleStates[visibleStates.length - 1]).toBe(false);
+    expect(threeRef.current.camera).toBe(threeRef.current.perspectiveCamera);
+    expect(threeRef.current.controls.enableRotate).toBe(true);
 
     root.unmount();
-  });
-
-  it('is accessible in all player modes', () => {
-    const modes = ['build', 'furnish', 'decorate'] as const;
-    for (const m of modes) {
-      visibleStates.length = 0;
-      const threeRef: any = { current: null };
-      const setMode = vi.fn();
-      const container = document.createElement('div');
-      document.body.appendChild(container);
-      const root = ReactDOM.createRoot(container);
-
-      act(() => {
-        root.render(
-          <SceneViewer
-            threeRef={threeRef}
-            addCountertop={false}
-            mode={m}
-            setMode={setMode}
-          />,
-        );
-      });
-      expect(visibleStates[visibleStates.length - 1]).toBe(false);
-
-      act(() => {
-        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyQ' }));
-      });
-      expect(visibleStates[visibleStates.length - 1]).toBe(true);
-
-      act(() => {
-        window.dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyQ' }));
-      });
-      expect(visibleStates[visibleStates.length - 1]).toBe(false);
-
-      root.unmount();
-      container.remove();
-    }
   });
 });

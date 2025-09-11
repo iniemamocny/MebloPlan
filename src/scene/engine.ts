@@ -8,13 +8,29 @@ export function setupThree(container: HTMLElement) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf3f4f6);
 
-  const camera = new THREE.PerspectiveCamera(
+  const perspectiveCamera = new THREE.PerspectiveCamera(
     45,
     container.clientWidth / container.clientHeight,
     0.1,
     100,
   );
-  camera.position.set(4, 3, 6);
+  perspectiveCamera.position.set(4, 3, 6);
+
+  const aspect = container.clientWidth / container.clientHeight;
+  const size = 5;
+  const orthographicCamera = new THREE.OrthographicCamera(
+    -size * aspect,
+    size * aspect,
+    size,
+    -size,
+    0.1,
+    100,
+  );
+  orthographicCamera.position.set(0, 10, 0);
+  orthographicCamera.up.set(0, 0, -1);
+  orthographicCamera.lookAt(0, 0, 0);
+
+  let camera: THREE.Camera = perspectiveCamera;
 
   const renderer = new THREE.WebGLRenderer({
     antialias: true,
@@ -42,10 +58,10 @@ export function setupThree(container: HTMLElement) {
   const group = new THREE.Group();
   scene.add(group);
 
-  const controls = new OrbitControls(camera, renderer.domElement);
+  let controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
 
-  const playerControls = new PointerLockControls(camera, renderer.domElement);
+  const playerControls = new PointerLockControls(perspectiveCamera, renderer.domElement);
   const isMobile =
     typeof window !== 'undefined' &&
     ('ontouchstart' in window ||
@@ -254,8 +270,14 @@ export function setupThree(container: HTMLElement) {
     const w = container.clientWidth,
       h = container.clientHeight;
     renderer.setSize(w, h);
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
+    perspectiveCamera.aspect = w / h;
+    perspectiveCamera.updateProjectionMatrix();
+    const aspect = w / h;
+    orthographicCamera.left = -size * aspect;
+    orthographicCamera.right = size * aspect;
+    orthographicCamera.top = size;
+    orthographicCamera.bottom = -size;
+    orthographicCamera.updateProjectionMatrix();
   };
   window.addEventListener('resize', onResize);
 
@@ -329,7 +351,7 @@ export function setupThree(container: HTMLElement) {
     window.removeEventListener('resize', onResize);
   };
 
-  return {
+  const three: any = {
     scene,
     camera,
     renderer,
@@ -337,6 +359,8 @@ export function setupThree(container: HTMLElement) {
     playerControls,
     group,
     cabinetDragger,
+    perspectiveCamera,
+    orthographicCamera,
     setPlayerParams,
     setMove,
     setMoveFromJoystick,
@@ -346,4 +370,18 @@ export function setupThree(container: HTMLElement) {
     onCrouch,
     dispose,
   };
+
+  const setCamera = (cam: THREE.Camera) => {
+    camera = cam;
+    three.camera = cam;
+  };
+  const setControls = (c: OrbitControls) => {
+    controls = c;
+    three.controls = c;
+  };
+
+  three.setCamera = setCamera;
+  three.setControls = setControls;
+
+  return three;
 }
