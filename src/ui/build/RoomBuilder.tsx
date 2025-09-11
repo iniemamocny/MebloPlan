@@ -510,7 +510,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     }
 
     const onDown = (e: PointerEvent) => {
-      if (wallTool !== 'draw') return;
+      if (wallTool !== 'draw' || e.button !== 0) return;
       startRef.current = getPoint(e);
       inputRef.current = '';
       lengthRef.current = 0;
@@ -519,9 +519,9 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       window.addEventListener('keydown', onKey);
     };
 
-    window.addEventListener('pointerdown', onDown);
+    dom.addEventListener('pointerdown', onDown);
     return () => {
-      window.removeEventListener('pointerdown', onDown);
+      dom.removeEventListener('pointerdown', onDown);
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
       window.removeEventListener('keydown', onKey);

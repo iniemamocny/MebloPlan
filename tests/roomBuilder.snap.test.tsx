@@ -60,7 +60,7 @@ describe('RoomBuilder snapping', () => {
     act(() => root.render(<RoomBuilder threeRef={threeRef} />));
 
     act(() => {
-      window.dispatchEvent(
+      canvas.dispatchEvent(
         new PointerEvent('pointerdown', { bubbles: true, clientX: 50, clientY: 50 }),
       );
     });
@@ -108,7 +108,7 @@ describe('RoomBuilder snapping', () => {
 
     // first wall
     act(() => {
-      window.dispatchEvent(
+      canvas.dispatchEvent(
         new PointerEvent('pointerdown', { bubbles: true, clientX: 50, clientY: 50 }),
       );
     });
@@ -127,7 +127,7 @@ describe('RoomBuilder snapping', () => {
 
     // second wall at roughly vertical direction
     act(() => {
-      window.dispatchEvent(
+      canvas.dispatchEvent(
         new PointerEvent('pointerdown', { bubbles: true, clientX: 80, clientY: 60 }),
       );
     });

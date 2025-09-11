@@ -33,12 +33,12 @@ beforeEach(() => {
   usePlannerStore.setState({
     room: { height: 2700, origin: { x: 0, y: 0 }, walls: [], windows: [], doors: [] },
     selectedTool: 'wall',
-    measurementUnit: 'mm',
+    selectedWall: { thickness: 0.1 },
   });
 });
 
-describe('RoomBuilder default wall thickness', () => {
-  it('adds a wall using default thickness without adjusting slider', () => {
+describe('RoomBuilder right click handling', () => {
+  it('does not add a wall on right click', () => {
     const canvas = document.createElement('canvas');
     const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
     camera.position.set(0, 5, 5);
@@ -54,22 +54,28 @@ describe('RoomBuilder default wall thickness', () => {
     document.body.appendChild(container);
     const root = ReactDOM.createRoot(container);
     act(() => root.render(<RoomBuilder threeRef={threeRef} />));
+
     act(() => {
       canvas.dispatchEvent(
-        new PointerEvent('pointerdown', { bubbles: true, clientX: 10, clientY: 10 }),
+        new PointerEvent('pointerdown', {
+          bubbles: true,
+          clientX: 10,
+          clientY: 10,
+          button: 2,
+        }),
       );
-    });
-    act(() => {
       window.dispatchEvent(
-        new PointerEvent('pointermove', { bubbles: true, clientX: 10, clientY: 10 }),
+        new PointerEvent('pointerup', {
+          bubbles: true,
+          clientX: 10,
+          clientY: 10,
+          button: 2,
+        }),
       );
     });
-    act(() => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: '1' }));
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
-    });
-    const wall = usePlannerStore.getState().room.walls[0];
-    expect(wall.thickness).toBe(0.1);
+
+    expect(usePlannerStore.getState().room.walls.length).toBe(0);
+
     root.unmount();
     container.remove();
   });
