@@ -579,7 +579,12 @@ const SceneViewer: React.FC<Props> = ({
     const raycaster = new THREE.Raycaster();
     const handlePointer = (event: PointerEvent) => {
       if (mode) {
-        if (event.button === 0 && mode === 'build' && store.selectedTool === 'wall') {
+        if (
+          event.button === 0 &&
+          mode === 'build' &&
+          store.selectedTool === 'wall' &&
+          !store.isRoomDrawing
+        ) {
           const rect = renderer.domElement.getBoundingClientRect();
           const mouse = new THREE.Vector2(
             ((event.clientX - rect.left) / rect.width) * 2 - 1,
@@ -746,6 +751,7 @@ const SceneViewer: React.FC<Props> = ({
     updateGhost,
     store.selectedTool,
     store.selectedWall,
+    store.isRoomDrawing,
     store.room,
   ]);
 
