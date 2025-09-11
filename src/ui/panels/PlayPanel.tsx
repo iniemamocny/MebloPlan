@@ -83,6 +83,7 @@ export default function PlayPanel({
           <button
             className="btnGhost"
             onClick={() => {
+              threeRef.current?.playerControls.lock();
               setMode(startMode);
               onClose();
             }}
