@@ -16,6 +16,7 @@ const WallDrawToolbar: React.FC = () => {
 
   return (
     <div
+      onPointerDown={(e) => e.stopPropagation()}
       style={{
         position: 'absolute',
         top: 10,
@@ -32,6 +33,7 @@ const WallDrawToolbar: React.FC = () => {
     >
       {tools.map((t) => (
         <button
+          onPointerDown={(e) => e.stopPropagation()}
           key={t.id}
           data-tool={t.id}
           className="btnGhost"

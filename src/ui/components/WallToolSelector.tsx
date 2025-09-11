@@ -8,6 +8,7 @@ const WallToolSelector: React.FC = () => {
 
   return (
     <div
+      onPointerDown={(e) => e.stopPropagation()}
       style={{
         position: 'absolute',
         bottom: 50,
@@ -22,6 +23,7 @@ const WallToolSelector: React.FC = () => {
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <input
+          onPointerDown={(e) => e.stopPropagation()}
           type="range"
           min={0.08}
           max={0.25}
