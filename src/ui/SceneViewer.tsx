@@ -978,16 +978,30 @@ const SceneViewer: React.FC<Props> = ({
         </button>
       </div>
       {viewMode === '2d' && (
-        <div style={{ position: 'absolute', top: 10, right: 10 }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            display: 'flex',
+            gap: 8,
+          }}
+        >
           <button
             data-testid="finish-drawing"
             className="btnGhost"
             onClick={() => {
               store.finishDrawing();
-              setViewMode('3d');
             }}
           >
             Zakończ rysowanie
+          </button>
+          <button
+            data-testid="switch-3d"
+            className="btnGhost"
+            onClick={() => setViewMode('3d')}
+          >
+            Widok 3D
           </button>
         </div>
       )}
