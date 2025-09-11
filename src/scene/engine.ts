@@ -85,7 +85,7 @@ export function setupThree(container: HTMLElement) {
   };
   const baseDivisions = Math.max(
     1,
-    Math.round(boardWidth / (usePlannerStore.getState().gridSize / 1000)),
+    Math.round(boardWidth / (usePlannerStore.getState().gridSize / 100)),
   );
   updateGrid(baseDivisions);
   const floor = new THREE.Mesh(
