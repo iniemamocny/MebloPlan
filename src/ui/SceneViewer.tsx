@@ -102,6 +102,11 @@ const SceneViewer: React.FC<Props> = ({
   const ghostRef = useRef<THREE.Object3D | null>(null);
   const wallStartRef = useRef<{ x: number; y: number } | null>(null);
   const savedView = useRef<{ pos: THREE.Vector3; target: THREE.Vector3 } | null>(null);
+  const roomRef = useRef(store.room);
+
+  useEffect(() => {
+    roomRef.current = store.room;
+  }, [store.room]);
 
   // reset wall creation state when room drawing mode is active
   useEffect(() => {
@@ -637,10 +642,10 @@ const SceneViewer: React.FC<Props> = ({
                 id: uuid(),
                 start,
                 end,
-                height: store.room.height / 1000,
+                height: roomRef.current.height / 1000,
                 thickness: store.selectedWall?.thickness ?? 0.1,
               };
-              store.setRoom({ walls: [...store.room.walls, wall] });
+              store.setRoom({ walls: [...roomRef.current.walls, wall] });
               wallStartRef.current = null;
             }
           }
@@ -759,7 +764,6 @@ const SceneViewer: React.FC<Props> = ({
     store.selectedTool,
     store.selectedWall,
     store.isRoomDrawing,
-    store.room,
   ]);
 
     useEffect(() => {
