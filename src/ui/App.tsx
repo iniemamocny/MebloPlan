@@ -72,6 +72,13 @@ export default function App() {
     if (mode !== null) setStartMode(mode);
   }, [mode]);
 
+  useEffect(() => {
+    if (mode !== null) {
+      setViewMode('3d');
+      store.setIsRoomDrawing(false);
+    }
+  }, [mode, store]);
+
   const handleSetViewMode = (v: '3d' | '2d') => {
     setViewMode(v);
   };
