@@ -55,15 +55,15 @@ describe('RoomBuilder measurement units', () => {
     document.body.appendChild(container);
     const root = ReactDOM.createRoot(container);
     act(() => root.render(<RoomBuilder threeRef={threeRef} />));
-    return { container, root };
+    return { container, root, canvas };
   };
 
   it('interprets keyboard length in millimeters', () => {
-    const { container, root } = setup();
+    const { container, root, canvas } = setup();
     const label = container.querySelector('div')!;
 
     act(() => {
-      window.dispatchEvent(
+      canvas.dispatchEvent(
         new PointerEvent('pointerdown', { bubbles: true, clientX: 50, clientY: 50 }),
       );
     });
@@ -88,11 +88,11 @@ describe('RoomBuilder measurement units', () => {
 
   it('interprets keyboard length in centimeters', () => {
     usePlannerStore.setState({ measurementUnit: 'cm', selectedTool: 'wall' });
-    const { container, root } = setup();
+    const { container, root, canvas } = setup();
     const label = container.querySelector('div')!;
 
     act(() => {
-      window.dispatchEvent(
+      canvas.dispatchEvent(
         new PointerEvent('pointerdown', { bubbles: true, clientX: 50, clientY: 50 }),
       );
     });

@@ -59,7 +59,7 @@ describe('RoomBuilder direction handling', () => {
     act(() => root.render(<RoomBuilder threeRef={threeRef} />));
 
     act(() => {
-      window.dispatchEvent(
+      canvas.dispatchEvent(
         new PointerEvent('pointerdown', { bubbles: true, clientX: 10, clientY: 10 }),
       );
     });
