@@ -115,11 +115,7 @@ const SceneViewer: React.FC<Props> = ({
     }
   }, [store.isRoomDrawing]);
 
-  useEffect(() => {
-    if (!store.isRoomDrawing && viewMode === '2d') {
-      setViewMode('3d');
-    }
-  }, [store.isRoomDrawing, viewMode, setViewMode]);
+  // Removed automatic switch to 3D when room drawing ends.
 
   const radialItems =
     mode === 'build'
@@ -955,6 +951,20 @@ const SceneViewer: React.FC<Props> = ({
           {mode ? 'Tryb edycji' : 'Tryb gracza'}
         </button>
       </div>
+      {viewMode === '2d' && (
+        <div style={{ position: 'absolute', top: 10, right: 10 }}>
+          <button
+            data-testid="finish-drawing"
+            className="btnGhost"
+            onClick={() => {
+              store.setIsRoomDrawing(false);
+              setViewMode('3d');
+            }}
+          >
+            Zakończ rysowanie
+          </button>
+        </div>
+      )}
       {isRoomDrawing && (
         <>
           <RoomBuilder threeRef={threeRef} />

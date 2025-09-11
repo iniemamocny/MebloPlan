@@ -118,7 +118,7 @@ describe('SceneViewer room drawing in 2D view', () => {
     container.remove();
   });
 
-  it('returns to 3d view when room drawing ends', () => {
+  it('returns to 3d view only after finishing drawing manually', () => {
     const threeRef: any = { current: null };
     const setMode = vi.fn();
     const setViewMode = vi.fn();
@@ -140,13 +140,21 @@ describe('SceneViewer room drawing in 2D view', () => {
         />,
       );
     });
-
     act(() => {
       usePlannerStore.getState().setIsRoomDrawing(false);
     });
 
+    // view mode should not change automatically
+    expect(setViewMode).not.toHaveBeenCalled();
+
+    const finishBtn = container.querySelector('[data-testid="finish-drawing"]') as HTMLElement;
+    act(() => {
+      finishBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
     expect(setViewMode).toHaveBeenCalledWith('3d');
     expect(setMode).not.toHaveBeenCalled();
+    expect(usePlannerStore.getState().isRoomDrawing).toBe(false);
 
     root.unmount();
     container.remove();
