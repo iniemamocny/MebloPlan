@@ -12,18 +12,7 @@ import { FAMILY } from '../src/core/catalog';
 import { usePlannerStore } from '../src/state/store';
 
 beforeAll(() => {
-  // jsdom does not implement canvas context; provide a minimal stub
-  // so RoomDrawBoard can render without throwing.
   (global as any).PointerEvent = MouseEvent;
-  HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
-    clearRect: vi.fn(),
-    beginPath: vi.fn(),
-    moveTo: vi.fn(),
-    lineTo: vi.fn(),
-    stroke: vi.fn(),
-    setLineDash: vi.fn(),
-    // fields used by draw board
-  } as any));
 });
 
 vi.mock('react-i18next', () => ({

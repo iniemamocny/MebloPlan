@@ -8,7 +8,6 @@ import { createTranslator } from './i18n';
 import MainTabs from './MainTabs';
 import { safeSetItem } from '../utils/storage';
 import { PlayerMode } from './types';
-import RoomDrawBoard from './build/RoomDrawBoard';
 
 type PlayerSubMode = Exclude<PlayerMode, null>;
 
@@ -121,17 +120,14 @@ export default function App() {
         </div>
       )}
       <div className="canvasWrap">
-        {viewMode === '3d' ? (
-          <SceneViewer
-            threeRef={threeRef}
-            addCountertop={addCountertop}
-            mode={mode}
-            setMode={setMode}
-            startMode={startMode}
-          />
-        ) : (
-          <RoomDrawBoard mode={mode} />
-        )}
+        <SceneViewer
+          threeRef={threeRef}
+          addCountertop={addCountertop}
+          mode={mode}
+          setMode={setMode}
+          startMode={startMode}
+          viewMode={viewMode}
+        />
         {mode === null && (
           <TopBar
             t={t}
