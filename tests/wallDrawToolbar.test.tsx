@@ -110,4 +110,32 @@ describe('WallDrawToolbar', () => {
     root.unmount();
     container.remove();
   });
+
+  it('does not trigger wall placement when clicking toolbar buttons', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+
+    usePlannerStore.setState({ wallTool: 'draw', isRoomDrawing: true });
+
+    act(() => {
+      root.render(<WallDrawToolbar />);
+    });
+
+    const handler = vi.fn();
+    document.addEventListener('pointerdown', handler);
+
+    const drawBtn = container.querySelector('button[aria-label="Draw wall"]');
+    act(() => {
+      drawBtn?.dispatchEvent(
+        new PointerEvent('pointerdown', { bubbles: true })
+      );
+    });
+
+    expect(handler).not.toHaveBeenCalled();
+
+    document.removeEventListener('pointerdown', handler);
+    root.unmount();
+    container.remove();
+  });
 });
