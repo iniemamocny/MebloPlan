@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
 import type CabinetDragger from '../viewer/CabinetDragger';
 import { setupThree } from '../scene/engine';
@@ -24,12 +24,16 @@ import uuid from '../utils/uuid';
 
 interface ThreeContext {
   scene: THREE.Scene;
-  camera: THREE.PerspectiveCamera;
+  camera: THREE.Camera;
   renderer: THREE.WebGLRenderer;
   controls: OrbitControls;
   playerControls: PointerLockControls;
   group: THREE.Group;
   cabinetDragger: CabinetDragger;
+  perspectiveCamera: THREE.PerspectiveCamera;
+  orthographicCamera: THREE.OrthographicCamera;
+  setCamera?: (cam: THREE.Camera) => void;
+  setControls?: (c: OrbitControls) => void;
   setPlayerParams?: (p: { height?: number; speed?: number }) => void;
   setMove?: (m: {
     forward: boolean;
@@ -105,26 +109,36 @@ const SceneViewer: React.FC<Props> = ({
   const applyViewMode = React.useCallback(
     (mode: '3d' | '2d') => {
       const three = threeRef.current;
-      if (!three?.camera || !three?.controls) return;
+      if (!three?.renderer || !three.setCamera || !three.setControls) return;
       if (mode === '2d') {
         savedView.current = {
-          pos: three.camera.position.clone(),
+          pos: three.perspectiveCamera.position.clone(),
           target: three.controls.target.clone(),
         };
-        three.controls.enableRotate = false;
+        three.setCamera(three.orthographicCamera);
+        three.controls.dispose();
+        const c = new OrbitControls(three.camera, three.renderer.domElement);
+        c.enableDamping = true;
+        c.enableRotate = false;
+        three.setControls(c);
         three.camera.position.set(0, 10, 0);
         three.camera.up.set(0, 0, -1);
-        three.controls.target.set(0, 0, 0);
+        c.target.set(0, 0, 0);
         three.camera.lookAt(0, 0, 0);
-        three.controls.update();
+        c.update();
       } else {
+        three.setCamera(three.perspectiveCamera);
+        three.controls.dispose();
+        const c = new OrbitControls(three.camera, three.renderer.domElement);
+        c.enableDamping = true;
+        c.enableRotate = true;
+        three.setControls(c);
         if (savedView.current) {
           three.camera.position.copy(savedView.current.pos);
-          three.controls.target.copy(savedView.current.target);
+          c.target.copy(savedView.current.target);
         }
         three.camera.up.set(0, 1, 0);
-        three.controls.enableRotate = true;
-        three.controls.update();
+        c.update();
       }
     },
     [threeRef],
@@ -134,31 +148,6 @@ const SceneViewer: React.FC<Props> = ({
     if (!threeInitialized.current) return;
     applyViewMode(viewMode);
   }, [viewMode, applyViewMode]);
-
-  useEffect(() => {
-    const three = threeRef.current;
-    if (!three) return;
-    if (viewMode === '2d') {
-      savedView.current = {
-        pos: three.camera.position.clone(),
-        target: three.controls.target.clone(),
-      };
-      three.controls.enableRotate = false;
-      three.camera.position.set(0, 10, 0);
-      three.camera.up.set(0, 0, -1);
-      three.controls.target.set(0, 0, 0);
-      three.camera.lookAt(0, 0, 0);
-      three.controls.update();
-    } else {
-      if (savedView.current) {
-        three.camera.position.copy(savedView.current.pos);
-        three.controls.target.copy(savedView.current.target);
-      }
-      three.camera.up.set(0, 1, 0);
-      three.controls.enableRotate = true;
-      three.controls.update();
-    }
-  }, [viewMode, threeRef]);
 
   useEffect(() => {
     const items =
@@ -277,6 +266,12 @@ const SceneViewer: React.FC<Props> = ({
   useEffect(() => {
     const three = threeRef.current;
     if (!three) return;
+    if (viewMode === '2d') {
+      three.cabinetDragger.disable();
+      three.playerControls.unlock();
+      three.controls.enabled = true;
+      return;
+    }
     if (mode === 'furnish') {
       three.controls.enabled = false;
       three.cabinetDragger.enable();
@@ -293,7 +288,7 @@ const SceneViewer: React.FC<Props> = ({
         three.controls.enabled = true;
       }
     }
-  }, [mode, threeRef, store.playerHeight]);
+  }, [mode, threeRef, store.playerHeight, viewMode]);
 
   useEffect(() => {
     threeRef.current?.setPlayerParams?.({
@@ -552,7 +547,7 @@ const SceneViewer: React.FC<Props> = ({
     const three = threeRef.current;
     if (!three || !three.renderer || !three.camera || !three.group) return;
     const renderer = three.renderer as THREE.WebGLRenderer;
-    const camera = three.camera as THREE.PerspectiveCamera;
+    const camera = three.camera;
     const group = three.group as THREE.Group;
     const raycaster = new THREE.Raycaster();
     const handlePointer = (event: PointerEvent) => {
@@ -734,7 +729,7 @@ const SceneViewer: React.FC<Props> = ({
       const detect = () => {
         const three = threeRef.current;
         if (mode && three && three.group) {
-          const camera = three.camera as THREE.PerspectiveCamera;
+          const camera = three.camera;
           const group = three.group as THREE.Group;
           const origin = camera.getWorldPosition(new THREE.Vector3());
           const dir = camera.getWorldDirection(new THREE.Vector3());

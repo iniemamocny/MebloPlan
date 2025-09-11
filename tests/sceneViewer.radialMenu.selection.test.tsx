@@ -3,10 +3,20 @@ import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { act } from 'react';
+import * as THREE from 'three';
 import SceneViewer from '../src/ui/SceneViewer';
 import { usePlannerStore } from '../src/state/store';
 
 let onSelect: ((slot: number) => void) | null = null;
+
+vi.mock('three/examples/jsm/controls/OrbitControls.js', () => ({
+  OrbitControls: vi.fn().mockImplementation(() => ({
+    target: new THREE.Vector3(),
+    enableRotate: true,
+    update: vi.fn(),
+    dispose: vi.fn(),
+  })),
+}));
 
 vi.mock('../src/scene/engine', () => ({
   setupThree: () => {
@@ -22,11 +32,21 @@ vi.mock('../src/scene/engine', () => ({
       y: 0,
       toJSON() {},
     });
-    return {
+    const perspectiveCamera = new THREE.PerspectiveCamera();
+    const orthographicCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
+    const three: any = {
       scene: {},
-      camera: { position: { y: 0 } },
+      camera: perspectiveCamera,
       renderer: { domElement: dom },
-      controls: { enabled: true, dollyIn: () => {}, dollyOut: () => {}, update: () => {} },
+      controls: {
+        enabled: true,
+        target: new THREE.Vector3(),
+        enableRotate: true,
+        update: () => {},
+        dispose: () => {},
+        dollyIn: () => {},
+        dollyOut: () => {},
+      },
       playerControls: {
         lock: vi.fn(),
         unlock: vi.fn(),
@@ -36,7 +56,16 @@ vi.mock('../src/scene/engine', () => ({
       },
       group: { children: [], add: () => {}, remove: () => {} },
       cabinetDragger: { enable: vi.fn(), disable: vi.fn() },
+      perspectiveCamera,
+      orthographicCamera,
     };
+    three.setCamera = (cam: THREE.Camera) => {
+      three.camera = cam;
+    };
+    three.setControls = (c: any) => {
+      three.controls = c;
+    };
+    return three;
   },
 }));
 
