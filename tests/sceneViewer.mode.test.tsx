@@ -73,11 +73,9 @@ vi.mock('../src/scene/engine', () => {
 vi.mock('../src/ui/components/ItemHotbar', () => ({
   default: (props: any) => <div data-testid="item-hotbar" data-mode={props.mode}></div>,
   hotbarItems: [],
-  buildHotbarItems: () => [],
   furnishHotbarItems: [],
 }));
 vi.mock('../src/ui/components/TouchJoystick', () => ({ default: () => null }));
-vi.mock('../src/ui/build/RoomBuilder', () => ({ default: () => null }));
 
 describe('SceneViewer hotbar visibility', () => {
   it('renders hotbar only when mode is not null', () => {
@@ -104,7 +102,7 @@ describe('SceneViewer hotbar visibility', () => {
         <SceneViewer
           threeRef={threeRef}
           addCountertop={false}
-          mode="build"
+          mode="furnish"
           setMode={setMode}
         />,
       );
@@ -137,7 +135,7 @@ describe('SceneViewer cabinetDragger mode control', () => {
 
     const before = dragger.disable.mock.calls.length;
     act(() => {
-      root.render(<SceneViewer threeRef={threeRef} addCountertop={false} mode="build" setMode={setMode} />);
+      root.render(<SceneViewer threeRef={threeRef} addCountertop={false} mode="decorate" setMode={setMode} />);
     });
     expect(dragger.disable.mock.calls.length).toBeGreaterThan(before);
 

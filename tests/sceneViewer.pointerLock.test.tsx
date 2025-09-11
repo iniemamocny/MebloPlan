@@ -83,12 +83,9 @@ vi.mock('../src/scene/engine', () => {
 vi.mock('../src/ui/components/ItemHotbar', () => ({
   default: (props: any) => <div data-testid="item-hotbar" data-mode={props.mode}></div>,
   hotbarItems: [],
-  buildHotbarItems: () => [],
   furnishHotbarItems: [],
 }));
 vi.mock('../src/ui/components/TouchJoystick', () => ({ default: () => null }));
-vi.mock('../src/ui/build/RoomBuilder', () => ({ default: () => null }));
-vi.mock('../src/ui/panels/RoomPanel', () => ({ default: () => null }));
 
 const t = (s: string) => s;
 
@@ -98,7 +95,7 @@ describe('pointer lock handling', () => {
   const setMode = vi.fn((v: any) => {
     mode = typeof v === 'function' ? v(mode) : v;
   });
-  let startMode: PlayerSubMode = 'build';
+  let startMode: PlayerSubMode = 'furnish';
   const setStartMode = (v: PlayerSubMode) => {
     startMode = v;
   };
@@ -129,7 +126,7 @@ describe('pointer lock handling', () => {
             addCountertop={false}
             mode={mode}
             setMode={setMode}
-            startMode={'build'}
+            startMode={'furnish'}
             viewMode="3d"
             setViewMode={() => {}}
           />
@@ -150,7 +147,7 @@ describe('pointer lock handling', () => {
       btn.click();
     });
     expect(threeRef.current.playerControls.lock).toHaveBeenCalled();
-    expect(mode).toBe('build');
+    expect(mode).toBe('furnish');
 
     act(() => {
       threeRef.current.playerControls.dispatch('unlock');
@@ -169,7 +166,7 @@ describe('pointer lock handling', () => {
             addCountertop={false}
             mode={mode}
             setMode={setMode}
-            startMode={'build'}
+            startMode={'furnish'}
             viewMode="3d"
             setViewMode={() => {}}
           />

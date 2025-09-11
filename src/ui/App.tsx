@@ -38,13 +38,13 @@ export default function App() {
     initSidePanel,
   } = useCabinetConfig(family, kind, variant, setVariant);
 
-  const [tab, setTab] = useState<'cab' | 'costs' | 'cut' | 'global' | 'play' | 'room' | null>(null);
+  const [tab, setTab] = useState<'cab' | 'costs' | 'cut' | 'global' | 'play' | null>(null);
   const [boardL, setBoardL] = useState(2800);
   const [boardW, setBoardW] = useState(2070);
   const [boardKerf, setBoardKerf] = useState(3);
   const [boardHasGrain, setBoardHasGrain] = useState(false);
   const [mode, setMode] = useState<PlayerMode>(null);
-  const [startMode, setStartMode] = useState<PlayerSubMode>('build');
+  const [startMode, setStartMode] = useState<PlayerSubMode>('furnish');
   const [viewMode, setViewMode] = useState<'3d' | '2d'>('3d');
 
   const undo = store.undo;
@@ -72,10 +72,6 @@ export default function App() {
     if (mode !== null) setStartMode(mode);
   }, [mode]);
 
-  // allow drawing to continue even when a play mode is active
-  // drawing will now be terminated only when the user explicitly exits
-  // drawing mode (e.g. via the "Finish" action in SceneViewer)
-
   const handleSetViewMode = (v: '3d' | '2d') => {
     setViewMode(v);
   };
@@ -83,9 +79,6 @@ export default function App() {
   const toggleViewMode = () => {
     const next = viewMode === '3d' ? '2d' : '3d';
     handleSetViewMode(next);
-    if (next === '3d' && store.isRoomDrawing) {
-      store.finishDrawing();
-    }
   };
 
   return (
@@ -123,7 +116,6 @@ export default function App() {
             setMode={setMode}
             startMode={startMode}
             setStartMode={setStartMode}
-            setViewMode={handleSetViewMode}
           />
         </div>
       )}

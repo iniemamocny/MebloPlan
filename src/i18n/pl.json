@@ -1,7 +1,4 @@
 {
-  "drawWall": "Rysuj ścianę",
-  "editWall": "Edytuj ścianę",
-  "eraseWall": "Usuń ścianę",
   "app": {
     "mode": "Tryb",
     "roles": {
@@ -28,31 +25,11 @@
       "costs": "Koszty",
       "cut": "Formatki",
       "global": "Ustawienia",
-      "play": "Play",
-      "room": "Pomieszczenie"
+      "play": "Play"
     },
     "cabinetType": "Typ szafki",
     "subcategories": "Podkategorie ({{family}})",
     "variant": "Wariant"
-  },
-  "room": {
-    "walls": "Ściany",
-    "windowsDoors": "Okna i drzwi",
-    "decor": "Elementy dekoracyjne",
-    "draw": "Rysuj",
-    "height": "Wysokość",
-    "wallThickness": "Grubość",
-    "addWindow": "Dodaj okno",
-    "addDoor": "Dodaj drzwi",
-    "addDecor": "Dodaj dekorację",
-    "noWindows": "Brak okien lub drzwi",
-    "noDecor": "Brak dekoracji",
-    "board2D": "Plansza 2D",
-    "close": "Zamknij",
-    "drawErrors": {
-      "intersect": "Segmenty nie mogą się przecinać",
-      "tooShort": "Ściana jest za krótka"
-    }
   },
   "catalog": {
     "choose": "Wybierz"
@@ -219,7 +196,6 @@
     "height": "Wysokość człowieka",
     "speed": "Prędkość poruszania",
     "mode": {
-      "build": "Budowanie",
       "furnish": "Meblowanie",
       "decorate": "Dekoracje"
     }
@@ -228,12 +204,10 @@
     "cup": "Kubek",
     "plate": "Talerz",
     "bottle": "Butelka",
-    "wall": "Ściana",
     "window": "Okno",
     "door": "Drzwi"
   },
   "radial": {
-    "wall": "Ściana",
     "window": "Okno",
     "door": "Drzwi",
     "cup": "Kubek",

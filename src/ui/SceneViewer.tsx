@@ -12,16 +12,10 @@ import { loadItemModel } from '../scene/itemLoader';
 import ItemHotbar, {
   hotbarItems,
   furnishHotbarItems,
-  buildHotbarItems,
 } from './components/ItemHotbar';
-import WallToolSelector from './components/WallToolSelector';
-import WallDrawToolbar from './components/WallDrawToolbar';
 import TouchJoystick from './components/TouchJoystick';
 import { PlayerMode, PlayerSubMode, PLAYER_MODES } from './types';
-import RoomBuilder from './build/RoomBuilder';
 import RadialMenu from './components/RadialMenu';
-import RoomPanel from './panels/RoomPanel';
-import uuid from '../utils/uuid';
 
 interface ThreeContext {
   scene: THREE.Scene;
@@ -65,7 +59,6 @@ interface Props {
 const INTERACT_DISTANCE = 1.5;
 const PLATE_HEIGHT = 0.02;
 const MODE_ICONS: Record<PlayerSubMode, string> = {
-  build: '🔨',
   furnish: '🪑',
   decorate: '🎨',
 };
@@ -91,7 +84,6 @@ const SceneViewer: React.FC<Props> = ({
   const store = usePlannerStore();
   const showEdges = store.role === 'stolarz';
   const showFronts = store.showFronts;
-  const isRoomDrawing = store.isRoomDrawing;
   const threeInitialized = useRef(false);
 
   const [isMobile, setIsMobile] = useState(false);
@@ -101,7 +93,6 @@ const SceneViewer: React.FC<Props> = ({
   const [showHint, setShowHint] = useState(false);
   const [targetCabinet, setTargetCabinet] = useState<THREE.Object3D | null>(null);
   const ghostRef = useRef<THREE.Object3D | null>(null);
-  const wallStartRef = useRef<{ x: number; y: number } | null>(null);
   const savedView = useRef<{ pos: THREE.Vector3; target: THREE.Vector3 } | null>(null);
   const roomRef = useRef(store.room);
   const [pointerLockError, setPointerLockError] = useState<string | null>(null);
@@ -110,21 +101,9 @@ const SceneViewer: React.FC<Props> = ({
     roomRef.current = store.room;
   }, [store.room]);
 
-  // reset wall creation state when room drawing mode is active
-  useEffect(() => {
-    if (store.isRoomDrawing) {
-      wallStartRef.current = null;
-    }
-  }, [store.isRoomDrawing]);
-
   // Removed automatic switch to 3D when room drawing ends.
 
-  const radialItems =
-    mode === 'build'
-      ? buildHotbarItems()
-      : mode === 'furnish'
-        ? furnishHotbarItems
-        : hotbarItems;
+  const radialItems = mode === 'furnish' ? furnishHotbarItems : hotbarItems;
 
   const applyViewMode = React.useCallback(
     (mode: '3d' | '2d') => {
@@ -191,22 +170,6 @@ const SceneViewer: React.FC<Props> = ({
     if (!threeInitialized.current) return;
     applyViewMode(viewMode);
   }, [viewMode, applyViewMode]);
-
-  useEffect(() => {
-    const items =
-      mode === 'build'
-        ? buildHotbarItems()
-        : mode === 'furnish'
-          ? furnishHotbarItems
-          : hotbarItems;
-    const tool = items[store.selectedItemSlot - 1];
-    if (tool === 'wall' || tool === 'window' || tool === 'door') {
-      if (store.selectedTool !== tool) store.setSelectedTool(tool);
-    } else if (store.selectedTool) {
-      store.setSelectedTool(null);
-    }
-  }, [mode, store.selectedItemSlot, store.selectedTool]);
-
 
   const updateGhost = React.useCallback(() => {
     const three = threeRef.current;
@@ -611,65 +574,7 @@ const SceneViewer: React.FC<Props> = ({
     const raycaster = new THREE.Raycaster();
     const handlePointer = (event: PointerEvent) => {
       if (mode) {
-        if (
-          event.button === 0 &&
-          mode === 'build' &&
-          store.selectedTool === 'wall' &&
-          !store.isRoomDrawing
-        ) {
-          const rect = renderer.domElement.getBoundingClientRect();
-          const mouse = new THREE.Vector2(
-            ((event.clientX - rect.left) / rect.width) * 2 - 1,
-            -((event.clientY - rect.top) / rect.height) * 2 + 1,
-          );
-          raycaster.setFromCamera(mouse, camera);
-          const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-          const point = new THREE.Vector3();
-          const hit = raycaster.ray.intersectPlane(plane, point);
-          if (hit) {
-            const pos = { x: point.x, y: point.z };
-            if (!wallStartRef.current && event.type === 'pointerdown') {
-              wallStartRef.current = pos;
-            } else if (
-              wallStartRef.current &&
-              (event.type === 'pointerup' || event.type === 'pointerdown')
-            ) {
-              let start = wallStartRef.current;
-              let end = pos;
-              const dx = end.x - start.x;
-              const dy = end.y - start.y;
-              const len = Math.hypot(dx, dy);
-              if (len === 0) {
-                const thickness = store.selectedWall?.thickness ?? 0.1;
-                const dir = camera.getWorldDirection(new THREE.Vector3());
-                dir.y = 0;
-                dir.normalize();
-                const orientation =
-                  Math.abs(dir.x) > Math.abs(dir.z)
-                    ? new THREE.Vector2(Math.sign(dir.x), 0)
-                    : new THREE.Vector2(0, Math.sign(dir.z));
-                const half = thickness / 2;
-                start = {
-                  x: point.x - orientation.x * half,
-                  y: point.z - orientation.y * half,
-                };
-                end = {
-                  x: point.x + orientation.x * half,
-                  y: point.z + orientation.y * half,
-                };
-              }
-              const wall: Wall = {
-                id: uuid(),
-                start,
-                end,
-                height: roomRef.current.height / 1000,
-                thickness: store.selectedWall?.thickness ?? 0.1,
-              };
-              store.setRoom({ walls: [...roomRef.current.walls, wall] });
-              wallStartRef.current = null;
-            }
-          }
-        } else if (event.button === 2) {
+        if (event.button === 2) {
           const target = targetRef.current;
           if (target) {
             const { cab, index } = target;
@@ -781,9 +686,6 @@ const SceneViewer: React.FC<Props> = ({
     store.selectedItemSlot,
     store.items,
     updateGhost,
-    store.selectedTool,
-    store.selectedWall,
-    store.isRoomDrawing,
   ]);
 
     useEffect(() => {
@@ -973,7 +875,7 @@ const SceneViewer: React.FC<Props> = ({
         </div>
       )}
       <div style={{ position: 'absolute', top: 10, left: 10 }}>
-        <button className="btnGhost" onClick={() => setMode((m) => (m ? null : startMode || 'build'))}>
+        <button className="btnGhost" onClick={() => setMode((m) => (m ? null : startMode || 'furnish'))}>
           {mode ? 'Tryb edycji' : 'Tryb gracza'}
         </button>
       </div>
@@ -988,15 +890,6 @@ const SceneViewer: React.FC<Props> = ({
           }}
         >
           <button
-            data-testid="finish-drawing"
-            className="btnGhost"
-            onClick={() => {
-              store.finishDrawing();
-            }}
-          >
-            Zakończ rysowanie
-          </button>
-          <button
             data-testid="switch-3d"
             className="btnGhost"
             onClick={() => setViewMode('3d')}
@@ -1005,19 +898,7 @@ const SceneViewer: React.FC<Props> = ({
           </button>
         </div>
       )}
-      {isRoomDrawing && (
-        <>
-          <RoomBuilder threeRef={threeRef} />
-          <WallDrawToolbar />
-        </>
-      )}
-      {!isRoomDrawing && mode === null && <WallToolSelector />}
-      {mode === 'build' && (
-        <div style={{ position: 'absolute', top: 60, left: 10 }}>
-          <RoomPanel setViewMode={setViewMode} />
-        </div>
-      )}
-      {mode && !isRoomDrawing && <ItemHotbar mode={mode} />}
+      {mode && <ItemHotbar mode={mode} />}
       {mode && isMobile && (
         <>
           <TouchJoystick

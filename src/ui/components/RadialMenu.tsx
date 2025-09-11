@@ -83,7 +83,7 @@ const RadialMenu: React.FC<Props> = ({
           );
         })}
       </svg>
-      {items[selected - 1] === 'wall' && subMenu && (
+      {subMenu && (
         <svg
           width={size * 1.5}
           height={size * 1.5}

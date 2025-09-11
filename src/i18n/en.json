@@ -1,7 +1,4 @@
 {
-  "drawWall": "Draw wall",
-  "editWall": "Edit wall",
-  "eraseWall": "Erase wall",
   "app": {
     "mode": "Mode",
     "roles": {
@@ -28,31 +25,11 @@
       "costs": "Costs",
       "cut": "Cutlist",
       "global": "Settings",
-      "play": "Play",
-      "room": "Room"
+      "play": "Play"
     },
     "cabinetType": "Cabinet type",
     "subcategories": "Subcategories ({{family}})",
     "variant": "Variant"
-  },
-  "room": {
-    "walls": "Walls",
-    "windowsDoors": "Windows and doors",
-    "decor": "Decorative elements",
-    "draw": "Draw",
-    "height": "Height",
-    "wallThickness": "Thickness",
-    "addWindow": "Add window",
-    "addDoor": "Add door",
-    "addDecor": "Add decoration",
-    "noWindows": "No windows or doors",
-    "noDecor": "No decorations",
-    "board2D": "2D Board",
-    "close": "Close",
-    "drawErrors": {
-      "intersect": "Segments cannot intersect",
-      "tooShort": "Wall is too short"
-    }
   },
   "catalog": {
     "choose": "Choose"
@@ -219,7 +196,6 @@
     "height": "Player height",
     "speed": "Movement speed",
     "mode": {
-      "build": "Build mode",
       "furnish": "Furnish mode",
       "decorate": "Decorate mode"
     }
@@ -228,14 +204,10 @@
     "cup": "Cup",
     "plate": "Plate",
     "bottle": "Bottle",
-    "bearingWall": "Load-bearing wall",
-    "partitionWall": "Partition wall",
-    "wall": "Wall",
     "window": "Window",
     "door": "Door"
   },
   "radial": {
-    "wall": "Wall",
     "window": "Window",
     "door": "Door",
     "cup": "Cup",
