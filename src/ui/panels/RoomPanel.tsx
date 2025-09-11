@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePlannerStore } from '../../state/store';
+import { PlayerMode } from '../types';
 
 interface Props {
   setViewMode: (v: '3d' | '2d') => void;
+  setMode: React.Dispatch<React.SetStateAction<PlayerMode>>;
 }
 
-export default function RoomPanel({ setViewMode }: Props) {
+export default function RoomPanel({ setViewMode, setMode }: Props) {
   const { t } = useTranslation();
   const [wallsOpen, setWallsOpen] = useState(false);
   const [windowsOpen, setWindowsOpen] = useState(false);
@@ -56,6 +58,7 @@ export default function RoomPanel({ setViewMode }: Props) {
   };
 
   const startDrawing = () => {
+    setMode('build');
     setViewMode('2d');
     setIsRoomDrawing(true);
     setWallTool('draw');

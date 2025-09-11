@@ -134,7 +134,9 @@ describe('Room features', () => {
     });
 
     act(() => {
-      root.render(<RoomPanel setViewMode={() => {}} />);
+      root.render(
+        <RoomPanel setViewMode={() => {}} setMode={() => {}} />,
+      );
     });
 
     const header = container.querySelector('.section .hd');
@@ -173,8 +175,11 @@ describe('Room features', () => {
     });
 
     const setViewMode = vi.fn();
+    const setMode = vi.fn();
     act(() => {
-      root.render(<RoomPanel setViewMode={setViewMode} />);
+      root.render(
+        <RoomPanel setViewMode={setViewMode} setMode={setMode} />,
+      );
     });
 
     const header = container.querySelector('.section .hd');
@@ -189,6 +194,7 @@ describe('Room features', () => {
       btn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
 
+    expect(setMode).toHaveBeenCalledWith('build');
     expect(setViewMode).toHaveBeenCalledWith('2d');
     expect(usePlannerStore.getState().isRoomDrawing).toBe(true);
     expect(usePlannerStore.getState().wallTool).toBe('draw');

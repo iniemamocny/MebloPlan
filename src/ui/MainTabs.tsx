@@ -221,7 +221,9 @@ export default function MainTabs({
             onClose={() => setTab(null)}
           />
         )}
-        {tab === 'room' && <RoomPanel setViewMode={setViewMode} />}
+        {tab === 'room' && (
+          <RoomPanel setViewMode={setViewMode} setMode={setMode} />
+        )}
       </SlidingPanel>
     </>
   );
