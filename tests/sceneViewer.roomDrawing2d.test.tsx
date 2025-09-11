@@ -92,7 +92,7 @@ describe('SceneViewer room drawing in 2D view', () => {
     document.body.appendChild(container);
     const root = ReactDOM.createRoot(container);
 
-    usePlannerStore.setState({ isRoomDrawing: true });
+    usePlannerStore.setState({ isRoomDrawing: true, wallTool: 'draw' });
 
     act(() => {
       root.render(
@@ -126,7 +126,7 @@ describe('SceneViewer room drawing in 2D view', () => {
     document.body.appendChild(container);
     const root = ReactDOM.createRoot(container);
 
-    usePlannerStore.setState({ isRoomDrawing: true });
+    usePlannerStore.setState({ isRoomDrawing: true, wallTool: 'draw' });
 
     act(() => {
       root.render(

@@ -261,7 +261,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   selectedTool: null,
   selectedWall: { thickness: 0.1 },
   isRoomDrawing: false,
-  wallTool: 'draw',
+  wallTool: 'edit',
   showFronts: true,
   itemsByCabinet: (cabinetId) =>
     get().items.filter((it) => it.cabinetId === cabinetId),
