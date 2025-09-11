@@ -271,7 +271,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   }, [wallTool, selectedWall?.thickness, threeRef]);
 
   const addWall = () => {
-    const wallHeight = room.height / 1000;
+    const wallHeight = roomRef.current.height / 1000;
     const newWall: Wall = {
       id: uuid(),
       start: { x: 0, y: 0 },
@@ -280,17 +280,19 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       thickness: selectedWall?.thickness ?? 0.1,
       color: '#ffffff',
     };
-    setRoom({ walls: [...room.walls, newWall] });
+    setRoom({ walls: [...roomRef.current.walls, newWall] });
   };
 
   const updateWallColor = (id: string, color: string) => {
     setRoom({
-      walls: room.walls.map((w) => (w.id === id ? { ...w, color } : w)),
+      walls: roomRef.current.walls.map((w) =>
+        w.id === id ? { ...w, color } : w,
+      ),
     });
   };
 
   const addWindow = (wallId: string) => {
-    const wall = room.walls.find((w) => w.id === wallId);
+    const wall = roomRef.current.walls.find((w) => w.id === wallId);
     if (!wall) return;
     const len = Math.hypot(
       wall.end.x - wall.start.x,
@@ -304,11 +306,11 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       height: 1,
       bottom: 1,
     };
-    setRoom({ windows: [...room.windows, win] });
+    setRoom({ windows: [...roomRef.current.windows, win] });
   };
 
   const addDoor = (wallId: string) => {
-    const wall = room.walls.find((w) => w.id === wallId);
+    const wall = roomRef.current.walls.find((w) => w.id === wallId);
     if (!wall) return;
     const len = Math.hypot(
       wall.end.x - wall.start.x,
@@ -322,7 +324,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       height: 2,
       bottom: 0,
     };
-    setRoom({ doors: [...room.doors, door] });
+    setRoom({ doors: [...roomRef.current.doors, door] });
   };
 
   useEffect(() => {
@@ -351,8 +353,8 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       let angle = Math.atan2(dy, dx);
       const rad = (snapAngle * Math.PI) / 180;
       if (rad > 0) {
-        if (snapRightAngles && room.walls.length > 0) {
-          const last = room.walls[room.walls.length - 1];
+        if (snapRightAngles && roomRef.current.walls.length > 0) {
+          const last = roomRef.current.walls[roomRef.current.walls.length - 1];
           const lastAngle = Math.atan2(
             last.end.y - last.start.y,
             last.end.x - last.start.x,
@@ -462,7 +464,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
         thickness: selectedWall?.thickness ?? 0.1,
         color: '#ffffff',
       };
-      setRoom({ walls: [...room.walls, newWall] });
+      setRoom({ walls: [...roomRef.current.walls, newWall] });
       cleanup();
     }
 
@@ -526,7 +528,6 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     };
   }, [
     room.height,
-    room.walls,
     wallTool,
     selectedWall?.thickness,
     setRoom,
