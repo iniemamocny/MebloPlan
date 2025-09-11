@@ -1,8 +1,17 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { act } from 'react';
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (s: string) =>
+      ({ drawWall: 'Draw wall', editWall: 'Edit wall', eraseWall: 'Erase wall' }[
+        s
+      ] || s),
+  }),
+}));
 
 import WallDrawToolbar from '../src/ui/components/WallDrawToolbar';
 import { usePlannerStore } from '../src/state/store';
@@ -23,13 +32,13 @@ describe('WallDrawToolbar', () => {
       root.render(<WallDrawToolbar />);
     });
 
-    const eraseBtn = container.querySelector('button[data-tool="erase"]');
+    const eraseBtn = container.querySelector('button[aria-label="Erase wall"]');
     act(() => {
       eraseBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
     expect(usePlannerStore.getState().wallTool).toBe('erase');
 
-    const editBtn = container.querySelector('button[data-tool="edit"]');
+    const editBtn = container.querySelector('button[aria-label="Edit wall"]');
     act(() => {
       editBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
@@ -69,7 +78,7 @@ describe('WallDrawToolbar', () => {
       root.render(<WallDrawToolbar />);
     });
 
-    const eraseBtn = container.querySelector('button[data-tool="erase"]');
+    const eraseBtn = container.querySelector('button[aria-label="Erase wall"]');
     act(() => {
       eraseBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
@@ -78,7 +87,7 @@ describe('WallDrawToolbar', () => {
     });
     expect(usePlannerStore.getState().room.walls.length).toBe(0);
 
-    const editBtn = container.querySelector('button[data-tool="edit"]');
+    const editBtn = container.querySelector('button[aria-label="Edit wall"]');
     act(() => {
       editBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
