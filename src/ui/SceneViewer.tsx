@@ -115,6 +115,12 @@ const SceneViewer: React.FC<Props> = ({
     }
   }, [store.isRoomDrawing]);
 
+  useEffect(() => {
+    if (!store.isRoomDrawing && viewMode === '2d') {
+      setViewMode('3d');
+    }
+  }, [store.isRoomDrawing, viewMode, setViewMode]);
+
   const radialItems =
     mode === 'build'
       ? buildHotbarItems()
@@ -948,7 +954,7 @@ const SceneViewer: React.FC<Props> = ({
       {mode === 'build' && !isRoomDrawing && <WallToolSelector />}
       {mode === 'build' && (
         <div style={{ position: 'absolute', top: 60, left: 10 }}>
-          <RoomPanel setViewMode={setViewMode} setMode={setMode} />
+          <RoomPanel setViewMode={setViewMode} />
         </div>
       )}
       {mode && !isRoomDrawing && <ItemHotbar mode={mode} />}

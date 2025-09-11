@@ -134,9 +134,7 @@ describe('Room features', () => {
     });
 
     act(() => {
-      root.render(
-        <RoomPanel setViewMode={() => {}} setMode={() => {}} />,
-      );
+      root.render(<RoomPanel setViewMode={() => {}} />);
     });
 
     const header = container.querySelector('.section .hd');
@@ -162,7 +160,7 @@ describe('Room features', () => {
     container.remove();
   });
 
-    it('activates 2D view after clicking draw without changing game mode', () => {
+  it('activates 2D view after clicking draw', () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = ReactDOM.createRoot(container);
@@ -175,11 +173,8 @@ describe('Room features', () => {
     });
 
     const setViewMode = vi.fn();
-    const setMode = vi.fn();
     act(() => {
-      root.render(
-        <RoomPanel setViewMode={setViewMode} setMode={setMode} />,
-      );
+      root.render(<RoomPanel setViewMode={setViewMode} />);
     });
 
     const header = container.querySelector('.section .hd');
@@ -194,7 +189,6 @@ describe('Room features', () => {
       btn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
 
-    expect(setMode).toHaveBeenCalledWith('build');
     expect(setViewMode).toHaveBeenCalledWith('2d');
     expect(usePlannerStore.getState().isRoomDrawing).toBe(true);
     expect(usePlannerStore.getState().wallTool).toBe('draw');

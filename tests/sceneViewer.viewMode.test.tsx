@@ -74,6 +74,7 @@ describe('SceneViewer view mode', () => {
   it('uses orthographic camera in 2d mode', () => {
     const threeRef: any = { current: null };
     const setMode = vi.fn();
+    const setViewMode = vi.fn();
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = ReactDOM.createRoot(container);
@@ -86,6 +87,7 @@ describe('SceneViewer view mode', () => {
           mode="build"
           setMode={setMode}
           viewMode="2d"
+          setViewMode={setViewMode}
         />,
       );
     });
@@ -101,6 +103,7 @@ describe('SceneViewer view mode', () => {
           mode="build"
           setMode={setMode}
           viewMode="3d"
+          setViewMode={setViewMode}
         />,
       );
     });

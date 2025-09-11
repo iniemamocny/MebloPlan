@@ -87,6 +87,7 @@ describe('SceneViewer room drawing in 2D view', () => {
   it('shows wall drawing toolbar only in build mode', () => {
     const threeRef: any = { current: null };
     const setMode = vi.fn();
+    const setViewMode = vi.fn();
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = ReactDOM.createRoot(container);
@@ -101,6 +102,7 @@ describe('SceneViewer room drawing in 2D view', () => {
           mode="build"
           setMode={setMode}
           viewMode="2d"
+          setViewMode={setViewMode}
         />,
       );
     });
@@ -110,6 +112,40 @@ describe('SceneViewer room drawing in 2D view', () => {
 
     expect(container.querySelector('[data-testid="wall-toolbar"]')).not.toBeNull();
     expect(container.querySelector('[data-testid="item-hotbar"]')).toBeNull();
+    expect(setMode).not.toHaveBeenCalled();
+
+    root.unmount();
+    container.remove();
+  });
+
+  it('returns to 3d view when room drawing ends', () => {
+    const threeRef: any = { current: null };
+    const setMode = vi.fn();
+    const setViewMode = vi.fn();
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+
+    usePlannerStore.setState({ isRoomDrawing: true });
+
+    act(() => {
+      root.render(
+        <SceneViewer
+          threeRef={threeRef}
+          addCountertop={false}
+          mode="build"
+          setMode={setMode}
+          viewMode="2d"
+          setViewMode={setViewMode}
+        />,
+      );
+    });
+
+    act(() => {
+      usePlannerStore.getState().setIsRoomDrawing(false);
+    });
+
+    expect(setViewMode).toHaveBeenCalledWith('3d');
     expect(setMode).not.toHaveBeenCalled();
 
     root.unmount();
