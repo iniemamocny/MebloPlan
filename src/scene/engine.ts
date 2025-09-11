@@ -46,8 +46,28 @@ export function setupThree(container: HTMLElement) {
   dir.position.set(6, 8, 4);
   scene.add(dir);
 
-  const grid = new THREE.GridHelper(10, 20, 0xdddddd, 0xcccccc);
-  scene.add(grid);
+  const gridSize = 10;
+  let grid: THREE.GridHelper | null = null;
+  let currentGridDivisions = 0;
+  const updateGrid = (divisions: number) => {
+    const d = Math.max(1, Math.round(divisions));
+    if (d === currentGridDivisions) return;
+    if (grid) {
+      scene.remove(grid);
+      grid.geometry.dispose();
+      if (Array.isArray((grid as any).material))
+        (grid.material as THREE.Material[]).forEach((m) => m.dispose());
+      else (grid.material as THREE.Material).dispose();
+    }
+    grid = new THREE.GridHelper(gridSize, d, 0xdddddd, 0xcccccc);
+    scene.add(grid);
+    currentGridDivisions = d;
+  };
+  const baseDivisions = Math.max(
+    1,
+    Math.round(gridSize / (usePlannerStore.getState().gridSize / 100)),
+  );
+  updateGrid(baseDivisions);
   const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(10, 10),
     new THREE.MeshStandardMaterial({ color: 0xeeeeee, side: THREE.DoubleSide }),
@@ -368,6 +388,7 @@ export function setupThree(container: HTMLElement) {
     resetCameraRotation,
     onJump,
     onCrouch,
+    updateGrid,
     dispose,
   };
 
