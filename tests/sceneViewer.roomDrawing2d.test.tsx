@@ -141,7 +141,7 @@ describe('SceneViewer room drawing in 2D view', () => {
       );
     });
     act(() => {
-      usePlannerStore.getState().setIsRoomDrawing(false);
+      usePlannerStore.getState().finishDrawing();
     });
 
     // view mode should not change automatically

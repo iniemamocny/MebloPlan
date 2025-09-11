@@ -220,6 +220,7 @@ type Store = {
   setIsRoomDrawing: (v: boolean) => void;
   setWallTool: (t: 'draw' | 'erase' | 'edit') => void;
   startDrawing: () => void;
+  finishDrawing: () => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -531,6 +532,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setIsRoomDrawing: (v) => set({ isRoomDrawing: v }),
   setWallTool: (t) => set({ wallTool: t }),
   startDrawing: () => set({ isRoomDrawing: true, wallTool: 'draw' }),
+  finishDrawing: () => set({ isRoomDrawing: false, wallTool: 'edit' }),
 }));
 
 const persistSelector = (s: Store) => ({

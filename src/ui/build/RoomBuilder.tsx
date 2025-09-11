@@ -435,7 +435,6 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     };
 
     function cleanup() {
-      setIsRoomDrawing(false);
       if (previewRef.current) {
         groupRef.current?.remove(previewRef.current);
         previewRef.current.geometry.dispose();
@@ -514,7 +513,6 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
         finalize(end);
       } else if (e.key === 'Escape') {
         setWallTool('edit');
-        setIsRoomDrawing(false);
         cleanup();
       }
     }
@@ -529,12 +527,26 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       window.addEventListener('keydown', onKey);
     };
 
+    function finishDrawing() {
+      cleanup();
+      setIsRoomDrawing(false);
+      setWallTool('edit');
+    }
+
+    usePlannerStore.setState({ finishDrawing });
+
     dom.addEventListener('pointerdown', onDown);
     return () => {
       dom.removeEventListener('pointerdown', onDown);
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
       window.removeEventListener('keydown', onKey);
+      usePlannerStore.setState({
+        finishDrawing: () => {
+          setIsRoomDrawing(false);
+          setWallTool('edit');
+        },
+      });
     };
   }, [
     room.height,
