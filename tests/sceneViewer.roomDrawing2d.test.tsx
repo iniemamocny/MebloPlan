@@ -84,7 +84,7 @@ vi.mock('../src/ui/components/WallDrawToolbar', () => ({
 }));
 
 describe('SceneViewer room drawing in 2D view', () => {
-  it('shows wall drawing toolbar without entering game mode', () => {
+  it('shows wall drawing toolbar only in build mode', () => {
     const threeRef: any = { current: null };
     const setMode = vi.fn();
     const container = document.createElement('div');
@@ -98,7 +98,7 @@ describe('SceneViewer room drawing in 2D view', () => {
         <SceneViewer
           threeRef={threeRef}
           addCountertop={false}
-          mode={null}
+          mode="build"
           setMode={setMode}
           viewMode="2d"
         />,

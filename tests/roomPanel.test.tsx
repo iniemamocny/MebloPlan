@@ -194,7 +194,7 @@ describe('Room features', () => {
       btn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
 
-    expect(setMode).not.toHaveBeenCalled();
+    expect(setMode).toHaveBeenCalledWith('build');
     expect(setViewMode).toHaveBeenCalledWith('2d');
     expect(usePlannerStore.getState().isRoomDrawing).toBe(true);
     expect(usePlannerStore.getState().wallTool).toBe('draw');
