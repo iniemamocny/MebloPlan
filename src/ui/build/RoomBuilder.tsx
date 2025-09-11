@@ -455,6 +455,13 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     function finalize(end: { x: number; y: number }) {
       if (!startRef.current) return;
       const { x: sx, y: sy } = startRef.current;
+      const dx = end.x - sx;
+      const dy = end.y - sy;
+      const len = Math.hypot(dx, dy);
+      if (len < 1e-6) {
+        cleanup();
+        return;
+      }
       const wallHeight = room.height / 1000;
       const newWall: Wall = {
         id: uuid(),
