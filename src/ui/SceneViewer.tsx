@@ -49,6 +49,7 @@ interface ThreeContext {
   onJump?: () => void;
   onCrouch?: (active: boolean) => void;
   dispose?: () => void;
+  showPointerLockError?: (msg: string) => void;
 }
 
 interface Props {
@@ -103,6 +104,7 @@ const SceneViewer: React.FC<Props> = ({
   const wallStartRef = useRef<{ x: number; y: number } | null>(null);
   const savedView = useRef<{ pos: THREE.Vector3; target: THREE.Vector3 } | null>(null);
   const roomRef = useRef(store.room);
+  const [pointerLockError, setPointerLockError] = useState<string | null>(null);
 
   useEffect(() => {
     roomRef.current = store.room;
@@ -295,15 +297,21 @@ const SceneViewer: React.FC<Props> = ({
     threeInitialized.current = true;
     if (viewMode === '2d') applyViewMode(viewMode);
     (threeRef.current as any).setMode = setMode;
+    threeRef.current.showPointerLockError = (msg: string) => setPointerLockError(msg);
     const pc = threeRef.current.playerControls;
     const onUnlock = () => setMode(null);
     const onLock = () => {
       // pointer lock acquired
+      setPointerLockError(null);
       return;
     };
     const onPointerlockError = () => {
       setMode(null);
-      alert('Pointer lock failed');
+      const supported = 'pointerLockElement' in document;
+      const msg = supported
+        ? 'Pointer lock failed'
+        : 'Pointer lock not supported';
+      setPointerLockError(msg);
     };
     pc.addEventListener('unlock', onUnlock);
     pc.addEventListener('lock', onLock);
@@ -944,6 +952,24 @@ const SceneViewer: React.FC<Props> = ({
         >
           <div style={{ fontSize: 24 }}>✛</div>
           <div style={{ fontSize: 12 }}>Kliknij, aby otworzyć</div>
+        </div>
+      )}
+      {pointerLockError && (
+        <div
+          data-testid="pointerlock-error"
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: 'rgba(0, 0, 0, 0.7)',
+            color: '#fff',
+            padding: 8,
+            borderRadius: 4,
+            textAlign: 'center',
+          }}
+        >
+          {pointerLockError}
         </div>
       )}
       <div style={{ position: 'absolute', top: 10, left: 10 }}>

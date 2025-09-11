@@ -65,33 +65,38 @@ export default function PlayPanel({
             />
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {PLAYER_MODES.map((key) => (
-              <button
-                key={key}
-                className="btnGhost"
-                style={
-                  startMode === key
-                    ? { background: 'var(--accent)', color: 'var(--white)' }
-                    : undefined
-                }
-                onClick={() => setStartMode(key)}
-              >
-                {t(`play.mode.${key}`)}
-              </button>
-            ))}
-          </div>
-          <button
-            className="btnGhost"
-            onClick={() => {
+          {PLAYER_MODES.map((key) => (
+            <button
+              key={key}
+              className="btnGhost"
+              style={
+                startMode === key
+                  ? { background: 'var(--accent)', color: 'var(--white)' }
+                  : undefined
+              }
+              onClick={() => setStartMode(key)}
+            >
+              {t(`play.mode.${key}`)}
+            </button>
+          ))}
+        </div>
+        <button
+          data-testid="enter-play-mode"
+          className="btnGhost"
+          onClick={() => {
+            if ('pointerLockElement' in document) {
               threeRef.current?.playerControls.lock();
               setMode(startMode);
               onClose();
-            }}
-          >
-            Enter play mode
-          </button>
-        </div>
+            } else {
+              threeRef.current?.showPointerLockError?.('Pointer lock not supported');
+            }
+          }}
+        >
+          Enter play mode
+        </button>
       </div>
-    </>
+    </div>
+  </>
   );
 }
