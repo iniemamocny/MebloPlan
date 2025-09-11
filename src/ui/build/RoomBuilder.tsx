@@ -21,6 +21,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
   const wallTool = usePlannerStore((s) => s.wallTool);
   const setWallTool = usePlannerStore((s) => s.setWallTool);
+  const setIsRoomDrawing = usePlannerStore((s) => s.setIsRoomDrawing);
   const snapAngle = usePlannerStore((s) => s.snapAngle);
   const snapLength = usePlannerStore((s) => s.snapLength);
   const snapRightAngles = usePlannerStore((s) => s.snapRightAngles);
@@ -434,6 +435,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     };
 
     function cleanup() {
+      setIsRoomDrawing(false);
       if (previewRef.current) {
         groupRef.current?.remove(previewRef.current);
         previewRef.current.geometry.dispose();
@@ -512,6 +514,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
         finalize(end);
       } else if (e.key === 'Escape') {
         setWallTool('edit');
+        setIsRoomDrawing(false);
         cleanup();
       }
     }
@@ -543,6 +546,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     snapLength,
     snapRightAngles,
     setWallTool,
+    setIsRoomDrawing,
   ]);
 
   useEffect(() => {
