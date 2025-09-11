@@ -6,17 +6,13 @@ import { act } from 'react';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (s: string) =>
-      ({ drawWall: 'Draw wall', editWall: 'Edit wall', eraseWall: 'Erase wall' }[
-        s
-      ] || s),
+    t: (s: string) => ({ drawWall: 'Draw wall', editWall: 'Edit wall' }[s] || s),
   }),
 }));
 
 vi.mock('lucide-react', () => ({
-  Pencil: () => null,
   Hammer: () => null,
-  Eraser: () => null,
+  User: () => null,
 }));
 
 import WallDrawToolbar from '../src/ui/components/WallDrawToolbar';
@@ -39,20 +35,13 @@ describe('WallDrawToolbar', () => {
     });
 
     const drawBtn = container.querySelector('button[aria-label="Draw wall"]');
-    const eraseBtn = container.querySelector('button[aria-label="Erase wall"]');
     const editBtn = container.querySelector('button[aria-label="Edit wall"]');
-
-    act(() => {
-      eraseBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-    expect(usePlannerStore.getState().wallTool).toBe('erase');
-    expect(usePlannerStore.getState().wallTool).not.toBe('draw');
 
     act(() => {
       editBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
     expect(usePlannerStore.getState().wallTool).toBe('edit');
-    expect(usePlannerStore.getState().wallTool).not.toBe('erase');
+    expect(usePlannerStore.getState().wallTool).not.toBe('draw');
 
     act(() => {
       drawBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -64,7 +53,7 @@ describe('WallDrawToolbar', () => {
     container.remove();
   });
 
-  it('erases walls and edits color via store actions', () => {
+  it('edits wall color via store actions', () => {
     usePlannerStore.setState({
       wallTool: 'draw',
       isRoomDrawing: true,
@@ -93,15 +82,6 @@ describe('WallDrawToolbar', () => {
     act(() => {
       root.render(<WallDrawToolbar />);
     });
-
-    const eraseBtn = container.querySelector('button[aria-label="Erase wall"]');
-    act(() => {
-      eraseBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    });
-    act(() => {
-      usePlannerStore.getState().setRoom({ walls: [] });
-    });
-    expect(usePlannerStore.getState().room.walls.length).toBe(0);
 
     const editBtn = container.querySelector('button[aria-label="Edit wall"]');
     act(() => {
