@@ -35,6 +35,7 @@ interface ThreeContext {
   orthographicCamera: THREE.OrthographicCamera;
   setCamera?: (cam: THREE.Camera) => void;
   setControls?: (c: OrbitControls) => void;
+  updateGrid?: (divisions: number) => void;
   setPlayerParams?: (p: { height?: number; speed?: number }) => void;
   setMove?: (m: {
     forward: boolean;
@@ -113,6 +114,10 @@ const SceneViewer: React.FC<Props> = ({
     (mode: '3d' | '2d') => {
       const three = threeRef.current;
       if (!three?.renderer || !three.setCamera || !three.setControls) return;
+      if ((three as any).gridChangeHandler) {
+        three.controls.removeEventListener('change', (three as any).gridChangeHandler);
+        (three as any).gridChangeHandler = null;
+      }
       if (mode === '2d') {
         savedView.current = {
           pos: three.perspectiveCamera.position.clone(),
@@ -129,6 +134,20 @@ const SceneViewer: React.FC<Props> = ({
         c.target.set(0, 0, 0);
         three.camera.lookAt(0, 0, 0);
         c.update();
+        const updateGrid = () => {
+          const base = Math.max(
+            1,
+            Math.round(10 / (usePlannerStore.getState().gridSize / 100)),
+          );
+          const divisions = Math.max(
+            1,
+            Math.round(base * three.orthographicCamera.zoom),
+          );
+          three.updateGrid?.(divisions);
+        };
+        c.addEventListener('change', updateGrid);
+        (three as any).gridChangeHandler = updateGrid;
+        updateGrid();
       } else {
         three.setCamera(three.perspectiveCamera);
         three.controls.dispose();
@@ -142,6 +161,11 @@ const SceneViewer: React.FC<Props> = ({
         }
         three.camera.up.set(0, 1, 0);
         c.update();
+        const base = Math.max(
+          1,
+          Math.round(10 / (usePlannerStore.getState().gridSize / 100)),
+        );
+        three.updateGrid?.(base);
       }
     },
     [threeRef],
