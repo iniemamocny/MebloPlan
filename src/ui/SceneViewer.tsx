@@ -83,6 +83,7 @@ const SceneViewer: React.FC<Props> = ({
   const showEdges = store.role === 'stolarz';
   const showFronts = store.showFronts;
   const isRoomDrawing = store.isRoomDrawing;
+  const threeInitialized = useRef(false);
 
   const [isMobile, setIsMobile] = useState(false);
   const [showRadial, setShowRadial] = useState(false);
@@ -101,30 +102,38 @@ const SceneViewer: React.FC<Props> = ({
         ? furnishHotbarItems
         : hotbarItems;
 
-  useEffect(() => {
-    const three = threeRef.current;
-    if (!three?.camera || !three?.controls) return;
-    if (viewMode === '2d') {
-      savedView.current = {
-        pos: three.camera.position.clone(),
-        target: three.controls.target.clone(),
-      };
-      three.controls.enableRotate = false;
-      three.camera.position.set(0, 10, 0);
-      three.camera.up.set(0, 0, -1);
-      three.controls.target.set(0, 0, 0);
-      three.camera.lookAt(0, 0, 0);
-      three.controls.update();
-    } else {
-      if (savedView.current) {
-        three.camera.position.copy(savedView.current.pos);
-        three.controls.target.copy(savedView.current.target);
+  const applyViewMode = React.useCallback(
+    (mode: '3d' | '2d') => {
+      const three = threeRef.current;
+      if (!three?.camera || !three?.controls) return;
+      if (mode === '2d') {
+        savedView.current = {
+          pos: three.camera.position.clone(),
+          target: three.controls.target.clone(),
+        };
+        three.controls.enableRotate = false;
+        three.camera.position.set(0, 10, 0);
+        three.camera.up.set(0, 0, -1);
+        three.controls.target.set(0, 0, 0);
+        three.camera.lookAt(0, 0, 0);
+        three.controls.update();
+      } else {
+        if (savedView.current) {
+          three.camera.position.copy(savedView.current.pos);
+          three.controls.target.copy(savedView.current.target);
+        }
+        three.camera.up.set(0, 1, 0);
+        three.controls.enableRotate = true;
+        three.controls.update();
       }
-      three.camera.up.set(0, 1, 0);
-      three.controls.enableRotate = true;
-      three.controls.update();
-    }
-  }, [viewMode, threeRef]);
+    },
+    [threeRef],
+  );
+
+  useEffect(() => {
+    if (!threeInitialized.current) return;
+    applyViewMode(viewMode);
+  }, [viewMode, applyViewMode]);
 
   useEffect(() => {
     const items =
@@ -228,6 +237,8 @@ const SceneViewer: React.FC<Props> = ({
   useEffect(() => {
     if (!containerRef.current) return;
     threeRef.current = setupThree(containerRef.current) as ThreeContext;
+    threeInitialized.current = true;
+    if (viewMode === '2d') applyViewMode(viewMode);
     (threeRef.current as any).setMode = setMode;
     const pc = threeRef.current.playerControls;
     const onUnlock = () => setMode(null);
