@@ -50,8 +50,8 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
     }
     const g = groupRef.current;
     // clear previous meshes
-    while (g.children.length > 0) {
-      const c = g.children.pop() as THREE.Object3D;
+    for (const c of [...g.children]) {
+      if (!c || !(c instanceof THREE.Object3D)) continue;
       g.remove(c);
       c.traverse((o) => {
         if (o instanceof THREE.Mesh) {
