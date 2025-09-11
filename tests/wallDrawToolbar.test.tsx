@@ -13,6 +13,12 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+vi.mock('lucide-react', () => ({
+  Pencil: () => null,
+  Hammer: () => null,
+  Eraser: () => null,
+}));
+
 import WallDrawToolbar from '../src/ui/components/WallDrawToolbar';
 import { usePlannerStore } from '../src/state/store';
 
@@ -32,17 +38,27 @@ describe('WallDrawToolbar', () => {
       root.render(<WallDrawToolbar />);
     });
 
+    const drawBtn = container.querySelector('button[aria-label="Draw wall"]');
     const eraseBtn = container.querySelector('button[aria-label="Erase wall"]');
+    const editBtn = container.querySelector('button[aria-label="Edit wall"]');
+
     act(() => {
       eraseBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
     expect(usePlannerStore.getState().wallTool).toBe('erase');
+    expect(usePlannerStore.getState().wallTool).not.toBe('draw');
 
-    const editBtn = container.querySelector('button[aria-label="Edit wall"]');
     act(() => {
       editBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
     expect(usePlannerStore.getState().wallTool).toBe('edit');
+    expect(usePlannerStore.getState().wallTool).not.toBe('erase');
+
+    act(() => {
+      drawBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    expect(usePlannerStore.getState().wallTool).toBe('draw');
+    expect(usePlannerStore.getState().wallTool).not.toBe('edit');
 
     root.unmount();
     container.remove();
