@@ -186,6 +186,7 @@ type Store = {
   selectedTool: string | null;
   selectedWall: { thickness: number } | null;
   isRoomDrawing: boolean;
+  wallTool: 'draw' | 'erase' | 'edit';
   itemsByCabinet: (cabinetId: string) => Item[];
   itemsBySurface: (cabinetId: string, surfaceIndex: number) => Item[];
   setRole: (r: 'stolarz' | 'klient') => void;
@@ -217,6 +218,8 @@ type Store = {
   setSelectedTool: (tool: string | null) => void;
   setSelectedWallThickness: (thickness: number) => void;
   setIsRoomDrawing: (v: boolean) => void;
+  setWallTool: (t: 'draw' | 'erase' | 'edit') => void;
+  startDrawing: () => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -257,6 +260,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   selectedTool: null,
   selectedWall: { thickness: 0.1 },
   isRoomDrawing: false,
+  wallTool: 'draw',
   showFronts: true,
   itemsByCabinet: (cabinetId) =>
     get().items.filter((it) => it.cabinetId === cabinetId),
@@ -525,6 +529,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
       selectedWall: { thickness: clamp(thickness, 0.08, 0.25) },
     }),
   setIsRoomDrawing: (v) => set({ isRoomDrawing: v }),
+  setWallTool: (t) => set({ wallTool: t }),
+  startDrawing: () => set({ isRoomDrawing: true, wallTool: 'draw' }),
 }));
 
 const persistSelector = (s: Store) => ({

@@ -19,6 +19,8 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   const selectedTool = usePlannerStore((s) => s.selectedTool);
   const selectedWall = usePlannerStore((s) => s.selectedWall);
   const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
+  const wallTool = usePlannerStore((s) => s.wallTool);
+  const setWallTool = usePlannerStore((s) => s.setWallTool);
   const snapAngle = usePlannerStore((s) => s.snapAngle);
   const snapLength = usePlannerStore((s) => s.snapLength);
   const snapRightAngles = usePlannerStore((s) => s.snapRightAngles);
@@ -137,7 +139,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
 
   useEffect(() => {
     const three = threeRef.current;
-    if (!three || selectedTool) return;
+    if (!three || wallTool !== 'edit' || selectedTool) return;
     const dom: HTMLElement = three.renderer.domElement;
     const raycaster = new THREE.Raycaster();
     const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -219,11 +221,11 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
     };
-  }, [selectedTool, setRoom, threeRef]);
+  }, [selectedTool, setRoom, threeRef, wallTool]);
 
   useEffect(() => {
     const three = threeRef.current;
-    if (!three || selectedTool !== 'wall') return;
+    if (!three || wallTool !== 'draw') return;
 
     const size = selectedWall?.thickness ?? 0.1;
     const geom = new THREE.BoxGeometry(size, 0.01, size);
@@ -266,7 +268,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
         wallPreviewRef.current = null;
       }
     };
-  }, [selectedTool, selectedWall?.thickness, threeRef]);
+  }, [wallTool, selectedWall?.thickness, threeRef]);
 
   const addWall = () => {
     const wallHeight = room.height / 1000;
@@ -461,10 +463,6 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
         color: '#ffffff',
       };
       setRoom({ walls: [...room.walls, newWall] });
-      // Keep wall tool active to allow drawing consecutive walls
-      if (selectedTool !== 'wall') {
-        setSelectedTool(null);
-      }
       cleanup();
     }
 
@@ -504,13 +502,13 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
         const end = { x: sx + dx * len, y: sy + dy * len };
         finalize(end);
       } else if (e.key === 'Escape') {
-        setSelectedTool(null);
+        setWallTool('edit');
         cleanup();
       }
     }
 
     const onDown = (e: PointerEvent) => {
-      if (selectedTool !== 'wall') return;
+      if (wallTool !== 'draw') return;
       startRef.current = getPoint(e);
       inputRef.current = '';
       lengthRef.current = 0;
@@ -529,15 +527,48 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
   }, [
     room.height,
     room.walls,
-    selectedTool,
+    wallTool,
     selectedWall?.thickness,
     setRoom,
-    setSelectedTool,
     threeRef,
     snapAngle,
     snapLength,
     snapRightAngles,
+    setWallTool,
   ]);
+
+  useEffect(() => {
+    const three = threeRef.current;
+    if (!three || wallTool !== 'erase') return;
+    const dom: HTMLElement = three.renderer.domElement;
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+
+    const onDown = (e: PointerEvent) => {
+      const rect = dom.getBoundingClientRect();
+      pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, three.camera);
+      const intersects = raycaster.intersectObjects(
+        groupRef.current?.children || [],
+        true,
+      );
+      const hit = intersects.find(
+        (i) => i.object.userData?.wallId && !i.object.userData?.handle,
+      );
+      if (hit) {
+        const id = hit.object.userData.wallId;
+        setRoom({
+          walls: roomRef.current.walls.filter((w) => w.id !== id),
+        });
+      }
+    };
+
+    window.addEventListener('pointerdown', onDown);
+    return () => {
+      window.removeEventListener('pointerdown', onDown);
+    };
+  }, [wallTool, setRoom, threeRef]);
 
   useEffect(() => {
     if (!selectedTool) return;

@@ -15,6 +15,7 @@ import ItemHotbar, {
   buildHotbarItems,
 } from './components/ItemHotbar';
 import WallToolSelector from './components/WallToolSelector';
+import WallDrawToolbar from './components/WallDrawToolbar';
 import TouchJoystick from './components/TouchJoystick';
 import { PlayerMode, PlayerSubMode, PLAYER_MODES } from './types';
 import RoomBuilder from './build/RoomBuilder';
@@ -895,7 +896,12 @@ const SceneViewer: React.FC<Props> = ({
           {mode ? 'Tryb edycji' : 'Tryb gracza'}
         </button>
       </div>
-      {mode === 'build' && isRoomDrawing && <RoomBuilder threeRef={threeRef} />}
+      {mode === 'build' && isRoomDrawing && (
+        <>
+          <RoomBuilder threeRef={threeRef} />
+          <WallDrawToolbar />
+        </>
+      )}
       {mode === 'build' && !isRoomDrawing && <WallToolSelector />}
       {mode === 'build' && (
         <div style={{ position: 'absolute', top: 60, left: 10 }}>

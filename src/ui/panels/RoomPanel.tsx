@@ -44,7 +44,8 @@ export default function RoomPanel({ setViewMode }: Props) {
   const wallThickness =
     usePlannerStore((s) => s.selectedWall?.thickness) ?? 0.1;
   const setThickness = usePlannerStore((s) => s.setSelectedWallThickness);
-  const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
+  const setIsRoomDrawing = usePlannerStore((s) => s.setIsRoomDrawing);
+  const setWallTool = usePlannerStore((s) => s.setWallTool);
 
   const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRoom({ height: parseInt(e.target.value, 10) });
@@ -56,7 +57,8 @@ export default function RoomPanel({ setViewMode }: Props) {
 
   const startDrawing = () => {
     setViewMode('2d');
-    setSelectedTool('wall');
+    setIsRoomDrawing(true);
+    setWallTool('draw');
   };
 
   return (
