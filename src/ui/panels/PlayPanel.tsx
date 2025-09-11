@@ -9,7 +9,6 @@ interface Props {
   startMode: PlayerSubMode;
   setStartMode: (v: PlayerSubMode) => void;
   onClose: () => void;
-  setViewMode: (v: '3d' | '2d') => void;
 }
 
 export default function PlayPanel({
@@ -19,14 +18,12 @@ export default function PlayPanel({
   startMode,
   setStartMode,
   onClose,
-  setViewMode,
 }: Props) {
   const {
     playerHeight,
     playerSpeed,
     setPlayerHeight,
     setPlayerSpeed,
-    setSelectedTool,
   } = usePlannerStore();
   const onHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = Number((e.target as HTMLInputElement).value) || 0;
@@ -38,11 +35,6 @@ export default function PlayPanel({
     const v = Number((e.target as HTMLInputElement).value) || 0;
     setPlayerSpeed(v);
     threeRef.current?.setPlayerParams?.({ speed: v });
-  };
-
-  const startDrawing = () => {
-    setViewMode('2d');
-    setSelectedTool('wall');
   };
 
   return (
@@ -72,9 +64,6 @@ export default function PlayPanel({
               onChange={onSpeedChange}
             />
           </div>
-          <button className="btnGhost" onClick={startDrawing}>
-            {t('room.draw')}
-          </button>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {PLAYER_MODES.map((key) => (
               <button

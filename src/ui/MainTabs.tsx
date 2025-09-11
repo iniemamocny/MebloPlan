@@ -219,7 +219,6 @@ export default function MainTabs({
             setStartMode={setStartMode}
             setMode={setMode}
             onClose={() => setTab(null)}
-            setViewMode={setViewMode}
           />
         )}
         {tab === 'room' && <RoomPanel setViewMode={setViewMode} />}
