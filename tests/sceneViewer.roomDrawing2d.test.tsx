@@ -84,7 +84,7 @@ vi.mock('../src/ui/components/WallDrawToolbar', () => ({
 }));
 
 describe('SceneViewer room drawing in 2D view', () => {
-  it('shows wall drawing toolbar only in build mode', () => {
+  it('continues drawing when switching to build mode', () => {
     const threeRef: any = { current: null };
     const setMode = vi.fn();
     const setViewMode = vi.fn();
@@ -94,6 +94,24 @@ describe('SceneViewer room drawing in 2D view', () => {
 
     usePlannerStore.setState({ isRoomDrawing: true, wallTool: 'draw' });
 
+    // start with no active play mode
+    act(() => {
+      root.render(
+        <SceneViewer
+          threeRef={threeRef}
+          addCountertop={false}
+          mode={null}
+          setMode={setMode}
+          viewMode="2d"
+          setViewMode={setViewMode}
+        />,
+      );
+    });
+
+    expect(container.querySelector('[data-testid="wall-toolbar"]')).not.toBeNull();
+    expect(container.querySelector('[data-testid="item-hotbar"]')).toBeNull();
+
+    // switching to build mode should not terminate drawing
     act(() => {
       root.render(
         <SceneViewer
@@ -109,7 +127,6 @@ describe('SceneViewer room drawing in 2D view', () => {
 
     expect(threeRef.current.camera).toBe(threeRef.current.orthographicCamera);
     expect(threeRef.current.controls.enableRotate).toBe(false);
-
     expect(container.querySelector('[data-testid="wall-toolbar"]')).not.toBeNull();
     expect(container.querySelector('[data-testid="item-hotbar"]')).toBeNull();
     expect(setMode).not.toHaveBeenCalled();
