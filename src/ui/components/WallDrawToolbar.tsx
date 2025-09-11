@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { User, Hammer } from 'lucide-react';
+import { Pencil, Eraser, Hammer } from 'lucide-react';
 import { usePlannerStore } from '../../state/store';
 
 const WallDrawToolbar: React.FC = () => {
@@ -8,8 +8,13 @@ const WallDrawToolbar: React.FC = () => {
   const setWallTool = usePlannerStore((s) => s.setWallTool);
   const { t } = useTranslation();
 
-  const tools: { id: 'draw' | 'edit'; icon: React.ReactNode; label: string }[] = [
-    { id: 'draw', icon: <User size={16} />, label: t('drawWall') },
+  const tools: {
+    id: 'draw' | 'erase' | 'edit';
+    icon: React.ReactNode;
+    label: string;
+  }[] = [
+    { id: 'draw', icon: <Pencil size={16} />, label: t('drawWall') },
+    { id: 'erase', icon: <Eraser size={16} />, label: t('eraseWall') },
     { id: 'edit', icon: <Hammer size={16} />, label: t('editWall') },
   ];
 
