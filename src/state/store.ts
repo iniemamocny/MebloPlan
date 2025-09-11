@@ -7,12 +7,8 @@ import {
   Prices,
   Gaps,
   RoomShape,
-  Wall,
-  ShapePoint,
 } from '../types';
-import { shapeToWalls } from '../utils/roomShape';
 import { safeSetItem } from '../utils/storage';
-import uuid from '../utils/uuid';
 
 export const defaultGaps: Gaps = {
   left: 2,
@@ -123,27 +119,6 @@ export const defaultPrices: Prices = {
 const clamp = (v: number, min: number, max: number) =>
   Math.min(Math.max(v, min), max);
 
-const wallsToShape = (walls: Wall[]): RoomShape => {
-  const pointMap = new Map<string, ShapePoint>();
-
-  const getPoint = ({ x, y }: { x: number; y: number }): ShapePoint => {
-    const key = `${x}:${y}`;
-    let point = pointMap.get(key);
-    if (!point) {
-      point = { id: uuid(), x, y };
-      pointMap.set(key, point);
-    }
-    return point;
-  };
-
-  const segments = walls.map((w) => ({
-    start: getPoint(w.start),
-    end: getPoint(w.end),
-  }));
-
-  return { points: Array.from(pointMap.values()), segments };
-};
-
 const persisted = (() => {
   try {
     return JSON.parse(localStorage.getItem('kv7_state') || 'null');
@@ -167,8 +142,18 @@ type Store = {
   prices: Prices;
   modules: Module3D[];
   items: Item[];
-  past: { modules: Module3D[]; items: Item[]; room: Room }[];
-  future: { modules: Module3D[]; items: Item[]; room: Room }[];
+  past: {
+    modules: Module3D[];
+    items: Item[];
+    room: Room;
+    roomShape: RoomShape;
+  }[];
+  future: {
+    modules: Module3D[];
+    items: Item[];
+    room: Room;
+    roomShape: RoomShape;
+  }[];
   room: Room;
   roomShape: RoomShape;
   snapAngle: number;
@@ -184,9 +169,6 @@ type Store = {
   playerSpeed: number;
   selectedItemSlot: number;
   selectedTool: string | null;
-  selectedWall: { thickness: number } | null;
-  isRoomDrawing: boolean;
-  wallTool: 'draw' | 'erase' | 'edit';
   itemsByCabinet: (cabinetId: string) => Item[];
   itemsBySurface: (cabinetId: string, surfaceIndex: number) => Item[];
   setRole: (r: 'stolarz' | 'klient') => void;
@@ -216,11 +198,6 @@ type Store = {
   setPlayerSpeed: (v: number) => void;
   setSelectedItemSlot: (slot: number) => void;
   setSelectedTool: (tool: string | null) => void;
-  setSelectedWallThickness: (thickness: number) => void;
-  setIsRoomDrawing: (v: boolean) => void;
-  setWallTool: (t: 'draw' | 'erase' | 'edit') => void;
-  startDrawing: () => void;
-  finishDrawing: () => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -235,16 +212,10 @@ export const usePlannerStore = create<Store>((set, get) => ({
     ? {
         ...persisted.room,
         origin: persisted.room.origin || { x: 0, y: 0 },
-        walls: persisted.room.walls || [],
-        windows: persisted.room.windows || [],
-        doors: persisted.room.doors || [],
       }
     : {
         height: 2700,
         origin: { x: 0, y: 0 },
-        walls: [],
-        windows: [],
-      doors: [],
       },
   roomShape: persisted?.roomShape || { points: [], segments: [] },
   snapAngle: persisted?.snapAngle ?? 90,
@@ -259,9 +230,6 @@ export const usePlannerStore = create<Store>((set, get) => ({
   playerSpeed: persisted?.playerSpeed ?? 0.1,
   selectedItemSlot: 1,
   selectedTool: null,
-  selectedWall: { thickness: 0.1 },
-  isRoomDrawing: false,
-  wallTool: 'edit',
   showFronts: true,
   itemsByCabinet: (cabinetId) =>
     get().items.filter((it) => it.cabinetId === cabinetId),
@@ -335,6 +303,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
           modules: JSON.parse(JSON.stringify(s.modules)),
           items: JSON.parse(JSON.stringify(s.items)),
           room: JSON.parse(JSON.stringify(s.room)),
+          roomShape: JSON.parse(JSON.stringify(s.roomShape)),
         },
       ],
       modules: [...s.modules, m],
@@ -348,6 +317,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
           modules: JSON.parse(JSON.stringify(s.modules)),
           items: JSON.parse(JSON.stringify(s.items)),
           room: JSON.parse(JSON.stringify(s.room)),
+          roomShape: JSON.parse(JSON.stringify(s.roomShape)),
         },
       ],
       modules: s.modules.map((x) => (x.id === id ? { ...x, ...patch } : x)),
@@ -361,6 +331,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
           modules: JSON.parse(JSON.stringify(s.modules)),
           items: JSON.parse(JSON.stringify(s.items)),
           room: JSON.parse(JSON.stringify(s.room)),
+          roomShape: JSON.parse(JSON.stringify(s.roomShape)),
         },
       ],
       modules: s.modules.filter((x) => x.id !== id),
@@ -374,6 +345,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
           modules: JSON.parse(JSON.stringify(s.modules)),
           items: JSON.parse(JSON.stringify(s.items)),
           room: JSON.parse(JSON.stringify(s.room)),
+          roomShape: JSON.parse(JSON.stringify(s.roomShape)),
         },
       ],
       items: [...s.items, i],
@@ -387,6 +359,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
           modules: JSON.parse(JSON.stringify(s.modules)),
           items: JSON.parse(JSON.stringify(s.items)),
           room: JSON.parse(JSON.stringify(s.room)),
+          roomShape: JSON.parse(JSON.stringify(s.roomShape)),
         },
       ],
       items: s.items.map((x) => (x.id === id ? { ...x, ...patch } : x)),
@@ -400,6 +373,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
           modules: JSON.parse(JSON.stringify(s.modules)),
           items: JSON.parse(JSON.stringify(s.items)),
           room: JSON.parse(JSON.stringify(s.room)),
+          roomShape: JSON.parse(JSON.stringify(s.roomShape)),
         },
       ],
       items: s.items.filter((x) => x.id !== id),
@@ -413,6 +387,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
           modules: JSON.parse(JSON.stringify(s.modules)),
           items: JSON.parse(JSON.stringify(s.items)),
           room: JSON.parse(JSON.stringify(s.room)),
+          roomShape: JSON.parse(JSON.stringify(s.roomShape)),
         },
       ],
       modules: [],
@@ -427,7 +402,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
         modules: previous.modules,
         items: previous.items,
         room: previous.room,
-        roomShape: wallsToShape(previous.room.walls || []),
+        roomShape: previous.roomShape,
         past: s.past.slice(0, -1),
         future: [
           ...s.future,
@@ -435,6 +410,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
             modules: JSON.parse(JSON.stringify(s.modules)),
             items: JSON.parse(JSON.stringify(s.items)),
             room: JSON.parse(JSON.stringify(s.room)),
+            roomShape: JSON.parse(JSON.stringify(s.roomShape)),
           },
         ],
       };
@@ -447,13 +423,14 @@ export const usePlannerStore = create<Store>((set, get) => ({
         modules: next.modules,
         items: next.items,
         room: next.room,
-        roomShape: wallsToShape(next.room.walls || []),
+        roomShape: next.roomShape,
         past: [
           ...s.past,
           {
             modules: JSON.parse(JSON.stringify(s.modules)),
             items: JSON.parse(JSON.stringify(s.items)),
             room: JSON.parse(JSON.stringify(s.room)),
+            roomShape: JSON.parse(JSON.stringify(s.roomShape)),
           },
         ],
         future: s.future.slice(0, -1),
@@ -462,19 +439,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setRoom: (patch, opts = {}) =>
     set((s) => {
       const { pushHistory = true } = opts as { pushHistory?: boolean };
-      const newPatch: Partial<Room> = { ...patch };
-      if (patch.walls) {
-        const defaultThickness = s.selectedWall?.thickness ?? 0.1;
-        newPatch.walls = patch.walls.map((w) => ({
-          ...w,
-          thickness: clamp(w.thickness ?? defaultThickness, 0.08, 0.25),
-        }));
-      }
-      const updatedRoom = { ...s.room, ...newPatch };
-      const base = {
-        room: updatedRoom,
-        roomShape: patch.walls ? wallsToShape(updatedRoom.walls) : s.roomShape,
-      };
+      const updatedRoom = { ...s.room, ...patch };
+      const base = { room: updatedRoom };
       if (!pushHistory) return base;
       return {
         past: [
@@ -483,6 +449,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
             modules: JSON.parse(JSON.stringify(s.modules)),
             items: JSON.parse(JSON.stringify(s.items)),
             room: JSON.parse(JSON.stringify(s.room)),
+            roomShape: JSON.parse(JSON.stringify(s.roomShape)),
           },
         ],
         future: [],
@@ -492,12 +459,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setRoomShape: (shape, opts = {}) =>
     set((s) => {
       const { pushHistory = true } = opts as { pushHistory?: boolean };
-      const walls = shapeToWalls(shape, {
-        height: s.room.height / 1000,
-        thickness: s.selectedWall?.thickness ?? 0.1,
-      });
-      const updatedRoom = { ...s.room, walls };
-      const base = { roomShape: shape, room: updatedRoom };
+      const base = { roomShape: shape };
       if (!pushHistory) return base;
       return {
         past: [
@@ -506,6 +468,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
             modules: JSON.parse(JSON.stringify(s.modules)),
             items: JSON.parse(JSON.stringify(s.items)),
             room: JSON.parse(JSON.stringify(s.room)),
+            roomShape: JSON.parse(JSON.stringify(s.roomShape)),
           },
         ],
         future: [],
@@ -525,15 +488,6 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setPlayerSpeed: (v) => set({ playerSpeed: v }),
   setSelectedItemSlot: (slot) => set({ selectedItemSlot: slot }),
   setSelectedTool: (tool) => set({ selectedTool: tool }),
-  setSelectedWallThickness: (thickness) =>
-    set({
-      selectedWall: { thickness: clamp(thickness, 0.08, 0.25) },
-    }),
-  setIsRoomDrawing: (v) => set({ isRoomDrawing: v }),
-  setWallTool: (t) => set({ wallTool: t }),
-  startDrawing: () => set({ isRoomDrawing: true, wallTool: 'draw' }),
-  finishDrawing: () =>
-    set({ isRoomDrawing: false, wallTool: 'edit', selectedTool: null }),
 }));
 
 const persistSelector = (s: Store) => ({
