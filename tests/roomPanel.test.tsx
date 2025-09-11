@@ -202,5 +202,19 @@ describe('Room features', () => {
     root.unmount();
     container.remove();
   });
+
+  it('switches wall tools exclusively', () => {
+    usePlannerStore.setState({ wallTool: 'draw' });
+    const setWallTool = usePlannerStore.getState().setWallTool;
+
+    act(() => setWallTool('edit'));
+    expect(usePlannerStore.getState().wallTool).toBe('edit');
+
+    act(() => setWallTool('erase'));
+    expect(usePlannerStore.getState().wallTool).toBe('erase');
+
+    act(() => setWallTool('draw'));
+    expect(usePlannerStore.getState().wallTool).toBe('draw');
+  });
 });
 

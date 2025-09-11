@@ -327,7 +327,7 @@ const RoomBuilder: React.FC<Props> = ({ threeRef }) => {
 
   useEffect(() => {
     const three = threeRef.current;
-    if (!three) return;
+    if (!three || wallTool !== 'draw') return;
     const dom: HTMLElement = three.renderer.domElement;
     const raycaster = new THREE.Raycaster();
     const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
