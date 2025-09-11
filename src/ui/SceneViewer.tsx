@@ -132,7 +132,7 @@ const SceneViewer: React.FC<Props> = ({
         const updateGrid = () => {
           const base = Math.max(
             1,
-            Math.round(10 / (usePlannerStore.getState().gridSize / 100)),
+            Math.round(16 / (usePlannerStore.getState().gridSize / 100)),
           );
           const divisions = Math.max(
             1,
@@ -158,7 +158,7 @@ const SceneViewer: React.FC<Props> = ({
         c.update();
         const base = Math.max(
           1,
-          Math.round(10 / (usePlannerStore.getState().gridSize / 100)),
+          Math.round(16 / (usePlannerStore.getState().gridSize / 100)),
         );
         three.updateGrid?.(base);
       }
