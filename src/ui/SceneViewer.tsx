@@ -957,7 +957,7 @@ const SceneViewer: React.FC<Props> = ({
             data-testid="finish-drawing"
             className="btnGhost"
             onClick={() => {
-              store.setIsRoomDrawing(false);
+              store.finishDrawing();
               setViewMode('3d');
             }}
           >

@@ -36,6 +36,7 @@ beforeEach(() => {
     room: { height: 2700, origin: { x: 0, y: 0 }, walls: [], windows: [], doors: [] },
     selectedTool: 'wall',
     selectedWall: { thickness: 0.1 },
+    isRoomDrawing: true,
   });
 });
 
@@ -78,6 +79,56 @@ describe('RoomBuilder direction handling', () => {
     const wall = walls[0];
     expect(Number.isFinite(wall.end.x)).toBe(true);
     expect(wall.end.x).toBeGreaterThan(wall.start.x);
+
+    root.unmount();
+    container.remove();
+  });
+
+  it('allows drawing consecutive walls without leaving drawing mode', () => {
+    const canvas = document.createElement('canvas');
+    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    camera.position.set(0, 5, 5);
+    camera.lookAt(0, 0, 0);
+    const threeRef: any = {
+      current: {
+        renderer: { domElement: canvas },
+        camera,
+        group: { children: [], add: () => {}, remove: () => {} },
+      },
+    };
+
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+    act(() => root.render(<RoomBuilder threeRef={threeRef} />));
+
+    act(() => {
+      canvas.dispatchEvent(
+        new PointerEvent('pointerdown', { bubbles: true, clientX: 10, clientY: 10 }),
+      );
+      window.dispatchEvent(
+        new PointerEvent('pointermove', { bubbles: true, clientX: 20, clientY: 10 }),
+      );
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '1' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    });
+
+    expect(usePlannerStore.getState().room.walls.length).toBe(1);
+    expect(usePlannerStore.getState().isRoomDrawing).toBe(true);
+
+    act(() => {
+      canvas.dispatchEvent(
+        new PointerEvent('pointerdown', { bubbles: true, clientX: 20, clientY: 10 }),
+      );
+      window.dispatchEvent(
+        new PointerEvent('pointermove', { bubbles: true, clientX: 30, clientY: 10 }),
+      );
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: '1' }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    });
+
+    expect(usePlannerStore.getState().room.walls.length).toBe(2);
+    expect(usePlannerStore.getState().isRoomDrawing).toBe(true);
 
     root.unmount();
     container.remove();
