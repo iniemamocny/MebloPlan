@@ -1,4 +1,7 @@
 {
+  "drawWall": "Rysuj ścianę",
+  "editWall": "Edytuj ścianę",
+  "eraseWall": "Wymaż ścianę",
   "app": {
     "mode": "Tryb",
     "roles": {

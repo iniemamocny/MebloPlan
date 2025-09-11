@@ -1,4 +1,7 @@
 {
+  "drawWall": "Draw wall",
+  "editWall": "Edit wall",
+  "eraseWall": "Erase wall",
   "app": {
     "mode": "Mode",
     "roles": {
