@@ -51,6 +51,7 @@ interface Props {
   mode: PlayerMode;
   setMode: React.Dispatch<React.SetStateAction<PlayerMode>>;
   startMode: Exclude<PlayerMode, null>;
+  viewMode: '3d' | '2d';
 }
 
 const INTERACT_DISTANCE = 1.5;
@@ -75,6 +76,7 @@ const SceneViewer: React.FC<Props> = ({
   mode,
   setMode,
   startMode,
+  viewMode = '3d',
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const store = usePlannerStore();
@@ -90,6 +92,7 @@ const SceneViewer: React.FC<Props> = ({
   const [targetCabinet, setTargetCabinet] = useState<THREE.Object3D | null>(null);
   const ghostRef = useRef<THREE.Object3D | null>(null);
   const wallStartRef = useRef<{ x: number; y: number } | null>(null);
+  const savedView = useRef<{ pos: THREE.Vector3; target: THREE.Vector3 } | null>(null);
 
   const radialItems =
     mode === 'build'
@@ -97,6 +100,31 @@ const SceneViewer: React.FC<Props> = ({
       : mode === 'furnish'
         ? furnishHotbarItems
         : hotbarItems;
+
+  useEffect(() => {
+    const three = threeRef.current;
+    if (!three) return;
+    if (viewMode === '2d') {
+      savedView.current = {
+        pos: three.camera.position.clone(),
+        target: three.controls.target.clone(),
+      };
+      three.controls.enableRotate = false;
+      three.camera.position.set(0, 10, 0);
+      three.camera.up.set(0, 0, -1);
+      three.controls.target.set(0, 0, 0);
+      three.camera.lookAt(0, 0, 0);
+      three.controls.update();
+    } else {
+      if (savedView.current) {
+        three.camera.position.copy(savedView.current.pos);
+        three.controls.target.copy(savedView.current.target);
+      }
+      three.camera.up.set(0, 1, 0);
+      three.controls.enableRotate = true;
+      three.controls.update();
+    }
+  }, [viewMode, threeRef]);
 
   useEffect(() => {
     const items =
@@ -832,7 +860,7 @@ const SceneViewer: React.FC<Props> = ({
         </div>
       )}
       <div style={{ position: 'absolute', top: 10, left: 10 }}>
-        <button className="btnGhost" onClick={() => setMode((m) => (m ? null : startMode))}>
+        <button className="btnGhost" onClick={() => setMode((m) => (m ? null : startMode || 'build'))}>
           {mode ? 'Tryb edycji' : 'Tryb gracza'}
         </button>
       </div>
