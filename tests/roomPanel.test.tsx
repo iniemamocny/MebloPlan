@@ -162,7 +162,7 @@ describe('Room features', () => {
     container.remove();
   });
 
-  it('activates 2D view after clicking draw', () => {
+    it('activates 2D view after clicking draw without changing game mode', () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = ReactDOM.createRoot(container);
