@@ -166,11 +166,12 @@ describe('Room features', () => {
     document.body.appendChild(container);
     const root = ReactDOM.createRoot(container);
 
+    const startDrawing = vi.fn();
     usePlannerStore.setState({
       room: { height: 2700, origin: { x: 0, y: 0 }, walls: [], windows: [], doors: [] },
       selectedWall: { thickness: 0.1 },
-      isRoomDrawing: false,
       wallTool: 'edit',
+      startDrawing,
     });
 
     const setViewMode = vi.fn();
@@ -191,8 +192,7 @@ describe('Room features', () => {
     });
 
     expect(setViewMode).toHaveBeenCalledWith('2d');
-    expect(usePlannerStore.getState().isRoomDrawing).toBe(true);
-    expect(usePlannerStore.getState().wallTool).toBe('draw');
+    expect(startDrawing).toHaveBeenCalled();
 
     root.unmount();
     container.remove();
