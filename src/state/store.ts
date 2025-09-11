@@ -169,6 +169,9 @@ type Store = {
   playerSpeed: number;
   selectedItemSlot: number;
   selectedTool: string | null;
+  wallDefaults: { height: number; thickness: number };
+  openingDefaults: { height: number; width: number; floorHeight: number };
+  dropCeilingDefaults: { length: number; width: number; height: number };
   itemsByCabinet: (cabinetId: string) => Item[];
   itemsBySurface: (cabinetId: string, surfaceIndex: number) => Item[];
   setRole: (r: 'stolarz' | 'klient') => void;
@@ -198,6 +201,11 @@ type Store = {
   setPlayerSpeed: (v: number) => void;
   setSelectedItemSlot: (slot: number) => void;
   setSelectedTool: (tool: string | null) => void;
+  drawWalls: (height: number, thickness: number) => void;
+  selectWindow: (type: 'single' | 'double' | 'triple') => void;
+  selectDoor: (type: 'single' | 'double' | 'sliding') => void;
+  insertOpening: (height: number, width: number, floorHeight: number) => void;
+  placeDropCeiling: (length: number, width: number, height: number) => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -230,6 +238,9 @@ export const usePlannerStore = create<Store>((set, get) => ({
   playerSpeed: persisted?.playerSpeed ?? 0.1,
   selectedItemSlot: 1,
   selectedTool: null,
+  wallDefaults: { height: 2700, thickness: 120 },
+  openingDefaults: { height: 1000, width: 1000, floorHeight: 0 },
+  dropCeilingDefaults: { length: 1000, width: 1000, height: 100 },
   showFronts: true,
   itemsByCabinet: (cabinetId) =>
     get().items.filter((it) => it.cabinetId === cabinetId),
@@ -488,6 +499,24 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setPlayerSpeed: (v) => set({ playerSpeed: v }),
   setSelectedItemSlot: (slot) => set({ selectedItemSlot: slot }),
   setSelectedTool: (tool) => set({ selectedTool: tool }),
+  drawWalls: (height, thickness) =>
+    set((s) => ({
+      selectedTool: 'wall',
+      wallDefaults: { height, thickness },
+      room: { ...s.room, height },
+    })),
+  selectWindow: (type) => set({ selectedTool: `window-${type}` }),
+  selectDoor: (type) => set({ selectedTool: `door-${type}` }),
+  insertOpening: (height, width, floorHeight) =>
+    set({
+      selectedTool: 'opening',
+      openingDefaults: { height, width, floorHeight },
+    }),
+  placeDropCeiling: (length, width, height) =>
+    set({
+      selectedTool: 'drop-ceiling',
+      dropCeilingDefaults: { length, width, height },
+    }),
 }));
 
 const persistSelector = (s: Store) => ({

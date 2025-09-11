@@ -24,6 +24,7 @@
       "cab": "Kuchnia",
       "costs": "Koszty",
       "cut": "Formatki",
+      "room": "Pomieszczenie",
       "global": "Ustawienia",
       "play": "Play"
     },
@@ -199,6 +200,27 @@
       "furnish": "Meblowanie",
       "decorate": "Dekoracje"
     }
+  },
+  "room": {
+    "walls": "Ściany",
+    "drawWalls": "Rysuj",
+    "windows": "Okna",
+    "windowSingle": "Okno jednoskrzydłowe",
+    "windowDouble": "Okno dwuskrzydłowe",
+    "windowTriple": "Okno trzyskrzydłowe",
+    "doors": "Drzwi",
+    "doorSingle": "Drzwi jednoskrzydłowe",
+    "doorDouble": "Drzwi dwuskrzydłowe",
+    "doorSliding": "Drzwi przesuwne",
+    "openings": "Otwory",
+    "height": "Wysokość",
+    "width": "Szerokość",
+    "thickness": "Grubość",
+    "floorHeight": "Wysokość od podłogi",
+    "insert": "Wstaw",
+    "dropCeiling": "Sufit opuszczany",
+    "length": "Długość",
+    "place": "Umieść"
   },
   "items": {
     "cup": "Kubek",

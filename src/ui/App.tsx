@@ -38,7 +38,7 @@ export default function App() {
     initSidePanel,
   } = useCabinetConfig(family, kind, variant, setVariant);
 
-  const [tab, setTab] = useState<'cab' | 'costs' | 'cut' | 'global' | 'play' | null>(null);
+  const [tab, setTab] = useState<'cab' | 'costs' | 'cut' | 'room' | 'global' | 'play' | null>(null);
   const [boardL, setBoardL] = useState(2800);
   const [boardW, setBoardW] = useState(2070);
   const [boardKerf, setBoardKerf] = useState(3);
