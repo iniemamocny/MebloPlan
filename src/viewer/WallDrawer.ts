@@ -80,6 +80,7 @@ export default class WallDrawer {
   private addCursor() {
     this.removeCursor();
     const geom = new THREE.PlaneGeometry(this.thickness, this.thickness);
+    geom.rotateX(-Math.PI / 2);
     const mat = new THREE.MeshBasicMaterial({
       color: 0x00ffff,
       transparent: true,
@@ -87,7 +88,6 @@ export default class WallDrawer {
       side: THREE.DoubleSide,
     });
     this.cursor = new THREE.Mesh(geom, mat);
-    this.cursor.rotation.x = -Math.PI / 2;
     this.cursor.position.set(0, 0.001, 0);
     this.cursorTarget = this.cursor.position.clone();
     this.group.add(this.cursor);
@@ -141,6 +141,7 @@ export default class WallDrawer {
   private onMove = (e: PointerEvent) => {
     const point = this.getPoint(e);
     if (!point) return;
+    point.y = 0.001;
     this.lastPoint = point;
     this.cursorTarget = point.clone();
     if (this.dragging && this.start && this.preview) {
@@ -223,7 +224,7 @@ export default class WallDrawer {
     this.start = null;
     this.disposePreview();
     if (this.cursor) {
-      this.cursor.position.set(point.x, this.cursor.position.y, point.z);
+      this.cursor.position.set(point.x, 0.001, point.z);
       this.cursorTarget = this.cursor.position.clone();
     }
   };
@@ -238,11 +239,7 @@ export default class WallDrawer {
     this.start = null;
     this.disposePreview();
     if (this.cursor && this.lastPoint) {
-      this.cursor.position.set(
-        this.lastPoint.x,
-        this.cursor.position.y,
-        this.lastPoint.z,
-      );
+      this.cursor.position.set(this.lastPoint.x, 0.001, this.lastPoint.z);
       this.cursorTarget = this.cursor.position.clone();
     }
   };
