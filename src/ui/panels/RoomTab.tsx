@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pencil, Hammer, Eraser } from 'lucide-react';
+import { Pencil, Group, Hammer } from 'lucide-react';
 import SingleMMInput from '../components/SingleMMInput';
 import { usePlannerStore } from '../../state/store';
 
@@ -14,7 +14,6 @@ export default function RoomTab() {
   const [openH, setOpenH] = useState(1000);
   const [openW, setOpenW] = useState(1000);
   const [openF, setOpenF] = useState(0);
-  const [showDrawMenu, setShowDrawMenu] = useState(false);
 
   const [ceilL, setCeilL] = useState(1000);
   const [ceilW, setCeilW] = useState(1000);
@@ -34,57 +33,28 @@ export default function RoomTab() {
               <div className="small">{t('room.thickness')}</div>
               <SingleMMInput value={wallT} onChange={setWallT} />
             </div>
-            <div style={{ display: 'flex', alignItems: 'flex-end', position: 'relative' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4 }}>
               <button
-                className="btn"
-                onClick={() => {
-                  setShowDrawMenu((m) => !m);
-                }}
+                className="btnGhost"
+                title={t('room.pencil')}
+                onClick={() => store.drawWalls(wallH, wallT)}
               >
-                {t('room.drawWalls')}
+                <Pencil size={16} />
               </button>
-              {showDrawMenu && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: '100%',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    marginBottom: 8,
-                    display: 'flex',
-                    gap: 4,
-                    background: 'var(--white)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 8,
-                    padding: 4,
-                  }}
-                >
-                  <button
-                    className="btnGhost"
-                    title={t('room.pencil')}
-                    onClick={() => {
-                      store.drawWalls(wallH, wallT);
-                      setShowDrawMenu(false);
-                    }}
-                  >
-                    <Pencil size={16} />
-                  </button>
-                  <button
-                    className="btnGhost"
-                    title={t('room.hammer')}
-                    onClick={() => setShowDrawMenu(false)}
-                  >
-                    <Hammer size={16} />
-                  </button>
-                  <button
-                    className="btnGhost"
-                    title={t('room.eraser')}
-                    onClick={() => setShowDrawMenu(false)}
-                  >
-                    <Eraser size={16} />
-                  </button>
-                </div>
-              )}
+              <button
+                className="btnGhost"
+                title={t('room.group')}
+                onClick={() => store.setSelectedTool('group')}
+              >
+                <Group size={16} />
+              </button>
+              <button
+                className="btnGhost"
+                title={t('room.hammer')}
+                onClick={() => store.setSelectedTool('hammer')}
+              >
+                <Hammer size={16} />
+              </button>
             </div>
           </div>
         </div>
