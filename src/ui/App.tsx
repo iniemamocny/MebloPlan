@@ -39,6 +39,8 @@ export default function App() {
   } = useCabinetConfig(family, kind, variant, setVariant);
 
   const [tab, setTab] = useState<'cab' | 'costs' | 'cut' | 'room' | 'global' | 'play' | null>(null);
+  const [activeTab, setActiveTab] =
+    useState<'cab' | 'costs' | 'cut' | 'room' | 'global' | 'play' | null>(null);
   const [boardL, setBoardL] = useState(2800);
   const [boardW, setBoardW] = useState(2070);
   const [boardKerf, setBoardKerf] = useState(3);
@@ -93,6 +95,7 @@ export default function App() {
             t={t}
             tab={tab}
             setTab={setTab}
+            setActiveTab={setActiveTab}
             family={family}
             setFamily={setFamily}
             kind={kind}
@@ -145,7 +148,7 @@ export default function App() {
           setMode={setMode}
           viewMode={viewMode}
           setViewMode={handleSetViewMode}
-          roomTabOpen={tab === 'room'}
+          showRoomTools={activeTab === 'room'}
         />
       </div>
     </div>
