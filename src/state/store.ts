@@ -156,6 +156,7 @@ type Store = {
     room: Room;
     roomShape: RoomShape;
   }[];
+  history: string[];
   room: Room;
   roomShape: RoomShape;
   snapAngle: number;
@@ -204,6 +205,7 @@ type Store = {
   setSelectedItemSlot: (slot: number) => void;
   setSelectedTool: (tool: string | null) => void;
   addWallSegment: (start: ShapePoint, end: ShapePoint) => void;
+  addWallWithHistory: (start: ShapePoint, end: ShapePoint) => void;
   drawWalls: (height: number, thickness: number) => void;
   selectWindow: (type: 'single' | 'double' | 'triple') => void;
   selectDoor: (type: 'single' | 'double' | 'sliding') => void;
@@ -219,6 +221,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   items: persisted?.items || [],
   past: [],
   future: [],
+  history: [],
   room: persisted?.room
     ? {
         ...persisted.room,
@@ -516,6 +519,15 @@ export const usePlannerStore = create<Store>((set, get) => ({
       roomShape: addSegmentToShape(s.roomShape, { start, end }),
       future: [],
     })),
+  addWallWithHistory: (start, end) => {
+    get().addWallSegment(start, end);
+    set((s) => ({
+      history: [
+        ...s.history,
+        `Added wall from (${start.x}, ${start.y}) to (${end.x}, ${end.y})`,
+      ],
+    }));
+  },
   drawWalls: (height, thickness) =>
     set((s) => ({
       selectedTool: 'wall',

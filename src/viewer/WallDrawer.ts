@@ -8,7 +8,7 @@ interface PlannerStore {
   snapToGrid: boolean;
   snapLength: number;
   wallDefaults: { height: number; thickness: number };
-  addWallSegment: (start: ShapePoint, end: ShapePoint) => void;
+  addWallWithHistory: (start: ShapePoint, end: ShapePoint) => void;
 }
 
 export default class WallDrawer {
@@ -170,7 +170,7 @@ export default class WallDrawer {
     }
     const start = { x: this.start.x, y: this.start.y };
     const end = { x: point.x, y: point.y };
-    this.store.getState().addWallSegment(start, end);
+    this.store.getState().addWallWithHistory(start, end);
     this.start = null;
     this.disposePreview();
     if (this.cursor) {
