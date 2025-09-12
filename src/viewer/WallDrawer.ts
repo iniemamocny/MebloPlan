@@ -138,8 +138,6 @@ export default class WallDrawer {
     this.lastPoint = point;
     if (!this.dragging) {
       this.cursorTarget = point.clone();
-    } else if (this.cursor && this.start) {
-      this.cursor.position.set(this.start.x, 0.001, this.start.z);
     }
     if (this.dragging && this.start && this.preview) {
       const dx = point.x - this.start.x;
@@ -167,6 +165,10 @@ export default class WallDrawer {
     this.pointerId = e.pointerId;
     this.dragging = true;
     this.start = point.clone();
+    if (this.cursor) {
+      this.cursor.position.copy(point).setY(0.001);
+      this.cursorTarget = this.cursor.position.clone();
+    }
     const state = this.store.getState();
     const height = state.wallDefaults.height / 1000;
     const geom = new THREE.BoxGeometry(1, height, this.thickness);
