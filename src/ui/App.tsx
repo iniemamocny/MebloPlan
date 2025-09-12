@@ -121,17 +121,8 @@ export default function App() {
           />
         </div>
       )}
-      <div className="canvasWrap">
-        <SceneViewer
-          threeRef={threeRef}
-          addCountertop={addCountertop}
-          mode={mode}
-          setMode={setMode}
-          startMode={startMode}
-          viewMode={viewMode}
-          setViewMode={handleSetViewMode}
-        />
-        {mode === null && (
+      {mode === null && (
+        <div className="topBarWrap">
           <TopBar
             t={t}
             store={store}
@@ -142,7 +133,18 @@ export default function App() {
             viewMode={viewMode}
             toggleViewMode={toggleViewMode}
           />
-        )}
+        </div>
+      )}
+      <div className="canvasWrap">
+        <SceneViewer
+          threeRef={threeRef}
+          addCountertop={addCountertop}
+          mode={mode}
+          setMode={setMode}
+          startMode={startMode}
+          viewMode={viewMode}
+          setViewMode={handleSetViewMode}
+        />
       </div>
     </div>
   );
