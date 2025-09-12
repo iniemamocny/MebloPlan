@@ -7,8 +7,10 @@ import {
   Prices,
   Gaps,
   RoomShape,
+  ShapePoint,
 } from '../types';
 import { safeSetItem } from '../utils/storage';
+import { addSegmentToShape } from '../utils/roomShape';
 
 export const defaultGaps: Gaps = {
   left: 2,
@@ -201,6 +203,7 @@ type Store = {
   setPlayerSpeed: (v: number) => void;
   setSelectedItemSlot: (slot: number) => void;
   setSelectedTool: (tool: string | null) => void;
+  addWallSegment: (start: ShapePoint, end: ShapePoint) => void;
   drawWalls: (height: number, thickness: number) => void;
   selectWindow: (type: 'single' | 'double' | 'triple') => void;
   selectDoor: (type: 'single' | 'double' | 'sliding') => void;
@@ -499,6 +502,20 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setPlayerSpeed: (v) => set({ playerSpeed: v }),
   setSelectedItemSlot: (slot) => set({ selectedItemSlot: slot }),
   setSelectedTool: (tool) => set({ selectedTool: tool }),
+  addWallSegment: (start, end) =>
+    set((s) => ({
+      past: [
+        ...s.past,
+        {
+          modules: JSON.parse(JSON.stringify(s.modules)),
+          items: JSON.parse(JSON.stringify(s.items)),
+          room: JSON.parse(JSON.stringify(s.room)),
+          roomShape: JSON.parse(JSON.stringify(s.roomShape)),
+        },
+      ],
+      roomShape: addSegmentToShape(s.roomShape, { start, end }),
+      future: [],
+    })),
   drawWalls: (height, thickness) =>
     set((s) => ({
       selectedTool: 'wall',
