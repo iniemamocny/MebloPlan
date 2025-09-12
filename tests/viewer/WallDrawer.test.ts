@@ -38,7 +38,7 @@ function createDrawer() {
   const store = { getState: () => state } as any;
   const drawer = new WallDrawer(renderer, () => camera, group, store);
   drawer.enable(state.wallDefaults.thickness);
-  let point = new THREE.Vector3();
+  const point = new THREE.Vector3();
   (drawer as any).getPoint = vi.fn(() => point.clone());
   return { drawer, point, addWallWithHistory, history };
 }
