@@ -27,6 +27,7 @@ export default class WallDrawer {
   private lastPoint: THREE.Vector3 | null = null;
   private pointerId: number | null = null;
   private thickness = 0.1;
+  private enabled = false;
 
   constructor(
     renderer: WebGLRenderer,
@@ -41,6 +42,8 @@ export default class WallDrawer {
   }
 
   enable(thickness: number) {
+    if (this.enabled) return;
+    this.enabled = true;
     this.thickness = thickness / 1000;
     const dom = this.renderer.domElement;
     dom.addEventListener('pointermove', this.onMove);
@@ -52,6 +55,8 @@ export default class WallDrawer {
   }
 
   disable() {
+    if (!this.enabled) return;
+    this.enabled = false;
     const dom = this.renderer.domElement;
     dom.removeEventListener('pointermove', this.onMove);
     dom.removeEventListener('pointerdown', this.onDown);

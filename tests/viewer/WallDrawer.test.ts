@@ -44,8 +44,8 @@ function createDrawer() {
 }
 
 beforeEach(() => {
-  vi.stubGlobal('requestAnimationFrame', (fn: FrameRequestCallback) => 0);
-  vi.stubGlobal('cancelAnimationFrame', () => {});
+  vi.stubGlobal('requestAnimationFrame', vi.fn().mockReturnValue(0));
+  vi.stubGlobal('cancelAnimationFrame', vi.fn());
 });
 
 afterEach(() => {
@@ -110,6 +110,46 @@ describe('WallDrawer', () => {
     (drawer as any).onUp({ pointerId: 1 } as PointerEvent);
     expect(history.length).toBe(1);
     expect(history[0]).toBe('Added wall from (0, 0) to (1, 0)');
+    drawer.disable();
+  });
+
+  it('enable no-ops when already active', () => {
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    canvas.setPointerCapture = vi.fn();
+    canvas.releasePointerCapture = vi.fn();
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const group = new THREE.Group();
+    const state = {
+      snapToGrid: false,
+      snapLength: SNAP,
+      wallDefaults: { height: HEIGHT, thickness: THICKNESS },
+      addWallWithHistory: vi.fn(),
+    };
+    const store = { getState: () => state } as any;
+    const drawer = new WallDrawer(renderer, () => camera, group, store);
+    const addDom = vi.spyOn(canvas, 'addEventListener');
+    const addWin = vi.spyOn(window, 'addEventListener');
+    const raf = globalThis.requestAnimationFrame as any;
+    drawer.enable(state.wallDefaults.thickness);
+    const domCalls = addDom.mock.calls.length;
+    const winCalls = addWin.mock.calls.length;
+    const rafCalls = raf.mock.calls.length;
+    drawer.enable(state.wallDefaults.thickness);
+    expect(addDom.mock.calls.length).toBe(domCalls);
+    expect(addWin.mock.calls.length).toBe(winCalls);
+    expect(raf.mock.calls.length).toBe(rafCalls);
     drawer.disable();
   });
 });
