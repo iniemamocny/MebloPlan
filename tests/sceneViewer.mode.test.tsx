@@ -113,6 +113,54 @@ describe('SceneViewer hotbar visibility', () => {
   });
 });
 
+describe('SceneViewer mode bar visibility', () => {
+  it('renders mode bar only when mode is not null on mobile', () => {
+    const original = (navigator as any).maxTouchPoints;
+    Object.defineProperty(navigator, 'maxTouchPoints', {
+      configurable: true,
+      value: 1,
+    });
+    const threeRef: any = { current: null };
+    const setMode = vi.fn();
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+
+    act(() => {
+      root.render(
+        <SceneViewer
+          threeRef={threeRef}
+          addCountertop={false}
+          mode={null}
+          setMode={setMode}
+        />,
+      );
+    });
+    expect(container.querySelector('.modeBar')).toBeNull();
+    expect(setMode).not.toHaveBeenCalled();
+
+    act(() => {
+      root.render(
+        <SceneViewer
+          threeRef={threeRef}
+          addCountertop={false}
+          mode="furnish"
+          setMode={setMode}
+        />,
+      );
+    });
+    expect(container.querySelector('.modeBar')).not.toBeNull();
+
+    root.unmount();
+    container.remove();
+    Object.defineProperty(navigator, 'maxTouchPoints', {
+      configurable: true,
+      value: original,
+    });
+    expect(setMode).not.toHaveBeenCalled();
+  });
+});
+
 describe('SceneViewer cabinetDragger mode control', () => {
   it('enables cabinetDragger only in furnish mode', () => {
     const threeRef: any = { current: null };
