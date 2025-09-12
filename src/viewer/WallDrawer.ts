@@ -97,9 +97,17 @@ export default class WallDrawer {
 
   private disposePreview() {
     if (!this.preview) return;
-    this.group.remove(this.preview);
-    this.preview.geometry.dispose();
-    (this.preview.material as THREE.Material).dispose();
+    const mesh = this.preview;
+    // prevent any further intersections
+    mesh.visible = false;
+    mesh.raycast = () => null;
+    this.group.remove(mesh);
+    const geom = mesh.geometry;
+    const mat = mesh.material as THREE.Material;
+    queueMicrotask(() => {
+      geom.dispose();
+      mat.dispose();
+    });
     this.preview = null;
   }
 
@@ -137,6 +145,10 @@ export default class WallDrawer {
       const midY = (this.start.y + point.y) / 2;
       this.preview.position.set(midX, midY, this.preview.position.z);
       this.preview.rotation.z = Math.atan2(dy, dx);
+      const geometry = this.preview.geometry as THREE.BufferGeometry;
+      geometry.computeBoundingBox();
+      geometry.computeBoundingSphere();
+      geometry.computeVertexNormals();
     }
   };
 
@@ -235,4 +247,3 @@ export default class WallDrawer {
     this.animationId = requestAnimationFrame(this.animateCursor);
   };
 }
-
