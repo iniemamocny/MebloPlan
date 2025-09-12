@@ -47,6 +47,8 @@ interface MainTabsProps {
   setMode: (v: PlayerMode) => void;
   startMode: Exclude<PlayerMode, null>;
   setStartMode: (v: Exclude<PlayerMode, null>) => void;
+  viewMode: '3d' | '2d';
+  toggleViewMode: () => void;
 }
 
 export default function MainTabs({
@@ -80,6 +82,8 @@ export default function MainTabs({
   setMode,
   startMode,
   setStartMode,
+  viewMode,
+  toggleViewMode,
 }: MainTabsProps) {
   const toggleTab = (
     name: 'cab' | 'costs' | 'cut' | 'room' | 'global' | 'play',
@@ -209,7 +213,9 @@ export default function MainTabs({
             setBoardHasGrain={setBoardHasGrain}
           />
         )}
-        {tab === 'room' && <RoomTab />}
+        {tab === 'room' && (
+          <RoomTab viewMode={viewMode} toggleViewMode={toggleViewMode} />
+        )}
         {tab === 'global' && <GlobalSettings />}
         {tab === 'play' && (
           <PlayPanel
