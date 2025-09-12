@@ -26,8 +26,8 @@
 .card{border:1px solid var(--border);border-radius:12px;padding:10px;background:#fff;display:flex;flex-direction:column;gap:6px}
 .table{width:100%;border-collapse:collapse;font-size:12px}
 .table th,.table td{border:1px solid var(--border);padding:6px;text-align:left}
-.tabs{display:flex;gap:6px}
-.tabBtn{padding:8px 10px;border-radius:999px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:600}
+.tabs{display:flex;gap:8px}
+.tabBtn{padding:10px 13px;font-size:1.3em;border-radius:999px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:600}
 .tabBtn.active{background:#111827;color:#fff}
 .mainTabs{display:flex;flex-direction:column}
 .mainTabs .tabs{margin-bottom:0}
