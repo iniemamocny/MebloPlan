@@ -146,9 +146,11 @@ export default class WallDrawer {
       const dz = point.z - this.start.z;
       const dist = Math.sqrt(dx * dx + dz * dz);
       this.preview.scale.x = dist;
-      const midX = (this.start.x + point.x) / 2;
-      const midZ = (this.start.z + point.z) / 2;
-      this.preview.position.set(midX, this.preview.position.y, midZ);
+      this.preview.position.set(
+        this.start.x,
+        this.preview.position.y,
+        this.start.z,
+      );
       this.preview.rotation.y = Math.atan2(dz, dx);
       const geometry = this.preview.geometry as THREE.BufferGeometry;
       geometry.computeBoundingBox();
@@ -168,6 +170,7 @@ export default class WallDrawer {
     const state = this.store.getState();
     const height = state.wallDefaults.height / 1000;
     const geom = new THREE.BoxGeometry(1, height, this.thickness);
+    geom.translate(0.5, 0, 0);
     const mat = new THREE.MeshBasicMaterial({
       color: 0x888888,
       transparent: true,
