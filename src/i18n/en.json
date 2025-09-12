@@ -220,9 +220,8 @@
     "length": "Length",
     "place": "Place",
     "pencil": "Pencil",
-    "group": "Group",
     "hammer": "Hammer",
-    "eraser": "Eraser"
+    "group": "Group"
   },
   "items": {
     "cup": "Cup",

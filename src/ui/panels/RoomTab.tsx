@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pencil, Group, Hammer } from 'lucide-react';
+import { Pencil, Hammer, Users } from 'lucide-react';
 import SingleMMInput from '../components/SingleMMInput';
 import { usePlannerStore } from '../../state/store';
 
@@ -43,17 +43,17 @@ export default function RoomTab() {
               </button>
               <button
                 className="btnGhost"
-                title={t('room.group')}
-                onClick={() => store.setSelectedTool('group')}
-              >
-                <Group size={16} />
-              </button>
-              <button
-                className="btnGhost"
                 title={t('room.hammer')}
                 onClick={() => store.setSelectedTool('hammer')}
               >
                 <Hammer size={16} />
+              </button>
+              <button
+                className="btnGhost"
+                title={t('room.group')}
+                onClick={() => store.setSelectedTool('group')}
+              >
+                <Users size={16} />
               </button>
             </div>
           </div>
