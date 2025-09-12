@@ -118,11 +118,12 @@ export default class WallDrawer {
     const cam = this.getCamera();
     this.raycaster.setFromCamera(new THREE.Vector2(x, y), cam);
     const point = new THREE.Vector3();
-    this.raycaster.ray.intersectPlane(this.plane, point);
-    if (!isFinite(point.x) || !isFinite(point.y)) return null;
+    const intersection = this.raycaster.ray.intersectPlane(this.plane, point);
+    if (!intersection) return null;
+    if (!isFinite(intersection.x) || !isFinite(intersection.y)) return null;
     const state = this.store.getState();
-    let px = point.x;
-    let py = point.y;
+    let px = intersection.x;
+    let py = intersection.y;
     if (state.snapToGrid) {
       const step = state.snapLength / 1000;
       px = Math.round(px / step) * step;
