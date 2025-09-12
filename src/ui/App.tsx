@@ -116,6 +116,8 @@ export default function App() {
             setMode={setMode}
             startMode={startMode}
             setStartMode={setStartMode}
+            viewMode={viewMode}
+            toggleViewMode={toggleViewMode}
           />
         </div>
       )}
