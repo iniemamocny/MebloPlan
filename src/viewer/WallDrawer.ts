@@ -56,6 +56,10 @@ export default class WallDrawer {
 
   disable() {
     if (!this.enabled) return;
+    if (this.pointerId !== null) {
+      this.renderer.domElement.releasePointerCapture(this.pointerId);
+      this.pointerId = null;
+    }
     this.enabled = false;
     const dom = this.renderer.domElement;
     dom.removeEventListener('pointermove', this.onMove);
@@ -69,6 +73,7 @@ export default class WallDrawer {
     this.removeCursor();
     this.disposePreview();
     this.start = null;
+    this.lastPoint = null;
     this.dragging = false;
   }
 
