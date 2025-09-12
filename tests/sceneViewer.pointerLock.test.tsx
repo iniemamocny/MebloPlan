@@ -126,7 +126,6 @@ describe('pointer lock handling', () => {
             addCountertop={false}
             mode={mode}
             setMode={setMode}
-            startMode={'furnish'}
             viewMode="3d"
             setViewMode={() => {}}
           />
@@ -166,7 +165,6 @@ describe('pointer lock handling', () => {
             addCountertop={false}
             mode={mode}
             setMode={setMode}
-            startMode={'furnish'}
             viewMode="3d"
             setViewMode={() => {}}
           />
