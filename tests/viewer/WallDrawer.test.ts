@@ -65,6 +65,51 @@ describe('WallDrawer', () => {
     drawer.disable();
   });
 
+  it('returns raw intersection coordinates without rounding', () => {
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    canvas.setPointerCapture = vi.fn();
+    canvas.releasePointerCapture = vi.fn();
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const group = new THREE.Group();
+    const state = {
+      snapToGrid: false,
+      snapLength: SNAP,
+      wallDefaults: { height: HEIGHT, thickness: THICKNESS },
+      addWallWithHistory: vi.fn(),
+    };
+    const store = { getState: () => state } as any;
+    const drawer = new WallDrawer(renderer, () => camera, group, store);
+    drawer.enable(state.wallDefaults.thickness);
+
+    const intersection = new THREE.Vector3(1.2345, 0, -2.3456);
+    (drawer as any).raycaster.ray.intersectPlane = vi.fn(
+      (_plane: THREE.Plane, point: THREE.Vector3) => {
+        point.copy(intersection);
+        return point;
+      },
+    );
+
+    const result = (drawer as any).getPoint({
+      clientX: 0,
+      clientY: 0,
+    } as PointerEvent);
+    expect(result?.x).toBe(intersection.x);
+    expect(result?.z).toBe(intersection.z);
+    drawer.disable();
+  });
+
   it('single click adds fixed-length wall', () => {
     const { drawer, point, addWallWithHistory } = createDrawer();
     point.set(0, 0, 0);
