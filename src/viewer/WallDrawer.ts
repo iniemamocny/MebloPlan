@@ -182,8 +182,10 @@ export default class WallDrawer {
   };
 
   private onUp = (e: PointerEvent) => {
-    this.renderer.domElement.releasePointerCapture(e.pointerId);
-    this.pointerId = null;
+    if (this.pointerId === e.pointerId) {
+      this.renderer.domElement.releasePointerCapture(e.pointerId);
+      this.pointerId = null;
+    }
     if (!this.dragging) return;
     this.dragging = false;
     if (!this.start) return;
