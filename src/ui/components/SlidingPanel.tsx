@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 interface SlidingPanelProps {
   isOpen: boolean;
@@ -16,6 +17,12 @@ export default function SlidingPanel({
   locked = false,
 }: SlidingPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const [container, setContainer] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const el = document.querySelector('.canvasWrap');
+    if (el instanceof HTMLElement) setContainer(el);
+  }, []);
 
   useEffect(() => {
     if (!isOpen || locked) return;
@@ -31,8 +38,7 @@ export default function SlidingPanel({
       document.removeEventListener('mousedown', handleMouseDown);
     };
   }, [isOpen, onClose, locked]);
-
-  return (
+  const panel = (
     <div ref={panelRef} className={`slidingPanel ${className}`}>
       {!locked && (
         <button className="slidingPanelClose" onClick={onClose}>
@@ -42,5 +48,7 @@ export default function SlidingPanel({
       {children}
     </div>
   );
+
+  return container ? createPortal(panel, container) : panel;
 }
 
