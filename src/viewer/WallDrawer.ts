@@ -19,8 +19,13 @@ export default class WallDrawer {
   private raycaster = new THREE.Raycaster();
   private plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
   private cursor: THREE.Mesh | null = null;
+  private cursorTarget: THREE.Vector3 | null = null;
+  private animationId: number | null = null;
   private start: THREE.Vector3 | null = null;
   private preview: THREE.Mesh | null = null;
+  private dragging = false;
+  private lastPoint: THREE.Vector3 | null = null;
+  private pointerId: number | null = null;
   private thickness = 0.1;
 
   constructor(
@@ -41,7 +46,9 @@ export default class WallDrawer {
     dom.addEventListener('pointermove', this.onMove);
     dom.addEventListener('pointerdown', this.onDown);
     dom.addEventListener('pointerup', this.onUp);
+    window.addEventListener('keydown', this.onKeyDown);
     this.addCursor();
+    this.animationId = requestAnimationFrame(this.animateCursor);
   }
 
   disable() {
@@ -49,9 +56,15 @@ export default class WallDrawer {
     dom.removeEventListener('pointermove', this.onMove);
     dom.removeEventListener('pointerdown', this.onDown);
     dom.removeEventListener('pointerup', this.onUp);
+    window.removeEventListener('keydown', this.onKeyDown);
+    if (this.animationId !== null) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
     this.removeCursor();
     this.disposePreview();
     this.start = null;
+    this.dragging = false;
   }
 
   private addCursor() {
@@ -65,6 +78,7 @@ export default class WallDrawer {
     });
     this.cursor = new THREE.Mesh(geom, mat);
     this.cursor.position.set(0, 0, 0.001);
+    this.cursorTarget = this.cursor.position.clone();
     this.group.add(this.cursor);
   }
 
@@ -107,10 +121,9 @@ export default class WallDrawer {
   private onMove = (e: PointerEvent) => {
     const point = this.getPoint(e);
     if (!point) return;
-    if (this.cursor) {
-      this.cursor.position.lerp(point, 0.2);
-    }
-    if (this.start && this.preview) {
+    this.lastPoint = point;
+    this.cursorTarget = point.clone();
+    if (this.dragging && this.start && this.preview) {
       const dx = point.x - this.start.x;
       const dy = point.y - this.start.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
@@ -126,6 +139,8 @@ export default class WallDrawer {
     const point = this.getPoint(e);
     if (!point) return;
     this.renderer.domElement.setPointerCapture(e.pointerId);
+    this.pointerId = e.pointerId;
+    this.dragging = true;
     this.start = point.clone();
     const state = this.store.getState();
     const height = state.wallDefaults.height / 1000;
@@ -143,6 +158,9 @@ export default class WallDrawer {
 
   private onUp = (e: PointerEvent) => {
     this.renderer.domElement.releasePointerCapture(e.pointerId);
+    this.pointerId = null;
+    if (!this.dragging) return;
+    this.dragging = false;
     if (!this.start) return;
     const point = this.getPoint(e);
     if (!point) {
@@ -157,7 +175,34 @@ export default class WallDrawer {
     this.disposePreview();
     if (this.cursor) {
       this.cursor.position.set(point.x, point.y, this.cursor.position.z);
+      this.cursorTarget = this.cursor.position.clone();
     }
+  };
+
+  private onKeyDown = (e: KeyboardEvent) => {
+    if (e.key !== 'Escape') return;
+    if (this.pointerId !== null) {
+      this.renderer.domElement.releasePointerCapture(this.pointerId);
+      this.pointerId = null;
+    }
+    this.dragging = false;
+    this.start = null;
+    this.disposePreview();
+    if (this.cursor && this.lastPoint) {
+      this.cursor.position.set(
+        this.lastPoint.x,
+        this.lastPoint.y,
+        this.cursor.position.z,
+      );
+      this.cursorTarget = this.cursor.position.clone();
+    }
+  };
+
+  private animateCursor = () => {
+    if (this.cursor && this.cursorTarget) {
+      this.cursor.position.lerp(this.cursorTarget, 0.2);
+    }
+    this.animationId = requestAnimationFrame(this.animateCursor);
   };
 }
 
