@@ -329,11 +329,14 @@ const SceneViewer: React.FC<Props> = ({
   useEffect(() => {
     const drawer = wallDrawerRef.current;
     if (!drawer) return;
+    // ensure previous listeners are removed before possibly enabling again
+    drawer.disable();
     if (viewMode === '2d' && selectedTool === 'wall') {
       drawer.enable(wallThickness);
-    } else {
-      drawer.disable();
     }
+    return () => {
+      drawer.disable();
+    };
   }, [viewMode, selectedTool, wallThickness]);
 
   useEffect(() => {
