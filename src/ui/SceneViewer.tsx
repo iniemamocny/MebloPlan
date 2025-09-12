@@ -86,6 +86,7 @@ const SceneViewer: React.FC<Props> = ({
   const store = usePlannerStore();
   const selectedTool = usePlannerStore((s) => s.selectedTool);
   const wallThickness = usePlannerStore((s) => s.wallDefaults.thickness);
+  const wallHeight = usePlannerStore((s) => s.wallDefaults.height);
   const showEdges = store.role === 'stolarz';
   const showFronts = store.showFronts;
   const threeInitialized = useRef(false);
@@ -101,6 +102,7 @@ const SceneViewer: React.FC<Props> = ({
   const roomRef = useRef(store.room);
   const [pointerLockError, setPointerLockError] = useState<string | null>(null);
   const wallDrawerRef = useRef<WallDrawer | null>(null);
+  const wallGroupRef = useRef<THREE.Group | null>(null);
 
   useEffect(() => {
     roomRef.current = store.room;
@@ -340,6 +342,44 @@ const SceneViewer: React.FC<Props> = ({
       speed: store.playerSpeed,
     });
   }, [store.playerHeight, store.playerSpeed, threeRef]);
+
+  useEffect(() => {
+    const three = threeRef.current;
+    if (!three) return;
+    const { roomShape, wallDefaults } = usePlannerStore.getState();
+    const segments = roomShape.segments;
+    const group = three.group;
+    if (!group) return;
+    if (wallGroupRef.current) {
+      group.remove(wallGroupRef.current);
+      wallGroupRef.current.traverse((obj) => {
+        if (obj instanceof THREE.Mesh) {
+          obj.geometry.dispose();
+          if (Array.isArray(obj.material))
+            obj.material.forEach((m) => m.dispose());
+          else (obj.material as THREE.Material).dispose();
+        }
+      });
+    }
+    const wallGroup = new THREE.Group();
+    const width = wallDefaults.thickness / 1000;
+    const height = wallDefaults.height / 1000;
+    segments.forEach(({ start, end }) => {
+      const dx = end.x - start.x;
+      const dz = end.y - start.y;
+      const length = Math.sqrt(dx * dx + dz * dz);
+      const geom = new THREE.BoxGeometry(length, height, width);
+      const mat = new THREE.MeshStandardMaterial({ color: 0x888888 });
+      const mesh = new THREE.Mesh(geom, mat);
+      const midX = (start.x + end.x) / 2;
+      const midZ = (start.y + end.y) / 2;
+      mesh.position.set(midX, height / 2, midZ);
+      mesh.rotation.y = Math.atan2(dz, dx);
+      wallGroup.add(mesh);
+    });
+    group.add(wallGroup);
+    wallGroupRef.current = wallGroup;
+  }, [store.roomShape, wallThickness, wallHeight]);
 
     useEffect(() => {
       if (!mode) return;
