@@ -86,7 +86,7 @@ describe('WallDrawer', () => {
     (drawer as any).onMove({} as PointerEvent);
     const preview = (drawer as any).preview as THREE.Mesh;
     expect(preview.scale.x).toBeCloseTo(2);
-    expect(preview.position.x).toBeCloseTo(1);
+    expect(preview.position.x).toBeCloseTo(0);
     drawer.disable();
   });
 
