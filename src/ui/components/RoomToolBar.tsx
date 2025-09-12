@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pencil, Hammer, Eraser } from 'lucide-react';
+import { Pencil, Hammer, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { usePlannerStore } from '../../state/store';
 
@@ -19,6 +19,9 @@ const RoomToolBar: React.FC = () => {
         display: 'flex',
         gap: 4,
         padding: 4,
+        background: 'var(--white)',
+        border: '1px solid var(--border)',
+        borderRadius: 8,
       }}
     >
       <button
@@ -37,10 +40,10 @@ const RoomToolBar: React.FC = () => {
       </button>
       <button
         className="btnGhost"
-        title={t('room.eraser')}
-        onClick={() => setSelectedTool('eraser')}
+        title={t('room.group')}
+        onClick={() => setSelectedTool('group')}
       >
-        <Eraser size={16} />
+        <Users size={16} />
       </button>
     </div>
   );
