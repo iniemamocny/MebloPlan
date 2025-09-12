@@ -168,9 +168,34 @@ export default class WallDrawer {
       this.disposePreview();
       return;
     }
+    const state = this.store.getState();
+    let endX = point.x;
+    let endY = point.y;
+    const dx = endX - this.start.x;
+    const dy = endY - this.start.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 0.001) {
+      const step = state.snapLength / 1000;
+      let dirX = dx;
+      let dirY = dy;
+      if (dirX === 0 && dirY === 0 && this.lastPoint) {
+        dirX = this.lastPoint.x - this.start.x;
+        dirY = this.lastPoint.y - this.start.y;
+      }
+      if (dirX === 0 && dirY === 0) {
+        dirX = 1;
+        dirY = 0;
+      }
+      const len = Math.sqrt(dirX * dirX + dirY * dirY);
+      dirX /= len;
+      dirY /= len;
+      endX = this.start.x + dirX * step;
+      endY = this.start.y + dirY * step;
+      point.set(endX, endY, point.z);
+    }
     const start = { x: this.start.x, y: this.start.y };
-    const end = { x: point.x, y: point.y };
-    this.store.getState().addWallWithHistory(start, end);
+    const end = { x: endX, y: endY };
+    state.addWallWithHistory(start, end);
     this.start = null;
     this.disposePreview();
     if (this.cursor) {
