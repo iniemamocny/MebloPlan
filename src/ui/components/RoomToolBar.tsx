@@ -39,6 +39,7 @@ const RoomToolBar: React.FC = () => {
           display: 'flex',
           gap: 4,
           padding: 4,
+          width: '12rem',
           background: 'var(--white)',
           border: '1px solid var(--border)',
           borderRadius: 8,
