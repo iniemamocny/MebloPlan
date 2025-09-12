@@ -145,6 +145,7 @@ export default function App() {
           setMode={setMode}
           viewMode={viewMode}
           setViewMode={handleSetViewMode}
+          roomTabOpen={tab === 'room'}
         />
       </div>
     </div>

@@ -220,7 +220,8 @@
     "place": "Place",
     "pencil": "Pencil",
     "hammer": "Hammer",
-    "group": "Group"
+    "group": "Group",
+    "eraser": "Eraser"
   },
   "items": {
     "cup": "Cup",
