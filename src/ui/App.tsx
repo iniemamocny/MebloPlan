@@ -72,6 +72,10 @@ export default function App() {
     if (mode !== null) setStartMode(mode);
   }, [mode]);
 
+  useEffect(() => {
+    if (tab === 'room') handleSetViewMode('2d');
+  }, [tab]);
+
   const handleSetViewMode = (v: '3d' | '2d') => {
     setViewMode(v);
   };
