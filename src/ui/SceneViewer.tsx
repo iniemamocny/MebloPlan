@@ -51,7 +51,6 @@ interface Props {
   addCountertop: boolean;
   mode: PlayerMode;
   setMode: React.Dispatch<React.SetStateAction<PlayerMode>>;
-  startMode: Exclude<PlayerMode, null>;
   viewMode: '3d' | '2d';
   setViewMode: (v: '3d' | '2d') => void;
 }
@@ -76,7 +75,6 @@ const SceneViewer: React.FC<Props> = ({
   addCountertop,
   mode,
   setMode,
-  startMode,
   viewMode = '3d',
   setViewMode,
 }) => {
@@ -856,11 +854,6 @@ const SceneViewer: React.FC<Props> = ({
           {pointerLockError}
         </div>
       )}
-      <div style={{ position: 'absolute', top: 10, left: 10 }}>
-        <button className="btnGhost" onClick={() => setMode((m) => (m ? null : startMode || 'furnish'))}>
-          {mode ? 'Tryb edycji' : 'Tryb gracza'}
-        </button>
-      </div>
       {viewMode === '2d' && (
         <div
           style={{

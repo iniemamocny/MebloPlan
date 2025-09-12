@@ -139,7 +139,6 @@ export default function App() {
           addCountertop={addCountertop}
           mode={mode}
           setMode={setMode}
-          startMode={startMode}
           viewMode={viewMode}
           setViewMode={handleSetViewMode}
         />
