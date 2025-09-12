@@ -143,7 +143,11 @@ export default class WallDrawer {
     if (!point) return;
     point.y = 0.001;
     this.lastPoint = point;
-    this.cursorTarget = point.clone();
+    if (!this.dragging) {
+      this.cursorTarget = point.clone();
+    } else if (this.cursor && this.start) {
+      this.cursor.position.set(this.start.x, 0.001, this.start.z);
+    }
     if (this.dragging && this.start && this.preview) {
       const dx = point.x - this.start.x;
       const dz = point.z - this.start.z;
