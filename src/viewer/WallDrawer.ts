@@ -5,7 +5,6 @@ import { usePlannerStore } from '../state/store';
 import type { ShapePoint } from '../types';
 
 interface PlannerStore {
-  snapToGrid: boolean;
   snapLength: number;
   wallDefaults: { height: number; thickness: number };
   addWallWithHistory: (start: ShapePoint, end: ShapePoint) => void;
@@ -127,15 +126,9 @@ export default class WallDrawer {
     const intersection = this.raycaster.ray.intersectPlane(this.plane, point);
     if (!intersection) return null;
     if (!isFinite(intersection.x) || !isFinite(intersection.z)) return null;
-    const state = this.store.getState();
-    let px = intersection.x;
-    let py = intersection.z;
-    if (state.snapToGrid) {
-      const step = state.snapLength / 1000;
-      px = Math.round(px / step) * step;
-      py = Math.round(py / step) * step;
-    }
-    return new THREE.Vector3(px, 0, py);
+    // Return raw coordinates without snapping to grid so the wall can be drawn
+    // at any angle. This enables free rotation of the segment during preview.
+    return new THREE.Vector3(intersection.x, 0, intersection.z);
   }
 
   private onMove = (e: PointerEvent) => {
