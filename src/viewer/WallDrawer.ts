@@ -17,7 +17,7 @@ export default class WallDrawer {
   private group: THREE.Group;
   private store: UseBoundStore<StoreApi<PlannerStore>>;
   private raycaster = new THREE.Raycaster();
-  private plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+  private plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   private cursor: THREE.Mesh | null = null;
   private cursorTarget: THREE.Vector3 | null = null;
   private animationId: number | null = null;
@@ -87,7 +87,8 @@ export default class WallDrawer {
       side: THREE.DoubleSide,
     });
     this.cursor = new THREE.Mesh(geom, mat);
-    this.cursor.position.set(0, 0, 0.001);
+    this.cursor.rotation.x = -Math.PI / 2;
+    this.cursor.position.set(0, 0.001, 0);
     this.cursorTarget = this.cursor.position.clone();
     this.group.add(this.cursor);
   }
@@ -125,16 +126,16 @@ export default class WallDrawer {
     const point = new THREE.Vector3();
     const intersection = this.raycaster.ray.intersectPlane(this.plane, point);
     if (!intersection) return null;
-    if (!isFinite(intersection.x) || !isFinite(intersection.y)) return null;
+    if (!isFinite(intersection.x) || !isFinite(intersection.z)) return null;
     const state = this.store.getState();
     let px = intersection.x;
-    let py = intersection.y;
+    let py = intersection.z;
     if (state.snapToGrid) {
       const step = state.snapLength / 1000;
       px = Math.round(px / step) * step;
       py = Math.round(py / step) * step;
     }
-    return new THREE.Vector3(px, py, 0);
+    return new THREE.Vector3(px, 0, py);
   }
 
   private onMove = (e: PointerEvent) => {
@@ -144,13 +145,13 @@ export default class WallDrawer {
     this.cursorTarget = point.clone();
     if (this.dragging && this.start && this.preview) {
       const dx = point.x - this.start.x;
-      const dy = point.y - this.start.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
+      const dz = point.z - this.start.z;
+      const dist = Math.sqrt(dx * dx + dz * dz);
       this.preview.scale.x = dist;
       const midX = (this.start.x + point.x) / 2;
-      const midY = (this.start.y + point.y) / 2;
-      this.preview.position.set(midX, midY, this.preview.position.z);
-      this.preview.rotation.z = Math.atan2(dy, dx);
+      const midZ = (this.start.z + point.z) / 2;
+      this.preview.position.set(midX, this.preview.position.y, midZ);
+      this.preview.rotation.y = Math.atan2(dz, dx);
       const geometry = this.preview.geometry as THREE.BufferGeometry;
       geometry.computeBoundingBox();
       geometry.computeBoundingSphere();
@@ -167,14 +168,14 @@ export default class WallDrawer {
     this.start = point.clone();
     const state = this.store.getState();
     const height = state.wallDefaults.height / 1000;
-    const geom = new THREE.BoxGeometry(1, this.thickness, height);
+    const geom = new THREE.BoxGeometry(1, height, this.thickness);
     const mat = new THREE.MeshBasicMaterial({
       color: 0x888888,
       transparent: true,
       opacity: 0.5,
     });
     this.preview = new THREE.Mesh(geom, mat);
-    this.preview.position.set(point.x, point.y, height / 2);
+    this.preview.position.set(point.x, height / 2, point.z);
     this.preview.scale.set(0.0001, 1, 1);
     this.group.add(this.preview);
   };
@@ -193,36 +194,36 @@ export default class WallDrawer {
     }
     const state = this.store.getState();
     let endX = point.x;
-    let endY = point.y;
+    let endZ = point.z;
     const dx = endX - this.start.x;
-    const dy = endY - this.start.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dz = endZ - this.start.z;
+    const dist = Math.sqrt(dx * dx + dz * dz);
     if (dist < 0.001) {
       const step = state.snapLength / 1000;
       let dirX = dx;
-      let dirY = dy;
-      if (dirX === 0 && dirY === 0 && this.lastPoint) {
+      let dirZ = dz;
+      if (dirX === 0 && dirZ === 0 && this.lastPoint) {
         dirX = this.lastPoint.x - this.start.x;
-        dirY = this.lastPoint.y - this.start.y;
+        dirZ = this.lastPoint.z - this.start.z;
       }
-      if (dirX === 0 && dirY === 0) {
+      if (dirX === 0 && dirZ === 0) {
         dirX = 1;
-        dirY = 0;
+        dirZ = 0;
       }
-      const len = Math.sqrt(dirX * dirX + dirY * dirY);
+      const len = Math.sqrt(dirX * dirX + dirZ * dirZ);
       dirX /= len;
-      dirY /= len;
+      dirZ /= len;
       endX = this.start.x + dirX * step;
-      endY = this.start.y + dirY * step;
-      point.set(endX, endY, point.z);
+      endZ = this.start.z + dirZ * step;
+      point.set(endX, 0, endZ);
     }
-    const start = { x: this.start.x, y: this.start.y };
-    const end = { x: endX, y: endY };
+    const start = { x: this.start.x, y: this.start.z };
+    const end = { x: endX, y: endZ };
     state.addWallWithHistory(start, end);
     this.start = null;
     this.disposePreview();
     if (this.cursor) {
-      this.cursor.position.set(point.x, point.y, this.cursor.position.z);
+      this.cursor.position.set(point.x, this.cursor.position.y, point.z);
       this.cursorTarget = this.cursor.position.clone();
     }
   };
@@ -239,8 +240,8 @@ export default class WallDrawer {
     if (this.cursor && this.lastPoint) {
       this.cursor.position.set(
         this.lastPoint.x,
-        this.lastPoint.y,
-        this.cursor.position.z,
+        this.cursor.position.y,
+        this.lastPoint.z,
       );
       this.cursorTarget = this.cursor.position.clone();
     }
