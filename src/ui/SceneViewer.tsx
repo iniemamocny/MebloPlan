@@ -54,7 +54,7 @@ interface Props {
   setMode: React.Dispatch<React.SetStateAction<PlayerMode>>;
   viewMode: '3d' | '2d';
   setViewMode: (v: '3d' | '2d') => void;
-  roomTabOpen?: boolean;
+  showRoomTools?: boolean;
 }
 
 const INTERACT_DISTANCE = 1.5;
@@ -79,7 +79,7 @@ const SceneViewer: React.FC<Props> = ({
   setMode,
   viewMode = '3d',
   setViewMode,
-  roomTabOpen,
+  showRoomTools,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const store = usePlannerStore();
@@ -877,7 +877,7 @@ const SceneViewer: React.FC<Props> = ({
         </div>
       )}
       {mode && <ItemHotbar mode={mode} />}
-      {roomTabOpen && <RoomToolBar />}
+      {showRoomTools && <RoomToolBar />}
       {mode && isMobile && (
         <>
           <TouchJoystick

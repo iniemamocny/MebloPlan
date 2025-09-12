@@ -15,6 +15,7 @@ interface MainTabsProps {
   t: (key: string, opts?: any) => string;
   tab: 'cab' | 'costs' | 'cut' | 'room' | 'global' | 'play' | null;
   setTab: (t: 'cab' | 'costs' | 'cut' | 'room' | 'global' | 'play' | null) => void;
+  setActiveTab: (t: 'cab' | 'costs' | 'cut' | 'room' | 'global' | 'play') => void;
   family: FAMILY;
   setFamily: (f: FAMILY) => void;
   kind: Kind | null;
@@ -53,6 +54,7 @@ export default function MainTabs({
   t,
   tab,
   setTab,
+  setActiveTab,
   family,
   setFamily,
   kind,
@@ -85,6 +87,7 @@ export default function MainTabs({
     name: 'cab' | 'costs' | 'cut' | 'room' | 'global' | 'play',
   ) => {
     setTab(tab === name ? null : name);
+    setActiveTab(name);
   };
 
   return (
