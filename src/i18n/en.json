@@ -9,8 +9,6 @@
     "undo": "Undo",
     "redo": "Redo",
     "clear": "Clear",
-    "view2D": "View 2D",
-    "view3D": "View 3D",
     "auto": "Auto",
     "material": {
       "title": "Material (sheet)",

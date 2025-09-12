@@ -4,12 +4,7 @@ import { Pencil, Hammer, Eraser } from 'lucide-react';
 import SingleMMInput from '../components/SingleMMInput';
 import { usePlannerStore } from '../../state/store';
 
-interface RoomTabProps {
-  viewMode: '3d' | '2d';
-  toggleViewMode: () => void;
-}
-
-export default function RoomTab({ viewMode, toggleViewMode }: RoomTabProps) {
+export default function RoomTab() {
   const { t } = useTranslation();
   const store = usePlannerStore();
 
@@ -27,15 +22,6 @@ export default function RoomTab({ viewMode, toggleViewMode }: RoomTabProps) {
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-        <button
-          className="btnGhost"
-          onClick={toggleViewMode}
-          data-testid="room-view-toggle"
-        >
-          {t(viewMode === '3d' ? 'app.view2D' : 'app.view3D')}
-        </button>
-      </div>
       <div className="section">
         <div className="hd"><div><div className="h1">{t('room.walls')}</div></div></div>
         <div className="bd">
