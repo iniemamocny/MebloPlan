@@ -220,7 +220,10 @@
     "insert": "Insert",
     "dropCeiling": "Drop ceiling",
     "length": "Length",
-    "place": "Place"
+    "place": "Place",
+    "pencil": "Pencil",
+    "hammer": "Hammer",
+    "eraser": "Eraser"
   },
   "items": {
     "cup": "Cup",

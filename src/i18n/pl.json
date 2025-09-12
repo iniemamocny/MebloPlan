@@ -220,7 +220,10 @@
     "insert": "Wstaw",
     "dropCeiling": "Sufit opuszczany",
     "length": "Długość",
-    "place": "Umieść"
+    "place": "Umieść",
+    "pencil": "Ołówek",
+    "hammer": "Młotek",
+    "eraser": "Gumka"
   },
   "items": {
     "cup": "Kubek",
