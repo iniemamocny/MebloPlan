@@ -201,7 +201,6 @@
   },
   "room": {
     "walls": "Ściany",
-    "drawWalls": "Rysuj",
     "windows": "Okna",
     "windowSingle": "Okno jednoskrzydłowe",
     "windowDouble": "Okno dwuskrzydłowe",

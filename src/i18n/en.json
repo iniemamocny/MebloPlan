@@ -201,7 +201,6 @@
   },
   "room": {
     "walls": "Walls",
-    "drawWalls": "Draw",
     "windows": "Windows",
     "windowSingle": "Single window",
     "windowDouble": "Double window",
