@@ -22,6 +22,8 @@ export default function RoomTab() {
   const [ceilW, setCeilW] = useState(1000);
   const [ceilH, setCeilH] = useState(100);
 
+  const iconUrl = (name: string) => `${import.meta.env.BASE_URL}icons/${name}.svg`;
+
   return (
     <>
       <div className="section">
@@ -73,13 +75,13 @@ export default function RoomTab() {
         <div className="bd">
           <div className="grid3" style={{ gap: 8 }}>
             <button className="btn" onClick={() => store.selectWindow('single')} title={t('room.windowSingle')}>
-              <img src="/icons/window-single.svg" alt={t('room.windowSingle')} />
+              <img src={iconUrl('window-single')} alt={t('room.windowSingle')} />
             </button>
             <button className="btn" onClick={() => store.selectWindow('double')} title={t('room.windowDouble')}>
-              <img src="/icons/window-double.svg" alt={t('room.windowDouble')} />
+              <img src={iconUrl('window-double')} alt={t('room.windowDouble')} />
             </button>
             <button className="btn" onClick={() => store.selectWindow('triple')} title={t('room.windowTriple')}>
-              <img src="/icons/window-triple.svg" alt={t('room.windowTriple')} />
+              <img src={iconUrl('window-triple')} alt={t('room.windowTriple')} />
             </button>
           </div>
         </div>
@@ -90,13 +92,13 @@ export default function RoomTab() {
         <div className="bd">
           <div className="grid3" style={{ gap: 8 }}>
             <button className="btn" onClick={() => store.selectDoor('single')} title={t('room.doorSingle')}>
-              <img src="/icons/door-single.svg" alt={t('room.doorSingle')} />
+              <img src={iconUrl('door-single')} alt={t('room.doorSingle')} />
             </button>
             <button className="btn" onClick={() => store.selectDoor('double')} title={t('room.doorDouble')}>
-              <img src="/icons/door-double.svg" alt={t('room.doorDouble')} />
+              <img src={iconUrl('door-double')} alt={t('room.doorDouble')} />
             </button>
             <button className="btn" onClick={() => store.selectDoor('sliding')} title={t('room.doorSliding')}>
-              <img src="/icons/door-sliding.svg" alt={t('room.doorSliding')} />
+              <img src={iconUrl('door-sliding')} alt={t('room.doorSliding')} />
             </button>
           </div>
         </div>
