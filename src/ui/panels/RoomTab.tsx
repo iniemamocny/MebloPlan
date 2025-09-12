@@ -61,9 +61,10 @@ export default function RoomTab({ viewMode, toggleViewMode }: RoomTabProps) {
                 <div
                   style={{
                     position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    marginTop: 8,
+                    bottom: '100%',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    marginBottom: 8,
                     display: 'flex',
                     gap: 4,
                     background: 'var(--white)',
