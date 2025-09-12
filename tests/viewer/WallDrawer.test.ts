@@ -27,7 +27,9 @@ function createDrawer() {
   const group = new THREE.Group();
   const history: string[] = [];
   const addWallWithHistory = vi.fn((start: any, end: any) => {
-    history.push(`Added wall from (${start.x}, ${start.y}) to (${end.x}, ${end.y})`);
+    history.push(
+      `Added wall from (${start.x}, ${start.y}) to (${end.x}, ${end.y})`,
+    );
   });
   const state = {
     snapToGrid: false,
@@ -66,9 +68,9 @@ describe('WallDrawer', () => {
   it('single click adds fixed-length wall', () => {
     const { drawer, point, addWallWithHistory } = createDrawer();
     point.set(0, 0, 0);
-    (drawer as any).onDown({ pointerId: 1 } as PointerEvent);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
     point.set(SNAP / 1000, 0, 0);
-    (drawer as any).onUp({ pointerId: 1 } as PointerEvent);
+    (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
       { x: 0, y: 0 },
       { x: SNAP / 1000, y: 0 },
@@ -79,7 +81,7 @@ describe('WallDrawer', () => {
   it('dragging extends wall toward cursor', () => {
     const { drawer, point } = createDrawer();
     point.set(0, 0, 0);
-    (drawer as any).onDown({ pointerId: 1 } as PointerEvent);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
     point.set(2, 0, 0);
     (drawer as any).onMove({} as PointerEvent);
     const preview = (drawer as any).preview as THREE.Mesh;
@@ -91,13 +93,13 @@ describe('WallDrawer', () => {
   it('Escape cancels drag without adding wall', () => {
     const { drawer, point, addWallWithHistory } = createDrawer();
     point.set(0, 0, 0);
-    (drawer as any).onDown({ pointerId: 1 } as PointerEvent);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
     point.set(1, 0, 0);
     (drawer as any).onMove({} as PointerEvent);
     (drawer as any).onKeyDown({ key: 'Escape' } as KeyboardEvent);
     expect((drawer as any).preview).toBeNull();
     point.set(1, 0, 0);
-    (drawer as any).onUp({ pointerId: 1 } as PointerEvent);
+    (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).not.toHaveBeenCalled();
     drawer.disable();
   });
@@ -105,11 +107,21 @@ describe('WallDrawer', () => {
   it('finalized wall pushes history entry', () => {
     const { drawer, point, history } = createDrawer();
     point.set(0, 0, 0);
-    (drawer as any).onDown({ pointerId: 1 } as PointerEvent);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
     point.set(1, 0, 0);
-    (drawer as any).onUp({ pointerId: 1 } as PointerEvent);
+    (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(history.length).toBe(1);
     expect(history[0]).toBe('Added wall from (0, 0) to (1, 0)');
+    drawer.disable();
+  });
+
+  it('ignores right mouse button', () => {
+    const { drawer, point, addWallWithHistory } = createDrawer();
+    point.set(0, 0, 0);
+    (drawer as any).onDown({ pointerId: 1, button: 2 } as PointerEvent);
+    point.set(1, 0, 0);
+    (drawer as any).onUp({ pointerId: 1, button: 2 } as PointerEvent);
+    expect(addWallWithHistory).not.toHaveBeenCalled();
     drawer.disable();
   });
 
@@ -153,4 +165,3 @@ describe('WallDrawer', () => {
     drawer.disable();
   });
 });
-
