@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
 import type CabinetDragger from '../viewer/CabinetDragger';
+import WallDrawer from '../viewer/WallDrawer';
 import { setupThree } from '../scene/engine';
 import { buildCabinetMesh } from '../scene/cabinetBuilder';
 import { FAMILY } from '../core/catalog';
@@ -83,6 +84,8 @@ const SceneViewer: React.FC<Props> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const store = usePlannerStore();
+  const selectedTool = usePlannerStore((s) => s.selectedTool);
+  const wallThickness = usePlannerStore((s) => s.wallDefaults.thickness);
   const showEdges = store.role === 'stolarz';
   const showFronts = store.showFronts;
   const threeInitialized = useRef(false);
@@ -97,6 +100,7 @@ const SceneViewer: React.FC<Props> = ({
   const savedView = useRef<{ pos: THREE.Vector3; target: THREE.Vector3 } | null>(null);
   const roomRef = useRef(store.room);
   const [pointerLockError, setPointerLockError] = useState<string | null>(null);
+  const wallDrawerRef = useRef<WallDrawer | null>(null);
 
   useEffect(() => {
     roomRef.current = store.room;
@@ -258,6 +262,12 @@ const SceneViewer: React.FC<Props> = ({
   useEffect(() => {
     if (!containerRef.current) return;
     threeRef.current = setupThree(containerRef.current) as ThreeContext;
+    wallDrawerRef.current = new WallDrawer(
+      threeRef.current.renderer,
+      () => threeRef.current!.camera,
+      threeRef.current.group,
+      usePlannerStore,
+    );
     threeInitialized.current = true;
     if (viewMode === '2d') applyViewMode(viewMode);
     (threeRef.current as any).setMode = setMode;
@@ -284,6 +294,7 @@ const SceneViewer: React.FC<Props> = ({
       pc.removeEventListener('unlock', onUnlock);
       pc.removeEventListener('lock', onLock);
       pc.removeEventListener('pointerlockerror', onPointerlockError);
+      wallDrawerRef.current?.disable();
       threeRef.current?.dispose?.();
     };
   }, [threeRef]);
@@ -312,6 +323,16 @@ const SceneViewer: React.FC<Props> = ({
       }
     }
   }, [mode, threeRef, store.playerHeight, viewMode]);
+
+  useEffect(() => {
+    const drawer = wallDrawerRef.current;
+    if (!drawer) return;
+    if (viewMode === '2d' && selectedTool === 'wall') {
+      drawer.enable(wallThickness);
+    } else {
+      drawer.disable();
+    }
+  }, [viewMode, selectedTool, wallThickness]);
 
   useEffect(() => {
     threeRef.current?.setPlayerParams?.({
