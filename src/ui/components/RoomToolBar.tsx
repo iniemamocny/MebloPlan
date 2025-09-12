@@ -76,13 +76,12 @@ const RoomToolBar: React.FC = () => {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: 4,
+            gap: 8,
             padding: 4,
+            width: '12rem',
             background: 'var(--white)',
             border: '1px solid var(--border)',
             borderRadius: 8,
-            transform: 'scale(1.5)',
-            transformOrigin: 'top center',
             alignItems: 'center',
           }}
         >
