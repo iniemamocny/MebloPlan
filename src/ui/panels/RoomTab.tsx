@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pencil, Hammer, Users } from 'lucide-react';
 import SingleMMInput from '../components/SingleMMInput';
 import { usePlannerStore } from '../../state/store';
 
@@ -32,29 +31,6 @@ export default function RoomTab() {
             <div>
               <div className="small">{t('room.thickness')}</div>
               <SingleMMInput value={wallT} onChange={setWallT} />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4 }}>
-              <button
-                className="btnGhost"
-                title={t('room.pencil')}
-                onClick={() => store.drawWalls(wallH, wallT)}
-              >
-                <Pencil size={16} />
-              </button>
-              <button
-                className="btnGhost"
-                title={t('room.hammer')}
-                onClick={() => store.setSelectedTool('hammer')}
-              >
-                <Hammer size={16} />
-              </button>
-              <button
-                className="btnGhost"
-                title={t('room.group')}
-                onClick={() => store.setSelectedTool('group')}
-              >
-                <Users size={16} />
-              </button>
             </div>
           </div>
         </div>

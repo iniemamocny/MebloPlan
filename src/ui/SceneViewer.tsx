@@ -13,6 +13,7 @@ import ItemHotbar, {
   hotbarItems,
   furnishHotbarItems,
 } from './components/ItemHotbar';
+import RoomToolBar from './components/RoomToolBar';
 import TouchJoystick from './components/TouchJoystick';
 import { PlayerMode, PlayerSubMode, PLAYER_MODES } from './types';
 import RadialMenu from './components/RadialMenu';
@@ -53,6 +54,7 @@ interface Props {
   setMode: React.Dispatch<React.SetStateAction<PlayerMode>>;
   viewMode: '3d' | '2d';
   setViewMode: (v: '3d' | '2d') => void;
+  roomTabOpen?: boolean;
 }
 
 const INTERACT_DISTANCE = 1.5;
@@ -77,6 +79,7 @@ const SceneViewer: React.FC<Props> = ({
   setMode,
   viewMode = '3d',
   setViewMode,
+  roomTabOpen,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const store = usePlannerStore();
@@ -874,6 +877,7 @@ const SceneViewer: React.FC<Props> = ({
         </div>
       )}
       {mode && <ItemHotbar mode={mode} />}
+      {roomTabOpen && <RoomToolBar />}
       {mode && isMobile && (
         <>
           <TouchJoystick
