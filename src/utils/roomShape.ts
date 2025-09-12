@@ -75,6 +75,9 @@ export const addSegmentToShape = (
   shape: RoomShape,
   segment: ShapeSegment,
 ): RoomShape => {
+  if (pointsEqual(segment.start, segment.end)) {
+    return shape;
+  }
   if (shape.segments.some((s) => segmentsIntersect(s, segment))) {
     return shape;
   }
