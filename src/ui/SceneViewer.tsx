@@ -904,7 +904,7 @@ const SceneViewer: React.FC<Props> = ({
           </button>
         </>
       )}
-      {isMobile && (
+      {mode && isMobile && (
         <div className="modeBar">
           {PLAYER_MODES.map((key) => (
             <div
