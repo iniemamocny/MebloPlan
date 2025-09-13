@@ -65,7 +65,7 @@ describe('CabinetDragger pointer capture', () => {
     expect((dragger as any).draggingId).toBeNull();
   });
 
-  it('updates module position along XY plane when dragging', () => {
+  it('updates module position along XZ plane when dragging', () => {
     const canvas = document.createElement('canvas');
     canvas.getBoundingClientRect = () => ({
       left: 0,
@@ -102,7 +102,7 @@ describe('CabinetDragger pointer capture', () => {
 
     (dragger as any).raycaster.intersectObjects = () => [{ object: obj }];
 
-    (dragger as any).getPoint = () => new THREE.Vector3(0, 0, 0);
+    (dragger as any).getPoint = () => new THREE.Vector3(0, 0, 5);
     const down = {
       clientX: 0,
       clientY: 0,
@@ -111,7 +111,7 @@ describe('CabinetDragger pointer capture', () => {
     } as PointerEvent;
     (dragger as any).onDown(down);
 
-    (dragger as any).getPoint = () => new THREE.Vector3(10, 20, 0);
+    (dragger as any).getPoint = () => new THREE.Vector3(10, 0, 20);
     const move = {
       clientX: 10,
       clientY: 10,
@@ -121,7 +121,7 @@ describe('CabinetDragger pointer capture', () => {
     (dragger as any).onMove(move);
 
     expect(updateModule).toHaveBeenCalledWith('1', {
-      position: [10, 20, 5],
+      position: [10, 0, 20],
     });
   });
 });
