@@ -90,7 +90,7 @@ const SceneViewer: React.FC<Props> = ({
   showRoomTools,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const axesRef = useRef<HTMLCanvasElement>(null);
+  const axesRef = useRef<HTMLDivElement>(null);
   const store = usePlannerStore();
   const selectedTool = usePlannerStore((s) => s.selectedTool);
   const wallThickness = usePlannerStore((s) => s.wallDefaults.thickness);
@@ -111,37 +111,6 @@ const SceneViewer: React.FC<Props> = ({
   const [pointerLockError, setPointerLockError] = useState<string | null>(null);
   const wallDrawerRef = useRef<WallDrawer | null>(null);
   const wallGroupRef = useRef<THREE.Group | null>(null);
-
-  useEffect(() => {
-    const canvas = axesRef.current;
-    if (!canvas) return;
-    let renderer: THREE.WebGLRenderer | null = null;
-    try {
-      renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
-    } catch {
-      // WebGL not available (e.g., in tests)
-    }
-    renderer?.setSize(80, 80);
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
-    camera.position.set(0, 0, 2);
-    const axes = new THREE.AxesHelper(0.5);
-    scene.add(axes);
-    renderer?.render(scene, camera);
-    if (threeRef.current) {
-      threeRef.current.axesHelper = axes;
-    } else {
-      setTimeout(() => {
-        if (threeRef.current) threeRef.current.axesHelper = axes;
-      });
-    }
-    return () => {
-      renderer?.dispose();
-      if (threeRef.current) {
-        delete threeRef.current.axesHelper;
-      }
-    };
-  }, [viewMode, threeRef]);
 
   useEffect(() => {
     roomRef.current = store.room;
@@ -345,32 +314,118 @@ const SceneViewer: React.FC<Props> = ({
   }, [threeRef]);
 
   useEffect(() => {
-    const container = containerRef.current;
+    const axesContainer = axesRef.current;
     const three = threeRef.current;
-    if (!container || !three) return;
-    if (typeof WebGLRenderingContext === 'undefined') return;
+    if (!axesContainer || !three) return;
     const size = 80;
-    const overlay = document.createElement('div');
-    overlay.style.position = 'absolute';
-    overlay.style.bottom = '0';
-    overlay.style.right = '0';
-    overlay.style.width = `${size}px`;
-    overlay.style.height = `${size}px`;
-    overlay.style.pointerEvents = 'none';
-    container.appendChild(overlay);
+    axesContainer.innerHTML = '';
+    axesContainer.style.position = 'absolute';
+    axesContainer.style.bottom = '0';
+    axesContainer.style.right = '0';
+    axesContainer.style.width = `${size}px`;
+    axesContainer.style.height = `${size}px`;
+    axesContainer.style.pointerEvents = 'none';
 
-    const axesRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    axesRenderer.setSize(size, size);
-    axesRenderer.setClearColor(0x000000, 0);
-    axesRenderer.domElement.style.pointerEvents = 'none';
-    overlay.appendChild(axesRenderer.domElement);
+    if (viewMode === '2d') {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      axesContainer.appendChild(canvas);
+      let ctx: CanvasRenderingContext2D | null = null;
+      try {
+        ctx = canvas.getContext('2d');
+      } catch {
+        ctx = null;
+      }
+      if (ctx) {
+        const c = size / 2;
+        ctx.clearRect(0, 0, size, size);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#ff0000';
+        ctx.beginPath();
+        ctx.moveTo(c, c);
+        ctx.lineTo(size, c);
+        ctx.stroke();
+        ctx.strokeStyle = '#0000ff';
+        ctx.beginPath();
+        ctx.moveTo(c, c);
+        ctx.lineTo(c, 0);
+        ctx.stroke();
+        ctx.fillStyle = '#ff0000';
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'top';
+        ctx.fillText('X', size - 4, c + 4);
+        ctx.fillStyle = '#0000ff';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('Z', c + 4, 16);
+      }
+      const axes = new THREE.AxesHelper(1);
+      if (threeRef.current) {
+        threeRef.current.axesHelper = axes;
+      }
+      return () => {
+        axesContainer.innerHTML = '';
+        if (threeRef.current) {
+          delete threeRef.current.axesHelper;
+        }
+      };
+    }
 
-    const axesScene = new THREE.Scene();
-    const axesCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
-    axesCamera.position.set(2, 2, 2);
-    axesCamera.lookAt(0, 0, 0);
+    if (typeof WebGLRenderingContext === 'undefined') {
+      const axes = new THREE.AxesHelper(1);
+      if (threeRef.current) {
+        threeRef.current.axesHelper = axes;
+      }
+      return () => {
+        axesContainer.innerHTML = '';
+        if (threeRef.current) {
+          delete threeRef.current.axesHelper;
+        }
+      };
+    }
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(size, size);
+    renderer.setClearColor(0x000000, 0);
+    renderer.domElement.style.pointerEvents = 'none';
+    axesContainer.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
+    camera.position.set(2, 2, 2);
+    camera.lookAt(0, 0, 0);
     const axes = new THREE.AxesHelper(1);
-    axesScene.add(axes);
+    scene.add(axes);
+
+    const addLabel = (text: string, color: string, position: THREE.Vector3) => {
+      const labelCanvas = document.createElement('canvas');
+      labelCanvas.width = 64;
+      labelCanvas.height = 64;
+      let ctx: CanvasRenderingContext2D | null = null;
+      try {
+        ctx = labelCanvas.getContext('2d');
+      } catch {
+        ctx = null;
+      }
+      if (!ctx) return;
+      ctx.font = '24px sans-serif';
+      ctx.fillStyle = color;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, 32, 32);
+      const texture = new THREE.CanvasTexture(labelCanvas);
+      const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+      const sprite = new THREE.Sprite(material);
+      sprite.position.copy(position);
+      sprite.scale.set(0.5, 0.5, 0.5);
+      scene.add(sprite);
+    };
+
+    addLabel('X', '#ff0000', new THREE.Vector3(1.2, 0, 0));
+    addLabel('Y', '#00ff00', new THREE.Vector3(0, 1.2, 0));
+    addLabel('Z', '#0000ff', new THREE.Vector3(0, 0, 1.2));
+
     if (threeRef.current) {
       threeRef.current.axesHelper = axes;
     }
@@ -379,16 +434,16 @@ const SceneViewer: React.FC<Props> = ({
     const renderGizmo = () => {
       anim = requestAnimationFrame(renderGizmo);
       if (threeRef.current?.camera) {
-        axesCamera.quaternion.copy(threeRef.current.camera.quaternion);
+        camera.quaternion.copy(threeRef.current.camera.quaternion);
       }
-      axesRenderer.render(axesScene, axesCamera);
+      renderer.render(scene, camera);
     };
     renderGizmo();
 
     return () => {
       cancelAnimationFrame(anim);
-      axesRenderer.dispose();
-      overlay.remove();
+      renderer.dispose();
+      axesContainer.innerHTML = '';
       if (threeRef.current) {
         delete threeRef.current.axesHelper;
       }
@@ -944,11 +999,9 @@ const SceneViewer: React.FC<Props> = ({
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
       <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
-      <canvas
+      <div
         ref={axesRef}
         data-testid="axes-gizmo"
-        width={80}
-        height={80}
         style={{
           position: 'absolute',
           right: 10,
