@@ -263,9 +263,10 @@ export default class WallDrawer {
       point.set(endX, 0, endZ);
     }
     // Convert 3D coordinates (x, z) back to 2D room shape coordinates (x, y).
-    // Z was inverted in getPoint to match planner orientation, so flip again here.
-    const start = { x: startX, y: startZ === 0 ? 0 : -startZ };
-    const end = { x: endX, y: endZ === 0 ? 0 : -endZ };
+    // `getPoint` already flips the Z axis to match planner orientation, so use the
+    // values directly without an additional inversion.
+    const start = { x: startX, y: startZ === 0 ? 0 : startZ };
+    const end = { x: endX, y: endZ === 0 ? 0 : endZ };
     state.addWallWithHistory(start, end);
     this.start = null;
     this.disposePreview();
