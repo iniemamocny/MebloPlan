@@ -74,12 +74,12 @@ const segmentsIntersect = (s1: SegmentLike, s2: SegmentLike) => {
 export const addSegmentToShape = (
   shape: RoomShape,
   segment: ShapeSegment,
-): RoomShape => {
+): RoomShape | null => {
   if (pointsEqual(segment.start, segment.end)) {
-    return shape;
+    return null;
   }
   if (shape.segments.some((s) => segmentsIntersect(s, segment))) {
-    return shape;
+    return null;
   }
 
   const findPoint = (p: ShapePoint) =>

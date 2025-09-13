@@ -204,7 +204,7 @@ type Store = {
   setPlayerSpeed: (v: number) => void;
   setSelectedItemSlot: (slot: number) => void;
   setSelectedTool: (tool: string | null) => void;
-  addWallSegment: (start: ShapePoint, end: ShapePoint) => void;
+  addWallSegment: (start: ShapePoint, end: ShapePoint) => boolean;
   addWallWithHistory: (start: ShapePoint, end: ShapePoint) => void;
   drawWalls: (height: number, thickness: number) => void;
   selectWindow: (type: 'single' | 'double' | 'triple') => void;
@@ -505,28 +505,35 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setPlayerSpeed: (v) => set({ playerSpeed: v }),
   setSelectedItemSlot: (slot) => set({ selectedItemSlot: slot }),
   setSelectedTool: (tool) => set({ selectedTool: tool }),
-  addWallSegment: (start, end) =>
-    set((s) => ({
+  addWallSegment: (start, end) => {
+    const state = get();
+    const shape = addSegmentToShape(state.roomShape, { start, end });
+    if (!shape) return false;
+    set({
       past: [
-        ...s.past,
+        ...state.past,
         {
-          modules: JSON.parse(JSON.stringify(s.modules)),
-          items: JSON.parse(JSON.stringify(s.items)),
-          room: JSON.parse(JSON.stringify(s.room)),
-          roomShape: JSON.parse(JSON.stringify(s.roomShape)),
+          modules: JSON.parse(JSON.stringify(state.modules)),
+          items: JSON.parse(JSON.stringify(state.items)),
+          room: JSON.parse(JSON.stringify(state.room)),
+          roomShape: JSON.parse(JSON.stringify(state.roomShape)),
         },
       ],
-      roomShape: addSegmentToShape(s.roomShape, { start, end }),
+      roomShape: shape,
       future: [],
-    })),
+    });
+    return true;
+  },
   addWallWithHistory: (start, end) => {
-    get().addWallSegment(start, end);
-    set((s) => ({
-      history: [
-        ...s.history,
-        `Added wall from (${start.x}, ${start.y}) to (${end.x}, ${end.y})`,
-      ],
-    }));
+    const success = get().addWallSegment(start, end);
+    if (success) {
+      set((s) => ({
+        history: [
+          ...s.history,
+          `Added wall from (${start.x}, ${start.y}) to (${end.x}, ${end.y})`,
+        ],
+      }));
+    }
   },
   drawWalls: (height, thickness) =>
     set((s) => ({
