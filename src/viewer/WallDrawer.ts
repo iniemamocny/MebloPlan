@@ -167,6 +167,7 @@ export default class WallDrawer {
     this.pointerId = e.pointerId;
     this.dragging = true;
     this.start = point.clone();
+    this.lastPoint = this.start.clone();
     if (this.cursor) {
       this.cursor.position.copy(point).setY(0.001);
       this.cursorTarget = this.cursor.position.clone();

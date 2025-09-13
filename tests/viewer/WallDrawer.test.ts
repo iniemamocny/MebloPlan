@@ -123,6 +123,20 @@ describe('WallDrawer', () => {
     drawer.disable();
   });
 
+  it('single click after moving cursor starts in default direction', () => {
+    const { drawer, point, addWallWithHistory } = createDrawer();
+    point.set(0, 0, 1);
+    (drawer as any).onMove({} as PointerEvent);
+    point.set(0, 0, 0);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
+    (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
+    expect(addWallWithHistory).toHaveBeenCalledWith(
+      { x: 0, y: 0 },
+      { x: SNAP / 1000, y: 0 },
+    );
+    drawer.disable();
+  });
+
   it('dragging extends wall toward cursor', () => {
     const { drawer, point } = createDrawer();
     point.set(0, 0, 0);
