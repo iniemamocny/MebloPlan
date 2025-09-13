@@ -129,5 +129,68 @@ describe('SceneViewer axes gizmo', () => {
       container.remove();
     },
   );
+
+  it('matches world axes after switching view modes', async () => {
+    const threeRef: any = { current: null };
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+    act(() => {
+      root.render(
+        <SceneViewer
+          threeRef={threeRef}
+          addCountertop={false}
+          mode={null}
+          setMode={vi.fn()}
+          viewMode="3d"
+          setViewMode={() => {}}
+        />,
+      );
+    });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(threeRef.current.axesHelper).toBeDefined();
+    expect(threeRef.current.axesHelper!.rotation.x).toBeCloseTo(0);
+    expect(threeRef.current.axesHelper!.rotation.y).toBeCloseTo(0);
+    expect(threeRef.current.axesHelper!.rotation.z).toBeCloseTo(0);
+
+    act(() => {
+      root.render(
+        <SceneViewer
+          threeRef={threeRef}
+          addCountertop={false}
+          mode={null}
+          setMode={vi.fn()}
+          viewMode="2d"
+          setViewMode={() => {}}
+        />,
+      );
+    });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(threeRef.current.axesHelper).toBeDefined();
+    expect(threeRef.current.axesHelper!.rotation.x).toBeCloseTo(0);
+    expect(threeRef.current.axesHelper!.rotation.y).toBeCloseTo(0);
+    expect(threeRef.current.axesHelper!.rotation.z).toBeCloseTo(0);
+
+    act(() => {
+      root.render(
+        <SceneViewer
+          threeRef={threeRef}
+          addCountertop={false}
+          mode={null}
+          setMode={vi.fn()}
+          viewMode="3d"
+          setViewMode={() => {}}
+        />,
+      );
+    });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(threeRef.current.axesHelper).toBeDefined();
+    expect(threeRef.current.axesHelper!.rotation.x).toBeCloseTo(0);
+    expect(threeRef.current.axesHelper!.rotation.y).toBeCloseTo(0);
+    expect(threeRef.current.axesHelper!.rotation.z).toBeCloseTo(0);
+
+    root.unmount();
+    container.remove();
+  });
 });
 
