@@ -317,11 +317,13 @@ const SceneViewer: React.FC<Props> = ({
     const axesContainer = axesRef.current;
     const three = threeRef.current;
     if (!axesContainer || !three) return;
-    const size = 80;
+    // Make the axes helper more visible by enlarging it and offsetting from the
+    // edges. This improves discoverability on both desktop and mobile screens.
+    const size = 120;
     axesContainer.innerHTML = '';
     axesContainer.style.position = 'absolute';
-    axesContainer.style.bottom = '0';
-    axesContainer.style.right = '0';
+    axesContainer.style.bottom = '16px';
+    axesContainer.style.right = '16px';
     axesContainer.style.width = `${size}px`;
     axesContainer.style.height = `${size}px`;
     axesContainer.style.pointerEvents = 'none';
@@ -340,7 +342,7 @@ const SceneViewer: React.FC<Props> = ({
       if (ctx) {
         const c = size / 2;
         ctx.clearRect(0, 0, size, size);
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
         ctx.strokeStyle = '#ff0000';
         ctx.beginPath();
         ctx.moveTo(c, c);
@@ -352,16 +354,17 @@ const SceneViewer: React.FC<Props> = ({
         ctx.lineTo(c, 0);
         ctx.stroke();
         ctx.fillStyle = '#ff0000';
-        ctx.font = '16px sans-serif';
+        const fontSize = 20;
+        ctx.font = `${fontSize}px sans-serif`;
         ctx.textAlign = 'right';
         ctx.textBaseline = 'top';
         ctx.fillText('X', size - 4, c + 4);
         ctx.fillStyle = '#0000ff';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'bottom';
-        ctx.fillText('Z', c + 4, 16);
+        ctx.fillText('Z', c + 4, fontSize);
       }
-      const axes = new THREE.AxesHelper(1);
+      const axes = new THREE.AxesHelper(1.5);
       if (threeRef.current) {
         threeRef.current.axesHelper = axes;
       }
@@ -374,7 +377,7 @@ const SceneViewer: React.FC<Props> = ({
     }
 
     if (typeof WebGLRenderingContext === 'undefined') {
-      const axes = new THREE.AxesHelper(1);
+      const axes = new THREE.AxesHelper(1.5);
       if (threeRef.current) {
         threeRef.current.axesHelper = axes;
       }
@@ -395,13 +398,13 @@ const SceneViewer: React.FC<Props> = ({
     const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
     camera.position.set(2, 2, 2);
     camera.lookAt(0, 0, 0);
-    const axes = new THREE.AxesHelper(1);
+    const axes = new THREE.AxesHelper(1.5);
     scene.add(axes);
 
     const addLabel = (text: string, color: string, position: THREE.Vector3) => {
       const labelCanvas = document.createElement('canvas');
-      labelCanvas.width = 64;
-      labelCanvas.height = 64;
+      labelCanvas.width = 128;
+      labelCanvas.height = 128;
       let ctx: CanvasRenderingContext2D | null = null;
       try {
         ctx = labelCanvas.getContext('2d');
@@ -409,22 +412,22 @@ const SceneViewer: React.FC<Props> = ({
         ctx = null;
       }
       if (!ctx) return;
-      ctx.font = '24px sans-serif';
+      ctx.font = '48px sans-serif';
       ctx.fillStyle = color;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(text, 32, 32);
+      ctx.fillText(text, 64, 64);
       const texture = new THREE.CanvasTexture(labelCanvas);
       const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
       const sprite = new THREE.Sprite(material);
       sprite.position.copy(position);
-      sprite.scale.set(0.5, 0.5, 0.5);
+      sprite.scale.set(1, 1, 1);
       scene.add(sprite);
     };
 
-    addLabel('X', '#ff0000', new THREE.Vector3(1.2, 0, 0));
-    addLabel('Y', '#00ff00', new THREE.Vector3(0, 1.2, 0));
-    addLabel('Z', '#0000ff', new THREE.Vector3(0, 0, 1.2));
+    addLabel('X', '#ff0000', new THREE.Vector3(1.8, 0, 0));
+    addLabel('Y', '#00ff00', new THREE.Vector3(0, 1.8, 0));
+    addLabel('Z', '#0000ff', new THREE.Vector3(0, 0, 1.8));
 
     if (threeRef.current) {
       threeRef.current.axesHelper = axes;
