@@ -26,7 +26,7 @@ export const worldAxes: Axes = { x: 1, y: 1, z: 1 };
 export const viewerAxes: Axes = { x: 1, y: 1, z: 1 };
 
 /** Planner axes relative to the world (planner uses the XZ plane). */
-export const plannerAxes: Axes = { x: 1, y: 1, z: 1 };
+export const plannerAxes: Axes = { x: 1, y: -1, z: 1 };
 
 /** Screen (DOM) axes relative to the world. Y grows downward in the DOM. */
 export const screenAxes: Axes = { x: 1, y: -1, z: 1 };
@@ -64,7 +64,8 @@ export function convertAxis(
   to: Axes,
   toAxis: Axis,
 ): number {
-  return value * from[fromAxis] * to[toAxis];
+  const result = value * from[fromAxis] * to[toAxis];
+  return Object.is(result, -0) ? 0 : result;
 }
 
 /** Convert a screen-space value to world-space along the same axis. */
@@ -75,4 +76,16 @@ export function screenToWorld(value: number, axis: Axis): number {
 /** Convert a world-space value to screen-space along the same axis. */
 export function worldToScreen(value: number, axis: Axis): number {
   return convertAxis(value, worldAxes, axis, screenAxes, axis);
+}
+
+const plannerAxisMap: Record<Axis, Axis> = { x: 'x', y: 'z', z: 'y' };
+
+/** Convert a planner-space value to world-space. */
+export function plannerToWorld(value: number, axis: Axis): number {
+  return convertAxis(value, plannerAxes, axis, worldAxes, plannerAxisMap[axis]);
+}
+
+/** Convert a world-space value to planner-space. */
+export function worldToPlanner(value: number, axis: Axis): number {
+  return convertAxis(value, worldAxes, axis, plannerAxes, plannerAxisMap[axis]);
 }
