@@ -50,6 +50,19 @@ export default function App() {
   const [startMode, setStartMode] = useState<PlayerSubMode>('furnish');
   const [viewMode, setViewMode] = useState<'3d' | '2d'>('3d');
 
+  const handleSetMode: React.Dispatch<React.SetStateAction<PlayerMode>> = (v) => {
+    if (typeof v === 'function') {
+      setMode((prev) => {
+        const next = (v as (p: PlayerMode) => PlayerMode)(prev);
+        if (next !== null) setStartMode(next);
+        return next;
+      });
+    } else {
+      setMode(v);
+      if (v !== null) setStartMode(v);
+    }
+  };
+
   const undo = store.undo;
   const redo = store.redo;
   useEffect(() => {
@@ -69,10 +82,6 @@ export default function App() {
 
   useEffect(() => {
     if (mode !== null) setTab(null);
-  }, [mode]);
-
-  useEffect(() => {
-    if (mode !== null) setStartMode(mode);
   }, [mode]);
 
   useEffect(() => {
@@ -121,7 +130,7 @@ export default function App() {
             addCountertop={addCountertop}
             setAddCountertop={setAddCountertop}
             threeRef={threeRef}
-            setMode={setMode}
+            setMode={handleSetMode}
             startMode={startMode}
             setStartMode={setStartMode}
           />
@@ -146,7 +155,7 @@ export default function App() {
           threeRef={threeRef}
           addCountertop={addCountertop}
           mode={mode}
-          setMode={setMode}
+          setMode={handleSetMode}
           viewMode={viewMode}
           setViewMode={handleSetViewMode}
           showRoomTools={activeTab === 'room'}
