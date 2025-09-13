@@ -5,7 +5,35 @@ import { usePlannerStore } from '../state/store';
 import CabinetDragger from '../viewer/CabinetDragger';
 import { alignToGround } from '../utils/coordinateSystem';
 
-export function setupThree(container: HTMLElement) {
+export interface ThreeContext {
+  scene: THREE.Scene;
+  camera: THREE.Camera;
+  renderer: THREE.WebGLRenderer;
+  controls: OrbitControls;
+  playerControls: PointerLockControls;
+  group: THREE.Group;
+  cabinetDragger: CabinetDragger;
+  perspectiveCamera: THREE.PerspectiveCamera;
+  orthographicCamera: THREE.OrthographicCamera;
+  setPlayerParams: (p: { height?: number; speed?: number }) => void;
+  setMove: (m: {
+    forward?: boolean;
+    backward?: boolean;
+    left?: boolean;
+    right?: boolean;
+  }) => void;
+  setMoveFromJoystick: (v: { x?: number; y?: number }) => void;
+  updateCameraRotation: (dx: number, dy: number) => void;
+  resetCameraRotation: () => void;
+  onJump: () => void;
+  onCrouch: (active: boolean) => void;
+  updateGrid: (divisions: number) => void;
+  dispose: () => void;
+  setCamera: (cam: THREE.Camera) => void;
+  setControls: (c: OrbitControls) => void;
+}
+
+export function setupThree(container: HTMLElement): ThreeContext {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf9fafc);
 
@@ -394,7 +422,7 @@ export function setupThree(container: HTMLElement) {
     window.removeEventListener('resize', onResize);
   };
 
-  const three: any = {
+  const three: ThreeContext = {
     scene,
     camera,
     renderer,
@@ -413,19 +441,15 @@ export function setupThree(container: HTMLElement) {
     onCrouch,
     updateGrid,
     dispose,
+    setCamera: (cam: THREE.Camera) => {
+      camera = cam;
+      three.camera = cam;
+    },
+    setControls: (c: OrbitControls) => {
+      controls = c;
+      three.controls = c;
+    },
   };
-
-  const setCamera = (cam: THREE.Camera) => {
-    camera = cam;
-    three.camera = cam;
-  };
-  const setControls = (c: OrbitControls) => {
-    controls = c;
-    three.controls = c;
-  };
-
-  three.setCamera = setCamera;
-  three.setControls = setControls;
 
   return three;
 }

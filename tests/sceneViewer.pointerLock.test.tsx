@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import SceneViewer from '../src/ui/SceneViewer';
 import PlayPanel from '../src/ui/panels/PlayPanel';
 import { PlayerMode, PlayerSubMode } from '../src/ui/types';
+import type { ThreeContext } from '../src/scene/engine';
 
 vi.mock('three/examples/jsm/controls/OrbitControls.js', () => ({
   OrbitControls: vi.fn().mockImplementation(() => ({
@@ -90,7 +91,7 @@ vi.mock('../src/ui/components/TouchJoystick', () => ({ default: () => null }));
 const t = (s: string) => s;
 
 describe('pointer lock handling', () => {
-  const threeRef: any = { current: null };
+  const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
   let mode: PlayerMode = null;
   const setMode = vi.fn((v: any) => {
     mode = typeof v === 'function' ? v(mode) : v;

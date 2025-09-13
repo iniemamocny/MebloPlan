@@ -13,6 +13,7 @@ import {
   worldAxes,
   plannerToWorld,
 } from '../../src/utils/coordinateSystem';
+import type { ThreeContext } from '../../src/scene/engine';
 
 vi.mock('../../src/ui/components/ItemHotbar', () => ({
   default: () => null,
@@ -86,7 +87,7 @@ vi.mock('../../src/scene/engine', () => {
 describe('Scene wall rendering', () => {
   let container: HTMLDivElement;
   let root: ReactDOM.Root;
-  const threeRef: any = { current: null };
+  const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
   const setMode = vi.fn();
   const setViewMode = vi.fn();
 

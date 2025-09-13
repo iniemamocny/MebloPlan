@@ -8,6 +8,7 @@ import { createTranslator } from './i18n';
 import MainTabs from './MainTabs';
 import { safeSetItem } from '../utils/storage';
 import { PlayerMode } from './types';
+import type { ThreeContext } from '../scene/engine';
 
 type PlayerSubMode = Exclude<PlayerMode, null>;
 
@@ -17,7 +18,7 @@ export default function App() {
   const [kind, setKind] = useState<Kind | null>(null);
   const [variant, setVariant] = useState<Variant | null>(null);
   const [addCountertop, setAddCountertop] = useState(true);
-  const threeRef = useRef<any>(null);
+  const threeRef = useRef<ThreeContext | null>(null);
 
   const { t, i18n } = createTranslator();
   const [lang, setLang] = useState(
