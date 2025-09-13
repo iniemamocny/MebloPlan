@@ -351,7 +351,7 @@ const SceneViewer: React.FC<Props> = ({
         ctx.strokeStyle = '#0000ff';
         ctx.beginPath();
         ctx.moveTo(c, c);
-        ctx.lineTo(c, 0);
+        ctx.lineTo(c, size);
         ctx.stroke();
         ctx.fillStyle = '#ff0000';
         const fontSize = 20;
@@ -361,8 +361,8 @@ const SceneViewer: React.FC<Props> = ({
         ctx.fillText('X', size - 4, c + 4);
         ctx.fillStyle = '#0000ff';
         ctx.textAlign = 'left';
-        ctx.textBaseline = 'bottom';
-        ctx.fillText('Z', c + 4, fontSize);
+        ctx.textBaseline = 'top';
+        ctx.fillText('Z', c + 4, size - 4);
       }
       const axes = new THREE.AxesHelper(1.5);
       if (threeRef.current) {
