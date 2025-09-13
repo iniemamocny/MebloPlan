@@ -26,7 +26,7 @@ export const worldAxes: Axes = { x: 1, y: 1, z: 1 };
 export const viewerAxes: Axes = { x: 1, y: 1, z: 1 };
 
 /** Planner axes relative to the world (planner uses the XZ plane). */
-export const plannerAxes: Axes = { x: 1, y: -1, z: 1 };
+export const plannerAxes: Axes = { x: 1, y: 1, z: 1 };
 
 /** Screen (DOM) axes relative to the world. Y grows downward in the DOM. */
 export const screenAxes: Axes = { x: 1, y: -1, z: 1 };
