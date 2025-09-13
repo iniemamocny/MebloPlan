@@ -4,8 +4,6 @@ import type { UseBoundStore, StoreApi } from 'zustand';
 import { usePlannerStore } from '../state/store';
 import type { ShapePoint } from '../types';
 import {
-  screenToWorldZ,
-  worldZToPlannerY,
   convertAxis,
   screenAxes,
   worldAxes,
@@ -26,7 +24,7 @@ export default class WallDrawer {
   private group: THREE.Group;
   private store: UseBoundStore<StoreApi<PlannerStore>>;
   private raycaster = new THREE.Raycaster();
-  private plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  private plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
   private cursor: THREE.Mesh | null = null;
   private cursorTarget: THREE.Vector3 | null = null;
   private animationId: number | null = null;
@@ -93,7 +91,6 @@ export default class WallDrawer {
   private addCursor() {
     this.removeCursor();
     const geom = new THREE.PlaneGeometry(this.thickness, this.thickness);
-    geom.rotateX(-Math.PI / 2);
     const mat = new THREE.MeshBasicMaterial({
       color: 0x00ffff,
       transparent: true,
@@ -101,7 +98,7 @@ export default class WallDrawer {
       side: THREE.DoubleSide,
     });
     this.cursor = new THREE.Mesh(geom, mat);
-    this.cursor.position.set(0, 0.001, 0);
+    this.cursor.position.set(0, 0, 0.001);
     this.cursorTarget = this.cursor.position.clone();
     this.group.add(this.cursor);
   }
@@ -147,15 +144,13 @@ export default class WallDrawer {
     const point = new THREE.Vector3();
     const intersection = this.raycaster.ray.intersectPlane(this.plane, point);
     if (!intersection) return null;
-    if (!isFinite(intersection.x) || !isFinite(intersection.z)) return null;
-    // The camera uses a flipped Z axis in top-down mode, so convert the
-    // intersection's Z value to world coordinates.
-    point.set(intersection.x, 0, screenToWorldZ(intersection.z));
+    if (!isFinite(intersection.x) || !isFinite(intersection.y)) return null;
+    point.set(intersection.x, intersection.y, 0);
     const { snapToGrid, gridSize } = this.store.getState();
     if (snapToGrid && gridSize > 0) {
       const step = gridSize / 1000;
       point.x = Math.round(point.x / step) * step;
-      point.z = Math.round(point.z / step) * step;
+      point.y = Math.round(point.y / step) * step;
     }
     return point;
   }
@@ -164,9 +159,9 @@ export default class WallDrawer {
     const { snapRightAngles } = this.store.getState();
     if (!this.start || !snapRightAngles) return point;
     const dx = Math.abs(point.x - this.start.x);
-    const dz = Math.abs(point.z - this.start.z);
-    if (dx > dz) {
-      point.z = this.start.z;
+    const dy = Math.abs(point.y - this.start.y);
+    if (dx > dy) {
+      point.y = this.start.y;
     } else {
       point.x = this.start.x;
     }
@@ -177,25 +172,25 @@ export default class WallDrawer {
     const point = this.getPoint(e);
     if (!point) return;
     this.constrainPoint(point);
-    point.y = 0.001;
+    point.z = 0.001;
     this.lastPoint = point;
     this.cursorTarget = point.clone();
     if (this.dragging && this.start && this.preview) {
       if (this.cursor) {
-        this.cursor.position.copy(point).setY(0.001);
+        this.cursor.position.copy(point).setZ(0.001);
       }
       const dx = point.x - this.start.x;
-      const dz = point.z - this.start.z;
+      const dy = point.y - this.start.y;
       const distX = Math.abs(dx);
-      const distZ = Math.abs(dz);
-      const dist = Math.sqrt(distX * distX + distZ * distZ);
+      const distY = Math.abs(dy);
+      const dist = Math.sqrt(distX * distX + distY * distY);
       this.preview.scale.x = dist;
       this.preview.position.set(
         this.start.x,
-        this.preview.position.y,
-        this.start.z,
+        this.start.y,
+        this.preview.position.z,
       );
-      this.preview.rotation.y = Math.atan2(dz, dx);
+      this.preview.rotation.z = Math.atan2(dy, dx);
     }
   };
 
@@ -209,12 +204,12 @@ export default class WallDrawer {
     this.start = point.clone();
     this.lastPoint = this.start.clone();
     if (this.cursor) {
-      this.cursor.position.copy(point).setY(0.001);
+      this.cursor.position.copy(point).setZ(0.001);
       this.cursorTarget = this.cursor.position.clone();
     }
     const state = this.store.getState();
     const height = state.wallDefaults.height / 1000;
-    const geom = new THREE.BoxGeometry(1, height, this.thickness);
+    const geom = new THREE.BoxGeometry(1, this.thickness, height);
     geom.translate(0.5, 0, 0);
     geom.computeBoundingBox();
     geom.computeBoundingSphere();
@@ -224,7 +219,7 @@ export default class WallDrawer {
       opacity: 0.5,
     });
     this.preview = new THREE.Mesh(geom, mat);
-    this.preview.position.set(point.x, height / 2, point.z);
+    this.preview.position.set(point.x, point.y, height / 2);
     this.preview.scale.set(0.0001, 1, 1);
     this.group.add(this.preview);
   };
@@ -247,49 +242,47 @@ export default class WallDrawer {
     this.constrainPoint(point);
     const state = this.store.getState();
     let endX = point.x;
-    let endZ = point.z;
+    let endY = point.y;
     const dx = endX - this.start.x;
-    const dz = endZ - this.start.z;
-    const dist = Math.sqrt(dx * dx + dz * dz);
+    const dy = endY - this.start.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
     if (dist < 0.001) {
       const snapLength = state.snapLength > 0 ? state.snapLength : 10;
       const step = snapLength / 1000;
       let dirX = dx;
-      let dirZ = dz;
-      if (dirX === 0 && dirZ === 0 && this.lastPoint) {
+      let dirY = dy;
+      if (dirX === 0 && dirY === 0 && this.lastPoint) {
         dirX = this.lastPoint.x - this.start.x;
-        dirZ = this.lastPoint.z - this.start.z;
+        dirY = this.lastPoint.y - this.start.y;
       }
-      if (dirX === 0 && dirZ === 0) {
+      if (dirX === 0 && dirY === 0) {
         dirX = 1;
-        dirZ = 0;
+        dirY = 0;
       }
-      const len = Math.sqrt(dirX * dirX + dirZ * dirZ);
+      const len = Math.sqrt(dirX * dirX + dirY * dirY);
       dirX /= len;
-      dirZ /= len;
+      dirY /= len;
       endX = this.start.x + dirX * step;
-      endZ = this.start.z + dirZ * step;
-      point.set(endX, 0, endZ);
+      endY = this.start.y + dirY * step;
+      point.set(endX, endY, 0);
     }
     let startX = this.start.x;
-    let startZ = this.start.z;
+    let startY = this.start.y;
     if (state.snapToGrid && state.gridSize > 0) {
       const stepSize = state.gridSize / 1000;
       startX = Math.round(startX / stepSize) * stepSize;
-      startZ = Math.round(startZ / stepSize) * stepSize;
+      startY = Math.round(startY / stepSize) * stepSize;
       endX = Math.round(endX / stepSize) * stepSize;
-      endZ = Math.round(endZ / stepSize) * stepSize;
-      point.set(endX, 0, endZ);
+      endY = Math.round(endY / stepSize) * stepSize;
+      point.set(endX, endY, 0);
     }
-    // Convert 3D coordinates (x, z) to 2D room shape coordinates (x, y).
-    // Negate the stored Z values to match the planner's Y axis direction.
-    const start = { x: startX, y: worldZToPlannerY(startZ) || 0 };
-    const end = { x: endX, y: worldZToPlannerY(endZ) || 0 };
+    const start = { x: startX, y: startY };
+    const end = { x: endX, y: endY };
     state.addWallWithHistory(start, end);
     this.start = null;
     this.disposePreview();
     if (this.cursor) {
-      this.cursor.position.set(point.x, 0.001, point.z);
+      this.cursor.position.set(point.x, point.y, 0.001);
       this.cursorTarget = this.cursor.position.clone();
     }
   };
@@ -308,7 +301,7 @@ export default class WallDrawer {
     this.start = null;
     this.disposePreview();
     if (this.cursor && this.lastPoint) {
-      this.cursor.position.set(this.lastPoint.x, 0.001, this.lastPoint.z);
+      this.cursor.position.set(this.lastPoint.x, this.lastPoint.y, 0.001);
       this.cursorTarget = this.cursor.position.clone();
     }
   };

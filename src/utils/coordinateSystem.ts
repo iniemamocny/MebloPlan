@@ -10,14 +10,14 @@ export interface Axes {
   z: 1 | -1;
 }
 
-/** Identity world axes. */
+/** Identity world axes (Z up). */
 export const worldAxes: Axes = { x: 1, y: 1, z: 1 };
 
-/** Viewer axes relative to the world. Top-down mode flips the Z axis. */
-export const viewerAxes: Axes = { x: 1, y: 1, z: -1 };
+/** Viewer axes relative to the world. */
+export const viewerAxes: Axes = { x: 1, y: 1, z: 1 };
 
-/** Planner axes relative to the world. Planner Y points opposite of world Z. */
-export const plannerAxes: Axes = { x: 1, y: -1, z: 1 };
+/** Planner axes relative to the world. */
+export const plannerAxes: Axes = { x: 1, y: 1, z: 1 };
 
 /** Screen (DOM) axes relative to the world. Y grows downward in the DOM. */
 export const screenAxes: Axes = { x: 1, y: -1, z: 1 };
@@ -35,15 +35,3 @@ export function convertAxis(
 ): number {
   return value * from[fromAxis] * to[toAxis];
 }
-
-/**
- * Converts a Z coordinate from viewer (screen) space to world space.
- */
-export const screenToWorldZ = (z: number): number =>
-  convertAxis(z, viewerAxes, 'z', worldAxes, 'z');
-
-/**
- * Converts a world-space Z coordinate to the planner's Y axis.
- */
-export const worldZToPlannerY = (z: number): number =>
-  convertAxis(z, worldAxes, 'z', plannerAxes, 'y');
