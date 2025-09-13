@@ -59,6 +59,36 @@ export function hasValidSidePanelDimensions(
   );
 }
 
+export interface HardwareOptions {
+  [key: string]: number;
+}
+
+export interface LegsOptions {
+  type: string;
+  height: number;
+  category?: string;
+  legsOffset?: number;
+}
+
+export function isHardwareOptions(obj: unknown): obj is HardwareOptions {
+  return (
+    !!obj &&
+    typeof obj === 'object' &&
+    Object.values(obj as Record<string, unknown>).every(
+      (v) => typeof v === 'number'
+    )
+  );
+}
+
+export function isLegsOptions(obj: unknown): obj is LegsOptions {
+  return (
+    !!obj &&
+    typeof obj === 'object' &&
+    typeof (obj as { type?: unknown }).type === 'string' &&
+    typeof (obj as { height?: unknown }).height === 'number'
+  );
+}
+
 export type TopPanel =
   | { type: 'full' }
   | { type: 'none' }
@@ -165,7 +195,7 @@ export interface ModuleAdv {
   carcassType?: 'type1' | 'type2' | 'type3' | 'type4' | 'type5' | 'type6';
   category?: string;
   legsType?: string;
-  legs?: { type: string; height: number; category?: string; legsOffset?: number };
+  legs?: LegsOptions;
 }
 
 export interface Module3D {
