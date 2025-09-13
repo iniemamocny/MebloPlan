@@ -101,6 +101,7 @@ describe('SceneViewer view mode', () => {
 
     expect(threeRef.current.camera).toBe(threeRef.current.orthographicCamera);
     expect(threeRef.current.controls.enableRotate).toBe(false);
+    expect(threeRef.current.camera.up).toEqual(new THREE.Vector3(0, 1, 0));
 
     act(() => {
       root.render(
@@ -117,6 +118,7 @@ describe('SceneViewer view mode', () => {
 
     expect(threeRef.current.camera).toBe(threeRef.current.perspectiveCamera);
     expect(threeRef.current.controls.enableRotate).toBe(true);
+    expect(threeRef.current.camera.up).toEqual(new THREE.Vector3(0, 1, 0));
 
     root.unmount();
   });

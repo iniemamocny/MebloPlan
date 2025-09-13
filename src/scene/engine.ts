@@ -15,7 +15,7 @@ export function setupThree(container: HTMLElement) {
     100,
   );
   perspectiveCamera.position.set(4, 6, 3);
-  perspectiveCamera.up.set(0, 0, 1);
+  perspectiveCamera.up.set(0, 1, 0);
 
   const aspect = container.clientWidth / container.clientHeight;
   const size = 5;
@@ -27,7 +27,7 @@ export function setupThree(container: HTMLElement) {
     0.1,
     100,
   );
-  orthographicCamera.position.set(0, 0, 10);
+  orthographicCamera.position.set(0, 10, 0);
   orthographicCamera.up.set(0, 1, 0);
   orthographicCamera.lookAt(0, 0, 0);
 
@@ -80,6 +80,7 @@ export function setupThree(container: HTMLElement) {
     );
     const material = new THREE.LineBasicMaterial({ color: 0x515152 });
     grid = new THREE.LineSegments(geometry, material);
+    grid.rotateX(-Math.PI / 2);
     scene.add(grid);
     currentDivX = divX;
     currentDivY = divY;
@@ -93,6 +94,7 @@ export function setupThree(container: HTMLElement) {
     new THREE.PlaneGeometry(boardWidth, boardHeight),
     new THREE.MeshStandardMaterial({ color: 0xf9fafc, side: THREE.DoubleSide }),
   );
+  floor.rotateX(-Math.PI / 2);
   scene.add(floor);
 
   const group = new THREE.Group();
