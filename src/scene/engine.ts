@@ -14,7 +14,8 @@ export function setupThree(container: HTMLElement) {
     0.1,
     100,
   );
-  perspectiveCamera.position.set(4, 3, 6);
+  perspectiveCamera.position.set(4, 6, 3);
+  perspectiveCamera.up.set(0, 0, 1);
 
   const aspect = container.clientWidth / container.clientHeight;
   const size = 5;
@@ -26,8 +27,8 @@ export function setupThree(container: HTMLElement) {
     0.1,
     100,
   );
-  orthographicCamera.position.set(0, 10, 0);
-  orthographicCamera.up.set(0, 0, -1);
+  orthographicCamera.position.set(0, 0, 10);
+  orthographicCamera.up.set(0, 1, 0);
   orthographicCamera.lookAt(0, 0, 0);
 
   let camera: THREE.Camera = perspectiveCamera;
@@ -66,11 +67,11 @@ export function setupThree(container: HTMLElement) {
     const vertices: number[] = [];
     for (let i = 0; i <= divX; i++) {
       const x = -boardWidth / 2 + (i * boardWidth) / divX;
-      vertices.push(x, 0, -boardHeight / 2, x, 0, boardHeight / 2);
+      vertices.push(x, -boardHeight / 2, 0, x, boardHeight / 2, 0);
     }
     for (let j = 0; j <= divY; j++) {
-      const z = -boardHeight / 2 + (j * boardHeight) / divY;
-      vertices.push(-boardWidth / 2, 0, z, boardWidth / 2, 0, z);
+      const y = -boardHeight / 2 + (j * boardHeight) / divY;
+      vertices.push(-boardWidth / 2, y, 0, boardWidth / 2, y, 0);
     }
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute(
@@ -92,7 +93,6 @@ export function setupThree(container: HTMLElement) {
     new THREE.PlaneGeometry(boardWidth, boardHeight),
     new THREE.MeshStandardMaterial({ color: 0xf9fafc, side: THREE.DoubleSide }),
   );
-  floor.rotation.x = -Math.PI / 2;
   scene.add(floor);
 
   const group = new THREE.Group();

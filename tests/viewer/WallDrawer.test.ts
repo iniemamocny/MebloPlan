@@ -2,10 +2,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as THREE from 'three';
 import WallDrawer from '../../src/viewer/WallDrawer';
-import {
-  screenToWorldZ,
-  worldZToPlannerY,
-} from '../../src/utils/coordinateSystem';
 
 const THICKNESS = 100; // mm
 const HEIGHT = 2500; // mm
@@ -101,7 +97,7 @@ describe('WallDrawer', () => {
     const drawer = new WallDrawer(renderer, () => camera, group, store);
     drawer.enable(state.wallDefaults.thickness);
 
-    const intersection = new THREE.Vector3(1.2345, 0, 2.3456);
+    const intersection = new THREE.Vector3(1.2345, 2.3456, 0);
     (drawer as any).raycaster.ray.intersectPlane = vi.fn(
       (_plane: THREE.Plane, point: THREE.Vector3) => {
         point.copy(intersection);
@@ -114,8 +110,7 @@ describe('WallDrawer', () => {
       clientY: 0,
     } as PointerEvent);
     expect(result?.x).toBe(intersection.x);
-    // getPoint converts the intersection's Z axis to world coordinates
-    expect(result?.z).toBe(screenToWorldZ(intersection.z));
+    expect(result?.y).toBe(intersection.y);
     drawer.disable();
   });
 
@@ -134,7 +129,7 @@ describe('WallDrawer', () => {
 
   it('single click after moving cursor starts in default direction', () => {
     const { drawer, point, addWallWithHistory } = createDrawer();
-    point.set(0, 0, 1);
+    point.set(0, 1, 0);
     (drawer as any).onMove({} as PointerEvent);
     point.set(0, 0, 0);
     (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
@@ -161,34 +156,34 @@ describe('WallDrawer', () => {
     const { drawer, point } = createDrawer();
     point.set(0, 0, 0);
     (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
-    point.set(2, 0, 1);
+    point.set(2, 1, 0);
     (drawer as any).onMove({} as PointerEvent);
     const preview = (drawer as any).preview as THREE.Mesh;
     const dist = preview.scale.x;
-    const angle = preview.rotation.y;
+    const angle = preview.rotation.z;
     const endX = preview.position.x + dist * Math.cos(angle);
-    const endZ = preview.position.z + dist * Math.sin(angle);
+    const endY = preview.position.y + dist * Math.sin(angle);
     expect(endX).toBeCloseTo(2);
-    expect(endZ).toBeCloseTo(0);
+    expect(endY).toBeCloseTo(0);
     drawer.disable();
   });
   it('locks to vertical direction when snapRightAngles is enabled', () => {
     const { drawer, point, addWallWithHistory } = createDrawer();
     point.set(0, 0, 0);
     (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
-    point.set(0.1, 0, 2);
+    point.set(0.1, 2, 0);
     (drawer as any).onMove({} as PointerEvent);
     const preview = (drawer as any).preview as THREE.Mesh;
     const dist = preview.scale.x;
-    const angle = preview.rotation.y;
+    const angle = preview.rotation.z;
     const endX = preview.position.x + dist * Math.cos(angle);
-    const endZ = preview.position.z + dist * Math.sin(angle);
+    const endY = preview.position.y + dist * Math.sin(angle);
     expect(endX).toBeCloseTo(0);
-    expect(endZ).toBeCloseTo(2);
+    expect(endY).toBeCloseTo(2);
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
       { x: 0, y: 0 },
-      { x: 0, y: worldZToPlannerY(2) },
+      { x: 0, y: 2 },
     );
     drawer.disable();
   });
@@ -199,24 +194,24 @@ describe('WallDrawer', () => {
     });
     point.set(0, 0, 0);
     (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
-    point.set(2, 0, 1);
+    point.set(2, 1, 0);
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
       { x: 0, y: 0 },
-      { x: 2, y: worldZToPlannerY(1) },
+      { x: 2, y: 1 },
     );
     drawer.disable();
   });
 
-  it('converts negative z to positive y coordinates', () => {
+  it('handles negative y coordinates', () => {
     const { drawer, point, addWallWithHistory } = createDrawer();
     point.set(0, 0, 0);
     (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
-    point.set(0, 0, -2);
+    point.set(0, -2, 0);
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
       { x: 0, y: 0 },
-      { x: 0, y: worldZToPlannerY(-2) },
+      { x: 0, y: -2 },
     );
     drawer.disable();
   });

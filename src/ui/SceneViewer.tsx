@@ -131,8 +131,8 @@ const SceneViewer: React.FC<Props> = ({
         c.enableDamping = true;
         c.enableRotate = false;
         three.setControls(c);
-        three.camera.position.set(0, 10, 0);
-        three.camera.up.set(0, 0, -1);
+        three.camera.position.set(0, 0, 10);
+        three.camera.up.set(0, 1, 0);
         c.target.set(0, 0, 0);
         three.camera.lookAt(0, 0, 0);
         c.update();
@@ -161,7 +161,7 @@ const SceneViewer: React.FC<Props> = ({
           three.camera.position.copy(savedView.current.pos);
           c.target.copy(savedView.current.target);
         }
-        three.camera.up.set(0, 1, 0);
+        three.camera.up.set(0, 0, 1);
         c.update();
         const base = Math.max(
           1,
