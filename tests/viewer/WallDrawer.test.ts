@@ -134,6 +134,33 @@ describe('WallDrawer', () => {
     expect(preview.position.x).toBeCloseTo(0);
     drawer.disable();
   });
+  it('preview end matches cursor position (positive z)', () => {
+    const { drawer, point } = createDrawer();
+    point.set(0, 0, 0);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
+    point.set(2, 0, 1);
+    (drawer as any).onMove({} as PointerEvent);
+    const preview = (drawer as any).preview as THREE.Mesh;
+    preview.updateMatrixWorld();
+    const end = new THREE.Vector3(1, 0, 0).applyMatrix4(preview.matrixWorld);
+    expect(end.x).toBeCloseTo(point.x);
+    expect(end.z).toBeCloseTo(point.z);
+    drawer.disable();
+  });
+  it('preview end matches cursor position (negative z)', () => {
+    const { drawer, point } = createDrawer();
+    point.set(0, 0, 0);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
+    point.set(2, 0, -1);
+    (drawer as any).onMove({} as PointerEvent);
+    const preview = (drawer as any).preview as THREE.Mesh;
+    preview.updateMatrixWorld();
+    const end = new THREE.Vector3(1, 0, 0).applyMatrix4(preview.matrixWorld);
+    expect(end.x).toBeCloseTo(point.x);
+    expect(end.z).toBeCloseTo(point.z);
+    drawer.disable();
+  });
+
 
   it('Escape cancels drag without adding wall', () => {
     const { drawer, point, addWallWithHistory } = createDrawer();

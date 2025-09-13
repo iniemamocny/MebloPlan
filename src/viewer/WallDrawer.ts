@@ -142,17 +142,15 @@ export default class WallDrawer {
         this.cursor.position.copy(point).setY(0.001);
       }
       const dx = point.x - this.start.x;
-      const dz = this.start.z - point.z; // reverse Z axis
-      const distX = Math.abs(dx);
-      const distZ = Math.abs(dz);
-      const dist = Math.sqrt(distX * distX + distZ * distZ);
+      const dz = point.z - this.start.z;
+      const dist = Math.sqrt(dx * dx + dz * dz);
       this.preview.scale.x = dist;
       this.preview.position.set(
         this.start.x,
         this.preview.position.y,
         this.start.z,
       );
-      this.preview.rotation.y = Math.atan2(dz, dx);
+      this.preview.rotation.y = Math.atan2(-dz, dx);
       const geometry = this.preview.geometry as THREE.BufferGeometry;
       geometry.computeBoundingBox();
       geometry.computeBoundingSphere();
