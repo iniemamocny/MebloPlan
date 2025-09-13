@@ -179,6 +179,20 @@ describe('WallDrawer', () => {
     drawer.disable();
   });
 
+  it('pointer cancellation ends drag without adding wall', () => {
+    const { drawer, point, addWallWithHistory } = createDrawer();
+    point.set(0, 0, 0);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
+    point.set(1, 0, 0);
+    (drawer as any).onMove({} as PointerEvent);
+    (drawer as any).onCancel({} as PointerEvent);
+    expect((drawer as any).preview).toBeNull();
+    point.set(1, 0, 0);
+    (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
+    expect(addWallWithHistory).not.toHaveBeenCalled();
+    drawer.disable();
+  });
+
   it('finalized wall pushes history entry', () => {
     const { drawer, point, history } = createDrawer();
     point.set(0, 0, 0);
