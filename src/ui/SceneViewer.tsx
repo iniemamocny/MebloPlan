@@ -941,22 +941,6 @@ const SceneViewer: React.FC<Props> = ({
       };
     }, [mode, threeRef]);
 
-  const handleZoomIn = () => {
-    const controls = threeRef.current?.controls;
-    if (controls) {
-      controls.dollyIn(0.95);
-      controls.update();
-    }
-  };
-
-  const handleZoomOut = () => {
-    const controls = threeRef.current?.controls;
-    if (controls) {
-      controls.dollyOut(0.95);
-      controls.update();
-    }
-  };
-
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
       <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
@@ -988,16 +972,6 @@ const SceneViewer: React.FC<Props> = ({
         }}
         visible={showRadial}
       />
-      {mode === null && (
-        <div className="zoomControls">
-          <button className="btnGhost" onClick={handleZoomIn}>
-            +
-          </button>
-          <button className="btnGhost" onClick={handleZoomOut}>
-            −
-          </button>
-        </div>
-      )}
       {mode && showHint && (
         <div
           style={{
