@@ -161,6 +161,21 @@ describe('WallDrawer', () => {
     drawer.disable();
   });
 
+  it('uses pointerup coordinates when lastPoint is stale', () => {
+    const { drawer, point, addWallWithHistory } = createDrawer();
+    point.set(0, 0, 0);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
+    point.set(1, 0, 0);
+    (drawer as any).onMove({} as PointerEvent);
+    point.set(2, 0, 0);
+    (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
+    expect(addWallWithHistory).toHaveBeenCalledWith(
+      { x: worldToPlanner(0, 'x'), y: worldToPlanner(0, 'z') },
+      { x: worldToPlanner(2, 'x'), y: worldToPlanner(0, 'z') },
+    );
+    drawer.disable();
+  });
+
   it('places preview using XZ coordinates', () => {
     const { drawer, point } = createDrawer();
     point.set(1, 0, 2);

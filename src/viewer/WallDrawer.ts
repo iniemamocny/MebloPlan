@@ -233,7 +233,7 @@ export default class WallDrawer {
     if (!this.dragging) return;
     this.dragging = false;
     if (!this.start) return;
-    const point = this.lastPoint?.clone() ?? this.getPoint(e);
+    const point = this.getPoint(e) ?? this.lastPoint?.clone();
     if (!point) {
       this.start = null;
       this.disposePreview();
