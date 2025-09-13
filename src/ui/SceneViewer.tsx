@@ -131,10 +131,11 @@ const SceneViewer: React.FC<Props> = ({
         c.enableDamping = true;
         c.enableRotate = false;
         three.setControls(c);
-        three.camera.position.set(0, 0, 10);
+        const pos = savedView.current.pos;
+        three.camera.position.set(pos.x, 10, pos.z);
         three.camera.up.set(0, 1, 0);
-        c.target.set(0, 0, 0);
-        three.camera.lookAt(0, 0, 0);
+        c.target.copy(savedView.current.target);
+        three.camera.lookAt(c.target);
         c.update();
         const updateGrid = () => {
           const base = Math.max(
@@ -161,7 +162,7 @@ const SceneViewer: React.FC<Props> = ({
           three.camera.position.copy(savedView.current.pos);
           c.target.copy(savedView.current.target);
         }
-        three.camera.up.set(0, 0, 1);
+        three.camera.up.set(0, 1, 0);
         c.update();
         const base = Math.max(
           1,

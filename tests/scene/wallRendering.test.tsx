@@ -214,7 +214,9 @@ describe('Scene wall rendering', () => {
 
     const wallGroup = threeRef.current.group.children[0];
     const [mesh1, mesh2] = wallGroup.children as THREE.Mesh[];
+    expect(mesh1.rotation.x).toBeCloseTo(0);
     expect(mesh1.rotation.z).toBeCloseTo(0);
+    expect(mesh2.rotation.x).toBeCloseTo(0);
     expect(mesh2.rotation.z).toBeCloseTo(0);
   });
 
