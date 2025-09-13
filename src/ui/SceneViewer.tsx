@@ -302,6 +302,51 @@ const SceneViewer: React.FC<Props> = ({
   }, [threeRef]);
 
   useEffect(() => {
+    const container = containerRef.current;
+    const three = threeRef.current;
+    if (!container || !three) return;
+    if (typeof WebGLRenderingContext === 'undefined') return;
+    const size = 80;
+    const overlay = document.createElement('div');
+    overlay.style.position = 'absolute';
+    overlay.style.bottom = '0';
+    overlay.style.right = '0';
+    overlay.style.width = `${size}px`;
+    overlay.style.height = `${size}px`;
+    overlay.style.pointerEvents = 'none';
+    container.appendChild(overlay);
+
+    const axesRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    axesRenderer.setSize(size, size);
+    axesRenderer.setClearColor(0x000000, 0);
+    axesRenderer.domElement.style.pointerEvents = 'none';
+    overlay.appendChild(axesRenderer.domElement);
+
+    const axesScene = new THREE.Scene();
+    const axesCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
+    axesCamera.position.set(2, 2, 2);
+    axesCamera.lookAt(0, 0, 0);
+    const axes = new THREE.AxesHelper(1);
+    axesScene.add(axes);
+
+    let anim: number;
+    const renderGizmo = () => {
+      anim = requestAnimationFrame(renderGizmo);
+      if (threeRef.current?.camera) {
+        axesCamera.quaternion.copy(threeRef.current.camera.quaternion);
+      }
+      axesRenderer.render(axesScene, axesCamera);
+    };
+    renderGizmo();
+
+    return () => {
+      cancelAnimationFrame(anim);
+      axesRenderer.dispose();
+      overlay.remove();
+    };
+  }, [threeRef]);
+
+  useEffect(() => {
     const three = threeRef.current;
     if (!three) return;
     if (viewMode === '2d') {
