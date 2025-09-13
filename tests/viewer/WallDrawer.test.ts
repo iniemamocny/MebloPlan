@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as THREE from 'three';
 import WallDrawer from '../../src/viewer/WallDrawer';
-import { GROUND_NORMAL } from '../../src/utils/coordinateSystem';
+import { GROUND_NORMAL, worldToPlanner } from '../../src/utils/coordinateSystem';
 
 const THICKNESS = 100; // mm
 const HEIGHT = 2500; // mm
@@ -129,8 +129,8 @@ describe('WallDrawer', () => {
     point.set(SNAP / 1000, 0, 0);
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
-      { x: 0, y: 0 },
-      { x: SNAP / 1000, y: 0 },
+      { x: worldToPlanner(0, 'x'), y: worldToPlanner(0, 'z') },
+      { x: worldToPlanner(SNAP / 1000, 'x'), y: worldToPlanner(0, 'z') },
     );
     drawer.disable();
   });
@@ -143,8 +143,8 @@ describe('WallDrawer', () => {
     (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
-      { x: 0, y: 0 },
-      { x: SNAP / 1000, y: 0 },
+      { x: worldToPlanner(0, 'x'), y: worldToPlanner(0, 'z') },
+      { x: worldToPlanner(SNAP / 1000, 'x'), y: worldToPlanner(0, 'z') },
     );
     drawer.disable();
   });
@@ -200,8 +200,8 @@ describe('WallDrawer', () => {
     expect(endZ).toBeCloseTo(2);
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
-      { x: 0, y: 0 },
-      { x: 0, y: -2 },
+      { x: worldToPlanner(0, 'x'), y: worldToPlanner(0, 'z') },
+      { x: worldToPlanner(0, 'x'), y: worldToPlanner(2, 'z') },
     );
     drawer.disable();
   });
@@ -215,8 +215,8 @@ describe('WallDrawer', () => {
     point.set(2, 0, 1);
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
-      { x: 0, y: 0 },
-      { x: 2, y: -1 },
+      { x: worldToPlanner(0, 'x'), y: worldToPlanner(0, 'z') },
+      { x: worldToPlanner(2, 'x'), y: worldToPlanner(1, 'z') },
     );
     drawer.disable();
   });
@@ -228,8 +228,8 @@ describe('WallDrawer', () => {
     point.set(0, 0, -2);
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
-      { x: 0, y: 0 },
-      { x: 0, y: 2 },
+      { x: worldToPlanner(0, 'x'), y: worldToPlanner(0, 'z') },
+      { x: worldToPlanner(0, 'x'), y: worldToPlanner(-2, 'z') },
     );
     drawer.disable();
   });
@@ -244,10 +244,10 @@ describe('WallDrawer', () => {
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledTimes(1);
     const [[start, end]] = addWallWithHistory.mock.calls;
-    expect(start.x).toBeCloseTo(0.1);
-    expect(start.y).toBeCloseTo(0);
-    expect(end.x).toBeCloseTo(0.3);
-    expect(end.y).toBeCloseTo(0);
+    expect(start.x).toBeCloseTo(worldToPlanner(0.1, 'x'));
+    expect(start.y).toBeCloseTo(worldToPlanner(0, 'z'));
+    expect(end.x).toBeCloseTo(worldToPlanner(0.3, 'x'));
+    expect(end.y).toBeCloseTo(worldToPlanner(0, 'z'));
     drawer.disable();
   });
 
@@ -302,7 +302,9 @@ describe('WallDrawer', () => {
     point.set(1, 0, 0);
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(history.length).toBe(1);
-    expect(history[0]).toBe('Added wall from (0, 0) to (1, 0)');
+    expect(history[0]).toBe(
+      `Added wall from (${worldToPlanner(0, 'x')}, ${worldToPlanner(0, 'z')}) to (${worldToPlanner(1, 'x')}, ${worldToPlanner(0, 'z')})`,
+    );
     drawer.disable();
   });
 
