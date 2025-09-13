@@ -155,12 +155,15 @@ const SceneViewer: React.FC<Props> = ({
         c.screenSpacePanning = true;
         three.setControls(c);
         const pos = savedView.current.pos;
-        three.camera.position.set(pos.x, pos.y, 10);
-        three.camera.up.set(0, 1, 0);
-        c.target.set(pos.x, pos.y, 0);
+        const height = 10;
+        three.camera.position.set(pos.x, height, pos.z);
+        three.camera.up.set(0, 0, -1);
+        c.target.set(pos.x, 0, pos.z);
         three.camera.lookAt(c.target);
         c.update();
         const updateGrid = () => {
+          three.camera.position.y = height;
+          c.target.y = 0;
           const base = Math.max(
             1,
             Math.round(16 / (usePlannerStore.getState().gridSize / 100)),
