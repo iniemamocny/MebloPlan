@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as THREE from 'three';
 import WallDrawer from '../../src/viewer/WallDrawer';
+import { GROUND_NORMAL } from '../../src/utils/coordinateSystem';
 
 const THICKNESS = 100; // mm
 const HEIGHT = 2500; // mm
@@ -65,6 +66,13 @@ describe('WallDrawer', () => {
     const geom = cursor.geometry as THREE.PlaneGeometry;
     expect((geom.parameters as any).width).toBeCloseTo(THICKNESS / 1000);
     expect((geom.parameters as any).height).toBeCloseTo(THICKNESS / 1000);
+    drawer.disable();
+  });
+
+  it('uses shared ground plane normal', () => {
+    const { drawer } = createDrawer();
+    const plane = (drawer as any).plane as THREE.Plane;
+    expect(plane.normal.equals(GROUND_NORMAL)).toBe(true);
     drawer.disable();
   });
 

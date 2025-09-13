@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 /**
  * Defines orientation of global coordinate systems and provides helpers to
  * convert values between them.
@@ -28,6 +30,28 @@ export const plannerAxes: Axes = { x: 1, y: 1, z: 1 };
 
 /** Screen (DOM) axes relative to the world. Y grows downward in the DOM. */
 export const screenAxes: Axes = { x: 1, y: -1, z: 1 };
+
+/** Shared normal for the ground plane (XZ plane, Y up). */
+export const GROUND_NORMAL = new THREE.Vector3(0, 1, 0);
+
+/**
+ * Create a plane representing the ground (XZ plane).
+ */
+export function groundPlane(): THREE.Plane {
+  return new THREE.Plane(GROUND_NORMAL.clone(), 0);
+}
+
+/**
+ * Orient an object so that its surface lies on the ground plane.
+ * Useful for aligning geometries created in the XY plane to the XZ plane.
+ */
+export function alignToGround(obj: THREE.Object3D) {
+  const quat = new THREE.Quaternion().setFromUnitVectors(
+    new THREE.Vector3(0, 0, 1),
+    GROUND_NORMAL,
+  );
+  obj.applyQuaternion(quat);
+}
 
 /**
  * Converts a coordinate value from one axis in the source system to an axis in

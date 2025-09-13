@@ -3,7 +3,7 @@ import type { WebGLRenderer, Camera } from 'three';
 import type { UseBoundStore, StoreApi } from 'zustand';
 import { usePlannerStore } from '../state/store';
 import type { Module3D } from '../types';
-import { screenToWorld } from '../utils/coordinateSystem';
+import { screenToWorld, groundPlane } from '../utils/coordinateSystem';
 
 interface PlannerStore {
   modules: Module3D[];
@@ -16,7 +16,7 @@ export default class CabinetDragger {
   private group: THREE.Group;
   private store: UseBoundStore<StoreApi<PlannerStore>>;
   private raycaster = new THREE.Raycaster();
-  private plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  private plane = groundPlane();
   private draggingId: string | null = null;
   private offset = new THREE.Vector3();
 

@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
 import { usePlannerStore } from '../state/store';
 import CabinetDragger from '../viewer/CabinetDragger';
+import { alignToGround } from '../utils/coordinateSystem';
 
 export function setupThree(container: HTMLElement) {
   const scene = new THREE.Scene();
@@ -80,7 +81,7 @@ export function setupThree(container: HTMLElement) {
     );
     const material = new THREE.LineBasicMaterial({ color: 0x515152 });
     grid = new THREE.LineSegments(geometry, material);
-    grid.rotateX(-Math.PI / 2);
+    alignToGround(grid);
     scene.add(grid);
     currentDivX = divX;
     currentDivY = divY;
@@ -94,7 +95,7 @@ export function setupThree(container: HTMLElement) {
     new THREE.PlaneGeometry(boardWidth, boardHeight),
     new THREE.MeshStandardMaterial({ color: 0xf9fafc, side: THREE.DoubleSide }),
   );
-  floor.rotateX(-Math.PI / 2);
+  alignToGround(floor);
   scene.add(floor);
 
   const group = new THREE.Group();
