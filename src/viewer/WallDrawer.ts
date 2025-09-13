@@ -10,6 +10,7 @@ interface PlannerStore {
   addWallWithHistory: (start: ShapePoint, end: ShapePoint) => void;
   snapToGrid: boolean;
   gridSize: number;
+  snapRightAngles: boolean;
 }
 
 export default class WallDrawer {
@@ -145,7 +146,8 @@ export default class WallDrawer {
   }
 
   private constrainPoint(point: THREE.Vector3) {
-    if (!this.start) return point;
+    const { snapRightAngles } = this.store.getState();
+    if (!this.start || !snapRightAngles) return point;
     const dx = Math.abs(point.x - this.start.x);
     const dz = Math.abs(point.z - this.start.z);
     if (dx > dz) {

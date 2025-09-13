@@ -36,6 +36,7 @@ function createDrawer(overrides: Partial<any> = {}) {
     gridSize: 100,
     snapLength: SNAP,
     wallDefaults: { height: HEIGHT, thickness: THICKNESS },
+    snapRightAngles: true,
     addWallWithHistory,
     ...overrides,
   };
@@ -167,7 +168,7 @@ describe('WallDrawer', () => {
     expect(endZ).toBeCloseTo(0);
     drawer.disable();
   });
-  it('locks to vertical direction when dragging mostly vertically', () => {
+  it('locks to vertical direction when snapRightAngles is enabled', () => {
     const { drawer, point, addWallWithHistory } = createDrawer();
     point.set(0, 0, 0);
     (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
@@ -184,6 +185,21 @@ describe('WallDrawer', () => {
     expect(addWallWithHistory).toHaveBeenCalledWith(
       { x: 0, y: 0 },
       { x: 0, y: -2 },
+    );
+    drawer.disable();
+  });
+
+  it('allows free angles when snapRightAngles is disabled', () => {
+    const { drawer, point, addWallWithHistory } = createDrawer({
+      snapRightAngles: false,
+    });
+    point.set(0, 0, 0);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
+    point.set(2, 0, 1);
+    (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
+    expect(addWallWithHistory).toHaveBeenCalledWith(
+      { x: 0, y: 0 },
+      { x: 2, y: -1 },
     );
     drawer.disable();
   });
