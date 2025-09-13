@@ -2,6 +2,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as THREE from 'three';
 import WallDrawer from '../../src/viewer/WallDrawer';
+import {
+  screenToWorldZ,
+  worldZToPlannerY,
+} from '../../src/utils/coordinates';
 
 const THICKNESS = 100; // mm
 const HEIGHT = 2500; // mm
@@ -110,8 +114,8 @@ describe('WallDrawer', () => {
       clientY: 0,
     } as PointerEvent);
     expect(result?.x).toBe(intersection.x);
-    // getPoint flips the intersection's Z axis
-    expect(result?.z).toBe(-intersection.z);
+    // getPoint converts the intersection's Z axis to world coordinates
+    expect(result?.z).toBe(screenToWorldZ(intersection.z));
     drawer.disable();
   });
 
@@ -184,7 +188,7 @@ describe('WallDrawer', () => {
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
       { x: 0, y: 0 },
-      { x: 0, y: -2 },
+      { x: 0, y: worldZToPlannerY(2) },
     );
     drawer.disable();
   });
@@ -199,7 +203,7 @@ describe('WallDrawer', () => {
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
       { x: 0, y: 0 },
-      { x: 2, y: -1 },
+      { x: 2, y: worldZToPlannerY(1) },
     );
     drawer.disable();
   });
@@ -212,7 +216,7 @@ describe('WallDrawer', () => {
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
       { x: 0, y: 0 },
-      { x: 0, y: 2 },
+      { x: 0, y: worldZToPlannerY(-2) },
     );
     drawer.disable();
   });
