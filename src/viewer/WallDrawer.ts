@@ -126,9 +126,12 @@ export default class WallDrawer {
     const intersection = this.raycaster.ray.intersectPlane(this.plane, point);
     if (!intersection) return null;
     if (!isFinite(intersection.x) || !isFinite(intersection.z)) return null;
+    // Flip the Z axis so dragging downwards on screen translates to
+    // increasing coordinates in our floor plan space.
+    point.set(intersection.x, 0, -intersection.z);
     // Return raw coordinates without snapping to grid so the wall can be drawn
     // at any angle. This enables free rotation of the segment during preview.
-    return new THREE.Vector3(intersection.x, 0, intersection.z);
+    return point;
   }
 
   private onMove = (e: PointerEvent) => {
