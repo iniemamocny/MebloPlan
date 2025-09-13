@@ -156,10 +156,6 @@ export default class WallDrawer {
         this.start.z,
       );
       this.preview.rotation.y = Math.atan2(dz, dx);
-      const geometry = this.preview.geometry as THREE.BufferGeometry;
-      geometry.computeBoundingBox();
-      geometry.computeBoundingSphere();
-      geometry.computeVertexNormals();
     }
   };
 
@@ -179,6 +175,8 @@ export default class WallDrawer {
     const height = state.wallDefaults.height / 1000;
     const geom = new THREE.BoxGeometry(1, height, this.thickness);
     geom.translate(0.5, 0, 0);
+    geom.computeBoundingBox();
+    geom.computeBoundingSphere();
     const mat = new THREE.MeshBasicMaterial({
       color: 0x888888,
       transparent: true,
