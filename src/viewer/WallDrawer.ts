@@ -142,7 +142,7 @@ export default class WallDrawer {
         this.cursor.position.copy(point).setY(0.001);
       }
       const dx = point.x - this.start.x;
-      const dz = this.start.z - point.z; // reverse Z axis
+      const dz = point.z - this.start.z;
       const distX = Math.abs(dx);
       const distZ = Math.abs(dz);
       const dist = Math.sqrt(distX * distX + distZ * distZ);
