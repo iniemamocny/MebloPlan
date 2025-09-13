@@ -10,6 +10,7 @@ import { CabinetConfig, PlayerMode } from './types';
 import SlidingPanel from './components/SlidingPanel';
 import GlobalSettings from './panels/GlobalSettings';
 import PlayPanel from './panels/PlayPanel';
+import type { ThreeContext } from '../scene/engine';
 
 interface MainTabsProps {
   t: (key: string, opts?: any) => string;
@@ -44,7 +45,7 @@ interface MainTabsProps {
   setBoardHasGrain: (v: boolean) => void;
   addCountertop: boolean;
   setAddCountertop: (v: boolean) => void;
-  threeRef: React.MutableRefObject<any>;
+  threeRef: React.MutableRefObject<ThreeContext | null>;
   setMode: (v: PlayerMode) => void;
   startMode: Exclude<PlayerMode, null>;
   setStartMode: (v: Exclude<PlayerMode, null>) => void;

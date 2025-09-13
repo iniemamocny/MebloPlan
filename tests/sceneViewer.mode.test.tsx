@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import SceneViewer from '../src/ui/SceneViewer';
 import { usePlannerStore } from '../src/state/store';
 import { PlayerMode, PLAYER_MODES } from '../src/ui/types';
+import type { ThreeContext } from '../src/scene/engine';
 
 vi.mock('three/examples/jsm/controls/OrbitControls.js', () => ({
   OrbitControls: vi.fn().mockImplementation(() => ({
@@ -79,7 +80,7 @@ vi.mock('../src/ui/components/TouchJoystick', () => ({ default: () => null }));
 
 describe('SceneViewer hotbar visibility', () => {
   it('renders hotbar only when mode is not null', () => {
-    const threeRef: any = { current: null };
+    const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
     const setMode = vi.fn();
     const container = document.createElement('div');
     document.body.appendChild(container);
@@ -120,7 +121,7 @@ describe('SceneViewer mode bar visibility', () => {
       configurable: true,
       value: 1,
     });
-    const threeRef: any = { current: null };
+    const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
     const setMode = vi.fn();
     const container = document.createElement('div');
     document.body.appendChild(container);
@@ -163,7 +164,7 @@ describe('SceneViewer mode bar visibility', () => {
 
 describe('SceneViewer cabinetDragger mode control', () => {
   it('enables cabinetDragger only in furnish mode', () => {
-    const threeRef: any = { current: null };
+    const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
     const setMode = vi.fn();
     const container = document.createElement('div');
     document.body.appendChild(container);
@@ -193,7 +194,7 @@ describe('SceneViewer cabinetDragger mode control', () => {
 
 describe('SceneViewer Tab key', () => {
   it('does nothing when mode is null', () => {
-    const threeRef: any = { current: null };
+    const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
     const setMode = vi.fn();
     const container = document.createElement('div');
     document.body.appendChild(container);
@@ -214,7 +215,7 @@ describe('SceneViewer Tab key', () => {
   });
 
   it('cycles through modes when active', () => {
-    const threeRef: any = { current: null };
+    const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
     let mode: PlayerMode = PLAYER_MODES[0];
     const setMode = vi.fn((updater: any) => {
       mode = typeof updater === 'function' ? updater(mode) : updater;
@@ -243,7 +244,7 @@ describe('SceneViewer Tab key', () => {
 
 describe('SceneViewer hotbar keys', () => {
   it('does not change selectedItemSlot when mode is null', () => {
-    const threeRef: any = { current: null };
+    const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
     const setMode = vi.fn();
     const container = document.createElement('div');
     document.body.appendChild(container);
@@ -273,7 +274,7 @@ describe('SceneViewer hotbar keys', () => {
   });
 
   it('changes selectedItemSlot when mode is active', () => {
-    const threeRef: any = { current: null };
+    const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
     const setMode = vi.fn();
     const container = document.createElement('div');
     document.body.appendChild(container);

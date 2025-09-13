@@ -5,6 +5,7 @@ import { act } from 'react';
 import ReactDOM from 'react-dom/client';
 import * as THREE from 'three';
 import SceneViewer from '../src/ui/SceneViewer';
+import type { ThreeContext } from '../src/scene/engine';
 
 const visibleStates: boolean[] = [];
 
@@ -86,7 +87,7 @@ vi.mock('../src/ui/components/RadialMenu', () => ({
 describe('SceneViewer RadialMenu visibility', () => {
   it('shows on Q down and hides on Q up', () => {
     visibleStates.length = 0;
-    const threeRef: any = { current: null };
+    const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
     const setMode = vi.fn();
     const container = document.createElement('div');
     document.body.appendChild(container);
@@ -121,7 +122,7 @@ describe('SceneViewer RadialMenu visibility', () => {
     const modes = ['furnish', 'decorate'] as const;
     for (const m of modes) {
       visibleStates.length = 0;
-      const threeRef: any = { current: null };
+      const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
       const setMode = vi.fn();
       const container = document.createElement('div');
       document.body.appendChild(container);

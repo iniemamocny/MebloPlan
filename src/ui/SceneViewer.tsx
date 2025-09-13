@@ -1,10 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import type { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
-import type CabinetDragger from '../viewer/CabinetDragger';
 import WallDrawer from '../viewer/WallDrawer';
-import { setupThree } from '../scene/engine';
+import { setupThree, ThreeContext } from '../scene/engine';
 import { buildCabinetMesh } from '../scene/cabinetBuilder';
 import { FAMILY } from '../core/catalog';
 import { usePlannerStore, legCategories } from '../state/store';
@@ -25,38 +23,13 @@ import {
   worldAxes,
 } from '../utils/coordinateSystem';
 
-interface ThreeContext {
-  scene: THREE.Scene;
-  camera: THREE.Camera;
-  renderer: THREE.WebGLRenderer;
-  controls: OrbitControls;
-  playerControls: PointerLockControls;
-  group: THREE.Group;
-  cabinetDragger: CabinetDragger;
-  perspectiveCamera: THREE.PerspectiveCamera;
-  orthographicCamera: THREE.OrthographicCamera;
+type ThreeWithExtras = ThreeContext & {
   axesHelper?: THREE.AxesHelper;
-  setCamera?: (cam: THREE.Camera) => void;
-  setControls?: (c: OrbitControls) => void;
-  updateGrid?: (divisions: number) => void;
-  setPlayerParams?: (p: { height?: number; speed?: number }) => void;
-  setMove?: (m: {
-    forward: boolean;
-    backward: boolean;
-    left: boolean;
-    right: boolean;
-  }) => void;
-  setMoveFromJoystick?: (v: { x: number; y: number }) => void;
-  updateCameraRotation?: (dx: number, dy: number) => void;
-  resetCameraRotation?: () => void;
-  onJump?: () => void;
-  onCrouch?: (active: boolean) => void;
-  dispose?: () => void;
   showPointerLockError?: (msg: string) => void;
-}
+};
 
 interface Props {
-  threeRef: React.MutableRefObject<ThreeContext | null>;
+  threeRef: React.MutableRefObject<ThreeWithExtras | null>;
   addCountertop: boolean;
   mode: PlayerMode;
   setMode: React.Dispatch<React.SetStateAction<PlayerMode>>;
@@ -275,7 +248,7 @@ const SceneViewer: React.FC<Props> = ({
 
   useEffect(() => {
     if (!containerRef.current) return;
-    threeRef.current = setupThree(containerRef.current) as ThreeContext;
+    threeRef.current = setupThree(containerRef.current);
     wallDrawerRef.current = new WallDrawer(
       threeRef.current.renderer,
       () => threeRef.current!.camera,

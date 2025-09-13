@@ -5,6 +5,7 @@ import { act } from 'react';
 import ReactDOM from 'react-dom/client';
 import * as THREE from 'three';
 import SceneViewer from '../src/ui/SceneViewer';
+import type { ThreeContext } from '../src/scene/engine';
 
 vi.mock('three/examples/jsm/controls/OrbitControls.js', () => ({
   OrbitControls: vi.fn().mockImplementation(() => ({
@@ -81,7 +82,7 @@ vi.mock('../src/ui/components/TouchJoystick', () => ({ default: () => null }));
 
 describe('SceneViewer axes gizmo', () => {
   it('renders axes helper overlay', () => {
-    const threeRef: any = { current: null };
+    const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = ReactDOM.createRoot(container);
@@ -104,7 +105,7 @@ describe('SceneViewer axes gizmo', () => {
   it.each(["3d", "2d"] as const)(
     "matches world axes in %s view",
     async (viewMode) => {
-      const threeRef: any = { current: null };
+      const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
       const container = document.createElement("div");
       document.body.appendChild(container);
       const root = ReactDOM.createRoot(container);
@@ -131,7 +132,7 @@ describe('SceneViewer axes gizmo', () => {
   );
 
   it('matches world axes after switching view modes', async () => {
-    const threeRef: any = { current: null };
+    const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = ReactDOM.createRoot(container);

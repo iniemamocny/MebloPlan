@@ -5,6 +5,7 @@ import { act } from 'react';
 import ReactDOM from 'react-dom/client';
 import * as THREE from 'three';
 import SceneViewer from '../src/ui/SceneViewer';
+import type { ThreeContext } from '../src/scene/engine';
 
 vi.mock('../src/ui/components/ItemHotbar', () => ({
   default: () => null,
@@ -81,7 +82,7 @@ vi.mock('../src/scene/engine', () => {
 
 describe('SceneViewer view mode', () => {
   it('uses orthographic camera in 2d mode', () => {
-    const threeRef: any = { current: null };
+    const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
     const setMode = vi.fn();
     const setViewMode = vi.fn();
     const container = document.createElement('div');

@@ -1,9 +1,10 @@
 import React from 'react';
 import { usePlannerStore } from '../../state/store';
 import { PlayerMode, PlayerSubMode, PLAYER_MODES } from '../types';
+import type { ThreeContext } from '../../scene/engine';
 
 interface Props {
-  threeRef: React.MutableRefObject<any>;
+  threeRef: React.MutableRefObject<ThreeContext | null>;
   t: (key: string, opts?: any) => string;
   setMode: (v: PlayerMode) => void;
   startMode: PlayerSubMode;
