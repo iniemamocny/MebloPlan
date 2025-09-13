@@ -7,7 +7,7 @@ const THICKNESS = 100; // mm
 const HEIGHT = 2500; // mm
 const SNAP = 1000; // mm default length for single click
 
-function createDrawer() {
+function createDrawer(overrides: Partial<any> = {}) {
   const canvas = document.createElement('canvas');
   canvas.getBoundingClientRect = () => ({
     left: 0,
@@ -33,9 +33,11 @@ function createDrawer() {
   });
   const state = {
     snapToGrid: false,
+    gridSize: 100,
     snapLength: SNAP,
     wallDefaults: { height: HEIGHT, thickness: THICKNESS },
     addWallWithHistory,
+    ...overrides,
   };
   const store = { getState: () => state } as any;
   const drawer = new WallDrawer(renderer, () => camera, group, store);
@@ -85,6 +87,7 @@ describe('WallDrawer', () => {
     const group = new THREE.Group();
     const state = {
       snapToGrid: false,
+      gridSize: 100,
       snapLength: SNAP,
       wallDefaults: { height: HEIGHT, thickness: THICKNESS },
       addWallWithHistory: vi.fn(),
@@ -163,7 +166,23 @@ describe('WallDrawer', () => {
     expect(endZ).toBeCloseTo(point.z);
     drawer.disable();
   });
-
+  it('snaps points to grid when enabled', () => {
+    const { drawer, point, addWallWithHistory } = createDrawer({
+      snapToGrid: true,
+      gridSize: 100,
+    });
+    point.set(0.12, 0, 0);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
+    point.set(0.26, 0, 0);
+    (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
+    expect(addWallWithHistory).toHaveBeenCalledTimes(1);
+    const [[start, end]] = addWallWithHistory.mock.calls;
+    expect(start.x).toBeCloseTo(0.1);
+    expect(start.y).toBeCloseTo(0);
+    expect(end.x).toBeCloseTo(0.3);
+    expect(end.y).toBeCloseTo(0);
+    drawer.disable();
+  });
 
   it('Escape cancels drag without adding wall', () => {
     const { drawer, point, addWallWithHistory } = createDrawer();
@@ -234,6 +253,7 @@ describe('WallDrawer', () => {
     const group = new THREE.Group();
     const state = {
       snapToGrid: false,
+      gridSize: 100,
       snapLength: SNAP,
       wallDefaults: { height: HEIGHT, thickness: THICKNESS },
       addWallWithHistory: vi.fn(),

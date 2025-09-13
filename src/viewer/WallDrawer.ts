@@ -8,6 +8,8 @@ interface PlannerStore {
   snapLength: number;
   wallDefaults: { height: number; thickness: number };
   addWallWithHistory: (start: ShapePoint, end: ShapePoint) => void;
+  snapToGrid: boolean;
+  gridSize: number;
 }
 
 export default class WallDrawer {
@@ -133,8 +135,12 @@ export default class WallDrawer {
     // Flip the Z axis so dragging downwards on screen translates to
     // increasing coordinates in our floor plan space.
     point.set(intersection.x, 0, -intersection.z);
-    // Return raw coordinates without snapping to grid so the wall can be drawn
-    // at any angle. This enables free rotation of the segment during preview.
+    const { snapToGrid, gridSize } = this.store.getState();
+    if (snapToGrid) {
+      const step = gridSize / 1000;
+      point.x = Math.round(point.x / step) * step;
+      point.z = Math.round(point.z / step) * step;
+    }
     return point;
   }
 
@@ -233,7 +239,17 @@ export default class WallDrawer {
       endZ = this.start.z + dirZ * step;
       point.set(endX, 0, endZ);
     }
-    const start = { x: this.start.x, y: this.start.z };
+    let startX = this.start.x;
+    let startZ = this.start.z;
+    if (state.snapToGrid) {
+      const stepSize = state.gridSize / 1000;
+      startX = Math.round(startX / stepSize) * stepSize;
+      startZ = Math.round(startZ / stepSize) * stepSize;
+      endX = Math.round(endX / stepSize) * stepSize;
+      endZ = Math.round(endZ / stepSize) * stepSize;
+      point.set(endX, 0, endZ);
+    }
+    const start = { x: startX, y: startZ };
     const end = { x: endX, y: endZ };
     state.addWallWithHistory(start, end);
     this.start = null;
