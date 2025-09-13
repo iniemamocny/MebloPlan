@@ -151,7 +151,7 @@ describe('WallDrawer', () => {
     expect(preview.position.x).toBeCloseTo(0);
     drawer.disable();
   });
-  it('preview end matches cursor position', () => {
+  it('preview end matches constrained cursor position', () => {
     const { drawer, point } = createDrawer();
     point.set(0, 0, 0);
     (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
@@ -162,8 +162,28 @@ describe('WallDrawer', () => {
     const angle = preview.rotation.y;
     const endX = preview.position.x + dist * Math.cos(angle);
     const endZ = preview.position.z + dist * Math.sin(angle);
-    expect(endX).toBeCloseTo(point.x);
-    expect(endZ).toBeCloseTo(point.z);
+    expect(endX).toBeCloseTo(2);
+    expect(endZ).toBeCloseTo(0);
+    drawer.disable();
+  });
+  it('locks to vertical direction when dragging mostly vertically', () => {
+    const { drawer, point, addWallWithHistory } = createDrawer();
+    point.set(0, 0, 0);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
+    point.set(0.1, 0, 2);
+    (drawer as any).onMove({} as PointerEvent);
+    const preview = (drawer as any).preview as THREE.Mesh;
+    const dist = preview.scale.x;
+    const angle = preview.rotation.y;
+    const endX = preview.position.x + dist * Math.cos(angle);
+    const endZ = preview.position.z + dist * Math.sin(angle);
+    expect(endX).toBeCloseTo(0);
+    expect(endZ).toBeCloseTo(2);
+    (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
+    expect(addWallWithHistory).toHaveBeenCalledWith(
+      { x: 0, y: 0 },
+      { x: 0, y: 2 },
+    );
     drawer.disable();
   });
   it('snaps points to grid when enabled', () => {

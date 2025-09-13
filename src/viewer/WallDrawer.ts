@@ -142,9 +142,22 @@ export default class WallDrawer {
     return point;
   }
 
+  private constrainPoint(point: THREE.Vector3) {
+    if (!this.start) return point;
+    const dx = Math.abs(point.x - this.start.x);
+    const dz = Math.abs(point.z - this.start.z);
+    if (dx > dz) {
+      point.z = this.start.z;
+    } else {
+      point.x = this.start.x;
+    }
+    return point;
+  }
+
   private onMove = (e: PointerEvent) => {
     const point = this.getPoint(e);
     if (!point) return;
+    this.constrainPoint(point);
     point.y = 0.001;
     this.lastPoint = point;
     this.cursorTarget = point.clone();
@@ -212,6 +225,7 @@ export default class WallDrawer {
       this.disposePreview();
       return;
     }
+    this.constrainPoint(point);
     const state = this.store.getState();
     let endX = point.x;
     let endZ = point.z;
