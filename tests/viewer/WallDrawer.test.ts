@@ -67,7 +67,7 @@ describe('WallDrawer', () => {
     drawer.disable();
   });
 
-  it('returns intersection coordinates with Z flipped', () => {
+  it('returns intersection coordinates', () => {
     const canvas = document.createElement('canvas');
     canvas.getBoundingClientRect = () => ({
       left: 0,
@@ -96,7 +96,7 @@ describe('WallDrawer', () => {
     const drawer = new WallDrawer(renderer, () => camera, group, store);
     drawer.enable(state.wallDefaults.thickness);
 
-    const intersection = new THREE.Vector3(1.2345, 0, -2.3456);
+    const intersection = new THREE.Vector3(1.2345, 0, 2.3456);
     (drawer as any).raycaster.ray.intersectPlane = vi.fn(
       (_plane: THREE.Plane, point: THREE.Vector3) => {
         point.copy(intersection);
@@ -109,7 +109,7 @@ describe('WallDrawer', () => {
       clientY: 0,
     } as PointerEvent);
     expect(result?.x).toBe(intersection.x);
-    expect(result?.z).toBe(-intersection.z);
+    expect(result?.z).toBe(intersection.z);
     drawer.disable();
   });
 

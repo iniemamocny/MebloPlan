@@ -132,9 +132,7 @@ export default class WallDrawer {
     const intersection = this.raycaster.ray.intersectPlane(this.plane, point);
     if (!intersection) return null;
     if (!isFinite(intersection.x) || !isFinite(intersection.z)) return null;
-    // Flip the Z axis so dragging downwards on screen translates to
-    // increasing coordinates in our floor plan space.
-    point.set(intersection.x, 0, -intersection.z);
+    point.set(intersection.x, 0, intersection.z);
     const { snapToGrid, gridSize } = this.store.getState();
     if (snapToGrid) {
       const step = gridSize / 1000;
