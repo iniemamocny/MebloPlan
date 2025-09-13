@@ -369,13 +369,13 @@ const SceneViewer: React.FC<Props> = ({
     const height = wallDefaults.height / 1000;
     segments.forEach(({ start, end }) => {
       const dx = end.x - start.x;
-      const dz = end.y - start.y;
+      const dz = -(end.y - start.y);
       const length = Math.sqrt(dx * dx + dz * dz);
       const geom = new THREE.BoxGeometry(length, height, width);
       geom.translate(length / 2, 0, 0);
       const mat = new THREE.MeshStandardMaterial({ color: 0x888888 });
       const mesh = new THREE.Mesh(geom, mat);
-      mesh.position.set(start.x, height / 2, start.y);
+      mesh.position.set(start.x, height / 2, -start.y);
       mesh.rotation.y = Math.atan2(dz, dx);
       wallGroup.add(mesh);
     });
