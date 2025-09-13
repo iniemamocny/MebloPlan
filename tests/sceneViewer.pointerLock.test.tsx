@@ -7,7 +7,7 @@ import * as THREE from 'three';
 import SceneViewer from '../src/ui/SceneViewer';
 import PlayPanel from '../src/ui/panels/PlayPanel';
 import { PlayerMode, PlayerSubMode } from '../src/ui/types';
-import type { ThreeContext } from '../src/scene/engine';
+import type { ThreeEngine, PlayerControls } from '../src/scene/engine';
 
 vi.mock('three/examples/jsm/controls/OrbitControls.js', () => ({
   OrbitControls: vi.fn().mockImplementation(() => ({
@@ -36,7 +36,7 @@ vi.mock('../src/scene/engine', () => {
       const perspectiveCamera = new THREE.PerspectiveCamera();
       const orthographicCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
       const events: Record<string, Array<() => void>> = {};
-      const playerControls: any = {
+      const playerControls: PlayerControls = {
         lock: vi.fn(),
         unlock: vi.fn(),
         addEventListener: vi.fn((e: string, cb: () => void) => {
@@ -46,12 +46,12 @@ vi.mock('../src/scene/engine', () => {
         removeEventListener: vi.fn((e: string, cb: () => void) => {
           events[e] = (events[e] || []).filter((fn) => fn !== cb);
         }),
-        dispatch: (e: string) => {
-          (events[e] || []).forEach((fn) => fn());
+        dispatchEvent: (event: { type: string }) => {
+          (events[event.type] || []).forEach((fn) => fn());
         },
         isLocked: false,
       };
-      const three: any = {
+      const three: ThreeEngine = {
         scene: {},
         camera: perspectiveCamera,
         renderer: { domElement: dom },
@@ -69,12 +69,23 @@ vi.mock('../src/scene/engine', () => {
         cabinetDragger: { enable: vi.fn(), disable: vi.fn() },
         perspectiveCamera,
         orthographicCamera,
-      };
-      three.setCamera = (cam: THREE.Camera) => {
-        three.camera = cam;
-      };
-      three.setControls = (c: any) => {
-        three.controls = c;
+        setPlayerParams: vi.fn(),
+        setMove: vi.fn(),
+        setMoveFromJoystick: vi.fn(),
+        updateCameraRotation: vi.fn(),
+        resetCameraRotation: vi.fn(),
+        onJump: vi.fn(),
+        onCrouch: vi.fn(),
+        updateGrid: vi.fn(),
+        dispose: vi.fn(),
+        setCamera: (cam: THREE.Camera) => {
+          three.camera = cam;
+        },
+        setControls: (c: any) => {
+          three.controls = c;
+        },
+        start: vi.fn(),
+        stop: vi.fn(),
       };
       return three;
     },
@@ -91,7 +102,7 @@ vi.mock('../src/ui/components/TouchJoystick', () => ({ default: () => null }));
 const t = (s: string) => s;
 
 describe('pointer lock handling', () => {
-  const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
+  const threeRef: React.MutableRefObject<ThreeEngine | null> = { current: null };
   let mode: PlayerMode = null;
   const setMode = vi.fn((v: any) => {
     mode = typeof v === 'function' ? v(mode) : v;
@@ -150,7 +161,7 @@ describe('pointer lock handling', () => {
     expect(mode).toBe('furnish');
 
     act(() => {
-      threeRef.current.playerControls.dispatch('unlock');
+      threeRef.current.playerControls.dispatchEvent({ type: 'unlock' });
     });
     expect(mode).toBeNull();
 

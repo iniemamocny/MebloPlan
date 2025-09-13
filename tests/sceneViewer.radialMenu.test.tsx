@@ -5,7 +5,7 @@ import { act } from 'react';
 import ReactDOM from 'react-dom/client';
 import * as THREE from 'three';
 import SceneViewer from '../src/ui/SceneViewer';
-import type { ThreeContext } from '../src/scene/engine';
+import type { ThreeEngine, PlayerControls } from '../src/scene/engine';
 
 const visibleStates: boolean[] = [];
 
@@ -35,7 +35,7 @@ vi.mock('../src/scene/engine', () => {
       });
       const perspectiveCamera = new THREE.PerspectiveCamera();
       const orthographicCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
-      const three: any = {
+      const three: ThreeEngine = {
         scene: {},
         camera: perspectiveCamera,
         renderer: { domElement: dom },
@@ -53,18 +53,30 @@ vi.mock('../src/scene/engine', () => {
           unlock: vi.fn(),
           addEventListener: vi.fn(),
           removeEventListener: vi.fn(),
+          dispatchEvent: vi.fn(),
           isLocked: false,
-        },
+        } as PlayerControls,
         group: { children: [], add: () => {}, remove: () => {} },
         cabinetDragger: { enable: vi.fn(), disable: vi.fn() },
         perspectiveCamera,
         orthographicCamera,
-      };
-      three.setCamera = (cam: THREE.Camera) => {
-        three.camera = cam;
-      };
-      three.setControls = (c: any) => {
-        three.controls = c;
+        setPlayerParams: vi.fn(),
+        setMove: vi.fn(),
+        setMoveFromJoystick: vi.fn(),
+        updateCameraRotation: vi.fn(),
+        resetCameraRotation: vi.fn(),
+        onJump: vi.fn(),
+        onCrouch: vi.fn(),
+        updateGrid: vi.fn(),
+        dispose: vi.fn(),
+        setCamera: (cam: THREE.Camera) => {
+          three.camera = cam;
+        },
+        setControls: (c: any) => {
+          three.controls = c;
+        },
+        start: vi.fn(),
+        stop: vi.fn(),
       };
       return three;
     },
@@ -87,7 +99,7 @@ vi.mock('../src/ui/components/RadialMenu', () => ({
 describe('SceneViewer RadialMenu visibility', () => {
   it('shows on Q down and hides on Q up', () => {
     visibleStates.length = 0;
-    const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
+    const threeRef: React.MutableRefObject<ThreeEngine | null> = { current: null };
     const setMode = vi.fn();
     const container = document.createElement('div');
     document.body.appendChild(container);
@@ -122,7 +134,7 @@ describe('SceneViewer RadialMenu visibility', () => {
     const modes = ['furnish', 'decorate'] as const;
     for (const m of modes) {
       visibleStates.length = 0;
-      const threeRef: React.MutableRefObject<ThreeContext | null> = { current: null };
+      const threeRef: React.MutableRefObject<ThreeEngine | null> = { current: null };
       const setMode = vi.fn();
       const container = document.createElement('div');
       document.body.appendChild(container);
