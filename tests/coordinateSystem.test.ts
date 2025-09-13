@@ -23,12 +23,12 @@ describe('coordinate system helpers', () => {
   });
 
   it('maps planner Y to world Z', () => {
-    expect(plannerToWorld(1, 'y')).toBe(-1);
-    expect(plannerToWorld(-1, 'y')).toBe(1);
+    expect(plannerToWorld(1, 'y')).toBe(1);
+    expect(plannerToWorld(-1, 'y')).toBe(-1);
   });
 
   it('maps world Z to planner Y', () => {
-    expect(worldToPlanner(1, 'z')).toBe(-1);
-    expect(worldToPlanner(-1, 'z')).toBe(1);
+    expect(worldToPlanner(1, 'z')).toBe(1);
+    expect(worldToPlanner(-1, 'z')).toBe(-1);
   });
 });
