@@ -213,6 +213,7 @@ describe('WallDrawer', () => {
     point.set(0, 0, 0);
     (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
     point.set(2, 0, 1);
+    (drawer as any).onMove({} as PointerEvent);
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
       { x: worldToPlanner(0, 'x'), y: worldToPlanner(0, 'z') },
@@ -226,6 +227,7 @@ describe('WallDrawer', () => {
     point.set(0, 0, 0);
     (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
     point.set(0, 0, -2);
+    (drawer as any).onMove({} as PointerEvent);
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
       { x: worldToPlanner(0, 'x'), y: worldToPlanner(0, 'z') },
@@ -241,6 +243,7 @@ describe('WallDrawer', () => {
     point.set(0.12, 0, 0);
     (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
     point.set(0.26, 0, 0);
+    (drawer as any).onMove({} as PointerEvent);
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledTimes(1);
     const [[start, end]] = addWallWithHistory.mock.calls;
