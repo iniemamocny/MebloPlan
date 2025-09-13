@@ -16,7 +16,7 @@ export default class CabinetDragger {
   private group: THREE.Group;
   private store: UseBoundStore<StoreApi<PlannerStore>>;
   private raycaster = new THREE.Raycaster();
-  private plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  private plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
   private draggingId: string | null = null;
   private offset = new THREE.Vector3();
 
@@ -51,7 +51,7 @@ export default class CabinetDragger {
     const rect = this.renderer.domElement.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     const yScreen = ((event.clientY - rect.top) / rect.height) * 2 - 1;
-    const y = convertAxis(yScreen, screenAxes, 'y', worldAxes, 'z');
+    const y = convertAxis(yScreen, screenAxes, 'y', worldAxes, 'y');
     const cam = this.getCamera();
     this.raycaster.setFromCamera(new THREE.Vector2(x, y), cam);
     const point = new THREE.Vector3();
@@ -64,7 +64,7 @@ export default class CabinetDragger {
     const rect = this.renderer.domElement.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     const yScreen = ((e.clientY - rect.top) / rect.height) * 2 - 1;
-    const y = convertAxis(yScreen, screenAxes, 'y', worldAxes, 'z');
+    const y = convertAxis(yScreen, screenAxes, 'y', worldAxes, 'y');
     const cam = this.getCamera();
     this.raycaster.setFromCamera(new THREE.Vector2(x, y), cam);
     const intersects = this.raycaster.intersectObjects(this.group.children, true);
@@ -83,8 +83,8 @@ export default class CabinetDragger {
     const point = this.getPoint(e);
     if (!point) return;
     this.draggingId = mod.id;
-    const pointXZ = new THREE.Vector3(point.x, point.z, 0);
-    this.offset.set(mod.position[0], mod.position[2], 0).sub(pointXZ);
+    const pointXY = new THREE.Vector3(point.x, point.y, 0);
+    this.offset.set(mod.position[0], mod.position[1], 0).sub(pointXY);
   };
 
   private onMove = (e: PointerEvent) => {
@@ -95,9 +95,9 @@ export default class CabinetDragger {
     const current = mods.find((m) => m.id === this.draggingId);
     if (!current) return;
     const newX = point.x + this.offset.x;
-    const newZ = point.z + this.offset.y;
+    const newY = point.y + this.offset.y;
     this.store.getState().updateModule(this.draggingId, {
-      position: [newX, current.position[1], newZ],
+      position: [newX, newY, current.position[2]],
     });
   };
 
