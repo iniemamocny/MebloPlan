@@ -109,7 +109,7 @@ describe('WallDrawer', () => {
       clientY: 0,
     } as PointerEvent);
     expect(result?.x).toBe(intersection.x);
-    expect(result?.z).toBeCloseTo(intersection.z);
+    expect(result?.z).toBeCloseTo(-intersection.z);
     drawer.disable();
   });
 
@@ -170,7 +170,7 @@ describe('WallDrawer', () => {
     const { drawer, point, addWallWithHistory } = createDrawer();
     point.set(0, 0, 0);
     (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
-    point.set(0.1, 0, 2);
+    point.set(0.1, 0, -2);
     (drawer as any).onMove({} as PointerEvent);
     const preview = (drawer as any).preview as THREE.Mesh;
     const dist = preview.scale.x;
@@ -178,7 +178,7 @@ describe('WallDrawer', () => {
     const endX = preview.position.x + dist * Math.cos(angle);
     const endZ = preview.position.z + dist * Math.sin(angle);
     expect(endX).toBeCloseTo(0);
-    expect(endZ).toBeCloseTo(2);
+    expect(endZ).toBeCloseTo(-2);
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
       { x: 0, y: 0 },
@@ -186,11 +186,11 @@ describe('WallDrawer', () => {
     );
     drawer.disable();
   });
-  it('maps negative z to negative y coordinates', () => {
+  it('maps positive z to negative y coordinates', () => {
     const { drawer, point, addWallWithHistory } = createDrawer();
     point.set(0, 0, 0);
     (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
-    point.set(0.1, 0, -2);
+    point.set(0.1, 0, 2);
     (drawer as any).onMove({} as PointerEvent);
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
