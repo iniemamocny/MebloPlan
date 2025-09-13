@@ -1,6 +1,13 @@
 /**
- * Defines orientation of global coordinate systems and provides helpers
- * to convert values between them.
+ * Defines orientation of global coordinate systems and provides helpers to
+ * convert values between them.
+ *
+ * The application uses a right-handed world space with the **Y axis pointing
+ * upward**. The 3D viewer shares this orientation. The 2D planner operates on
+ * the XZ plane where `Y` is usually `0`.
+ *
+ * Screen (DOM) coordinates follow the typical convention where the Y axis grows
+ * downward.
  */
 export type Axis = 'x' | 'y' | 'z';
 
@@ -10,13 +17,13 @@ export interface Axes {
   z: 1 | -1;
 }
 
-/** Identity world axes (Z up). */
+/** World axes: +Y is up. */
 export const worldAxes: Axes = { x: 1, y: 1, z: 1 };
 
-/** Viewer axes relative to the world. */
+/** Viewer axes relative to the world (matches world orientation). */
 export const viewerAxes: Axes = { x: 1, y: 1, z: 1 };
 
-/** Planner axes relative to the world. */
+/** Planner axes relative to the world (planner uses the XZ plane). */
 export const plannerAxes: Axes = { x: 1, y: 1, z: 1 };
 
 /** Screen (DOM) axes relative to the world. Y grows downward in the DOM. */
@@ -34,4 +41,14 @@ export function convertAxis(
   toAxis: Axis,
 ): number {
   return value * from[fromAxis] * to[toAxis];
+}
+
+/** Convert a screen-space value to world-space along the same axis. */
+export function screenToWorld(value: number, axis: Axis): number {
+  return convertAxis(value, screenAxes, axis, worldAxes, axis);
+}
+
+/** Convert a world-space value to screen-space along the same axis. */
+export function worldToScreen(value: number, axis: Axis): number {
+  return convertAxis(value, worldAxes, axis, screenAxes, axis);
 }

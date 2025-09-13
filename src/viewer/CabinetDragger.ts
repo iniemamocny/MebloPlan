@@ -3,7 +3,7 @@ import type { WebGLRenderer, Camera } from 'three';
 import type { UseBoundStore, StoreApi } from 'zustand';
 import { usePlannerStore } from '../state/store';
 import type { Module3D } from '../types';
-import { convertAxis, screenAxes, worldAxes } from '../utils/coordinateSystem';
+import { screenToWorld } from '../utils/coordinateSystem';
 
 interface PlannerStore {
   modules: Module3D[];
@@ -51,7 +51,7 @@ export default class CabinetDragger {
     const rect = this.renderer.domElement.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     const yScreen = ((event.clientY - rect.top) / rect.height) * 2 - 1;
-    const y = convertAxis(yScreen, screenAxes, 'y', worldAxes, 'z');
+    const y = screenToWorld(yScreen, 'y');
     const cam = this.getCamera();
     this.raycaster.setFromCamera(new THREE.Vector2(x, y), cam);
     const point = new THREE.Vector3();
@@ -64,7 +64,7 @@ export default class CabinetDragger {
     const rect = this.renderer.domElement.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     const yScreen = ((e.clientY - rect.top) / rect.height) * 2 - 1;
-    const y = convertAxis(yScreen, screenAxes, 'y', worldAxes, 'z');
+    const y = screenToWorld(yScreen, 'y');
     const cam = this.getCamera();
     this.raycaster.setFromCamera(new THREE.Vector2(x, y), cam);
     const intersects = this.raycaster.intersectObjects(this.group.children, true);
