@@ -132,7 +132,7 @@ export default class WallDrawer {
     const intersection = this.raycaster.ray.intersectPlane(this.plane, point);
     if (!intersection) return null;
     if (!isFinite(intersection.x) || !isFinite(intersection.z)) return null;
-    point.set(intersection.x, 0, -intersection.z);
+    point.set(intersection.x, 0, intersection.z);
     const { snapToGrid, gridSize } = this.store.getState();
     if (snapToGrid) {
       const step = gridSize / 1000;
@@ -262,8 +262,8 @@ export default class WallDrawer {
       point.set(endX, 0, endZ);
     }
     // Convert 3D coordinates (x, z) back to 2D room shape coordinates (x, y).
-    const start = { x: startX, y: -startZ || 0 };
-    const end = { x: endX, y: -endZ || 0 };
+    const start = { x: startX, y: startZ || 0 };
+    const end = { x: endX, y: endZ || 0 };
     state.addWallWithHistory(start, end);
     this.start = null;
     this.disposePreview();

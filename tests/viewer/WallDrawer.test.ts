@@ -109,7 +109,7 @@ describe('WallDrawer', () => {
       clientY: 0,
     } as PointerEvent);
     expect(result?.x).toBe(intersection.x);
-    expect(result?.z).toBeCloseTo(-intersection.z);
+    expect(result?.z).toBeCloseTo(intersection.z);
     drawer.disable();
   });
 
@@ -182,11 +182,11 @@ describe('WallDrawer', () => {
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
       { x: 0, y: 0 },
-      { x: 0, y: 2 },
+      { x: 0, y: -2 },
     );
     drawer.disable();
   });
-  it('maps positive z to negative y coordinates', () => {
+  it('maps z coordinate directly to y', () => {
     const { drawer, point, addWallWithHistory } = createDrawer();
     point.set(0, 0, 0);
     (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
@@ -195,7 +195,7 @@ describe('WallDrawer', () => {
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
       { x: 0, y: 0 },
-      { x: 0, y: -2 },
+      { x: 0, y: 2 },
     );
     drawer.disable();
   });
