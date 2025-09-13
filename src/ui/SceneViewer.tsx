@@ -83,6 +83,7 @@ const SceneViewer: React.FC<Props> = ({
   showRoomTools,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const axesRef = useRef<HTMLCanvasElement>(null);
   const store = usePlannerStore();
   const selectedTool = usePlannerStore((s) => s.selectedTool);
   const wallThickness = usePlannerStore((s) => s.wallDefaults.thickness);
@@ -103,6 +104,27 @@ const SceneViewer: React.FC<Props> = ({
   const [pointerLockError, setPointerLockError] = useState<string | null>(null);
   const wallDrawerRef = useRef<WallDrawer | null>(null);
   const wallGroupRef = useRef<THREE.Group | null>(null);
+
+  useEffect(() => {
+    const canvas = axesRef.current;
+    if (!canvas) return;
+    let renderer: THREE.WebGLRenderer | null = null;
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+    } catch {
+      return; // WebGL not available (e.g., in tests)
+    }
+    renderer.setSize(80, 80);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
+    camera.position.set(0, 0, 2);
+    const axes = new THREE.AxesHelper(0.5);
+    scene.add(axes);
+    renderer.render(scene, camera);
+    return () => {
+      renderer?.dispose();
+    };
+  }, []);
 
   useEffect(() => {
     roomRef.current = store.room;
@@ -909,6 +931,20 @@ const SceneViewer: React.FC<Props> = ({
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
       <div ref={containerRef} style={{ position: 'absolute', inset: 0 }} />
+      <canvas
+        ref={axesRef}
+        data-testid="axes-gizmo"
+        width={80}
+        height={80}
+        style={{
+          position: 'absolute',
+          right: 10,
+          bottom: 10,
+          width: 80,
+          height: 80,
+          pointerEvents: 'none',
+        }}
+      />
       <RadialMenu
         items={radialItems}
         selected={store.selectedItemSlot}
