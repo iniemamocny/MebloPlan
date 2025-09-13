@@ -5,8 +5,13 @@ import * as THREE from 'three';
  * convert values between them.
  *
  * The application uses a right-handed world space with the **Y axis pointing
- * upward**. The 3D viewer shares this orientation. The 2D planner operates on
- * the XZ plane where `Y` is usually `0`.
+ * upward**. The 3D viewer shares this orientation. The 2D planner lays on the
+ * world's XZ plane and interprets its local axes as:
+ *
+ * - planner **X** → world **X**
+ * - planner **Y** → world **Z** (but planner Y grows downward, so values are
+ *   negated)
+ * - planner **Z** → world **Y**
  *
  * Screen (DOM) coordinates follow the typical convention where the Y axis grows
  * downward.
@@ -25,7 +30,11 @@ export const worldAxes: Axes = { x: 1, y: 1, z: 1 };
 /** Viewer axes relative to the world (matches world orientation). */
 export const viewerAxes: Axes = { x: 1, y: 1, z: 1 };
 
-/** Planner axes relative to the world (planner uses the XZ plane). Z grows downward. */
+/**
+ * Planner axes relative to the world. Planner X matches world X. Planner Y
+ * corresponds to world Z but grows in the opposite direction (negative values
+ * are up). Planner Z corresponds directly to world Y.
+ */
 export const plannerAxes: Axes = { x: 1, y: -1, z: 1 };
 
 /** Screen (DOM) axes relative to the world. Y grows downward in the DOM. */
@@ -78,6 +87,10 @@ export function worldToScreen(value: number, axis: Axis): number {
   return convertAxis(value, worldAxes, axis, screenAxes, axis);
 }
 
+/**
+ * Maps planner axis names to the world axis names used for conversion.
+ * `x → x`, `y → z`, `z → y`.
+ */
 const plannerAxisMap: Record<Axis, Axis> = { x: 'x', y: 'z', z: 'y' };
 
 /** Convert a planner-space value to world-space. */

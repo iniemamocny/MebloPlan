@@ -20,6 +20,8 @@ describe('coordinate system helpers', () => {
   it('leaves X axis unchanged', () => {
     expect(screenToWorld(1, 'x')).toBe(1);
     expect(worldToScreen(1, 'x')).toBe(1);
+    expect(plannerToWorld(1, 'x')).toBe(1);
+    expect(worldToPlanner(1, 'x')).toBe(1);
   });
 
   it('maps planner Y to world Z with inverted sign', () => {
@@ -30,5 +32,15 @@ describe('coordinate system helpers', () => {
   it('maps world Z to planner Y with inverted sign', () => {
     expect(worldToPlanner(1, 'z')).toBe(-1);
     expect(worldToPlanner(-1, 'z')).toBe(1);
+  });
+
+  it('maps planner Z to world Y', () => {
+    expect(plannerToWorld(1, 'z')).toBe(1);
+    expect(plannerToWorld(-1, 'z')).toBe(-1);
+  });
+
+  it('maps world Y to planner Z', () => {
+    expect(worldToPlanner(1, 'y')).toBe(1);
+    expect(worldToPlanner(-1, 'y')).toBe(-1);
   });
 });
