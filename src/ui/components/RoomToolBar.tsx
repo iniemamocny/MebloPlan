@@ -83,23 +83,33 @@ const RoomToolBar: React.FC = () => {
             borderRadius: 8,
           }}
         >
-          <div>
-            <div className="small">{t('room.height')}</div>
-            <SingleMMInput
-              value={wallDefaults.height}
-              onChange={(v) => drawWalls(v, wallDefaults.thickness)}
-            />
-          </div>
-          <div>
-            <div className="small">{t('room.thickness')}</div>
-            <SingleMMInput
-              value={wallDefaults.thickness}
-              onChange={(v) => drawWalls(wallDefaults.height, v)}
-            />
+          <div style={{ display: 'flex', gap: 4 }}>
+            <div>
+              <div className="small">{t('room.height')}</div>
+              <SingleMMInput
+                value={wallDefaults.height}
+                onChange={(v) => drawWalls(v, wallDefaults.thickness)}
+                maxLength={4}
+              />
+            </div>
+            <div>
+              <div className="small">{t('room.thickness')}</div>
+              <SingleMMInput
+                value={wallDefaults.thickness}
+                onChange={(v) => drawWalls(wallDefaults.height, v)}
+                maxLength={3}
+                max={999}
+              />
+            </div>
           </div>
           <div>
             <div className="small">{t('room.length')}</div>
-            <SingleMMInput value={snapLength} onChange={setSnapLength} />
+            <SingleMMInput
+              value={snapLength}
+              onChange={setSnapLength}
+              maxLength={4}
+              max={9999}
+            />
           </div>
         </div>
       )}
