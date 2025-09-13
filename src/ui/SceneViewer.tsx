@@ -372,11 +372,10 @@ const SceneViewer: React.FC<Props> = ({
       const dz = end.y - start.y;
       const length = Math.sqrt(dx * dx + dz * dz);
       const geom = new THREE.BoxGeometry(length, height, width);
+      geom.translate(length / 2, 0, 0);
       const mat = new THREE.MeshStandardMaterial({ color: 0x888888 });
       const mesh = new THREE.Mesh(geom, mat);
-      const midX = (start.x + end.x) / 2;
-      const midZ = (start.y + end.y) / 2;
-      mesh.position.set(midX, height / 2, midZ);
+      mesh.position.set(start.x, height / 2, start.y);
       mesh.rotation.y = Math.atan2(dz, dx);
       wallGroup.add(mesh);
     });
