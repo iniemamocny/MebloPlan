@@ -104,14 +104,14 @@ describe('SceneViewer view mode', () => {
     expect(threeRef.current.camera).toBe(threeRef.current.orthographicCamera);
     expect(threeRef.current.controls.enableRotate).toBe(false);
     expect(threeRef.current.controls.screenSpacePanning).toBe(true);
-    expect(threeRef.current.camera.up).toEqual(new THREE.Vector3(0, 1, 0));
-    expect(threeRef.current.camera.position).toEqual(new THREE.Vector3(0, 0, 10));
+    expect(threeRef.current.camera.up).toEqual(new THREE.Vector3(0, 0, -1));
+    expect(threeRef.current.camera.position).toEqual(new THREE.Vector3(0, 10, 0));
     expect(threeRef.current.controls.target).toEqual(new THREE.Vector3(0, 0, 0));
     const dir = new THREE.Vector3();
     threeRef.current.camera.getWorldDirection(dir);
     expect(dir.x).toBeCloseTo(0);
-    expect(dir.y).toBeCloseTo(0);
-    expect(dir.z).toBe(-1);
+    expect(dir.y).toBe(-1);
+    expect(dir.z).toBeCloseTo(0);
 
     act(() => {
       root.render(
