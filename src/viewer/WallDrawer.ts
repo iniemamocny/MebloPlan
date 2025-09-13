@@ -276,8 +276,14 @@ export default class WallDrawer {
       endZ = Math.round(endZ / stepSize) * stepSize;
       point.set(endX, 0, endZ);
     }
-    const start = { x: startX, y: worldToPlanner(startZ, 'z') };
-    const end = { x: endX, y: worldToPlanner(endZ, 'z') };
+    const start = {
+      x: worldToPlanner(startX, 'x'),
+      y: worldToPlanner(startZ, 'z'),
+    };
+    const end = {
+      x: worldToPlanner(endX, 'x'),
+      y: worldToPlanner(endZ, 'z'),
+    };
     state.addWallWithHistory(start, end);
     this.start = null;
     this.disposePreview();
