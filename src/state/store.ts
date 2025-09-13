@@ -129,6 +129,9 @@ const persisted = (() => {
   }
 })();
 
+const DEFAULT_SNAP_LENGTH = 10;
+const DEFAULT_GRID_SIZE = 100;
+
 export interface Item {
   id: string;
   type: string;
@@ -233,11 +236,11 @@ export const usePlannerStore = create<Store>((set, get) => ({
       },
   roomShape: persisted?.roomShape || { points: [], segments: [] },
   snapAngle: persisted?.snapAngle ?? 90,
-  snapLength: persisted?.snapLength ?? 10,
+  snapLength: persisted?.snapLength > 0 ? persisted.snapLength : DEFAULT_SNAP_LENGTH,
   snapRightAngles: true,
   angleToPrev: persisted?.angleToPrev ?? 0,
   defaultSquareAngle: persisted?.defaultSquareAngle ?? 0,
-  gridSize: persisted?.gridSize ?? 100,
+  gridSize: persisted?.gridSize > 0 ? persisted.gridSize : DEFAULT_GRID_SIZE,
   snapToGrid: persisted?.snapToGrid ?? false,
   measurementUnit: persisted?.measurementUnit || 'mm',
   playerHeight: persisted?.playerHeight ?? 1.6,
@@ -494,11 +497,11 @@ export const usePlannerStore = create<Store>((set, get) => ({
     }),
   setShowFronts: (v) => set({ showFronts: v }),
   setSnapAngle: (v) => set({ snapAngle: v }),
-  setSnapLength: (v) => set({ snapLength: v }),
+  setSnapLength: (v) => set({ snapLength: v > 0 ? v : DEFAULT_SNAP_LENGTH }),
   setSnapRightAngles: (v) => set({ snapRightAngles: v, snapAngle: v ? 90 : 0 }),
   setAngleToPrev: (v) => set({ angleToPrev: clamp(v, 0, 360) }),
   setDefaultSquareAngle: (v) => set({ defaultSquareAngle: clamp(v, 0, 360) }),
-  setGridSize: (v) => set({ gridSize: v }),
+  setGridSize: (v) => set({ gridSize: v > 0 ? v : DEFAULT_GRID_SIZE }),
   setSnapToGrid: (v) => set({ snapToGrid: v }),
   setMeasurementUnit: (v) => set({ measurementUnit: v }),
   setPlayerHeight: (v) => set({ playerHeight: v }),

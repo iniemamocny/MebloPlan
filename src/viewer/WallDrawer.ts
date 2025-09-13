@@ -138,7 +138,7 @@ export default class WallDrawer {
     // intersection's Z value to world coordinates.
     point.set(intersection.x, 0, screenToWorldZ(intersection.z));
     const { snapToGrid, gridSize } = this.store.getState();
-    if (snapToGrid) {
+    if (snapToGrid && gridSize > 0) {
       const step = gridSize / 1000;
       point.x = Math.round(point.x / step) * step;
       point.z = Math.round(point.z / step) * step;
@@ -238,7 +238,8 @@ export default class WallDrawer {
     const dz = endZ - this.start.z;
     const dist = Math.sqrt(dx * dx + dz * dz);
     if (dist < 0.001) {
-      const step = state.snapLength / 1000;
+      const snapLength = state.snapLength > 0 ? state.snapLength : 10;
+      const step = snapLength / 1000;
       let dirX = dx;
       let dirZ = dz;
       if (dirX === 0 && dirZ === 0 && this.lastPoint) {
@@ -258,7 +259,7 @@ export default class WallDrawer {
     }
     let startX = this.start.x;
     let startZ = this.start.z;
-    if (state.snapToGrid) {
+    if (state.snapToGrid && state.gridSize > 0) {
       const stepSize = state.gridSize / 1000;
       startX = Math.round(startX / stepSize) * stepSize;
       startZ = Math.round(startZ / stepSize) * stepSize;
