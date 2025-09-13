@@ -109,7 +109,7 @@ describe('WallDrawer', () => {
       clientY: 0,
     } as PointerEvent);
     expect(result?.x).toBe(intersection.x);
-    expect(result?.z).toBeCloseTo(-intersection.z);
+    expect(result?.z).toBeCloseTo(intersection.z);
     drawer.disable();
   });
 

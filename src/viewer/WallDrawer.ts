@@ -132,8 +132,7 @@ export default class WallDrawer {
     const intersection = this.raycaster.ray.intersectPlane(this.plane, point);
     if (!intersection) return null;
     if (!isFinite(intersection.x) || !isFinite(intersection.z)) return null;
-    // Top-down camera uses a flipped Z axis; invert it to match planner coords.
-    point.set(intersection.x, 0, -intersection.z);
+    point.set(intersection.x, 0, intersection.z);
     const { snapToGrid, gridSize } = this.store.getState();
     if (snapToGrid) {
       const step = gridSize / 1000;
@@ -263,10 +262,8 @@ export default class WallDrawer {
       point.set(endX, 0, endZ);
     }
     // Convert 3D coordinates (x, z) back to 2D room shape coordinates (x, y).
-    // `getPoint` already flips the Z axis to match planner orientation, so use the
-    // values directly without an additional inversion.
-    const start = { x: startX, y: startZ === 0 ? 0 : startZ };
-    const end = { x: endX, y: endZ === 0 ? 0 : endZ };
+    const start = { x: startX, y: startZ };
+    const end = { x: endX, y: endZ };
     state.addWallWithHistory(start, end);
     this.start = null;
     this.disposePreview();
