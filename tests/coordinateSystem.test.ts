@@ -22,13 +22,13 @@ describe('coordinate system helpers', () => {
     expect(worldToScreen(1, 'x')).toBe(1);
   });
 
-  it('maps planner Y to world Z', () => {
-    expect(plannerToWorld(1, 'y')).toBe(1);
-    expect(plannerToWorld(-1, 'y')).toBe(-1);
+  it('maps planner Y to world Z with inverted sign', () => {
+    expect(plannerToWorld(1, 'y')).toBe(-1);
+    expect(plannerToWorld(-1, 'y')).toBe(1);
   });
 
-  it('maps world Z to planner Y', () => {
-    expect(worldToPlanner(1, 'z')).toBe(1);
-    expect(worldToPlanner(-1, 'z')).toBe(-1);
+  it('maps world Z to planner Y with inverted sign', () => {
+    expect(worldToPlanner(1, 'z')).toBe(-1);
+    expect(worldToPlanner(-1, 'z')).toBe(1);
   });
 });
