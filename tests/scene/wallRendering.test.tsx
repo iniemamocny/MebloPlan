@@ -6,6 +6,7 @@ import ReactDOM from 'react-dom/client';
 import * as THREE from 'three';
 import SceneViewer from '../../src/ui/SceneViewer';
 import { usePlannerStore } from '../../src/state/store';
+import WallDrawer from '../../src/viewer/WallDrawer';
 
 vi.mock('../../src/ui/components/ItemHotbar', () => ({
   default: () => null,
@@ -144,6 +145,77 @@ describe('Scene wall rendering', () => {
 
     expect(group.children).toHaveLength(1);
     expect(group.children[0].children).toHaveLength(3);
+  });
+
+  it('orients walls correctly when drawn via WallDrawer', () => {
+    vi.stubGlobal('requestAnimationFrame', vi.fn().mockReturnValue(0));
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+
+    usePlannerStore.setState({
+      roomShape: { points: [], segments: [] },
+      snapToGrid: false,
+      gridSize: 100,
+      snapLength: 1000,
+      snapRightAngles: true,
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    canvas.setPointerCapture = vi.fn();
+    canvas.releasePointerCapture = vi.fn();
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const group = new THREE.Group();
+    const drawer = new WallDrawer(renderer, () => camera, group, usePlannerStore as any);
+    drawer.enable(usePlannerStore.getState().wallDefaults.thickness);
+
+    const point = new THREE.Vector3();
+    (drawer as any).getPoint = vi.fn(() => point.clone());
+
+    // Horizontal wall
+    point.set(0, 0, 0);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
+    point.set(1, 0, 0);
+    (drawer as any).onMove({} as PointerEvent);
+    (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
+
+    // Vertical wall
+    point.set(0, 0, 0);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
+    point.set(0, 0, -1);
+    (drawer as any).onMove({} as PointerEvent);
+    (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
+
+    drawer.disable();
+    vi.unstubAllGlobals();
+
+    act(() => {
+      root.render(
+        <SceneViewer
+          threeRef={threeRef}
+          addCountertop={false}
+          mode={null}
+          setMode={setMode}
+          viewMode="3d"
+          setViewMode={setViewMode}
+        />,
+      );
+    });
+
+    const wallGroup = threeRef.current.group.children[0];
+    const [mesh1, mesh2] = wallGroup.children as THREE.Mesh[];
+    expect(mesh1.rotation.y).toBeCloseTo(0);
+    expect(mesh2.rotation.y).toBeCloseTo(-Math.PI / 2);
   });
 
   it('does not leak listeners when toggling wall tool', () => {
