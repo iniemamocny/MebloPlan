@@ -5,12 +5,21 @@ import { usePlannerStore } from '../state/store';
 import CabinetDragger from '../viewer/CabinetDragger';
 import { alignToGround } from '../utils/coordinateSystem';
 
-export interface ThreeContext {
+export interface PlayerControls {
+  isLocked: boolean;
+  lock: () => void;
+  unlock: () => void;
+  addEventListener: (type: string, listener: (event: any) => void) => void;
+  removeEventListener: (type: string, listener: (event: any) => void) => void;
+  dispatchEvent: (event: any) => void;
+}
+
+export interface ThreeEngine {
   scene: THREE.Scene;
   camera: THREE.Camera;
   renderer: THREE.WebGLRenderer;
   controls: OrbitControls;
-  playerControls: PointerLockControls;
+  playerControls: PlayerControls;
   group: THREE.Group;
   cabinetDragger: CabinetDragger;
   perspectiveCamera: THREE.PerspectiveCamera;
@@ -31,9 +40,11 @@ export interface ThreeContext {
   dispose: () => void;
   setCamera: (cam: THREE.Camera) => void;
   setControls: (c: OrbitControls) => void;
+  start: () => void;
+  stop: () => void;
 }
 
-export function setupThree(container: HTMLElement): ThreeContext {
+export function setupThree(container: HTMLElement): ThreeEngine {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf9fafc);
 
@@ -132,18 +143,21 @@ export function setupThree(container: HTMLElement): ThreeContext {
   let controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
 
-  const playerControls = new PointerLockControls(perspectiveCamera, renderer.domElement);
+  const playerControls = new PointerLockControls(
+    perspectiveCamera,
+    renderer.domElement,
+  ) as unknown as PlayerControls;
   const isMobile =
     typeof window !== 'undefined' &&
     ('ontouchstart' in window ||
       (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0));
   if (isMobile) {
-    (playerControls as any).lock = () => {
-      (playerControls as any).isLocked = true;
+    playerControls.lock = () => {
+      playerControls.isLocked = true;
       playerControls.dispatchEvent({ type: 'lock' });
     };
-    (playerControls as any).unlock = () => {
-      (playerControls as any).isLocked = false;
+    playerControls.unlock = () => {
+      playerControls.isLocked = false;
       playerControls.dispatchEvent({ type: 'unlock' });
     };
   }
@@ -352,7 +366,7 @@ export function setupThree(container: HTMLElement): ThreeContext {
   };
   window.addEventListener('resize', onResize);
 
-  const run = true;
+  let run = false;
   const floorHalf = 5;
   const forward = new THREE.Vector3();
   const side = new THREE.Vector3();
@@ -402,7 +416,19 @@ export function setupThree(container: HTMLElement): ThreeContext {
     renderer.render(scene, camera);
     requestAnimationFrame(loop);
   };
-  loop();
+
+  const start = () => {
+    if (!run) {
+      run = true;
+      loop();
+    }
+  };
+
+  const stop = () => {
+    run = false;
+  };
+
+  start();
 
   const setPlayerParams = ({ height, speed }: { height?: number; speed?: number }) => {
     if (typeof height === 'number') {
@@ -422,7 +448,7 @@ export function setupThree(container: HTMLElement): ThreeContext {
     window.removeEventListener('resize', onResize);
   };
 
-  const three: ThreeContext = {
+  const three: ThreeEngine = {
     scene,
     camera,
     renderer,
@@ -449,6 +475,8 @@ export function setupThree(container: HTMLElement): ThreeContext {
       controls = c;
       three.controls = c;
     },
+    start,
+    stop,
   };
 
   return three;

@@ -1,10 +1,10 @@
 import React from 'react';
 import type { MutableRefObject } from 'react';
 import { loadRoomFile } from '../import/roomImport';
-import type { ThreeContext } from '../scene/engine';
+import type { ThreeEngine } from '../scene/engine';
 
 interface Props {
-  three: MutableRefObject<ThreeContext | null>;
+  three: MutableRefObject<ThreeEngine | null>;
 }
 
 /**

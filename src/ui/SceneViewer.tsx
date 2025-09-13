@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import WallDrawer from '../viewer/WallDrawer';
-import { setupThree, ThreeContext } from '../scene/engine';
+import { setupThree, ThreeEngine } from '../scene/engine';
 import { buildCabinetMesh } from '../scene/cabinetBuilder';
 import { FAMILY } from '../core/catalog';
 import { usePlannerStore, legCategories } from '../state/store';
@@ -23,7 +23,7 @@ import {
   worldAxes,
 } from '../utils/coordinateSystem';
 
-type ThreeWithExtras = ThreeContext & {
+type ThreeWithExtras = ThreeEngine & {
   axesHelper?: THREE.AxesHelper;
   showPointerLockError?: (msg: string) => void;
 };
