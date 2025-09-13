@@ -101,28 +101,33 @@ describe('SceneViewer axes gizmo', () => {
     container.remove();
   });
 
-  it('orients axes with X right and Z up in 2d mode', async () => {
-    const threeRef: any = { current: null };
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    const root = ReactDOM.createRoot(container);
-    act(() => {
-      root.render(
-        <SceneViewer
-          threeRef={threeRef}
-          addCountertop={false}
-          mode={null}
-          setMode={vi.fn()}
-          viewMode="2d"
-          setViewMode={() => {}}
-        />,
-      );
-    });
-    await new Promise((r) => setTimeout(r, 0));
-    expect(threeRef.current.axesHelper).toBeDefined();
-    expect(threeRef.current.axesHelper!.rotation.x).toBeCloseTo(Math.PI / 2);
-    root.unmount();
-    container.remove();
-  });
+  it.each(["3d", "2d"] as const)(
+    "matches world axes in %s view",
+    async (viewMode) => {
+      const threeRef: any = { current: null };
+      const container = document.createElement("div");
+      document.body.appendChild(container);
+      const root = ReactDOM.createRoot(container);
+      act(() => {
+        root.render(
+          <SceneViewer
+            threeRef={threeRef}
+            addCountertop={false}
+            mode={null}
+            setMode={vi.fn()}
+            viewMode={viewMode}
+            setViewMode={() => {}}
+          />,
+        );
+      });
+      await new Promise((r) => setTimeout(r, 0));
+      expect(threeRef.current.axesHelper).toBeDefined();
+      expect(threeRef.current.axesHelper!.rotation.x).toBeCloseTo(0);
+      expect(threeRef.current.axesHelper!.rotation.y).toBeCloseTo(0);
+      expect(threeRef.current.axesHelper!.rotation.z).toBeCloseTo(0);
+      root.unmount();
+      container.remove();
+    },
+  );
 });
 

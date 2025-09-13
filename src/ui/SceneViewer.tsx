@@ -120,9 +120,6 @@ const SceneViewer: React.FC<Props> = ({
     const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
     camera.position.set(0, 0, 2);
     const axes = new THREE.AxesHelper(0.5);
-    if (viewMode === '2d') {
-      axes.rotation.set(Math.PI / 2, 0, 0);
-    }
     scene.add(axes);
     renderer?.render(scene, camera);
     if (threeRef.current) {
@@ -367,9 +364,6 @@ const SceneViewer: React.FC<Props> = ({
     axesCamera.position.set(2, 2, 2);
     axesCamera.lookAt(0, 0, 0);
     const axes = new THREE.AxesHelper(1);
-    if (viewMode === '2d') {
-      axes.rotation.set(Math.PI / 2, 0, 0);
-    }
     axesScene.add(axes);
     if (threeRef.current) {
       threeRef.current.axesHelper = axes;
