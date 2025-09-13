@@ -3,6 +3,7 @@ import type { WebGLRenderer, Camera } from 'three';
 import type { UseBoundStore, StoreApi } from 'zustand';
 import { usePlannerStore } from '../state/store';
 import type { ShapePoint } from '../types';
+import { screenToWorldZ, worldZToPlannerY } from '../utils/coordinates';
 
 interface PlannerStore {
   snapLength: number;
@@ -133,9 +134,9 @@ export default class WallDrawer {
     const intersection = this.raycaster.ray.intersectPlane(this.plane, point);
     if (!intersection) return null;
     if (!isFinite(intersection.x) || !isFinite(intersection.z)) return null;
-    // The camera uses a flipped Z axis in top-down mode, so negate the
-    // intersection's Z value to align with the application's coordinate system.
-    point.set(intersection.x, 0, -intersection.z);
+    // The camera uses a flipped Z axis in top-down mode, so convert the
+    // intersection's Z value to world coordinates.
+    point.set(intersection.x, 0, screenToWorldZ(intersection.z));
     const { snapToGrid, gridSize } = this.store.getState();
     if (snapToGrid) {
       const step = gridSize / 1000;
@@ -267,8 +268,8 @@ export default class WallDrawer {
     }
     // Convert 3D coordinates (x, z) to 2D room shape coordinates (x, y).
     // Negate the stored Z values to match the planner's Y axis direction.
-    const start = { x: startX, y: -startZ || 0 };
-    const end = { x: endX, y: -endZ || 0 };
+    const start = { x: startX, y: worldZToPlannerY(startZ) || 0 };
+    const end = { x: endX, y: worldZToPlannerY(endZ) || 0 };
     state.addWallWithHistory(start, end);
     this.start = null;
     this.disposePreview();
