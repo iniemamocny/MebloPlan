@@ -48,6 +48,8 @@ export default class WallDrawer {
     dom.addEventListener('pointermove', this.onMove);
     dom.addEventListener('pointerdown', this.onDown);
     dom.addEventListener('pointerup', this.onUp);
+    dom.addEventListener('pointercancel', this.onCancel);
+    dom.addEventListener('pointerleave', this.onCancel);
     window.addEventListener('keydown', this.onKeyDown);
     this.addCursor();
     this.animationId = requestAnimationFrame(this.animateCursor);
@@ -64,6 +66,8 @@ export default class WallDrawer {
     dom.removeEventListener('pointermove', this.onMove);
     dom.removeEventListener('pointerdown', this.onDown);
     dom.removeEventListener('pointerup', this.onUp);
+    dom.removeEventListener('pointercancel', this.onCancel);
+    dom.removeEventListener('pointerleave', this.onCancel);
     window.removeEventListener('keydown', this.onKeyDown);
     if (this.animationId !== null) {
       cancelAnimationFrame(this.animationId);
@@ -238,6 +242,10 @@ export default class WallDrawer {
       this.cursor.position.set(point.x, 0.001, point.z);
       this.cursorTarget = this.cursor.position.clone();
     }
+  };
+
+  private onCancel = (_e: PointerEvent) => {
+    this.onKeyDown({ key: 'Escape' } as KeyboardEvent);
   };
 
   private onKeyDown = (e: KeyboardEvent) => {

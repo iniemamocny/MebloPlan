@@ -176,14 +176,14 @@ describe('Scene wall rendering', () => {
       usePlannerStore.setState({ selectedTool: null });
     });
     const inactive = listeners();
-    expect(active.dom - inactive.dom).toBe(3);
+    expect(active.dom - inactive.dom).toBe(5);
     expect(active.win - inactive.win).toBe(1);
 
     act(() => {
       usePlannerStore.setState({ selectedTool: 'wall' });
     });
     const active2 = listeners();
-    expect(active2.dom - inactive.dom).toBe(3);
+    expect(active2.dom - inactive.dom).toBe(5);
     expect(active2.win - inactive.win).toBe(1);
 
     act(() => {
