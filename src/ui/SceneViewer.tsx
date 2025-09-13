@@ -18,7 +18,12 @@ import RoomToolBar from './components/RoomToolBar';
 import TouchJoystick from './components/TouchJoystick';
 import { PlayerMode, PlayerSubMode, PLAYER_MODES } from './types';
 import RadialMenu from './components/RadialMenu';
-import { plannerToWorld } from '../utils/coordinateSystem';
+import {
+  plannerToWorld,
+  convertAxis,
+  plannerAxes,
+  worldAxes,
+} from '../utils/coordinateSystem';
 
 interface ThreeContext {
   scene: THREE.Scene;
@@ -458,7 +463,7 @@ const SceneViewer: React.FC<Props> = ({
     const height = wallDefaults.height / 1000;
     segments.forEach(({ start, end }) => {
       const dx = plannerToWorld(end.x - start.x, 'x');
-      const dz = plannerToWorld(end.y - start.y, 'y');
+      const dz = convertAxis(end.y - start.y, plannerAxes, 'y', worldAxes, 'z');
       const length = Math.sqrt(dx * dx + dz * dz);
       const geom = new THREE.BoxGeometry(length, height, width);
       geom.translate(length / 2, 0, 0);
@@ -467,7 +472,7 @@ const SceneViewer: React.FC<Props> = ({
       mesh.position.set(
         plannerToWorld(start.x, 'x'),
         height / 2,
-        plannerToWorld(start.y, 'y'),
+        convertAxis(start.y, plannerAxes, 'y', worldAxes, 'z'),
       );
       mesh.rotation.y = Math.atan2(dz, dx);
       wallGroup.add(mesh);

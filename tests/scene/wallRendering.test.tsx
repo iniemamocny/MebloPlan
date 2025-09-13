@@ -7,6 +7,12 @@ import * as THREE from 'three';
 import SceneViewer from '../../src/ui/SceneViewer';
 import { usePlannerStore } from '../../src/state/store';
 import WallDrawer from '../../src/viewer/WallDrawer';
+import {
+  convertAxis,
+  plannerAxes,
+  worldAxes,
+  plannerToWorld,
+} from '../../src/utils/coordinateSystem';
 
 vi.mock('../../src/ui/components/ItemHotbar', () => ({
   default: () => null,
@@ -131,6 +137,16 @@ describe('Scene wall rendering', () => {
     expect(group.children).toHaveLength(1);
     expect(group.children[0].children).toHaveLength(2);
 
+    const [wall1, wall2] = group.children[0].children as THREE.Mesh[];
+    expect(wall1.position.x).toBeCloseTo(plannerToWorld(0, 'x'));
+    expect(wall1.position.z).toBeCloseTo(
+      convertAxis(0, plannerAxes, 'y', worldAxes, 'z'),
+    );
+    expect(wall2.position.x).toBeCloseTo(plannerToWorld(1, 'x'));
+    expect(wall2.position.z).toBeCloseTo(
+      convertAxis(0, plannerAxes, 'y', worldAxes, 'z'),
+    );
+
     const shape2 = {
       points: [],
       segments: [
@@ -145,6 +161,11 @@ describe('Scene wall rendering', () => {
 
     expect(group.children).toHaveLength(1);
     expect(group.children[0].children).toHaveLength(3);
+    const wall3 = group.children[0].children[2] as THREE.Mesh;
+    expect(wall3.position.x).toBeCloseTo(plannerToWorld(1, 'x'));
+    expect(wall3.position.z).toBeCloseTo(
+      convertAxis(1, plannerAxes, 'y', worldAxes, 'z'),
+    );
   });
 
   it('orients walls correctly when drawn via WallDrawer', () => {
