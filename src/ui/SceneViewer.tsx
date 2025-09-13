@@ -130,11 +130,12 @@ const SceneViewer: React.FC<Props> = ({
         const c = new OrbitControls(three.camera, three.renderer.domElement);
         c.enableDamping = true;
         c.enableRotate = false;
+        c.screenSpacePanning = true;
         three.setControls(c);
         const pos = savedView.current.pos;
-        three.camera.position.set(pos.x, 10, pos.z);
+        three.camera.position.set(pos.x, pos.y, 10);
         three.camera.up.set(0, 1, 0);
-        c.target.copy(savedView.current.target);
+        c.target.set(pos.x, pos.y, 0);
         three.camera.lookAt(c.target);
         c.update();
         const updateGrid = () => {
