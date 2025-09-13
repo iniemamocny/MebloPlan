@@ -145,7 +145,7 @@ export default class WallDrawer {
     const intersection = this.raycaster.ray.intersectPlane(this.plane, point);
     if (!intersection) return null;
     if (!isFinite(intersection.x) || !isFinite(intersection.z)) return null;
-    point.set(intersection.x, 0, intersection.z);
+    point.set(intersection.x, 0, -intersection.z);
     const { snapToGrid, gridSize } = this.store.getState();
     if (snapToGrid && gridSize > 0) {
       const step = gridSize / 1000;
