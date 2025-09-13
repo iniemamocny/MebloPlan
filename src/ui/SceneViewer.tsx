@@ -398,8 +398,10 @@ const SceneViewer: React.FC<Props> = ({
     const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
     camera.position.set(2, 2, 2);
     camera.lookAt(0, 0, 0);
+    const axesGroup = new THREE.Group();
+    scene.add(axesGroup);
     const axes = new THREE.AxesHelper(1.5);
-    scene.add(axes);
+    axesGroup.add(axes);
 
     const addLabel = (text: string, color: string, position: THREE.Vector3) => {
       const labelCanvas = document.createElement('canvas');
@@ -422,7 +424,7 @@ const SceneViewer: React.FC<Props> = ({
       const sprite = new THREE.Sprite(material);
       sprite.position.copy(position);
       sprite.scale.set(1, 1, 1);
-      scene.add(sprite);
+      axesGroup.add(sprite);
     };
 
     addLabel('X', '#ff0000', new THREE.Vector3(1.8, 0, 0));
@@ -437,7 +439,7 @@ const SceneViewer: React.FC<Props> = ({
     const renderGizmo = () => {
       anim = requestAnimationFrame(renderGizmo);
       if (threeRef.current?.camera) {
-        camera.quaternion.copy(threeRef.current.camera.quaternion);
+        axesGroup.quaternion.copy(threeRef.current.camera.quaternion);
       }
       renderer.render(scene, camera);
     };
