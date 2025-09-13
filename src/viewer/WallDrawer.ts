@@ -136,10 +136,11 @@ export default class WallDrawer {
     if (!point) return;
     point.y = 0.001;
     this.lastPoint = point;
-    if (!this.dragging) {
-      this.cursorTarget = point.clone();
-    }
+    this.cursorTarget = point.clone();
     if (this.dragging && this.start && this.preview) {
+      if (this.cursor) {
+        this.cursor.position.copy(point).setY(0.001);
+      }
       const dx = point.x - this.start.x;
       const dz = this.start.z - point.z; // reverse Z axis
       const distX = Math.abs(dx);
