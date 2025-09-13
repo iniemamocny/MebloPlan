@@ -261,8 +261,11 @@ export default class WallDrawer {
       endZ = Math.round(endZ / stepSize) * stepSize;
       point.set(endX, 0, endZ);
     }
-    const start = { x: startX, y: startZ };
-    const end = { x: endX, y: endZ };
+    // Convert 3D coordinates (x, z) to 2D room shape coordinates (x, y).
+    // The camera in top-down mode uses a flipped Z axis, so we need to
+    // invert the Z value to obtain the correct Y coordinate in the plan.
+    const start = { x: startX, y: startZ === 0 ? 0 : -startZ };
+    const end = { x: endX, y: endZ === 0 ? 0 : -endZ };
     state.addWallWithHistory(start, end);
     this.start = null;
     this.disposePreview();

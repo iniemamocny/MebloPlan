@@ -182,6 +182,19 @@ describe('WallDrawer', () => {
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
       { x: 0, y: 0 },
+      { x: 0, y: -2 },
+    );
+    drawer.disable();
+  });
+
+  it('converts negative z to positive y coordinates', () => {
+    const { drawer, point, addWallWithHistory } = createDrawer();
+    point.set(0, 0, 0);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
+    point.set(0, 0, -2);
+    (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
+    expect(addWallWithHistory).toHaveBeenCalledWith(
+      { x: 0, y: 0 },
       { x: 0, y: 2 },
     );
     drawer.disable();
