@@ -141,8 +141,10 @@ export default class WallDrawer {
     }
     if (this.dragging && this.start && this.preview) {
       const dx = point.x - this.start.x;
-      const dz = point.z - this.start.z;
-      const dist = Math.sqrt(dx * dx + dz * dz);
+      const dz = this.start.z - point.z; // reverse Z axis
+      const distX = Math.abs(dx);
+      const distZ = Math.abs(dz);
+      const dist = Math.sqrt(distX * distX + distZ * distZ);
       this.preview.scale.x = dist;
       this.preview.position.set(
         this.start.x,
