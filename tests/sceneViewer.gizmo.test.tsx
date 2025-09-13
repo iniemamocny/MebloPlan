@@ -14,6 +14,8 @@ vi.mock('three/examples/jsm/controls/OrbitControls.js', () => ({
     dispose: vi.fn(),
     dollyIn: vi.fn(),
     dollyOut: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
   })),
 }));
 
@@ -95,6 +97,30 @@ describe('SceneViewer axes gizmo', () => {
       );
     });
     expect(container.querySelector('[data-testid="axes-gizmo"]')).not.toBeNull();
+    root.unmount();
+    container.remove();
+  });
+
+  it('orients axes with X right and Z up in 2d mode', async () => {
+    const threeRef: any = { current: null };
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = ReactDOM.createRoot(container);
+    act(() => {
+      root.render(
+        <SceneViewer
+          threeRef={threeRef}
+          addCountertop={false}
+          mode={null}
+          setMode={vi.fn()}
+          viewMode="2d"
+          setViewMode={() => {}}
+        />,
+      );
+    });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(threeRef.current.axesHelper).toBeDefined();
+    expect(threeRef.current.axesHelper!.rotation.x).toBeCloseTo(Math.PI / 2);
     root.unmount();
     container.remove();
   });
