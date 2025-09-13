@@ -266,6 +266,22 @@ describe('WallDrawer', () => {
     drawer.disable();
   });
 
+  it('disposes preview when queueMicrotask is unavailable', async () => {
+    vi.stubGlobal('queueMicrotask', undefined as any);
+    const { drawer, point } = createDrawer();
+    point.set(0, 0, 0);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
+    const preview = (drawer as any).preview as THREE.Mesh;
+    const geomDispose = vi.spyOn(preview.geometry, 'dispose');
+    const matDispose = vi.spyOn(preview.material as THREE.Material, 'dispose');
+    point.set(1, 0, 0);
+    (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
+    await Promise.resolve();
+    expect(geomDispose).toHaveBeenCalled();
+    expect(matDispose).toHaveBeenCalled();
+    drawer.disable();
+  });
+
   it('finalized wall pushes history entry', () => {
     const { drawer, point, history } = createDrawer();
     point.set(0, 0, 0);

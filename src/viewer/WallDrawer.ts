@@ -117,10 +117,17 @@ export default class WallDrawer {
     this.group.remove(mesh);
     const geom = mesh.geometry;
     const mat = mesh.material as THREE.Material;
-    queueMicrotask(() => {
+    const dispose = () => {
       geom.dispose();
       mat.dispose();
-    });
+    };
+    if (typeof queueMicrotask === 'function') {
+      queueMicrotask(dispose);
+    } else if (typeof Promise !== 'undefined') {
+      Promise.resolve().then(dispose);
+    } else {
+      dispose();
+    }
     this.preview = null;
   }
 
