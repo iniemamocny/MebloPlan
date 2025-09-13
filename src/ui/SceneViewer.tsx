@@ -152,6 +152,7 @@ const SceneViewer: React.FC<Props> = ({
     (mode: '3d' | '2d') => {
       const three = threeRef.current;
       if (!three?.renderer || !three.setCamera || !three.setControls) return;
+      three.camera.up.set(0, 1, 0);
       if ((three as any).gridChangeHandler) {
         three.controls.removeEventListener('change', (three as any).gridChangeHandler);
         (three as any).gridChangeHandler = null;
@@ -171,7 +172,6 @@ const SceneViewer: React.FC<Props> = ({
         const pos = savedView.current.pos;
         const height = 10;
         three.camera.position.set(pos.x, height, pos.z);
-        three.camera.up.set(0, 0, -1);
         c.target.set(pos.x, 0, pos.z);
         three.camera.lookAt(c.target);
         c.update();
@@ -202,7 +202,6 @@ const SceneViewer: React.FC<Props> = ({
           three.camera.position.copy(savedView.current.pos);
           c.target.copy(savedView.current.target);
         }
-        three.camera.up.set(0, 1, 0);
         c.update();
         const base = Math.max(
           1,
