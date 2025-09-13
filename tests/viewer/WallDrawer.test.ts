@@ -65,7 +65,7 @@ describe('WallDrawer', () => {
     drawer.disable();
   });
 
-  it('returns raw intersection coordinates without rounding', () => {
+  it('returns intersection coordinates with Z flipped', () => {
     const canvas = document.createElement('canvas');
     canvas.getBoundingClientRect = () => ({
       left: 0,
@@ -106,7 +106,17 @@ describe('WallDrawer', () => {
       clientY: 0,
     } as PointerEvent);
     expect(result?.x).toBe(intersection.x);
-    expect(result?.z).toBe(intersection.z);
+    expect(result?.z).toBe(-intersection.z);
+    drawer.disable();
+  });
+
+  it('moves cursor to pointer on move', () => {
+    const { drawer, point } = createDrawer();
+    point.set(1, 0, 2);
+    (drawer as any).onMove({} as PointerEvent);
+    const cursor = (drawer as any).cursor as THREE.Mesh;
+    expect(cursor.position.x).toBeCloseTo(1);
+    expect(cursor.position.z).toBeCloseTo(2);
     drawer.disable();
   });
 
