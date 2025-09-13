@@ -5,7 +5,7 @@ import WallDrawer from '../../src/viewer/WallDrawer';
 import {
   screenToWorldZ,
   worldZToPlannerY,
-} from '../../src/utils/coordinates';
+} from '../../src/utils/coordinateSystem';
 
 const THICKNESS = 100; // mm
 const HEIGHT = 2500; // mm

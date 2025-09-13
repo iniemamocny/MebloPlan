@@ -3,7 +3,13 @@ import type { WebGLRenderer, Camera } from 'three';
 import type { UseBoundStore, StoreApi } from 'zustand';
 import { usePlannerStore } from '../state/store';
 import type { ShapePoint } from '../types';
-import { screenToWorldZ, worldZToPlannerY } from '../utils/coordinates';
+import {
+  screenToWorldZ,
+  worldZToPlannerY,
+  convertAxis,
+  screenAxes,
+  worldAxes,
+} from '../utils/coordinateSystem';
 
 interface PlannerStore {
   snapLength: number;
@@ -134,7 +140,8 @@ export default class WallDrawer {
   private getPoint(event: PointerEvent): THREE.Vector3 | null {
     const rect = this.renderer.domElement.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    const ny = ((event.clientY - rect.top) / rect.height) * 2 - 1;
+    const y = convertAxis(ny, screenAxes, 'y', worldAxes, 'y');
     const cam = this.getCamera();
     this.raycaster.setFromCamera(new THREE.Vector2(x, y), cam);
     const point = new THREE.Vector3();
