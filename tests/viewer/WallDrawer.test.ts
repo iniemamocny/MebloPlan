@@ -109,7 +109,8 @@ describe('WallDrawer', () => {
       clientY: 0,
     } as PointerEvent);
     expect(result?.x).toBe(intersection.x);
-    expect(result?.z).toBe(intersection.z);
+    // getPoint flips the intersection's Z axis
+    expect(result?.z).toBe(-intersection.z);
     drawer.disable();
   });
 
