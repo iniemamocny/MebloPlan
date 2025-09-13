@@ -3,7 +3,7 @@ import type { WebGLRenderer, Camera } from 'three';
 import type { UseBoundStore, StoreApi } from 'zustand';
 import { usePlannerStore } from '../state/store';
 import type { ShapePoint } from '../types';
-import { screenToWorld } from '../utils/coordinateSystem';
+import { screenToWorld, groundPlane } from '../utils/coordinateSystem';
 
 interface PlannerStore {
   snapLength: number;
@@ -20,7 +20,7 @@ export default class WallDrawer {
   private group: THREE.Group;
   private store: UseBoundStore<StoreApi<PlannerStore>>;
   private raycaster = new THREE.Raycaster();
-  private plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  private plane = groundPlane();
   private cursor: THREE.Mesh | null = null;
   private cursorTarget: THREE.Vector3 | null = null;
   private animationId: number | null = null;
