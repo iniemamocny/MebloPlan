@@ -1,12 +1,12 @@
 import * as THREE from 'three'
-import { ModuleAdv } from '../types'
+import { ModuleAdv, HardwareOptions } from '../types'
 
 export interface BuilderOpts {
   width: number // in millimetres
   height: number // in millimetres
   depth: number // in millimetres
   adv?: ModuleAdv
-  hardware?: Record<string, number>
+  hardware?: HardwareOptions
 }
 
 /**

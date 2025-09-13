@@ -4,6 +4,8 @@ import {
   BottomPanel,
   EdgeBanding,
   SidePanelSpec,
+  HardwareOptions,
+  LegsOptions,
 } from '../types';
 
 export interface CabinetConfig {
@@ -31,8 +33,8 @@ export interface CabinetConfig {
     left?: SidePanelSpec & { dropToFloor?: boolean };
     right?: SidePanelSpec & { dropToFloor?: boolean };
   };
-  hardware?: any;
-  legs?: { type: string; height: number; category?: string; legsOffset?: number };
+  hardware?: HardwareOptions;
+  legs?: LegsOptions;
 }
 
 export const PLAYER_MODES = ['furnish', 'decorate'] as const;

@@ -5,7 +5,7 @@ import { usePlannerStore, legCategories } from '../state/store';
 import TechDrawing from './components/TechDrawing';
 import Cabinet3D from './components/Cabinet3D';
 import { CabinetConfig } from './types';
-import { Gaps } from '../types';
+import { Gaps, isHardwareOptions, isLegsOptions } from '../types';
 import {
   CornerCabinetForm,
   SinkCabinetForm,
@@ -111,16 +111,16 @@ const CabinetConfigurator: React.FC<Props> = ({
   const formValues: CabinetFormValues = {
     height: gLocal.height,
     depth: gLocal.depth,
-    hardware: gLocal.hardware,
-    legs: gLocal.legs,
+    hardware: isHardwareOptions(gLocal.hardware) ? gLocal.hardware : undefined,
+    legs: isLegsOptions(gLocal.legs) ? gLocal.legs : undefined,
   };
   const handleFormChange = (vals: CabinetFormValues) => {
     setAdv({
       ...gLocal,
       height: vals.height,
       depth: vals.depth,
-      hardware: vals.hardware,
-      legs: vals.legs,
+      hardware: isHardwareOptions(vals.hardware) ? vals.hardware : undefined,
+      legs: isLegsOptions(vals.legs) ? vals.legs : undefined,
     });
   };
 

@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import SingleMMInput from '../components/SingleMMInput'
+import { HardwareOptions, LegsOptions } from '../../types'
 
 export interface CabinetFormValues {
   height: number
   depth: number
-  hardware?: any
-  legs?: any
+  hardware?: HardwareOptions
+  legs?: LegsOptions
 }
 
 export interface CabinetFormProps {
