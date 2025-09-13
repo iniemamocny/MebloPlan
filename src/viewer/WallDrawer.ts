@@ -3,7 +3,11 @@ import type { WebGLRenderer, Camera } from 'three';
 import type { UseBoundStore, StoreApi } from 'zustand';
 import { usePlannerStore } from '../state/store';
 import type { ShapePoint } from '../types';
-import { screenToWorld, groundPlane } from '../utils/coordinateSystem';
+import {
+  screenToWorld,
+  groundPlane,
+  worldToPlanner,
+} from '../utils/coordinateSystem';
 
 interface PlannerStore {
   snapLength: number;
@@ -272,8 +276,8 @@ export default class WallDrawer {
       endZ = Math.round(endZ / stepSize) * stepSize;
       point.set(endX, 0, endZ);
     }
-    const start = { x: startX, y: startZ };
-    const end = { x: endX, y: endZ };
+    const start = { x: startX, y: worldToPlanner(startZ, 'z') };
+    const end = { x: endX, y: worldToPlanner(endZ, 'z') };
     state.addWallWithHistory(start, end);
     this.start = null;
     this.disposePreview();
