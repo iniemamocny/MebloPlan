@@ -182,7 +182,7 @@ describe('WallDrawer', () => {
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
       { x: 0, y: 0 },
-      { x: 0, y: 2 },
+      { x: 0, y: -2 },
     );
     drawer.disable();
   });
