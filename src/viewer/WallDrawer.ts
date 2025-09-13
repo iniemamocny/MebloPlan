@@ -180,7 +180,7 @@ export default class WallDrawer {
         this.cursor.position.copy(point).setY(0.001);
       }
       const dx = point.x - this.start.x;
-      const dz = point.z - this.start.z;
+      const dz = this.start.z - point.z;
       const distX = Math.abs(dx);
       const distZ = Math.abs(dz);
       const dist = Math.sqrt(distX * distX + distZ * distZ);
@@ -190,7 +190,7 @@ export default class WallDrawer {
         this.preview.position.y,
         this.start.z,
       );
-      this.preview.rotation.y = Math.atan2(dz, dx);
+      this.preview.rotation.y = Math.atan2(-dz, dx);
     }
   };
 
@@ -244,13 +244,13 @@ export default class WallDrawer {
     let endX = point.x;
     let endZ = point.z;
     const dx = endX - this.start.x;
-    const dz = endZ - this.start.z;
+    const dz = this.start.z - endZ;
     const dist = Math.sqrt(dx * dx + dz * dz);
     if (dist < 0.001) {
       const snapLength = state.snapLength > 0 ? state.snapLength : 10;
       const step = snapLength / 1000;
       let dirX = dx;
-      let dirZ = dz;
+      let dirZ = -dz;
       if (dirX === 0 && dirZ === 0 && this.lastPoint) {
         dirX = this.lastPoint.x - this.start.x;
         dirZ = this.lastPoint.z - this.start.z;
