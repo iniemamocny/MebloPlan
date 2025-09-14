@@ -71,9 +71,9 @@ export function buildRoomShapeMesh(
     return new THREE.Vector2(x, z);
   });
   const area = contour.length >= 3 ? THREE.ShapeUtils.area(contour) : 0;
-  // With planner Y inverted when mapped to world Z, a positive area indicates
-  // a clockwise winding.
-  const clockwise = area > 0;
+  // Planner Y is inverted when mapped to world Z, reversing the sign of the
+  // computed area, so a negative area corresponds to a clockwise winding.
+  const clockwise = area < 0;
 
   for (const seg of segments) {
     const s = seg.start;
@@ -86,7 +86,7 @@ export function buildRoomShapeMesh(
     // one side of the drawn line when lines represent the inner face of the
     // wall.
     const normal = new THREE.Vector3(-dz, 0, dx).normalize();
-    if (clockwise) {
+    if (!clockwise) {
       normal.multiplyScalar(-1);
     }
 
