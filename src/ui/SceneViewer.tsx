@@ -16,6 +16,7 @@ import TouchJoystick from './components/TouchJoystick';
 import { PlayerMode, PlayerSubMode, PLAYER_MODES } from './types';
 import RadialMenu from './components/RadialMenu';
 import { addSegmentToShape } from '../utils/roomShape';
+import { buildRoomShapeMesh } from '../scene/roomShapeBuilder';
 
 type ThreeWithExtras = ThreeEngine & {
   axesHelper?: THREE.AxesHelper;
@@ -74,10 +75,30 @@ const SceneViewer: React.FC<Props> = ({
   const roomRef = useRef(store.room);
   const [pointerLockError, setPointerLockError] = useState<string | null>(null);
   const wallStartRef = useRef<ShapePoint | null>(null);
+  const wallMeshRef = useRef<THREE.LineSegments | null>(null);
 
   useEffect(() => {
     roomRef.current = store.room;
   }, [store.room]);
+
+  useEffect(() => {
+    const three = threeRef.current;
+    if (!three) return;
+    const shape = store.roomShape;
+    let mesh: THREE.LineSegments | null = null;
+    if (shape.segments.length > 0) {
+      mesh = buildRoomShapeMesh(shape);
+      three.group.add(mesh);
+      wallMeshRef.current = mesh;
+    }
+    return () => {
+      if (mesh) {
+        three.group.remove(mesh);
+        mesh.geometry.dispose();
+        (mesh.material as THREE.Material).dispose();
+      }
+    };
+  }, [store.roomShape, threeRef]);
 
   // Removed automatic switch to 3D when room drawing ends.
 
