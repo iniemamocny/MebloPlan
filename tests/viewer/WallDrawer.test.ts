@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as THREE from 'three';
 import WallDrawer from '../../src/viewer/WallDrawer';
 import { GROUND_NORMAL, worldToPlanner } from '../../src/utils/coordinateSystem';
+import * as coords from '../../src/utils/coordinateSystem';
 
 const THICKNESS = 100; // mm
 const HEIGHT = 2500; // mm
@@ -119,6 +120,47 @@ describe('WallDrawer', () => {
     } as PointerEvent);
     expect(result?.x).toBe(intersection.x);
     expect(result?.z).toBe(intersection.z);
+    drawer.disable();
+  });
+
+  it('converts screen coordinates for both axes', () => {
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    canvas.setPointerCapture = vi.fn();
+    canvas.releasePointerCapture = vi.fn();
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const group = new THREE.Group();
+    const state = {
+      snapToGrid: false,
+      gridSize: 100,
+      snapLength: SNAP,
+      wallDefaults: { height: HEIGHT, thickness: THICKNESS },
+      addWallWithHistory: vi.fn(),
+    };
+    const store = { getState: () => state } as any;
+    const drawer = new WallDrawer(renderer, () => camera, group, store);
+    drawer.enable(state.wallDefaults.thickness);
+    const spy = vi.spyOn(coords, 'screenToWorld');
+    (drawer as any).raycaster.ray.intersectPlane = vi.fn(
+      (_plane: THREE.Plane, point: THREE.Vector3) => {
+        point.set(0, 0, 0);
+        return point;
+      },
+    );
+    (drawer as any).getPoint({ clientX: 10, clientY: 20 } as PointerEvent);
+    expect(spy).toHaveBeenCalledWith(expect.any(Number), 'x');
+    expect(spy).toHaveBeenCalledWith(expect.any(Number), 'y');
     drawer.disable();
   });
 
