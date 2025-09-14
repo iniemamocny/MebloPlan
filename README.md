@@ -57,6 +57,13 @@ Aplikacja korzysta z prawoskrętnego układu współrzędnych, w którym oś **Y
 
 Do konwersji współrzędnych należy używać helperów z `src/utils/coordinateSystem.ts` oraz `src/utils/planner.ts` (`plannerToWorld`, `worldToPlanner`, `plannerPointToWorld`, `worldPointToPlanner`). Ręczne zamiany osi mogą prowadzić do błędów i powinny być zastąpione powyższymi funkcjami.
 
+## Eksperymentalny tryb 2D
+
+Istniejący moduł 2D jest traktowany jako "legacy" i może zostać wyłączony
+przez ustawienie zmiennej środowiskowej `VITE_ENABLE_LEGACY_2D=false`. Dzięki
+temu nowy system 2D może być rozwijany równolegle. Wstępny dokument projektowy
+znajduje się w [`docs/new-2d-system.md`](docs/new-2d-system.md).
+
 ## Licencja
 
 Projekt jest udostępniany na licencji **MebloPlan Non-Commercial License 1.0**. Użytkowanie, kopiowanie oraz modyfikacja kodu są dozwolone wyłącznie w celach niekomercyjnych i przy zachowaniu informacji o autorach. Wykorzystanie komercyjne wymaga wcześniejszej zgody wszystkich współautorów.
