@@ -1,27 +1,32 @@
 import * as THREE from 'three';
 import { RoomShape } from '../types';
-import { alignToGround } from '../utils/coordinateSystem';
 import { plannerPointToWorld } from '../utils/planner';
 
 /**
- * Convert a RoomShape into a Three.js LineSegments mesh.
- * Each segment is represented by a line on the XZ plane
- * (planner X/Y mapped to world X/Z).
+ * Convert a RoomShape into a Three.js mesh with walls extruded to the given
+ * thickness and height. Coordinates are interpreted in metres.
  */
-export function buildRoomShapeMesh(shape: RoomShape): THREE.LineSegments {
-  const verts: number[] = [];
+export function buildRoomShapeMesh(
+  shape: RoomShape,
+  opts: { thickness: number; height: number },
+): THREE.Group {
+  const group = new THREE.Group();
+  const thickness = opts.thickness / 1000;
+  const height = opts.height / 1000;
+  const material = new THREE.MeshStandardMaterial({ color: 0xb0b0b0 });
+
   for (const seg of shape.segments) {
-    // Convert planner coordinates to world space to avoid axis inversion
     const s = plannerPointToWorld(seg.start);
     const e = plannerPointToWorld(seg.end);
-
-    // Build geometry in the XY plane; alignToGround will map it onto XZ
-    verts.push(s.x, -s.z, 0, e.x, -e.z, 0);
+    const dx = e.x - s.x;
+    const dz = e.z - s.z;
+    const length = Math.sqrt(dx * dx + dz * dz);
+    const geometry = new THREE.BoxGeometry(length, height, thickness);
+    const mesh = new THREE.Mesh(geometry, material.clone());
+    mesh.position.set(s.x + dx / 2, height / 2, s.z + dz / 2);
+    mesh.rotation.y = Math.atan2(dz, dx);
+    group.add(mesh);
   }
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
-  const material = new THREE.LineBasicMaterial({ color: 0x333333 });
-  const lines = new THREE.LineSegments(geometry, material);
-  alignToGround(lines);
-  return lines;
+
+  return group;
 }

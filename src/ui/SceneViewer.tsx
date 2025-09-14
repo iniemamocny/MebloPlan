@@ -77,7 +77,7 @@ const SceneViewer: React.FC<Props> = ({
   const roomRef = useRef(store.room);
   const [pointerLockError, setPointerLockError] = useState<string | null>(null);
   const wallStartRef = useRef<ShapePoint | null>(null);
-  const wallMeshRef = useRef<THREE.LineSegments | null>(null);
+  const wallMeshRef = useRef<THREE.Group | null>(null);
   const wallPreviewRef = useRef<THREE.Line | null>(null);
 
   useEffect(() => {
@@ -88,20 +88,25 @@ const SceneViewer: React.FC<Props> = ({
     const three = threeRef.current;
     if (!three) return;
     const shape = store.roomShape;
-    let mesh: THREE.LineSegments | null = null;
+    let mesh: THREE.Group | null = null;
     if (shape.segments.length > 0) {
-      mesh = buildRoomShapeMesh(shape);
+      mesh = buildRoomShapeMesh(shape, store.wallDefaults);
       three.group.add(mesh);
       wallMeshRef.current = mesh;
     }
     return () => {
       if (mesh) {
         three.group.remove(mesh);
-        mesh.geometry.dispose();
-        (mesh.material as THREE.Material).dispose();
+        mesh.traverse((obj) => {
+          if ((obj as THREE.Mesh).isMesh) {
+            const m = obj as THREE.Mesh;
+            (m.geometry as THREE.BufferGeometry).dispose();
+            (m.material as THREE.Material).dispose();
+          }
+        });
       }
     };
-  }, [store.roomShape, threeRef]);
+  }, [store.roomShape, store.wallDefaults, threeRef]);
 
   // Removed automatic switch to 3D when room drawing ends.
 
