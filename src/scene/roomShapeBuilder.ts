@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { RoomShape } from '../types';
+import { RoomShape, ShapePoint, ShapeSegment } from '../types';
 import { plannerPointToWorld } from '../utils/planner';
 
 /**
@@ -28,23 +28,49 @@ export function buildRoomShapeMesh(
     start: plannerPointToWorld(seg.start),
     end: plannerPointToWorld(seg.end),
   }));
-  const points = shape.points.map((pt) => plannerPointToWorld(pt));
 
-  // Determine polygon orientation to ensure wall thickness always extends
-  // outward from the room shape. Signed area is computed on the XZ plane
-  // (planner Y maps to world Z with inverted direction).
-  let area = 0;
-  if (segments.length) {
-    for (const seg of segments) {
-      area += seg.start.x * seg.end.z - seg.end.x * seg.start.z;
+  // Build an ordered loop of points from the shape's segments to compute a
+  // signed polygon area on the XZ plane. This ensures orientation is derived
+  // from a consistent winding regardless of the input segment order.
+  const key = (p: ShapePoint) => p.id ?? `${p.x},${p.y}`;
+  const ordered: ShapePoint[] = [];
+  if (shape.segments.length) {
+    const conn = new Map<string, ShapeSegment[]>();
+    for (const seg of shape.segments) {
+      const a = key(seg.start);
+      const b = key(seg.end);
+      if (!conn.has(a)) conn.set(a, []);
+      if (!conn.has(b)) conn.set(b, []);
+      conn.get(a)!.push(seg);
+      conn.get(b)!.push(seg);
     }
-  } else if (points.length) {
-    for (let i = 0; i < points.length; i++) {
-      const p = points[i];
-      const q = points[(i + 1) % points.length];
-      area += p.x * q.z - q.x * p.z;
+    const start = shape.segments[0].start;
+    const startKey = key(start);
+    ordered.push(start);
+    const used = new Set<ShapeSegment>();
+    let current = start;
+    let currentKey = startKey;
+    while (ordered.length <= shape.segments.length) {
+      const segList = conn.get(currentKey) ?? [];
+      const nextSeg = segList.find((s) => !used.has(s));
+      if (!nextSeg) break;
+      used.add(nextSeg);
+      const next = key(nextSeg.start) === currentKey ? nextSeg.end : nextSeg.start;
+      const nextKey = key(next);
+      if (nextKey === startKey) break;
+      ordered.push(next);
+      current = next;
+      currentKey = nextKey;
     }
+  } else if (shape.points.length) {
+    ordered.push(...shape.points);
   }
+
+  const contour: THREE.Vector2[] = ordered.map((pt) => {
+    const { x, z } = plannerPointToWorld(pt);
+    return new THREE.Vector2(x, z);
+  });
+  const area = contour.length >= 3 ? THREE.ShapeUtils.area(contour) : 0;
   // With planner Y inverted when mapped to world Z, a positive area indicates
   // a clockwise winding.
   const clockwise = area > 0;
