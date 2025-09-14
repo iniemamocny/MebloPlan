@@ -218,7 +218,8 @@
     "place": "Umieść",
     "pencil": "Ołówek",
     "hammer": "Młotek",
-    "group": "Grupuj"
+    "group": "Grupuj",
+    "pressEscToFinish": "Naciśnij Esc, aby zakończyć"
   },
   "items": {
     "cup": "Kubek",

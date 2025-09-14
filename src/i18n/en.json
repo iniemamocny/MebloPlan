@@ -218,7 +218,8 @@
     "place": "Place",
     "pencil": "Pencil",
     "hammer": "Hammer",
-    "group": "Group"
+    "group": "Group",
+    "pressEscToFinish": "Press Esc to finish"
   },
   "items": {
     "cup": "Cup",
