@@ -15,27 +15,35 @@ export function buildRoomShapeMesh(
   const height = opts.height / 1000;
   const material = new THREE.MeshStandardMaterial({ color: 0xb0b0b0 });
 
+  // Convert all shape coordinates to world space before processing.
+  const segments = shape.segments.map((seg) => ({
+    start: plannerPointToWorld(seg.start),
+    end: plannerPointToWorld(seg.end),
+  }));
+  const points = shape.points.map((pt) => plannerPointToWorld(pt));
+
   // Determine polygon orientation to ensure wall thickness always extends
-  // outward from the room shape. A positive signed area indicates a
-  // counter-clockwise winding and a negative area indicates clockwise.
+  // outward from the room shape. Signed area is computed on the XZ plane
+  // (planner Y maps to world Z with inverted direction).
   let area = 0;
-  if (shape.segments.length) {
-    for (const seg of shape.segments) {
-      area +=
-        seg.start.x * seg.end.y - seg.end.x * seg.start.y;
+  if (segments.length) {
+    for (const seg of segments) {
+      area += seg.start.x * seg.end.z - seg.end.x * seg.start.z;
     }
-  } else if (shape.points.length) {
-    for (let i = 0; i < shape.points.length; i++) {
-      const p = shape.points[i];
-      const q = shape.points[(i + 1) % shape.points.length];
-      area += p.x * q.y - q.x * p.y;
+  } else if (points.length) {
+    for (let i = 0; i < points.length; i++) {
+      const p = points[i];
+      const q = points[(i + 1) % points.length];
+      area += p.x * q.z - q.x * p.z;
     }
   }
-  const clockwise = area < 0;
+  // With planner Y inverted when mapped to world Z, a positive area indicates
+  // a clockwise winding.
+  const clockwise = area > 0;
 
-  for (const seg of shape.segments) {
-    const s = plannerPointToWorld(seg.start);
-    const e = plannerPointToWorld(seg.end);
+  for (const seg of segments) {
+    const s = seg.start;
+    const e = seg.end;
     const dx = e.x - s.x;
     const dz = e.z - s.z;
     const length = Math.sqrt(dx * dx + dz * dz);
