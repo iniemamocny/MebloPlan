@@ -93,7 +93,9 @@ const SceneViewer: React.FC<Props> = ({
       mesh = buildRoomShapeMesh(shape, {
         thickness: store.wallDefaults.thickness,
         height: store.wallDefaults.height,
-        mode: 'inside',
+        // Wall lines in the planner represent the centre axis, so meshes
+        // should be centred on the segments without any outward offset.
+        mode: 'axis',
       });
       three.group.add(mesh);
       wallMeshRef.current = mesh;
