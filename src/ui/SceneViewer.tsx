@@ -77,6 +77,7 @@ const SceneViewer: React.FC<Props> = ({
   const [pointerLockError, setPointerLockError] = useState<string | null>(null);
   const wallStartRef = useRef<ShapePoint | null>(null);
   const wallMeshRef = useRef<THREE.LineSegments | null>(null);
+  const wallPreviewRef = useRef<THREE.Line | null>(null);
 
   useEffect(() => {
     roomRef.current = store.room;
@@ -939,53 +940,121 @@ const SceneViewer: React.FC<Props> = ({
     }, [mode, threeRef]);
 
   useEffect(() => {
+    const three = threeRef.current;
     if (store.selectedTool !== 'pencil') {
       wallStartRef.current = null;
+      if (three && wallPreviewRef.current) {
+        three.group.remove(wallPreviewRef.current);
+        wallPreviewRef.current.geometry.dispose();
+        (wallPreviewRef.current.material as THREE.Material).dispose();
+        wallPreviewRef.current = null;
+      }
       return;
     }
-    const three = threeRef.current;
     if (!three || !three.renderer || !three.camera) return;
     const canvas = three.renderer.domElement;
     const raycaster = new THREE.Raycaster();
     const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
     const temp = new THREE.Vector3();
-    const handleClick = (ev: PointerEvent) => {
-      ev.stopPropagation();
-      if (ev.button !== 0) return;
+
+    const getPoint = (ev: PointerEvent): ShapePoint | null => {
       const rect = canvas.getBoundingClientRect();
       const mouse = new THREE.Vector2(
         ((ev.clientX - rect.left) / rect.width) * 2 - 1,
         -((ev.clientY - rect.top) / rect.height) * 2 + 1,
       );
       raycaster.setFromCamera(mouse, three.camera);
-      if (!raycaster.ray.intersectPlane(plane, temp)) return;
-      const point: ShapePoint = { x: temp.x, y: temp.z };
-      const start = wallStartRef.current;
-      if (!start) {
-        wallStartRef.current = point;
+      if (!raycaster.ray.intersectPlane(plane, temp)) return null;
+      return { x: temp.x, y: temp.z };
+    };
+
+    const updatePreview = (start: ShapePoint, end: ShapePoint) => {
+      let line = wallPreviewRef.current;
+      if (!line) {
+        const geometry = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(start.x, 0, start.y),
+          new THREE.Vector3(end.x, 0, end.y),
+        ]);
+        const material = new THREE.LineBasicMaterial({ color: 0x444444 });
+        line = new THREE.Line(geometry, material);
+        three.group.add(line);
+        wallPreviewRef.current = line;
       } else {
-        const shape = usePlannerStore.getState().roomShape;
-        const newShape = addSegmentToShape(shape, { start, end: point });
-        if (newShape) {
-          usePlannerStore.getState().setRoomShape(newShape);
-        }
+        const pos = (
+          line.geometry as THREE.BufferGeometry
+        ).attributes.position.array as Float32Array;
+        pos[0] = start.x;
+        pos[1] = 0;
+        pos[2] = start.y;
+        pos[3] = end.x;
+        pos[4] = 0;
+        pos[5] = end.y;
+        (
+          line.geometry as THREE.BufferGeometry
+        ).attributes.position.needsUpdate = true;
+      }
+    };
+
+    const clearPreview = () => {
+      if (three && wallPreviewRef.current) {
+        three.group.remove(wallPreviewRef.current);
+        wallPreviewRef.current.geometry.dispose();
+        (wallPreviewRef.current.material as THREE.Material).dispose();
+        wallPreviewRef.current = null;
+      }
+    };
+
+    const handlePointerDown = (ev: PointerEvent) => {
+      ev.stopPropagation();
+      if (ev.button !== 0) return;
+      const point = getPoint(ev);
+      if (point) {
         wallStartRef.current = point;
       }
     };
-    const finish = () => {
+
+    const handlePointerMove = (ev: PointerEvent) => {
+      const start = wallStartRef.current;
+      if (!start) return;
+      const end = getPoint(ev);
+      if (end) {
+        updatePreview(start, end);
+      }
+    };
+
+    const handlePointerUp = (ev: PointerEvent) => {
+      const start = wallStartRef.current;
+      if (!start) return;
+      const end = getPoint(ev);
+      if (end) {
+        const shape = usePlannerStore.getState().roomShape;
+        const newShape = addSegmentToShape(shape, { start, end });
+        if (newShape) {
+          usePlannerStore.getState().setRoomShape(newShape);
+        }
+      }
       wallStartRef.current = null;
-      usePlannerStore.getState().setSelectedTool(null);
+      clearPreview();
     };
+
     const handleKeyDown = (ev: KeyboardEvent) => {
-      if (ev.key === 'Escape') finish();
+      if (ev.key === 'Escape') {
+        wallStartRef.current = null;
+        clearPreview();
+        usePlannerStore.getState().setSelectedTool(null);
+      }
     };
-    canvas.addEventListener('pointerdown', handleClick);
-    canvas.addEventListener('dblclick', finish);
+
+    canvas.addEventListener('pointerdown', handlePointerDown);
+    canvas.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
     window.addEventListener('keydown', handleKeyDown);
     return () => {
-      canvas.removeEventListener('pointerdown', handleClick);
-      canvas.removeEventListener('dblclick', finish);
+      canvas.removeEventListener('pointerdown', handlePointerDown);
+      canvas.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
       window.removeEventListener('keydown', handleKeyDown);
+      clearPreview();
     };
   }, [store.selectedTool, threeRef]);
 
