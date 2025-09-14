@@ -356,6 +356,42 @@ describe('WallDrawer', () => {
     drawer.disable();
   });
 
+  it.each([false, true])(
+    'stores segment matching last preview position (snapToGrid=%s)',
+    (snapToGrid) => {
+      const { drawer, addWallWithHistory } = createDrawer(
+        { snapToGrid, gridSize: 100, snapRightAngles: false },
+        { stubGetPoint: false },
+      );
+      const current = new THREE.Vector3();
+      (drawer as any).raycaster.ray.intersectPlane = vi.fn(
+        (_plane: THREE.Plane, point: THREE.Vector3) => {
+          point.copy(current);
+          return point;
+        },
+      );
+      current.set(0.12, 0, 0.15);
+      (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
+      current.set(0.27, 0, 0.35);
+      (drawer as any).onMove({} as PointerEvent);
+      const preview = (drawer as any).preview as THREE.Mesh;
+      const dist = preview.scale.x;
+      const angle = preview.rotation.y;
+      const startX = preview.position.x;
+      const startZ = preview.position.z;
+      const endX = startX + dist * Math.cos(angle);
+      const endZ = startZ + dist * Math.sin(angle);
+      (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
+      expect(addWallWithHistory).toHaveBeenCalledTimes(1);
+      const [[start, end]] = addWallWithHistory.mock.calls;
+      expect(start.x).toBeCloseTo(worldToPlanner(startX, 'x'));
+      expect(start.y).toBeCloseTo(worldToPlanner(startZ, 'z'));
+      expect(end.x).toBeCloseTo(worldToPlanner(endX, 'x'));
+      expect(end.y).toBeCloseTo(worldToPlanner(endZ, 'z'));
+      drawer.disable();
+    },
+  );
+
   it('Escape cancels drag without adding wall', () => {
     const { drawer, point, addWallWithHistory } = createDrawer();
     point.set(0, 0, 0);
