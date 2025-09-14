@@ -200,7 +200,6 @@
     }
   },
   "room": {
-    "walls": "Walls",
     "windows": "Windows",
     "windowSingle": "Single window",
     "windowDouble": "Double window",
@@ -212,13 +211,11 @@
     "openings": "Openings",
     "height": "Height",
     "width": "Width",
-    "thickness": "Thickness",
     "floorHeight": "Floor height",
     "insert": "Insert",
     "dropCeiling": "Drop ceiling",
     "length": "Length",
     "place": "Place",
-    "pencil": "Pencil",
     "hammer": "Hammer",
     "group": "Group"
   },

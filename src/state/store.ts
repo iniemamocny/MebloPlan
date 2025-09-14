@@ -10,7 +10,6 @@ import {
   ShapePoint,
 } from '../types';
 import { safeSetItem } from '../utils/storage';
-import { addSegmentToShape } from '../utils/roomShape';
 
 export const defaultGaps: Gaps = {
   left: 2,
@@ -159,7 +158,6 @@ type Store = {
     room: Room;
     roomShape: RoomShape;
   }[];
-  history: string[];
   room: Room;
   roomShape: RoomShape;
   snapAngle: number;
@@ -175,7 +173,6 @@ type Store = {
   playerSpeed: number;
   selectedItemSlot: number;
   selectedTool: string | null;
-  wallDefaults: { height: number; thickness: number };
   openingDefaults: { height: number; width: number; floorHeight: number };
   dropCeilingDefaults: { length: number; width: number; height: number };
   itemsByCabinet: (cabinetId: string) => Item[];
@@ -207,9 +204,6 @@ type Store = {
   setPlayerSpeed: (v: number) => void;
   setSelectedItemSlot: (slot: number) => void;
   setSelectedTool: (tool: string | null) => void;
-  addWallSegment: (start: ShapePoint, end: ShapePoint) => boolean;
-  addWallWithHistory: (start: ShapePoint, end: ShapePoint) => void;
-  drawWalls: (height: number, thickness: number) => void;
   selectWindow: (type: 'single' | 'double' | 'triple') => void;
   selectDoor: (type: 'single' | 'double' | 'sliding') => void;
   insertOpening: (height: number, width: number, floorHeight: number) => void;
@@ -224,7 +218,6 @@ export const usePlannerStore = create<Store>((set, get) => ({
   items: persisted?.items || [],
   past: [],
   future: [],
-  history: [],
   room: persisted?.room
     ? {
         ...persisted.room,
@@ -247,7 +240,6 @@ export const usePlannerStore = create<Store>((set, get) => ({
   playerSpeed: persisted?.playerSpeed ?? 0.1,
   selectedItemSlot: 1,
   selectedTool: null,
-  wallDefaults: { height: 2700, thickness: 120 },
   openingDefaults: { height: 1000, width: 1000, floorHeight: 0 },
   dropCeilingDefaults: { length: 1000, width: 1000, height: 100 },
   showFronts: true,
@@ -508,42 +500,6 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setPlayerSpeed: (v) => set({ playerSpeed: v }),
   setSelectedItemSlot: (slot) => set({ selectedItemSlot: slot }),
   setSelectedTool: (tool) => set({ selectedTool: tool }),
-  addWallSegment: (start, end) => {
-    const state = get();
-    const shape = addSegmentToShape(state.roomShape, { start, end });
-    if (!shape) return false;
-    set({
-      past: [
-        ...state.past,
-        {
-          modules: JSON.parse(JSON.stringify(state.modules)),
-          items: JSON.parse(JSON.stringify(state.items)),
-          room: JSON.parse(JSON.stringify(state.room)),
-          roomShape: JSON.parse(JSON.stringify(state.roomShape)),
-        },
-      ],
-      roomShape: shape,
-      future: [],
-    });
-    return true;
-  },
-  addWallWithHistory: (start, end) => {
-    const success = get().addWallSegment(start, end);
-    if (success) {
-      set((s) => ({
-        history: [
-          ...s.history,
-          `Added wall from (${start.x}, ${start.y}) to (${end.x}, ${end.y})`,
-        ],
-      }));
-    }
-  },
-  drawWalls: (height, thickness) =>
-    set((s) => ({
-      selectedTool: 'wall',
-      wallDefaults: { height, thickness },
-      room: { ...s.room, height },
-    })),
   selectWindow: (type) => set({ selectedTool: `window-${type}` }),
   selectDoor: (type) => set({ selectedTool: `door-${type}` }),
   insertOpening: (height, width, floorHeight) =>
