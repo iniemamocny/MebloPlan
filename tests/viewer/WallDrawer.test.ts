@@ -212,7 +212,7 @@ describe('WallDrawer', () => {
     drawer.disable();
   });
 
-  it('uses pointerup coordinates when lastPoint is stale', () => {
+  it('uses lastPoint when pointerup position differs', () => {
     const { drawer, point, addWallWithHistory } = createDrawer();
     point.set(0, 0, 0);
     (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
@@ -222,7 +222,7 @@ describe('WallDrawer', () => {
     (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
     expect(addWallWithHistory).toHaveBeenCalledWith(
       { x: worldToPlanner(0, 'x'), y: worldToPlanner(0, 'z') },
-      { x: worldToPlanner(2, 'x'), y: worldToPlanner(0, 'z') },
+      { x: worldToPlanner(1, 'x'), y: worldToPlanner(0, 'z') },
     );
     drawer.disable();
   });
@@ -445,7 +445,7 @@ describe('WallDrawer', () => {
     drawer.disable();
   });
 
-  it('uses last intersection for wall end in 3D mode', () => {
+  it('uses last cursor point for wall end in 3D mode', () => {
     const { drawer, addWallWithHistory } = createDrawer(
       { snapRightAngles: false },
       { stubGetPoint: false },
@@ -466,12 +466,12 @@ describe('WallDrawer', () => {
     const [[start, end]] = addWallWithHistory.mock.calls;
     expect(plannerToWorld(start.x, 'x')).toBeCloseTo(0);
     expect(plannerToWorld(start.y, 'y')).toBeCloseTo(0);
-    expect(plannerToWorld(end.x, 'x')).toBeCloseTo(2);
-    expect(plannerToWorld(end.y, 'y')).toBeCloseTo(2);
+    expect(plannerToWorld(end.x, 'x')).toBeCloseTo(1);
+    expect(plannerToWorld(end.y, 'y')).toBeCloseTo(1);
     drawer.disable();
   });
 
-  it('uses last intersection for wall end in 2D mode', () => {
+  it('uses last cursor point for wall end in 2D mode', () => {
     const camera = new THREE.OrthographicCamera(-5, 5, 5, -5, 0.1, 100);
     const { drawer, addWallWithHistory } = createDrawer(
       { snapRightAngles: false },
@@ -493,8 +493,8 @@ describe('WallDrawer', () => {
     const [[start, end]] = addWallWithHistory.mock.calls;
     expect(plannerToWorld(start.x, 'x')).toBeCloseTo(0);
     expect(plannerToWorld(start.y, 'y')).toBeCloseTo(0);
-    expect(plannerToWorld(end.x, 'x')).toBeCloseTo(-2);
-    expect(plannerToWorld(end.y, 'y')).toBeCloseTo(-2);
+    expect(plannerToWorld(end.x, 'x')).toBeCloseTo(-1);
+    expect(plannerToWorld(end.y, 'y')).toBeCloseTo(-1);
     drawer.disable();
   });
 });
