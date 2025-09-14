@@ -89,7 +89,7 @@ export function setupThree(container: HTMLElement): ThreeEngine {
 
   const boardWidth = 16;
   const boardHeight = 9;
-  let grid: THREE.LineSegments | null = null;
+  let grid: THREE.Group | null = null;
   let currentDivX = 0;
   let currentDivY = 0;
   const updateGrid = (divisions: number) => {
@@ -101,30 +101,48 @@ export function setupThree(container: HTMLElement): ThreeEngine {
     if (divX === currentDivX && divY === currentDivY) return;
     if (grid) {
       scene.remove(grid);
-      grid.geometry.dispose();
-      (grid.material as THREE.Material).dispose();
+      grid.traverse((obj) => {
+        if (obj instanceof THREE.Line) {
+          (obj.geometry as THREE.BufferGeometry).dispose();
+          (obj.material as THREE.Material).dispose();
+        }
+      });
     }
-    const vertices: number[] = [];
-    for (let i = 0; i <= divX; i++) {
-      const x = -boardWidth / 2 + (i * boardWidth) / divX;
-      vertices.push(x, -boardHeight / 2, 0, x, boardHeight / 2, 0);
-    }
-    for (let j = 0; j <= divY; j++) {
-      const y = -boardHeight / 2 + (j * boardHeight) / divY;
-      vertices.push(-boardWidth / 2, y, 0, boardWidth / 2, y, 0);
-    }
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute(
-      'position',
-      new THREE.Float32BufferAttribute(vertices, 3),
-    );
-    const material = new THREE.LineBasicMaterial({ color: 0x515152 });
-    grid = new THREE.LineSegments(geometry, material);
-    alignToGround(grid);
-    scene.add(grid);
+
+    const group = new THREE.Group();
+
+    const buildGrid = (divX: number, divY: number, color: number, width = 1) => {
+      const vertices: number[] = [];
+      for (let i = 0; i <= divX; i++) {
+        const x = -boardWidth / 2 + (i * boardWidth) / divX;
+        vertices.push(x, -boardHeight / 2, 0, x, boardHeight / 2, 0);
+      }
+      for (let j = 0; j <= divY; j++) {
+        const y = -boardHeight / 2 + (j * boardHeight) / divY;
+        vertices.push(-boardWidth / 2, y, 0, boardWidth / 2, y, 0);
+      }
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute(
+        'position',
+        new THREE.Float32BufferAttribute(vertices, 3),
+      );
+      const material = new THREE.LineBasicMaterial({ color, linewidth: width });
+      const lines = new THREE.LineSegments(geometry, material);
+      group.add(lines);
+    };
+
+    // Minor grid (100mm)
+    buildGrid(divX * 10, divY * 10, 0xd0d0d0, 1);
+    // Major grid (1000mm)
+    buildGrid(divX, divY, 0x515152, 2);
+
+    alignToGround(group);
+    scene.add(group);
+    grid = group;
     currentDivX = divX;
     currentDivY = divY;
   };
+
   const baseDivisions = Math.max(
     1,
     Math.round(boardWidth / (usePlannerStore.getState().gridSize / 100)),

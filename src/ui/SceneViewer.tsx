@@ -139,22 +139,13 @@ const SceneViewer: React.FC<Props> = ({
         c.target.set(pos.x, 0, pos.z);
         three.camera.lookAt(c.target);
         c.update();
-        const updateGrid = () => {
-          three.camera.position.y = height;
-          c.target.y = 0;
-          const base = Math.max(
-            1,
-            Math.round(16 / (usePlannerStore.getState().gridSize / 100)),
-          );
-          const divisions = Math.max(
-            1,
-            Math.round(base * three.orthographicCamera.zoom),
-          );
-          three.updateGrid?.(divisions);
-        };
-        c.addEventListener('change', updateGrid);
-        (three as any).gridChangeHandler = updateGrid;
-        updateGrid();
+        three.camera.position.y = height;
+        c.target.y = 0;
+        const base = Math.max(
+          1,
+          Math.round(16 / (usePlannerStore.getState().gridSize / 100)),
+        );
+        three.updateGrid?.(base);
       } else {
         three.setCamera(three.perspectiveCamera);
         three.controls.dispose();
