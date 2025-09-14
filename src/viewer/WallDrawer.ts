@@ -232,19 +232,34 @@ export default class WallDrawer {
     }
     this.constrainPoint(point);
     const state = this.store.getState();
+    let startX = this.start.x;
+    let startZ = this.start.z;
     let endX = point.x;
     let endZ = point.z;
-    const dx = endX - this.start.x;
-    const dz = endZ - this.start.z;
+    let lastX = this.lastPoint?.x;
+    let lastZ = this.lastPoint?.z;
+    if (state.snapToGrid && state.gridSize > 0) {
+      const stepSize = state.gridSize / 1000;
+      startX = Math.round(startX / stepSize) * stepSize;
+      startZ = Math.round(startZ / stepSize) * stepSize;
+      endX = Math.round(endX / stepSize) * stepSize;
+      endZ = Math.round(endZ / stepSize) * stepSize;
+      if (lastX !== undefined && lastZ !== undefined) {
+        lastX = Math.round(lastX / stepSize) * stepSize;
+        lastZ = Math.round(lastZ / stepSize) * stepSize;
+      }
+    }
+    let dx = endX - startX;
+    let dz = endZ - startZ;
     const dist = Math.sqrt(dx * dx + dz * dz);
     if (dist < 0.001) {
       const snapLength = state.snapLength > 0 ? state.snapLength : 10;
       const step = snapLength / 1000;
       let dirX = dx;
       let dirZ = dz;
-      if (dirX === 0 && dirZ === 0 && this.lastPoint) {
-        dirX = this.lastPoint.x - this.start.x;
-        dirZ = this.lastPoint.z - this.start.z;
+      if (dirX === 0 && dirZ === 0 && lastX !== undefined && lastZ !== undefined) {
+        dirX = lastX - startX;
+        dirZ = lastZ - startZ;
       }
       if (dirX === 0 && dirZ === 0) {
         dirX = 1;
@@ -253,20 +268,17 @@ export default class WallDrawer {
       const len = Math.sqrt(dirX * dirX + dirZ * dirZ);
       dirX /= len;
       dirZ /= len;
-      endX = this.start.x + dirX * step;
-      endZ = this.start.z + dirZ * step;
-      point.set(endX, 0, endZ);
+      endX = startX + dirX * step;
+      endZ = startZ + dirZ * step;
+      if (state.snapToGrid && state.gridSize > 0) {
+        const stepSize = state.gridSize / 1000;
+        endX = Math.round(endX / stepSize) * stepSize;
+        endZ = Math.round(endZ / stepSize) * stepSize;
+      }
+      dx = endX - startX;
+      dz = endZ - startZ;
     }
-    let startX = this.start.x;
-    let startZ = this.start.z;
-    if (state.snapToGrid && state.gridSize > 0) {
-      const stepSize = state.gridSize / 1000;
-      startX = Math.round(startX / stepSize) * stepSize;
-      startZ = Math.round(startZ / stepSize) * stepSize;
-      endX = Math.round(endX / stepSize) * stepSize;
-      endZ = Math.round(endZ / stepSize) * stepSize;
-      point.set(endX, 0, endZ);
-    }
+    point.set(endX, 0, endZ);
     const start = {
       x: worldToPlanner(startX, 'x'),
       y: worldToPlanner(startZ, 'z'),
