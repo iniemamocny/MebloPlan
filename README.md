@@ -44,6 +44,10 @@ W aplikacji webowej przejdź do zakładki **Room** i w sekcji "Import room scan"
 
 Obsługiwane formaty: **glTF** oraz **OBJ**.
 
+## Rysowanie ścian
+
+Aby rozpocząć rysowanie ścian, naciśnij w widoku sceny klawisz `P` lub wybierz narzędzie ołówka w zakładce **Room**. Na pasku narzędzi pojawią się opcje edycji ścian. Zakończ rysowanie, wciskając `Esc`.
+
 ## Licencja
 
 Projekt jest udostępniany na licencji **MebloPlan Non-Commercial License 1.0**. Użytkowanie, kopiowanie oraz modyfikacja kodu są dozwolone wyłącznie w celach niekomercyjnych i przy zachowaniu informacji o autorach. Wykorzystanie komercyjne wymaga wcześniejszej zgody wszystkich współautorów.

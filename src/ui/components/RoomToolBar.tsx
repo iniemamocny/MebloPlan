@@ -69,19 +69,19 @@ const RoomToolBar: React.FC = () => {
           <Users size={16} />
         </button>
       </div>
-      {selectedTool === 'pencil' && (
-        <div
-          style={{
-            padding: '4px 8px',
-            background: 'var(--white)',
-            border: '1px solid var(--border)',
-            borderRadius: 8,
-            fontSize: 12,
-          }}
-        >
-          {t('room.pressEscToFinish')}
-        </div>
-      )}
+      <div
+        style={{
+          padding: '4px 8px',
+          background: 'var(--white)',
+          border: '1px solid var(--border)',
+          borderRadius: 8,
+          fontSize: 12,
+        }}
+      >
+        {selectedTool === 'pencil'
+          ? t('room.pressEscToFinish')
+          : t('room.pressPToStart')}
+      </div>
     </div>
   );
 };
