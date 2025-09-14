@@ -2,14 +2,21 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as THREE from 'three';
 import WallDrawer from '../../src/viewer/WallDrawer';
-import { GROUND_NORMAL, worldToPlanner } from '../../src/utils/coordinateSystem';
+import {
+  GROUND_NORMAL,
+  worldToPlanner,
+  plannerToWorld,
+} from '../../src/utils/coordinateSystem';
 import * as coords from '../../src/utils/coordinateSystem';
 
 const THICKNESS = 100; // mm
 const HEIGHT = 2500; // mm
 const SNAP = 1000; // mm default length for single click
 
-function createDrawer(overrides: Partial<any> = {}) {
+function createDrawer(
+  overrides: Partial<any> = {},
+  config: { camera?: THREE.Camera; stubGetPoint?: boolean } = {},
+) {
   const canvas = document.createElement('canvas');
   canvas.getBoundingClientRect = () => ({
     left: 0,
@@ -25,7 +32,7 @@ function createDrawer(overrides: Partial<any> = {}) {
   canvas.setPointerCapture = vi.fn();
   canvas.releasePointerCapture = vi.fn();
   const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
-  const camera = new THREE.PerspectiveCamera();
+  const camera = (config.camera ?? new THREE.PerspectiveCamera()) as THREE.Camera;
   const group = new THREE.Group();
   const history: string[] = [];
   const addWallWithHistory = vi.fn((start: any, end: any) => {
@@ -46,7 +53,9 @@ function createDrawer(overrides: Partial<any> = {}) {
   const drawer = new WallDrawer(renderer, () => camera, group, store);
   drawer.enable(state.wallDefaults.thickness);
   const point = new THREE.Vector3();
-  (drawer as any).getPoint = vi.fn(() => point.clone());
+  if (config.stubGetPoint !== false) {
+    (drawer as any).getPoint = vi.fn(() => point.clone());
+  }
   return { drawer, point, addWallWithHistory, history };
 }
 
@@ -416,6 +425,59 @@ describe('WallDrawer', () => {
     expect(addDom.mock.calls.length).toBe(domCalls);
     expect(addWin.mock.calls.length).toBe(winCalls);
     expect(raf.mock.calls.length).toBe(rafCalls);
+    drawer.disable();
+  });
+
+  it('uses last intersection for wall end in 3D mode', () => {
+    const { drawer, addWallWithHistory } = createDrawer(
+      { snapRightAngles: false },
+      { stubGetPoint: false },
+    );
+    const current = new THREE.Vector3();
+    (drawer as any).raycaster.ray.intersectPlane = vi.fn(
+      (_plane: THREE.Plane, point: THREE.Vector3) => {
+        point.copy(current);
+        return point;
+      },
+    );
+    current.set(0, 0, 0);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
+    current.set(1, 0, 1);
+    (drawer as any).onMove({} as PointerEvent);
+    current.set(2, 0, 2);
+    (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
+    const [[start, end]] = addWallWithHistory.mock.calls;
+    expect(plannerToWorld(start.x, 'x')).toBeCloseTo(0);
+    expect(plannerToWorld(start.y, 'y')).toBeCloseTo(0);
+    expect(plannerToWorld(end.x, 'x')).toBeCloseTo(2);
+    expect(plannerToWorld(end.y, 'y')).toBeCloseTo(2);
+    drawer.disable();
+  });
+
+  it('uses last intersection for wall end in 2D mode', () => {
+    const camera = new THREE.OrthographicCamera(-5, 5, 5, -5, 0.1, 100);
+    const { drawer, addWallWithHistory } = createDrawer(
+      { snapRightAngles: false },
+      { camera, stubGetPoint: false },
+    );
+    const current = new THREE.Vector3();
+    (drawer as any).raycaster.ray.intersectPlane = vi.fn(
+      (_plane: THREE.Plane, point: THREE.Vector3) => {
+        point.copy(current);
+        return point;
+      },
+    );
+    current.set(0, 0, 0);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
+    current.set(-1, 0, -1);
+    (drawer as any).onMove({} as PointerEvent);
+    current.set(-2, 0, -2);
+    (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
+    const [[start, end]] = addWallWithHistory.mock.calls;
+    expect(plannerToWorld(start.x, 'x')).toBeCloseTo(0);
+    expect(plannerToWorld(start.y, 'y')).toBeCloseTo(0);
+    expect(plannerToWorld(end.x, 'x')).toBeCloseTo(-2);
+    expect(plannerToWorld(end.y, 'y')).toBeCloseTo(-2);
     drawer.disable();
   });
 });
