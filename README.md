@@ -48,6 +48,15 @@ Obsługiwane formaty: **glTF** oraz **OBJ**.
 
 Aby rozpocząć rysowanie ścian, naciśnij w widoku sceny klawisz `P` lub wybierz narzędzie ołówka w zakładce **Room**. Na pasku narzędzi pojawią się opcje edycji ścian. Zakończ rysowanie, wciskając `Esc`.
 
+## Układ współrzędnych
+
+Aplikacja korzysta z prawoskrętnego układu współrzędnych, w którym oś **Y** jest skierowana w górę. Widok 2D planera leży na płaszczyźnie **XZ** świata i interpretuje swoje osie następująco:
+
+- planner **X** → świat **X**
+- planner **Y** → świat **Z** (ale rośnie w dół, więc wartości są negowane)
+
+Do konwersji współrzędnych należy używać helperów z `src/utils/coordinateSystem.ts` oraz `src/utils/planner.ts` (`plannerToWorld`, `worldToPlanner`, `plannerPointToWorld`, `worldPointToPlanner`). Ręczne zamiany osi mogą prowadzić do błędów i powinny być zastąpione powyższymi funkcjami.
+
 ## Licencja
 
 Projekt jest udostępniany na licencji **MebloPlan Non-Commercial License 1.0**. Użytkowanie, kopiowanie oraz modyfikacja kodu są dozwolone wyłącznie w celach niekomercyjnych i przy zachowaniu informacji o autorach. Wykorzystanie komercyjne wymaga wcześniejszej zgody wszystkich współautorów.

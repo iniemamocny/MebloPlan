@@ -17,7 +17,7 @@ import { PlayerMode, PlayerSubMode, PLAYER_MODES } from './types';
 import RadialMenu from './components/RadialMenu';
 import { addSegmentToShape } from '../utils/roomShape';
 import { buildRoomShapeMesh } from '../scene/roomShapeBuilder';
-import { plannerToWorld, worldToPlanner } from '../utils/coordinateSystem';
+import { vector3ToPlannerPoint, plannerPointToVector3 } from '../utils/planner';
 
 type ThreeWithExtras = ThreeEngine & {
   axesHelper?: THREE.AxesHelper;
@@ -966,22 +966,17 @@ const SceneViewer: React.FC<Props> = ({
       );
       raycaster.setFromCamera(mouse, three.camera);
       if (!raycaster.ray.intersectPlane(plane, temp)) return null;
-      return {
-        x: worldToPlanner(temp.x, 'x'),
-        y: worldToPlanner(temp.z, 'y'),
-      };
+      return vector3ToPlannerPoint(temp);
     };
 
     const updatePreview = (start: ShapePoint, end: ShapePoint) => {
       let line = wallPreviewRef.current;
-      const sx = plannerToWorld(start.x, 'x');
-      const sz = plannerToWorld(start.y, 'y');
-      const ex = plannerToWorld(end.x, 'x');
-      const ez = plannerToWorld(end.y, 'y');
+      const s = plannerPointToVector3(start);
+      const e = plannerPointToVector3(end);
       if (!line) {
         const geometry = new THREE.BufferGeometry().setFromPoints([
-          new THREE.Vector3(sx, 0, sz),
-          new THREE.Vector3(ex, 0, ez),
+          s,
+          e,
         ]);
         const material = new THREE.LineBasicMaterial({ color: 0x444444 });
         line = new THREE.Line(geometry, material);
@@ -991,12 +986,12 @@ const SceneViewer: React.FC<Props> = ({
         const pos = (
           line.geometry as THREE.BufferGeometry
         ).attributes.position.array as Float32Array;
-        pos[0] = sx;
-        pos[1] = 0;
-        pos[2] = sz;
-        pos[3] = ex;
-        pos[4] = 0;
-        pos[5] = ez;
+        pos[0] = s.x;
+        pos[1] = s.y;
+        pos[2] = s.z;
+        pos[3] = e.x;
+        pos[4] = e.y;
+        pos[5] = e.z;
         (
           line.geometry as THREE.BufferGeometry
         ).attributes.position.needsUpdate = true;
