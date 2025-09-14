@@ -218,6 +218,47 @@ describe('buildRoomShapeMesh', () => {
         const topCw = cwGroup.children[0] as THREE.Mesh; // segment b->a
         expect(topCw.position.z).toBeGreaterThan(0);
       });
+
+    it('builds rectangle with shuffled and reversed segments', () => {
+      const a: ShapePoint = { id: 'a', x: 0, y: 0 };
+      const b: ShapePoint = { id: 'b', x: 1, y: 0 };
+      const c: ShapePoint = { id: 'c', x: 1, y: 1 };
+      const d: ShapePoint = { id: 'd', x: 0, y: 1 };
+      const shape: RoomShape = {
+        points: [a, b, c, d],
+        segments: [
+          { start: b, end: a }, // top edge reversed
+          { start: d, end: c }, // bottom edge reversed
+          { start: d, end: a }, // left edge
+          { start: c, end: b }, // right edge reversed
+        ],
+      };
+      const thickness = 200;
+      const group = buildRoomShapeMesh(shape, {
+        height: 3000,
+        thickness,
+        mode: 'inside',
+      });
+      expect(group.children).toHaveLength(4);
+
+      const [top, , , right] = group.children as THREE.Mesh[];
+      expect(top.position.z).toBeGreaterThan(0);
+
+      const t = thickness / 1000; // metres
+      const inside = {
+        x: right.position.x - t / 2,
+        z: top.position.z - t / 2,
+      };
+      expect(inside.x).toBeCloseTo(1);
+      expect(inside.z).toBeCloseTo(0);
+
+      const outside = {
+        x: right.position.x + t / 2,
+        z: top.position.z + t / 2,
+      };
+      expect(outside.x).toBeCloseTo(1 + t);
+      expect(outside.z).toBeCloseTo(t);
+    });
   });
 });
 
