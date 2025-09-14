@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { RoomShape } from '../types';
-import { alignToGround, plannerToWorld } from '../utils/coordinateSystem';
+import { alignToGround } from '../utils/coordinateSystem';
+import { plannerPointToWorld } from '../utils/planner';
 
 /**
  * Convert a RoomShape into a Three.js LineSegments mesh.
@@ -11,13 +12,11 @@ export function buildRoomShapeMesh(shape: RoomShape): THREE.LineSegments {
   const verts: number[] = [];
   for (const seg of shape.segments) {
     // Convert planner coordinates to world space to avoid axis inversion
-    const sx = plannerToWorld(seg.start.x, 'x');
-    const sz = plannerToWorld(seg.start.y, 'y');
-    const ex = plannerToWorld(seg.end.x, 'x');
-    const ez = plannerToWorld(seg.end.y, 'y');
+    const s = plannerPointToWorld(seg.start);
+    const e = plannerPointToWorld(seg.end);
 
     // Build geometry in the XY plane; alignToGround will map it onto XZ
-    verts.push(sx, -sz, 0, ex, -ez, 0);
+    verts.push(s.x, -s.z, 0, e.x, -e.z, 0);
   }
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));

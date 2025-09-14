@@ -5,6 +5,7 @@ import {
   plannerToWorld,
   worldToPlanner,
 } from '../src/utils/coordinateSystem';
+import { plannerPointToWorld, worldPointToPlanner } from '../src/utils/planner';
 
 describe('coordinate system helpers', () => {
   it('converts screen Y to world Y', () => {
@@ -42,5 +43,12 @@ describe('coordinate system helpers', () => {
   it('maps world Y to planner Z', () => {
     expect(worldToPlanner(1, 'y')).toBe(1);
     expect(worldToPlanner(-1, 'y')).toBe(-1);
+  });
+
+  it('converts planner points to world points and back', () => {
+    const p = { x: 2, y: -3 };
+    const w = plannerPointToWorld(p);
+    expect(w).toEqual({ x: 2, z: 3 });
+    expect(worldPointToPlanner(w)).toEqual(p);
   });
 });

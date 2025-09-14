@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { addSegmentToShape } from '../src/utils/roomShape';
-import { worldToPlanner } from '../src/utils/coordinateSystem';
+import { worldPointToPlanner } from '../src/utils/planner';
 import { usePlannerStore } from '../src/state/store';
 import type { ShapePoint } from '../src/types';
 
@@ -14,10 +14,7 @@ vi.mock('../src/utils/uuid', () => ({
 const createWorldClickSimulator = () => {
   let start: ShapePoint | null = null;
   return (x: number, z: number) => {
-    const point: ShapePoint = {
-      x: worldToPlanner(x, 'x'),
-      y: worldToPlanner(z, 'z'),
-    };
+    const point: ShapePoint = worldPointToPlanner({ x, z });
     if (!start) {
       start = point;
       return;
