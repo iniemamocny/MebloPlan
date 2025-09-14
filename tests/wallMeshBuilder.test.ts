@@ -126,5 +126,41 @@ describe('buildRoomShapeMesh', () => {
     const left = ccwGroup.children[0] as THREE.Mesh; // segment a->d
     expect(left.position.x).toBeCloseTo(-thickness / 2000);
   });
+
+  it('keeps first wall at positive Z with mixed Y coordinates for both windings', () => {
+    const a: ShapePoint = { id: 'a', x: 0, y: -1 };
+    const b: ShapePoint = { id: 'b', x: 1, y: -1 };
+    const c: ShapePoint = { id: 'c', x: 1, y: 1 };
+    const d: ShapePoint = { id: 'd', x: 0, y: 1 };
+    const thickness = 200;
+
+    // Counter-clockwise winding
+    const ccw: RoomShape = {
+      points: [a, b, c, d],
+      segments: [
+        { start: a, end: b },
+        { start: b, end: c },
+        { start: c, end: d },
+        { start: d, end: a },
+      ],
+    };
+    const ccwGroup = buildRoomShapeMesh(ccw, { height: 3000, thickness });
+    const topCcw = ccwGroup.children[0] as THREE.Mesh; // segment a->b
+    expect(topCcw.position.z).toBeGreaterThan(0);
+
+    // Clockwise winding
+    const cw: RoomShape = {
+      points: [b, a, d, c],
+      segments: [
+        { start: b, end: a },
+        { start: a, end: d },
+        { start: d, end: c },
+        { start: c, end: b },
+      ],
+    };
+    const cwGroup = buildRoomShapeMesh(cw, { height: 3000, thickness });
+    const topCw = cwGroup.children[0] as THREE.Mesh; // segment b->a
+    expect(topCw.position.z).toBeGreaterThan(0);
+  });
 });
 
