@@ -6,6 +6,7 @@ import { usePlannerStore } from '../../state/store';
 const RoomToolBar: React.FC = () => {
   const { t } = useTranslation();
   const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
+  const startWallPlacement = usePlannerStore((s) => s.startWallPlacement);
   const selectedTool = usePlannerStore((s) => s.selectedTool);
 
   return (
@@ -34,7 +35,7 @@ const RoomToolBar: React.FC = () => {
         <button
           className="btnGhost"
           title={t('room.pencil')}
-          onClick={() => setSelectedTool('pencil')}
+          onClick={() => startWallPlacement()}
           style={
             selectedTool === 'pencil'
               ? { background: 'var(--accent)', color: 'var(--white)' }
