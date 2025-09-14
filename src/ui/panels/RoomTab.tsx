@@ -3,16 +3,9 @@ import { useTranslation } from 'react-i18next';
 import SingleMMInput from '../components/SingleMMInput';
 import { usePlannerStore } from '../../state/store';
 
-const thicknessOptions = [
-  50, 60, 70, 80, 90, 100, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250,
-];
-
 export default function RoomTab() {
   const { t } = useTranslation();
   const store = usePlannerStore();
-
-  const [wallH, setWallH] = useState(2700);
-  const [wallT, setWallT] = useState(120);
 
   const [openH, setOpenH] = useState(1000);
   const [openW, setOpenW] = useState(1000);
@@ -26,50 +19,6 @@ export default function RoomTab() {
 
   return (
     <>
-      <div className="section">
-        <div className="hd"><div><div className="h1">{t('room.walls')}</div></div></div>
-        <div className="bd">
-          <div style={{ display: 'flex', gap: 8 }}>
-            <div>
-              <div className="small">{t('room.height')}</div>
-              <SingleMMInput value={wallH} onChange={setWallH} />
-            </div>
-            <div>
-              <div className="small">{t('room.thickness')}</div>
-              <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                <button
-                  className="btn"
-                  onClick={() => setWallT((t) => Math.max(1, t - 1))}
-                  title="-"
-                >
-                  -
-                </button>
-                <select
-                  className="input"
-                  value={wallT}
-                  onChange={(e) => setWallT(Number(e.target.value))}
-                >
-                  {[...new Set([...thicknessOptions, wallT])]
-                    .sort((a, b) => a - b)
-                    .map((v) => (
-                      <option key={v} value={v}>
-                        {v}
-                      </option>
-                    ))}
-                </select>
-                <button
-                  className="btn"
-                  onClick={() => setWallT((t) => t + 1)}
-                  title="+"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="section">
         <div className="hd"><div><div className="h1">{t('room.windows')}</div></div></div>
         <div className="bd">

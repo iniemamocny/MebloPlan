@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import WallDrawer from '../viewer/WallDrawer';
 import { setupThree, ThreeEngine } from '../scene/engine';
 import { buildCabinetMesh } from '../scene/cabinetBuilder';
 import { FAMILY } from '../core/catalog';
@@ -16,7 +15,6 @@ import RoomToolBar from './components/RoomToolBar';
 import TouchJoystick from './components/TouchJoystick';
 import { PlayerMode, PlayerSubMode, PLAYER_MODES } from './types';
 import RadialMenu from './components/RadialMenu';
-import { plannerToWorld } from '../utils/coordinateSystem';
 
 type ThreeWithExtras = ThreeEngine & {
   axesHelper?: THREE.AxesHelper;
@@ -60,9 +58,6 @@ const SceneViewer: React.FC<Props> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const axesRef = useRef<HTMLDivElement>(null);
   const store = usePlannerStore();
-  const selectedTool = usePlannerStore((s) => s.selectedTool);
-  const wallThickness = usePlannerStore((s) => s.wallDefaults.thickness);
-  const wallHeight = usePlannerStore((s) => s.wallDefaults.height);
   const showEdges = store.role === 'stolarz';
   const showFronts = store.showFronts;
   const threeInitialized = useRef(false);
@@ -77,8 +72,6 @@ const SceneViewer: React.FC<Props> = ({
   const savedView = useRef<{ pos: THREE.Vector3; target: THREE.Vector3 } | null>(null);
   const roomRef = useRef(store.room);
   const [pointerLockError, setPointerLockError] = useState<string | null>(null);
-  const wallDrawerRef = useRef<WallDrawer | null>(null);
-  const wallGroupRef = useRef<THREE.Group | null>(null);
 
   useEffect(() => {
     roomRef.current = store.room;
@@ -244,12 +237,6 @@ const SceneViewer: React.FC<Props> = ({
   useEffect(() => {
     if (!containerRef.current) return;
     threeRef.current = setupThree(containerRef.current);
-    wallDrawerRef.current = new WallDrawer(
-      threeRef.current.renderer,
-      () => threeRef.current!.camera,
-      threeRef.current.group,
-      usePlannerStore,
-    );
     threeInitialized.current = true;
     if (viewMode === '2d') applyViewMode(viewMode);
     (threeRef.current as any).setMode = setMode;
@@ -276,7 +263,6 @@ const SceneViewer: React.FC<Props> = ({
       pc.removeEventListener('unlock', onUnlock);
       pc.removeEventListener('lock', onLock);
       pc.removeEventListener('pointerlockerror', onPointerlockError);
-      wallDrawerRef.current?.disable();
       threeRef.current?.dispose?.();
     };
   }, [threeRef]);
@@ -449,65 +435,11 @@ const SceneViewer: React.FC<Props> = ({
   }, [mode, threeRef, store.playerHeight, viewMode]);
 
   useEffect(() => {
-    const drawer = wallDrawerRef.current;
-    if (!drawer) return;
-    // ensure previous listeners are removed before possibly enabling again
-    drawer.disable();
-    if (viewMode === '2d' && selectedTool === 'wall') {
-      drawer.enable(wallThickness);
-    }
-    return () => {
-      drawer.disable();
-    };
-  }, [viewMode, selectedTool, wallThickness]);
-
-  useEffect(() => {
     threeRef.current?.setPlayerParams?.({
       height: store.playerHeight,
       speed: store.playerSpeed,
     });
   }, [store.playerHeight, store.playerSpeed, threeRef]);
-
-  useEffect(() => {
-    const three = threeRef.current;
-    if (!three) return;
-    const { roomShape, wallDefaults } = usePlannerStore.getState();
-    const segments = roomShape.segments;
-    const group = three.group;
-    if (!group) return;
-    if (wallGroupRef.current) {
-      group.remove(wallGroupRef.current);
-      wallGroupRef.current.traverse((obj) => {
-        if (obj instanceof THREE.Mesh) {
-          obj.geometry.dispose();
-          if (Array.isArray(obj.material))
-            obj.material.forEach((m) => m.dispose());
-          else (obj.material as THREE.Material).dispose();
-        }
-      });
-    }
-    const wallGroup = new THREE.Group();
-    const width = wallDefaults.thickness / 1000;
-    const height = wallDefaults.height / 1000;
-    segments.forEach(({ start, end }) => {
-      const dx = plannerToWorld(end.x - start.x, 'x');
-      const dz = plannerToWorld(end.y - start.y, 'y');
-      const length = Math.sqrt(dx * dx + dz * dz);
-      const geom = new THREE.BoxGeometry(length, height, width);
-      geom.translate(length / 2, 0, 0);
-      const mat = new THREE.MeshStandardMaterial({ color: 0x888888 });
-      const mesh = new THREE.Mesh(geom, mat);
-      mesh.position.set(
-        plannerToWorld(start.x, 'x'),
-        height / 2,
-        plannerToWorld(start.y, 'y'),
-      );
-      mesh.rotation.y = Math.atan2(dz, dx);
-      wallGroup.add(mesh);
-    });
-    group.add(wallGroup);
-    wallGroupRef.current = wallGroup;
-  }, [store.roomShape, wallThickness, wallHeight]);
 
     useEffect(() => {
       if (!mode) return;
