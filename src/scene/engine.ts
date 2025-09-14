@@ -3,7 +3,6 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
 import { usePlannerStore } from '../state/store';
 import CabinetDragger from '../viewer/CabinetDragger';
-import { alignToGround } from '../utils/coordinateSystem';
 
 export interface PlayerControls {
   isLocked: boolean;
@@ -87,73 +86,9 @@ export function setupThree(container: HTMLElement): ThreeEngine {
   dir.position.set(6, 8, 4);
   scene.add(dir);
 
-  const boardWidth = 16;
-  const boardHeight = 9;
-  let grid: THREE.Group | null = null;
-  let currentDivX = 0;
-  let currentDivY = 0;
-  const updateGrid = (divisions: number) => {
-    const divX = Math.max(1, Math.round(divisions));
-    const divY = Math.max(
-      1,
-      Math.round(divisions * (boardHeight / boardWidth)),
-    );
-    if (divX === currentDivX && divY === currentDivY) return;
-    if (grid) {
-      scene.remove(grid);
-      grid.traverse((obj) => {
-        if (obj instanceof THREE.Line) {
-          (obj.geometry as THREE.BufferGeometry).dispose();
-          (obj.material as THREE.Material).dispose();
-        }
-      });
-    }
-
-    const group = new THREE.Group();
-
-    const buildGrid = (divX: number, divY: number, color: number, width = 1) => {
-      const vertices: number[] = [];
-      for (let i = 0; i <= divX; i++) {
-        const x = -boardWidth / 2 + (i * boardWidth) / divX;
-        vertices.push(x, -boardHeight / 2, 0, x, boardHeight / 2, 0);
-      }
-      for (let j = 0; j <= divY; j++) {
-        const y = -boardHeight / 2 + (j * boardHeight) / divY;
-        vertices.push(-boardWidth / 2, y, 0, boardWidth / 2, y, 0);
-      }
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute(
-        'position',
-        new THREE.Float32BufferAttribute(vertices, 3),
-      );
-      const material = new THREE.LineBasicMaterial({ color, linewidth: width });
-      const lines = new THREE.LineSegments(geometry, material);
-      group.add(lines);
-    };
-
-    // Minor grid (100mm)
-    buildGrid(divX * 10, divY * 10, 0xd0d0d0, 1);
-    // Major grid (1000mm)
-    buildGrid(divX, divY, 0x515152, 2);
-
-    alignToGround(group);
-    scene.add(group);
-    grid = group;
-    currentDivX = divX;
-    currentDivY = divY;
+  const updateGrid = (_divisions: number) => {
+    /* grid removed */
   };
-
-  const baseDivisions = Math.max(
-    1,
-    Math.round(boardWidth / (usePlannerStore.getState().gridSize / 100)),
-  );
-  updateGrid(baseDivisions);
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(boardWidth, boardHeight),
-    new THREE.MeshStandardMaterial({ color: 0xf9fafc, side: THREE.DoubleSide }),
-  );
-  alignToGround(floor);
-  scene.add(floor);
 
   const group = new THREE.Group();
   scene.add(group);
