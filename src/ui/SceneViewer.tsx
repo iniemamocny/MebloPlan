@@ -941,11 +941,16 @@ const SceneViewer: React.FC<Props> = ({
       wallStartRef.current = null;
       usePlannerStore.getState().setSelectedTool(null);
     };
+    const handleKeyDown = (ev: KeyboardEvent) => {
+      if (ev.key === 'Escape') finish();
+    };
     canvas.addEventListener('pointerdown', handleClick);
     canvas.addEventListener('dblclick', finish);
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
       canvas.removeEventListener('pointerdown', handleClick);
       canvas.removeEventListener('dblclick', finish);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [store.selectedTool, threeRef]);
 
