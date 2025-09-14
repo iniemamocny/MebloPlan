@@ -60,6 +60,7 @@ const SceneViewer: React.FC<Props> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const axesRef = useRef<HTMLDivElement>(null);
   const store = usePlannerStore();
+  const startWallPlacement = usePlannerStore((s) => s.startWallPlacement);
   const showEdges = store.role === 'stolarz';
   const showFronts = store.showFronts;
   const threeInitialized = useRef(false);
@@ -536,6 +537,19 @@ const SceneViewer: React.FC<Props> = ({
     window.addEventListener('keydown', handleTab);
     return () => window.removeEventListener('keydown', handleTab);
   }, [mode, setMode]);
+
+  useEffect(() => {
+    if (mode !== null) return;
+    const handleStartWall = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        startWallPlacement();
+        setViewMode('2d');
+      }
+    };
+    window.addEventListener('keydown', handleStartWall);
+    return () => window.removeEventListener('keydown', handleStartWall);
+  }, [mode, startWallPlacement, setViewMode]);
 
   useEffect(() => {
     updateGhost();

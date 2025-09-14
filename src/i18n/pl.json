@@ -219,7 +219,8 @@
     "pencil": "Ołówek",
     "hammer": "Młotek",
     "group": "Grupuj",
-    "pressEscToFinish": "Naciśnij Esc, aby zakończyć"
+    "pressEscToFinish": "Naciśnij Esc, aby zakończyć",
+    "pressPToStart": "Naciśnij P, aby rozpocząć rysowanie ścian"
   },
   "items": {
     "cup": "Kubek",

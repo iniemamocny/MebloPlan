@@ -158,7 +158,7 @@ export default function App() {
           setMode={handleSetMode}
           viewMode={viewMode}
           setViewMode={handleSetViewMode}
-          showRoomTools={activeTab === 'room'}
+          showRoomTools={activeTab === 'room' || store.selectedTool !== null}
         />
       </div>
     </div>

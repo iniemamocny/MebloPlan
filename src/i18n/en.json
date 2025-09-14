@@ -219,7 +219,8 @@
     "pencil": "Pencil",
     "hammer": "Hammer",
     "group": "Group",
-    "pressEscToFinish": "Press Esc to finish"
+    "pressEscToFinish": "Press Esc to finish",
+    "pressPToStart": "Press P to start drawing walls"
   },
   "items": {
     "cup": "Cup",
