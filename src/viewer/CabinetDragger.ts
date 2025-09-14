@@ -49,7 +49,8 @@ export default class CabinetDragger {
 
   private getPoint(event: PointerEvent): THREE.Vector3 | null {
     const rect = this.renderer.domElement.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    const xScreen = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    const x = screenToWorld(xScreen, 'x');
     const yScreen = ((event.clientY - rect.top) / rect.height) * 2 - 1;
     const y = screenToWorld(yScreen, 'y');
     const cam = this.getCamera();
@@ -62,7 +63,8 @@ export default class CabinetDragger {
   private onDown = (e: PointerEvent) => {
     this.renderer.domElement.setPointerCapture(e.pointerId);
     const rect = this.renderer.domElement.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    const xScreen = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    const x = screenToWorld(xScreen, 'x');
     const yScreen = ((e.clientY - rect.top) / rect.height) * 2 - 1;
     const y = screenToWorld(yScreen, 'y');
     const cam = this.getCamera();

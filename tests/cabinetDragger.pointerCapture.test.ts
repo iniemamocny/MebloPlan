@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import * as THREE from 'three';
 import CabinetDragger from '../src/viewer/CabinetDragger';
 import { GROUND_NORMAL } from '../src/utils/coordinateSystem';
+import * as coord from '../src/utils/coordinateSystem';
 import type { Module3D } from '../src/types';
 
 describe('CabinetDragger pointer capture', () => {
@@ -89,6 +90,39 @@ describe('CabinetDragger pointer capture', () => {
     const dragger = new CabinetDragger(renderer, getCamera, group, store);
     const plane = (dragger as any).plane as THREE.Plane;
     expect(plane.normal.equals(GROUND_NORMAL)).toBe(true);
+  });
+
+  it('converts screen coordinates for both axes', () => {
+    const canvas = document.createElement('canvas');
+    canvas.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 100,
+      right: 100,
+      bottom: 100,
+      x: 0,
+      y: 0,
+      toJSON() {},
+    });
+    const renderer = { domElement: canvas } as unknown as THREE.WebGLRenderer;
+    const camera = new THREE.PerspectiveCamera();
+    const getCamera = () => camera;
+    const group = new THREE.Group();
+    const store = {
+      getState: () => ({ modules: [], updateModule: vi.fn() }),
+    } as any;
+    const dragger = new CabinetDragger(renderer, getCamera, group, store);
+    const spy = vi.spyOn(coord, 'screenToWorld');
+    (dragger as any).raycaster.ray.intersectPlane = vi.fn(
+      (_plane: THREE.Plane, point: THREE.Vector3) => {
+        point.set(0, 0, 0);
+        return point;
+      },
+    );
+    (dragger as any).getPoint({ clientX: 10, clientY: 20 } as PointerEvent);
+    expect(spy).toHaveBeenCalledWith(expect.any(Number), 'x');
+    expect(spy).toHaveBeenCalledWith(expect.any(Number), 'y');
   });
 
   it('updates module position along XZ plane when dragging', () => {

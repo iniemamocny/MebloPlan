@@ -136,7 +136,8 @@ export default class WallDrawer {
 
   private getPoint(event: PointerEvent): THREE.Vector3 | null {
     const rect = this.renderer.domElement.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    const nx = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    const x = screenToWorld(nx, 'x');
     const ny = ((event.clientY - rect.top) / rect.height) * 2 - 1;
     const y = screenToWorld(ny, 'y');
     const cam = this.getCamera();
