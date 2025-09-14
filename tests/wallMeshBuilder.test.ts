@@ -56,6 +56,41 @@ describe('buildRoomShapeMesh', () => {
     expect(outside.z).toBeCloseTo(t);
   });
 
+  it('aligns corner meshes for clockwise winding', () => {
+    const a: ShapePoint = { id: 'a', x: 0, y: 0 };
+    const b: ShapePoint = { id: 'b', x: 1, y: 0 };
+    const c: ShapePoint = { id: 'c', x: 1, y: 1 };
+    const shape: RoomShape = {
+      points: [c, b, a],
+      segments: [
+        { start: c, end: b },
+        { start: b, end: a },
+      ],
+    };
+    const thickness = 200;
+    const group = buildRoomShapeMesh(shape, { height: 3000, thickness });
+    expect(group.children).toHaveLength(2);
+
+    const [vertical, horizontal] = group.children as THREE.Mesh[];
+    const t = thickness / 1000; // metres
+
+    // Inside corner where the drawn segments meet
+    const inside = {
+      x: vertical.position.x - t / 2,
+      z: horizontal.position.z - t / 2,
+    };
+    expect(inside.x).toBeCloseTo(1);
+    expect(inside.z).toBeCloseTo(0);
+
+    // Outside corner formed by the exterior faces of both walls
+    const outside = {
+      x: vertical.position.x + t / 2,
+      z: horizontal.position.z + t / 2,
+    };
+    expect(outside.x).toBeCloseTo(1 + t);
+    expect(outside.z).toBeCloseTo(t);
+  });
+
   it('expands wall thickness outward regardless of polygon winding', () => {
     const a: ShapePoint = { id: 'a', x: 0, y: 0 };
     const b: ShapePoint = { id: 'b', x: 1, y: 0 };
