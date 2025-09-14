@@ -204,6 +204,7 @@ type Store = {
   setPlayerSpeed: (v: number) => void;
   setSelectedItemSlot: (slot: number) => void;
   setSelectedTool: (tool: string | null) => void;
+  startWallPlacement: () => void;
   selectWindow: (type: 'single' | 'double' | 'triple') => void;
   selectDoor: (type: 'single' | 'double' | 'sliding') => void;
   insertOpening: (height: number, width: number, floorHeight: number) => void;
@@ -500,6 +501,7 @@ export const usePlannerStore = create<Store>((set, get) => ({
   setPlayerSpeed: (v) => set({ playerSpeed: v }),
   setSelectedItemSlot: (slot) => set({ selectedItemSlot: slot }),
   setSelectedTool: (tool) => set({ selectedTool: tool }),
+  startWallPlacement: () => set({ selectedTool: 'pencil' }),
   selectWindow: (type) => set({ selectedTool: `window-${type}` }),
   selectDoor: (type) => set({ selectedTool: `door-${type}` }),
   insertOpening: (height, width, floorHeight) =>

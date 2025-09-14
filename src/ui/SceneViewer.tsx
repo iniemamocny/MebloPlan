@@ -5,7 +5,7 @@ import { setupThree, ThreeEngine } from '../scene/engine';
 import { buildCabinetMesh } from '../scene/cabinetBuilder';
 import { FAMILY } from '../core/catalog';
 import { usePlannerStore, legCategories } from '../state/store';
-import { Module3D, ModuleAdv, Globals } from '../types';
+import { Module3D, ModuleAdv, Globals, ShapePoint } from '../types';
 import { loadItemModel } from '../scene/itemLoader';
 import ItemHotbar, {
   hotbarItems,
@@ -15,6 +15,7 @@ import RoomToolBar from './components/RoomToolBar';
 import TouchJoystick from './components/TouchJoystick';
 import { PlayerMode, PlayerSubMode, PLAYER_MODES } from './types';
 import RadialMenu from './components/RadialMenu';
+import { addSegmentToShape } from '../utils/roomShape';
 
 type ThreeWithExtras = ThreeEngine & {
   axesHelper?: THREE.AxesHelper;
@@ -72,6 +73,7 @@ const SceneViewer: React.FC<Props> = ({
   const savedView = useRef<{ pos: THREE.Vector3; target: THREE.Vector3 } | null>(null);
   const roomRef = useRef(store.room);
   const [pointerLockError, setPointerLockError] = useState<string | null>(null);
+  const wallStartRef = useRef<ShapePoint | null>(null);
 
   useEffect(() => {
     roomRef.current = store.room;
@@ -900,6 +902,52 @@ const SceneViewer: React.FC<Props> = ({
         cancelAnimationFrame(animId);
       };
     }, [mode, threeRef]);
+
+  useEffect(() => {
+    if (store.selectedTool !== 'pencil') {
+      wallStartRef.current = null;
+      return;
+    }
+    const three = threeRef.current;
+    if (!three || !three.renderer || !three.camera) return;
+    const canvas = three.renderer.domElement;
+    const raycaster = new THREE.Raycaster();
+    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const temp = new THREE.Vector3();
+    const handleClick = (ev: PointerEvent) => {
+      ev.stopPropagation();
+      if (ev.button !== 0) return;
+      const rect = canvas.getBoundingClientRect();
+      const mouse = new THREE.Vector2(
+        ((ev.clientX - rect.left) / rect.width) * 2 - 1,
+        -((ev.clientY - rect.top) / rect.height) * 2 + 1,
+      );
+      raycaster.setFromCamera(mouse, three.camera);
+      if (!raycaster.ray.intersectPlane(plane, temp)) return;
+      const point: ShapePoint = { x: temp.x, y: temp.z };
+      const start = wallStartRef.current;
+      if (!start) {
+        wallStartRef.current = point;
+      } else {
+        const shape = usePlannerStore.getState().roomShape;
+        const newShape = addSegmentToShape(shape, { start, end: point });
+        if (newShape) {
+          usePlannerStore.getState().setRoomShape(newShape);
+        }
+        wallStartRef.current = point;
+      }
+    };
+    const finish = () => {
+      wallStartRef.current = null;
+      usePlannerStore.getState().setSelectedTool(null);
+    };
+    canvas.addEventListener('pointerdown', handleClick);
+    canvas.addEventListener('dblclick', finish);
+    return () => {
+      canvas.removeEventListener('pointerdown', handleClick);
+      canvas.removeEventListener('dblclick', finish);
+    };
+  }, [store.selectedTool, threeRef]);
 
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
