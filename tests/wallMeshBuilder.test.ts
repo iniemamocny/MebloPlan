@@ -21,6 +21,25 @@ describe('buildRoomShapeMesh', () => {
     expect(params.depth).toBeCloseTo(0.2); // 200mm -> 0.2m
   });
 
+  it('centers meshes on segments when mode is axis', () => {
+    const a: ShapePoint = { id: 'a', x: 0, y: 0 };
+    const b: ShapePoint = { id: 'b', x: 1, y: 0 };
+    const shape: RoomShape = {
+      points: [a, b],
+      segments: [{ start: a, end: b }],
+    };
+    const group = buildRoomShapeMesh(shape, {
+      height: 3000,
+      thickness: 200,
+      mode: 'axis',
+    });
+    expect(group.children).toHaveLength(1);
+    const mesh = group.children[0] as THREE.Mesh;
+    const params = (mesh.geometry as THREE.BoxGeometry).parameters;
+    expect(params.width).toBeCloseTo(1); // no length extension
+    expect(mesh.position.z).toBeCloseTo(0); // no offset
+  });
+
   it('aligns corner meshes to expected inside and outside coordinates', () => {
     const a: ShapePoint = { id: 'a', x: 0, y: 0 };
     const b: ShapePoint = { id: 'b', x: 1, y: 0 };

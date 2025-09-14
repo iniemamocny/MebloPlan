@@ -90,7 +90,11 @@ const SceneViewer: React.FC<Props> = ({
     const shape = store.roomShape;
     let mesh: THREE.Group | null = null;
     if (shape.segments.length > 0) {
-      mesh = buildRoomShapeMesh(shape, store.wallDefaults);
+      mesh = buildRoomShapeMesh(shape, {
+        thickness: store.wallDefaults.thickness,
+        height: store.wallDefaults.height,
+        mode: 'inside',
+      });
       three.group.add(mesh);
       wallMeshRef.current = mesh;
     }
