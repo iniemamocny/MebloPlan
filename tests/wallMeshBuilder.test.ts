@@ -55,5 +55,41 @@ describe('buildRoomShapeMesh', () => {
     expect(outside.x).toBeCloseTo(1 + t);
     expect(outside.z).toBeCloseTo(t);
   });
+
+  it('expands wall thickness outward regardless of polygon winding', () => {
+    const a: ShapePoint = { id: 'a', x: 0, y: 0 };
+    const b: ShapePoint = { id: 'b', x: 1, y: 0 };
+    const c: ShapePoint = { id: 'c', x: 1, y: 1 };
+    const d: ShapePoint = { id: 'd', x: 0, y: 1 };
+    const thickness = 200;
+
+    // Clockwise winding
+    const cw: RoomShape = {
+      points: [a, b, c, d],
+      segments: [
+        { start: a, end: b },
+        { start: b, end: c },
+        { start: c, end: d },
+        { start: d, end: a },
+      ],
+    };
+    const cwGroup = buildRoomShapeMesh(cw, { height: 3000, thickness });
+    const top = cwGroup.children[0] as THREE.Mesh; // segment a->b
+    expect(top.position.z).toBeCloseTo(thickness / 2000);
+
+    // Counter-clockwise winding
+    const ccw: RoomShape = {
+      points: [a, d, c, b],
+      segments: [
+        { start: a, end: d },
+        { start: d, end: c },
+        { start: c, end: b },
+        { start: b, end: a },
+      ],
+    };
+    const ccwGroup = buildRoomShapeMesh(ccw, { height: 3000, thickness });
+    const left = ccwGroup.children[0] as THREE.Mesh; // segment a->d
+    expect(left.position.x).toBeCloseTo(-thickness / 2000);
+  });
 });
 
