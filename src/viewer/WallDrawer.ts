@@ -165,6 +165,12 @@ export default class WallDrawer {
     const point = this.getPoint(e);
     if (!point) return;
     this.constrainPoint(point);
+    const state = this.store.getState();
+    if (state.snapToGrid && state.gridSize > 0) {
+      const step = state.gridSize / 1000;
+      point.x = Math.round(point.x / step) * step;
+      point.z = Math.round(point.z / step) * step;
+    }
     this.lastPoint = point.clone();
     point.y = 0.001;
     if (this.cursor) {
@@ -232,6 +238,27 @@ export default class WallDrawer {
     }
     this.constrainPoint(point);
     const state = this.store.getState();
+    const stepSize = state.gridSize / 1000;
+    if (state.snapToGrid && state.gridSize > 0) {
+      point.x = Math.round(point.x / stepSize) * stepSize;
+      point.z = Math.round(point.z / stepSize) * stepSize;
+    }
+    this.lastPoint = point.clone();
+    if (this.cursor) {
+      this.cursor.position.set(point.x, 0.001, point.z);
+    }
+    if (this.preview && this.start) {
+      const dx = point.x - this.start.x;
+      const dz = point.z - this.start.z;
+      const dist = Math.sqrt(dx * dx + dz * dz);
+      this.preview.scale.x = dist;
+      this.preview.position.set(
+        this.start.x,
+        this.preview.position.y,
+        this.start.z,
+      );
+      this.preview.rotation.y = Math.atan2(dz, dx);
+    }
     let startX = this.start.x;
     let startZ = this.start.z;
     let endX = point.x;
@@ -239,7 +266,6 @@ export default class WallDrawer {
     let lastX = this.lastPoint?.x;
     let lastZ = this.lastPoint?.z;
     if (state.snapToGrid && state.gridSize > 0) {
-      const stepSize = state.gridSize / 1000;
       startX = Math.round(startX / stepSize) * stepSize;
       startZ = Math.round(startZ / stepSize) * stepSize;
       endX = Math.round(endX / stepSize) * stepSize;

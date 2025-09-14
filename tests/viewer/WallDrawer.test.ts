@@ -320,6 +320,25 @@ describe('WallDrawer', () => {
     drawer.disable();
   });
 
+  it('snaps right-angled walls to grid nodes', () => {
+    const { drawer, point, addWallWithHistory } = createDrawer({
+      snapToGrid: true,
+      gridSize: 100,
+    });
+    point.set(0.12, 0, 0.18);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
+    point.set(0.27, 0, 0.46);
+    (drawer as any).onMove({} as PointerEvent);
+    (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
+    expect(addWallWithHistory).toHaveBeenCalledTimes(1);
+    const [[start, end]] = addWallWithHistory.mock.calls;
+    expect(start.x).toBeCloseTo(worldToPlanner(0.1, 'x'));
+    expect(start.y).toBeCloseTo(worldToPlanner(0.2, 'z'));
+    expect(end.x).toBeCloseTo(worldToPlanner(0.1, 'x'));
+    expect(end.y).toBeCloseTo(worldToPlanner(0.5, 'z'));
+    drawer.disable();
+  });
+
   it('single click with snapping places wall on grid', () => {
     const { drawer, point, addWallWithHistory } = createDrawer({
       snapToGrid: true,
