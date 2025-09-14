@@ -320,6 +320,23 @@ describe('WallDrawer', () => {
     drawer.disable();
   });
 
+  it('single click with snapping places wall on grid', () => {
+    const { drawer, point, addWallWithHistory } = createDrawer({
+      snapToGrid: true,
+      gridSize: 100,
+    });
+    point.set(0.05, 0, 0.07);
+    (drawer as any).onDown({ pointerId: 1, button: 0 } as PointerEvent);
+    (drawer as any).onUp({ pointerId: 1, button: 0 } as PointerEvent);
+    expect(addWallWithHistory).toHaveBeenCalledTimes(1);
+    const [[start, end]] = addWallWithHistory.mock.calls;
+    expect(start.x).toBeCloseTo(worldToPlanner(0.1, 'x'));
+    expect(start.y).toBeCloseTo(worldToPlanner(0.1, 'z'));
+    expect(end.x).toBeCloseTo(worldToPlanner(1.1, 'x'));
+    expect(end.y).toBeCloseTo(worldToPlanner(0.1, 'z'));
+    drawer.disable();
+  });
+
   it('Escape cancels drag without adding wall', () => {
     const { drawer, point, addWallWithHistory } = createDrawer();
     point.set(0, 0, 0);
