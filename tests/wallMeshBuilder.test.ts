@@ -15,7 +15,8 @@ describe('buildRoomShapeMesh', () => {
     expect(group.children).toHaveLength(1);
     const mesh = group.children[0] as THREE.Mesh;
     const params = (mesh.geometry as THREE.BoxGeometry).parameters;
-    expect(params.width).toBeCloseTo(1); // length in metres
+    // Length is extended by the wall thickness so adjoining walls overlap
+    expect(params.width).toBeCloseTo(1.2); // length + thickness in metres
     expect(params.height).toBeCloseTo(3); // 3000mm -> 3m
     expect(params.depth).toBeCloseTo(0.2); // 200mm -> 0.2m
   });

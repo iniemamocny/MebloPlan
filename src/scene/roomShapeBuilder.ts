@@ -21,9 +21,22 @@ export function buildRoomShapeMesh(
     const dx = e.x - s.x;
     const dz = e.z - s.z;
     const length = Math.sqrt(dx * dx + dz * dz);
-    const geometry = new THREE.BoxGeometry(length, height, thickness);
+
+    // Compute a perpendicular unit vector (normal) for offsetting the wall to
+    // one side of the drawn line so that the line represents the inner face of
+    // the wall.
+    const normal = new THREE.Vector3(-dz, 0, dx).normalize();
+    const offset = opts.thickness / 2000; // half thickness in metres
+
+    // Extend the wall length slightly so adjoining walls meet without gaps.
+    const geometry = new THREE.BoxGeometry(length + thickness, height, thickness);
     const mesh = new THREE.Mesh(geometry, material.clone());
-    mesh.position.set(s.x + dx / 2, height / 2, s.z + dz / 2);
+    mesh.position.set(
+      s.x + dx / 2 + normal.x * offset,
+      height / 2,
+      s.z + dz / 2 + normal.z * offset,
+    );
+    // Keep rotation based on segment direction
     mesh.rotation.y = Math.atan2(dz, dx);
     group.add(mesh);
   }
