@@ -1,5 +1,5 @@
 import React from 'react';
-import { Hammer, Users } from 'lucide-react';
+import { Hammer, Users, Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { usePlannerStore } from '../../state/store';
 
@@ -31,6 +31,18 @@ const RoomToolBar: React.FC = () => {
           borderRadius: 8,
         }}
       >
+        <button
+          className="btnGhost"
+          title={t('room.pencil')}
+          onClick={() => setSelectedTool('pencil')}
+          style={
+            selectedTool === 'pencil'
+              ? { background: 'var(--accent)', color: 'var(--white)' }
+              : undefined
+          }
+        >
+          <Pencil size={16} />
+        </button>
         <button
           className="btnGhost"
           title={t('room.hammer')}
