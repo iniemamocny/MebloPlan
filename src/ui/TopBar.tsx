@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Kind, Variant } from '../core/catalog';
+import { legacy2dEnabled } from '../utils/featureFlags';
 
 interface TopBarProps {
   t: (key: string, opts?: any) => string;
@@ -30,9 +31,11 @@ export default function TopBar({ t, store, setVariant, setKind, lang, setLang, v
       <button className="btnGhost" onClick={() => store.clear()}>
         {t('app.clear')}
       </button>
-      <button className="btnGhost" onClick={toggleViewMode}>
-        {viewMode === '3d' ? '2D' : '3D'}
-      </button>
+      {legacy2dEnabled && (
+        <button className="btnGhost" onClick={toggleViewMode}>
+          {viewMode === '3d' ? '2D' : '3D'}
+        </button>
+      )}
       <select className="btnGhost" value={lang} onChange={e => setLang((e.target as HTMLSelectElement).value)}>
         <option value="pl">PL</option>
         <option value="en">EN</option>

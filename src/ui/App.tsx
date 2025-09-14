@@ -9,6 +9,7 @@ import MainTabs from './MainTabs';
 import { safeSetItem } from '../utils/storage';
 import { PlayerMode } from './types';
 import type { ThreeEngine } from '../scene/engine';
+import { legacy2dEnabled } from '../utils/featureFlags';
 
 type PlayerSubMode = Exclude<PlayerMode, null>;
 
@@ -85,14 +86,16 @@ export default function App() {
   }, [mode]);
 
   useEffect(() => {
-    if (tab === 'room') handleSetViewMode('2d');
+    if (tab === 'room' && legacy2dEnabled) handleSetViewMode('2d');
   }, [tab]);
 
   const handleSetViewMode = (v: '3d' | '2d') => {
+    if (!legacy2dEnabled && v === '2d') return;
     setViewMode(v);
   };
 
   const toggleViewMode = () => {
+    if (!legacy2dEnabled) return;
     const next = viewMode === '3d' ? '2d' : '3d';
     handleSetViewMode(next);
   };
