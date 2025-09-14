@@ -165,8 +165,8 @@ export default class WallDrawer {
     const point = this.getPoint(e);
     if (!point) return;
     this.constrainPoint(point);
-    point.y = 0.001;
     this.lastPoint = point.clone();
+    point.y = 0.001;
     if (this.cursor) {
       this.cursor.position.copy(point);
     }
@@ -224,7 +224,7 @@ export default class WallDrawer {
     if (!this.dragging) return;
     this.dragging = false;
     if (!this.start) return;
-    const point = this.getPoint(e) ?? this.lastPoint?.clone();
+    const point = this.lastPoint?.clone() ?? this.getPoint(e);
     if (!point) {
       this.start = null;
       this.disposePreview();
