@@ -29,13 +29,6 @@ export const variantRules: Record<FAMILY, Record<string, VariantRule>> = {
     'oven+mw': { kits: ['dwKit', 'mwKit'] },
     fridge: { doors: 2, kits: ['fridgeKit'] },
   },
-  [FAMILY.WALL]: {
-    wd1: { doors: 1 },
-    wd2: { doors: 2 },
-    hood: { doors: 2, kits: ['hoodKit'] },
-    avHK: { aventos: 'HK' },
-    avHS: { aventos: 'HS' },
-  },
   [FAMILY.PAWLACZ]: {
     p1: { doors: 1 },
     p2: { doors: 2 },
