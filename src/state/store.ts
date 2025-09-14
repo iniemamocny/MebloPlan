@@ -175,6 +175,7 @@ type Store = {
   selectedTool: string | null;
   openingDefaults: { height: number; width: number; floorHeight: number };
   dropCeilingDefaults: { length: number; width: number; height: number };
+  wallDefaults: { height: number; thickness: number; length: number };
   itemsByCabinet: (cabinetId: string) => Item[];
   itemsBySurface: (cabinetId: string, surfaceIndex: number) => Item[];
   setRole: (r: 'stolarz' | 'klient') => void;
@@ -209,6 +210,9 @@ type Store = {
   selectDoor: (type: 'single' | 'double' | 'sliding') => void;
   insertOpening: (height: number, width: number, floorHeight: number) => void;
   placeDropCeiling: (length: number, width: number, height: number) => void;
+  setWallDefaults: (
+    patch: Partial<{ height: number; thickness: number; length: number }>,
+  ) => void;
 };
 
 export const usePlannerStore = create<Store>((set, get) => ({
@@ -243,6 +247,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
   selectedTool: null,
   openingDefaults: { height: 1000, width: 1000, floorHeight: 0 },
   dropCeilingDefaults: { length: 1000, width: 1000, height: 100 },
+  wallDefaults:
+    persisted?.wallDefaults || { height: 2700, thickness: 120, length: 1000 },
   showFronts: true,
   itemsByCabinet: (cabinetId) =>
     get().items.filter((it) => it.cabinetId === cabinetId),
@@ -514,6 +520,8 @@ export const usePlannerStore = create<Store>((set, get) => ({
       selectedTool: 'drop-ceiling',
       dropCeilingDefaults: { length, width, height },
     }),
+  setWallDefaults: (patch) =>
+    set((s) => ({ wallDefaults: { ...s.wallDefaults, ...patch } })),
 }));
 
 const persistSelector = (s: Store) => ({
@@ -533,6 +541,7 @@ const persistSelector = (s: Store) => ({
   measurementUnit: s.measurementUnit,
   playerHeight: s.playerHeight,
   playerSpeed: s.playerSpeed,
+  wallDefaults: s.wallDefaults,
 });
 
 let persistTimeout = 0;

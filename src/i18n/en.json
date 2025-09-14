@@ -211,6 +211,7 @@
     "openings": "Openings",
     "height": "Height",
     "width": "Width",
+    "thickness": "Thickness",
     "floorHeight": "Floor height",
     "insert": "Insert",
     "dropCeiling": "Drop ceiling",

@@ -2,12 +2,15 @@ import React from 'react';
 import { Hammer, Users, Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { usePlannerStore } from '../../state/store';
+import SingleMMInput from './SingleMMInput';
 
 const RoomToolBar: React.FC = () => {
   const { t } = useTranslation();
   const setSelectedTool = usePlannerStore((s) => s.setSelectedTool);
   const startWallPlacement = usePlannerStore((s) => s.startWallPlacement);
   const selectedTool = usePlannerStore((s) => s.selectedTool);
+  const wallDefaults = usePlannerStore((s) => s.wallDefaults);
+  const setWallDefaults = usePlannerStore((s) => s.setWallDefaults);
 
   return (
     <div
@@ -69,6 +72,43 @@ const RoomToolBar: React.FC = () => {
           <Users size={16} />
         </button>
       </div>
+      {selectedTool === 'pencil' && (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 4,
+            padding: 8,
+            background: 'var(--white)',
+            border: '1px solid var(--border)',
+            borderRadius: 8,
+          }}
+        >
+          <div style={{ display: 'flex', gap: 8 }}>
+            <div>
+              <div className="small">{t('room.height')}</div>
+              <SingleMMInput
+                value={wallDefaults.height}
+                onChange={(v) => setWallDefaults({ height: v })}
+              />
+            </div>
+            <div>
+              <div className="small">{t('room.thickness')}</div>
+              <SingleMMInput
+                value={wallDefaults.thickness}
+                onChange={(v) => setWallDefaults({ thickness: v })}
+              />
+            </div>
+          </div>
+          <div>
+            <div className="small">{t('room.length')}</div>
+            <SingleMMInput
+              value={wallDefaults.length}
+              onChange={(v) => setWallDefaults({ length: v })}
+            />
+          </div>
+        </div>
+      )}
       <div
         style={{
           padding: '4px 8px',
