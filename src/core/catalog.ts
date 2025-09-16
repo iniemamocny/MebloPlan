@@ -1,9 +1,9 @@
-export enum FAMILY { BASE='BASE', TALL='TALL', WALL='WALL', PAWLACZ='PAWLACZ' }
+export enum FAMILY { BASE='BASE', TALL='TALL', PAWLACZ='PAWLACZ' }
 export const FAMILY_LABELS: Record<FAMILY,string> = {
-  [FAMILY.BASE]:'Dolna',[FAMILY.TALL]:'Słupek',[FAMILY.WALL]:'Górna',[FAMILY.PAWLACZ]:'Pawlacz'
+  [FAMILY.BASE]:'Dolna',[FAMILY.TALL]:'Słupek',[FAMILY.PAWLACZ]:'Pawlacz'
 }
 export const FAMILY_COLORS: Record<FAMILY,string> = {
-  [FAMILY.BASE]:'#3B82F6',[FAMILY.TALL]:'#10B981',[FAMILY.WALL]:'#6B7280',[FAMILY.PAWLACZ]:'#8B5CF6'
+  [FAMILY.BASE]:'#3B82F6',[FAMILY.TALL]:'#10B981',[FAMILY.PAWLACZ]:'#8B5CF6'
 }
 export type Variant = { key:string; label:string }
 export type Kind = { key:string; label:string; variants: Variant[] }
@@ -80,15 +80,6 @@ export const KIND_SETS: Record<FAMILY, Kind[]> = {
         { key:'fridge', label:'Lodówka' }
       ]
     }
-  ],
-  [FAMILY.WALL]: [
-    { key:'doors', label:'Drzwiczki', variants:[
-      { key:'wd1', label:'1 drzwiczki' },
-      { key:'wd2', label:'2 drzwiczki' },
-      { key:'hood', label:'Okapowa' },
-      { key:'avHK', label:'Aventos HK' },
-      { key:'avHS', label:'Aventos HS' }
-    ]}
   ],
   [FAMILY.PAWLACZ]: [
     { key:'doors', label:'Drzwiczki', variants:[
