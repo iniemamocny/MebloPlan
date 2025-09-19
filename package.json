@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "vitest run"
   },
   "license": "SEE LICENSE IN LICENSE",
@@ -16,7 +19,10 @@
     "@testing-library/react": "^16.3.0",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.3",
     "jsdom": "^27.0.0",
+    "typescript": "^5.7.3",
+    "vite": "^5.4.11",
     "vitest": "^3.2.4"
   }
 }
