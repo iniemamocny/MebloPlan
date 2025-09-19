@@ -1,5 +1,8 @@
 Kitchi v8.0.2 – instrukcja szybkiej instalacji
 
+0) Przygotowanie:
+   Node 18+
+
 1) Zainstaluj zależności:
    npm install
 
