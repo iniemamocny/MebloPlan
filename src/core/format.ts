@@ -167,15 +167,17 @@ export function packGuillotine(board:Board, parts:Part[]): Sheet[] {
   let placed: Placed[] = []
   let free: FreeRect[] = [{ x:0, y:0, w:board.W, h:board.L }]
 
-  const newSheet = () => {
-    if (placed.length || !sheets.length) {
-      sheets.push({ index: sheetIndex++, placed, overflow:false })
-    }
-    placed = []
+  const resetSheet = () => {
     free = [{ x:0, y:0, w:board.W, h:board.L }]
+    placed = []
   }
 
-  newSheet() // init first
+  const closeSheet = (overflow:boolean=false) => {
+    sheets.push({ index: sheetIndex++, placed, overflow })
+    resetSheet()
+  }
+
+  resetSheet()
 
   let counter = 1
   for (const p of prepared) {
@@ -211,7 +213,8 @@ export function packGuillotine(board:Board, parts:Part[]): Sheet[] {
 
     if (!placedHere){
       // new sheet and retry
-      newSheet()
+      if (placed.length) closeSheet(false)
+      else resetSheet()
       // retry once on fresh sheet
       let placedFresh = false
       const fr = free[0]
@@ -229,14 +232,14 @@ export function packGuillotine(board:Board, parts:Part[]): Sheet[] {
       }
       if (!placedFresh){
         // nie powinno się zdarzyć po validateParts, ale asekuracyjnie
-        sheets.push({ index: sheetIndex++, placed, overflow:true })
-        placed = []
-        free = [{ x:0, y:0, w:board.W, h:board.L }]
+        closeSheet(true)
       }
     }
   }
-  // push last
-  sheets.push({ index: sheetIndex++, placed, overflow:false })
+  // push last if anything placed
+  if (placed.length) {
+    closeSheet(false)
+  }
   return sheets
 }
 
