@@ -3,7 +3,8 @@
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": [
-      "ES2020"
+      "ES2020",
+      "DOM"
     ],
     "module": "ESNext",
     "skipLibCheck": true,
@@ -12,7 +13,8 @@
     "isolatedModules": true,
     "noEmit": true,
     "strict": false,
-    "types": []
+    "types": [],
+    "jsx": "react-jsx"
   },
   "include": [
     "src"

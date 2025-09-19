@@ -4,7 +4,19 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "echo \"no tests\""
+    "test": "vitest run"
   },
-  "license": "SEE LICENSE IN LICENSE"
+  "license": "SEE LICENSE IN LICENSE",
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "jsdom": "^27.0.0",
+    "vitest": "^3.2.4"
+  }
 }
