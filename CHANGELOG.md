@@ -1,8 +1,8 @@
 # Changelog
 
 ## [Unreleased]
-### Added
-- Po włączeniu rysowania w zakładce ściany widok 2D otrzymuje toolbar z ołówkiem, gumką i młotkiem.
+### Removed
+- Usunięto funkcjonalność rysowania ścian oraz powiązane narzędzia.
 
 ## [8.0.2] - 2025-08-30
 ### Changed
