@@ -33,6 +33,21 @@ Aplikacja wykorzystuje Supabase do zarządzania kontami użytkowników. Aby uruc
      on plans for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
    ```
 
+   Jeśli w panelu Supabase → **Security → Issues** pojawia się ostrzeżenie „RLS disabled on public.…”, oznacza to, że udostępniona publicznie tabela nie ma aktywnych polityk. W takim wypadku włącz RLS i dodaj zasady dopasowane do kolumn identyfikujących właściciela rekordu. Przykład dla tabeli `public.profiles` przechowującej kolumnę `user_id`:
+
+   ```sql
+   alter table public.profiles enable row level security;
+
+   create policy "Profile owner can read" on public.profiles
+     for select using (auth.uid() = user_id);
+
+   create policy "Profile owner can modify" on public.profiles
+     for all using (auth.uid() = user_id)
+     with check (auth.uid() = user_id);
+   ```
+
+   Analogiczne zasady zastosuj dla innych tabel powiązanych z użytkownikiem (np. `public.users`, `public.sessions`), dopasowując nazwy kolumn do swojej struktury. Po zapisaniu polityk ostrzeżenia w sekcji **Security** znikną.
+
 6. Po zapisaniu zmian uruchom aplikację (`npm run dev`). Formularz logowania automatycznie połączy się z Twoim projektem Supabase.
 
 ## Licencja
