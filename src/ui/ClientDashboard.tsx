@@ -9,7 +9,14 @@ const styles = {
     fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     color: '#1f2933'
   },
-  header: {
+  accountHeader: {
+    marginBottom: '2rem',
+    padding: '1.5rem',
+    borderRadius: '1rem',
+    background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+    boxShadow: '0 10px 30px rgba(59, 130, 246, 0.12)'
+  },
+  panelHeader: {
     marginBottom: '1.5rem'
   },
   familyList: {
@@ -38,7 +45,8 @@ const styles = {
   viewToggle: {
     display: 'flex',
     gap: '0.75rem',
-    marginBottom: '1rem'
+    marginBottom: '1rem',
+    alignItems: 'center'
   },
   toggleButton: (active: boolean): CSSProperties => ({
     padding: '0.4rem 0.9rem',
@@ -111,7 +119,9 @@ function buildVariantsDescription(kinds: Kind[]): string {
   const fragments: string[] = []
   if (categoriesWithSingle.length > 0) {
     fragments.push(
-      `${categoriesWithSingle.length} kategor${categoriesWithSingle.length === 1 ? 'ia' : 'ie'} oferuj${categoriesWithSingle.length === 1 ? 'e' : 'ą'} pojedynczy wariant`
+      `${categoriesWithSingle.length} kategor${categoriesWithSingle.length === 1 ? 'ia' : 'ie'} oferuj${
+        categoriesWithSingle.length === 1 ? 'e' : 'ą'
+      } pojedynczy wariant`
     )
   }
   if (categoriesWithMany.length > 0) {
@@ -121,7 +131,7 @@ function buildVariantsDescription(kinds: Kind[]): string {
   return `Łącznie dostępnych jest ${totalVariants} wariantów. ${fragments.join('. ')}`
 }
 
-const Dashboard: React.FC = () => {
+const ClientDashboard: React.FC = () => {
   const [selectedFamily, setSelectedFamily] = useState<FAMILY>(FAMILY.BASE)
   const [viewMode, setViewMode] = useState<ViewMode>('tabela')
 
@@ -142,16 +152,24 @@ const Dashboard: React.FC = () => {
 
   return (
     <div style={styles.container}>
-      <header style={styles.header}>
-        <h1>Panel planowania korpusów</h1>
-        <p>
-          W tym miejscu możesz przejrzeć dostępne moduły kuchenne i wybrać najlepszą konfigurację dla projektu.
-          Wybierz rodzinę korpusów, aby zobaczyć szczegółowe warianty i liczebność.
+      <header style={styles.accountHeader}>
+        <h1 style={{ marginBottom: '0.25rem' }}>Konto klienta</h1>
+        <p style={{ margin: 0 }}>
+          Możesz przeglądać katalog modułów, zestawiać warianty i przygotowywać listy pytań dla projektanta. Wszystkie dane
+          prezentujemy w trybie tylko do odczytu, aby zachować bezpieczeństwo konfiguracji.
         </p>
       </header>
 
+      <section style={styles.panelHeader} aria-labelledby="planning-panel-heading">
+        <h2 id="planning-panel-heading">Panel planowania korpusów</h2>
+        <p>
+          W tym miejscu przejrzysz dostępne moduły kuchenne i wybierzesz najlepszą konfigurację dla swojego projektu. Wybierz
+          rodzinę korpusów, aby zobaczyć szczegółowe warianty i liczebność.
+        </p>
+      </section>
+
       <section aria-labelledby="families-heading">
-        <h2 id="families-heading">Rodziny korpusów</h2>
+        <h3 id="families-heading">Rodziny korpusów</h3>
         <p>Wskaż rodzinę, aby zobaczyć odpowiadające jej moduły.</p>
         <div style={styles.familyList}>
           {Object.values(FAMILY).map(family => (
@@ -169,16 +187,26 @@ const Dashboard: React.FC = () => {
       </section>
 
       <section aria-labelledby="summary-heading" style={styles.summary}>
-        <h3 id="summary-heading">Podsumowanie wybranej rodziny</h3>
-        <p>Wybrana rodzina: <strong>{FAMILY_LABELS[selectedFamily]}</strong>.</p>
-        <p>Łączna liczba kategorii modułów: <strong>{kinds.length}</strong>.</p>
-        <p>Łączna liczba wariantów w rodzinie: <strong>{variantCount}</strong>.</p>
+        <h4 id="summary-heading" style={{ marginTop: 0 }}>
+          Podsumowanie wybranej rodziny
+        </h4>
+        <p>
+          Wybrana rodzina: <strong>{FAMILY_LABELS[selectedFamily]}</strong>.
+        </p>
+        <p>
+          Łączna liczba kategorii modułów: <strong>{kinds.length}</strong>.
+        </p>
+        <p>
+          Łączna liczba wariantów w rodzinie: <strong>{variantCount}</strong>.
+        </p>
         <p>{description}</p>
       </section>
 
       <section aria-labelledby="variants-heading">
         <div style={styles.viewToggle}>
-          <h2 id="variants-heading" style={{ margin: 0 }}>Warianty modułów</h2>
+          <h3 id="variants-heading" style={{ margin: 0 }}>
+            Warianty modułów
+          </h3>
           <div role="group" aria-label="Zmiana sposobu prezentacji">
             <button
               type="button"
@@ -212,7 +240,9 @@ const Dashboard: React.FC = () => {
                   <td style={styles.td}>{kind.label}</td>
                   <td style={styles.td}>
                     {kind.variants.length > 0
-                      ? `Rodzina ${FAMILY_LABELS[selectedFamily]} oferuje ${kind.variants.length} wariant${kind.variants.length === 1 ? '' : 'y'} w tej kategorii.`
+                      ? `Rodzina ${FAMILY_LABELS[selectedFamily]} oferuje ${kind.variants.length} wariant${
+                          kind.variants.length === 1 ? '' : 'y'
+                        } w tej kategorii.`
                       : 'Brak wariantów — możesz dodać własne moduły.'}
                   </td>
                   <td style={styles.td}>
@@ -228,7 +258,7 @@ const Dashboard: React.FC = () => {
           <div style={styles.cardsGrid} role="list" aria-label="Lista wariantów">
             {kinds.map(kind => (
               <article style={styles.card} key={kind.key} role="listitem">
-                <h3 style={styles.cardTitle}>{kind.label}</h3>
+                <h4 style={styles.cardTitle}>{kind.label}</h4>
                 {kind.variants.length > 0 ? (
                   <ul style={styles.cardList}>
                     {kind.variants.map(variant => (
@@ -245,11 +275,11 @@ const Dashboard: React.FC = () => {
       </section>
 
       <footer style={{ marginTop: '2rem', fontSize: '0.85rem', color: '#64748b' }}>
-        Wskazówka: kliknij w różne rodziny, aby od razu zobaczyć zmiany w dostępnych modułach. Dane pochodzą z wbudowanego katalogu
-        MebloPlan i są prezentowane w języku polskim.
+        Wskazówka: kliknij w różne rodziny, aby od razu zobaczyć zmiany w dostępnych modułach. Dane pochodzą z wbudowanego
+        katalogu MebloPlan i są prezentowane w języku polskim.
       </footer>
     </div>
   )
 }
 
-export default Dashboard
+export default ClientDashboard

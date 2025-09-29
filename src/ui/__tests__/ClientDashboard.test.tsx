@@ -1,11 +1,12 @@
 import { describe, it, expect } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
-import Dashboard from '../Dashboard'
+import ClientDashboard from '../ClientDashboard'
 
-describe('Dashboard', () => {
+describe('ClientDashboard', () => {
   it('pozwala na przełączanie rodzin i widoków', () => {
-    render(<Dashboard />)
+    render(<ClientDashboard />)
 
+    expect(screen.getByRole('heading', { name: 'Konto klienta' })).toBeInTheDocument()
     expect(
       screen.getByRole('heading', { name: 'Panel planowania korpusów' })
     ).toBeInTheDocument()
