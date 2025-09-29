@@ -5,6 +5,7 @@ import ClientDashboard from './ClientDashboard'
 import CarpenterDashboard from './CarpenterDashboard'
 import AdminDashboard from './AdminDashboard'
 import SignUpForm from './auth/SignUpForm'
+import AdminSetupPage from './auth/AdminSetupPage'
 import supabase from '../core/supabaseClient'
 
 export const APP_TITLE = 'MebloPlan – panel planowania'
@@ -13,6 +14,8 @@ const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [authError, setAuthError] = useState<string | null>(null)
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
+  const isAdminSetupRoute = currentPath === '/admin-setup'
 
   useEffect(() => {
     document.title = APP_TITLE
@@ -171,7 +174,7 @@ const App: React.FC = () => {
               {authError}
             </div>
           ) : null}
-          <SignUpForm />
+          {isAdminSetupRoute ? <AdminSetupPage /> : <SignUpForm />}
         </>
       )}
     </StrictMode>

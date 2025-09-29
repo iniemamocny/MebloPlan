@@ -50,6 +50,19 @@ Aplikacja wykorzystuje Supabase do zarządzania kontami użytkowników. Aby uruc
 
 6. Po zapisaniu zmian uruchom aplikację (`npm run dev`). Formularz logowania automatycznie połączy się z Twoim projektem Supabase.
 
+### Ręczne nadawanie roli administratora
+
+Jeżeli konto zostało utworzone bez użycia formularza konfiguracji administratora, rolę można nadać ręcznie z poziomu panelu Supabase.
+W zakładce **SQL editor** uruchom zapytanie aktualizujące pole `raw_app_meta_data` dla wybranego użytkownika (pamiętaj o podaniu poprawnego adresu e-mail):
+
+```sql
+update auth.users
+set raw_app_meta_data = jsonb_set(coalesce(raw_app_meta_data, '{}'::jsonb), '{role}', '"admin"', true)
+where email = 'admin@example.com';
+```
+
+Po zapisaniu zmian użytkownik otrzyma uprawnienia administratora przy następnym logowaniu.
+
 ## Licencja
 
 Projekt jest udostępniany na licencji **MebloPlan Non-Commercial License 1.0**. Użytkowanie, kopiowanie oraz modyfikacja kodu są dozwolone wyłącznie w celach niekomercyjnych i przy zachowaniu informacji o autorach. Wykorzystanie komercyjne wymaga wcześniejszej zgody wszystkich współautorów.
