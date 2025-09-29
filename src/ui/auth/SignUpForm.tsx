@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import supabase from '../../core/supabaseClient'
 
 type AuthMode = 'signIn' | 'signUp'
+type AccountType = 'client' | 'carpenter'
 
 const styles = {
   container: {
@@ -91,6 +92,7 @@ const SignUpForm: React.FC = () => {
   const [mode, setMode] = useState<AuthMode>('signIn')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [accountType, setAccountType] = useState<AccountType | ''>('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [infoMessage, setInfoMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -103,6 +105,11 @@ const SignUpForm: React.FC = () => {
       return
     }
 
+    if (mode === 'signUp' && !accountType) {
+      setErrorMessage('Wybierz rodzaj konta, aby kontynuować.')
+      return
+    }
+
     setIsSubmitting(true)
     setErrorMessage(null)
     setInfoMessage(null)
@@ -111,7 +118,15 @@ const SignUpForm: React.FC = () => {
 
     try {
       if (mode === 'signUp') {
-        const { error } = await supabase.auth.signUp({ email: normalizedEmail, password })
+        const { error } = await supabase.auth.signUp({
+          email: normalizedEmail,
+          password,
+          options: {
+            data: {
+              role: accountType
+            }
+          }
+        })
 
         if (error) {
           setErrorMessage(error.message)
@@ -119,10 +134,15 @@ const SignUpForm: React.FC = () => {
           setInfoMessage('Utworzono konto. Sprawdź skrzynkę pocztową, aby potwierdzić adres e-mail przed zalogowaniem.')
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password })
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: normalizedEmail,
+          password
+        })
 
         if (error) {
           setErrorMessage(error.message)
+        } else if (!data.user?.user_metadata?.role) {
+          setErrorMessage('Brak przypisanej roli konta. Skontaktuj się z administratorem.')
         }
       }
     } catch (error) {
@@ -136,6 +156,7 @@ const SignUpForm: React.FC = () => {
     setMode(current => (current === 'signIn' ? 'signUp' : 'signIn'))
     setErrorMessage(null)
     setInfoMessage(null)
+    setAccountType('')
   }
 
   return (
@@ -177,7 +198,37 @@ const SignUpForm: React.FC = () => {
           />
         </label>
 
-        <button type="submit" style={styles.button} disabled={isSubmitting}>
+        {mode === 'signUp' ? (
+          <label style={styles.label} htmlFor="accountType">
+            Typ konta
+            <select
+              id="accountType"
+              name="accountType"
+              style={styles.input}
+              value={accountType}
+              onChange={event => setAccountType(event.target.value as AccountType)}
+              disabled={isSubmitting}
+              required
+            >
+              <option value="" disabled>
+                Wybierz rolę konta
+              </option>
+              <option value="client">Klient</option>
+              <option value="carpenter">Stolarz</option>
+            </select>
+          </label>
+        ) : null}
+
+        <button
+          type="submit"
+          style={styles.button}
+          disabled={
+            isSubmitting ||
+            !email ||
+            !password ||
+            (mode === 'signUp' && !accountType)
+          }
+        >
           {isSubmitting ? 'Przetwarzanie...' : mode === 'signIn' ? 'Zaloguj się' : 'Utwórz konto'}
         </button>
       </form>
