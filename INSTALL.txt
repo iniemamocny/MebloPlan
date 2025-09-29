@@ -1,4 +1,7 @@
-Kitchi v8.0.1 – instrukcja szybkiej instalacji
+Kitchi v8.0.2 – instrukcja szybkiej instalacji
+
+0) Przygotowanie:
+   Node 18+
 
 1) Zainstaluj zależności:
    npm install
@@ -8,8 +11,10 @@ Kitchi v8.0.1 – instrukcja szybkiej instalacji
 
 3) Build produkcyjny:
    npm run build
-   npm run preview (lokalny podgląd)
+
+4) Lokalny podgląd buildu:
+   npm run preview
 
 Uwaga:
 - Paczka nie zawiera node_modules ani dist.
-- Wersja: 8.0.1
+- Wersja: 8.0.2
