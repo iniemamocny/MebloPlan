@@ -5,44 +5,63 @@
 
 # MebloPlan (Kitchi)
 
-Projekt oparty na Vite + React + TypeScript + Zustand + @react-three/fiber.
+Projekt zawiera podstawowe moduły logiki aplikacji bez interfejsu graficznego.
 
-## Szybki start
-```bash
-npm install
-npm run dev
+## Konfiguracja Supabase
+
+Aplikacja wykorzystuje Supabase do zarządzania kontami użytkowników. Aby uruchomić środowisko developerskie lub wdrożeniowe z obsługą logowania:
+
+1. Utwórz nowy projekt w [Supabase](https://supabase.com/).
+2. W panelu **Authentication → Providers** włącz logowanie przy użyciu adresu e-mail i hasła.
+3. Przejdź do **Project settings → API** i skopiuj wartości `Project URL` oraz `anon public API key`.
+4. Utwórz plik `.env.local` (lub ustaw zmienne środowiskowe na platformie hostingowej) i dodaj:
+
+   ```bash
+   VITE_SUPABASE_URL="https://example.supabase.co"
+   VITE_SUPABASE_ANON_KEY="twój_publiczny_klucz_anon"
+   ```
+
+5. Jeśli tworzysz tabele do przechowywania danych użytkownika (np. `plans`, `profiles`), pamiętaj o włączeniu mechanizmu Row Level Security (RLS) oraz zdefiniowaniu polityk dostępu. Przykładowa polityka ograniczająca dostęp tylko do właściciela rekordu:
+
+   ```sql
+   alter table plans enable row level security;
+
+   create policy "Użytkownik widzi tylko swoje plany"
+     on plans for select using (auth.uid() = user_id);
+
+   create policy "Użytkownik może modyfikować swoje plany"
+     on plans for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+   ```
+
+   Jeśli w panelu Supabase → **Security → Issues** pojawia się ostrzeżenie „RLS disabled on public.…”, oznacza to, że udostępniona publicznie tabela nie ma aktywnych polityk. W takim wypadku włącz RLS i dodaj zasady dopasowane do kolumn identyfikujących właściciela rekordu. Przykład dla tabeli `public.profiles` przechowującej kolumnę `user_id`:
+
+   ```sql
+   alter table public.profiles enable row level security;
+
+   create policy "Profile owner can read" on public.profiles
+     for select using (auth.uid() = user_id);
+
+   create policy "Profile owner can modify" on public.profiles
+     for all using (auth.uid() = user_id)
+     with check (auth.uid() = user_id);
+   ```
+
+   Analogiczne zasady zastosuj dla innych tabel powiązanych z użytkownikiem (np. `public.users`, `public.sessions`), dopasowując nazwy kolumn do swojej struktury. Po zapisaniu polityk ostrzeżenia w sekcji **Security** znikną.
+
+6. Po zapisaniu zmian uruchom aplikację (`npm run dev`). Formularz logowania automatycznie połączy się z Twoim projektem Supabase.
+
+### Ręczne nadawanie roli administratora
+
+Jeżeli konto zostało utworzone bez użycia formularza konfiguracji administratora, rolę można nadać ręcznie z poziomu panelu Supabase.
+W zakładce **SQL editor** uruchom zapytanie aktualizujące pole `raw_app_meta_data` dla wybranego użytkownika (pamiętaj o podaniu poprawnego adresu e-mail):
+
+```sql
+update auth.users
+set raw_app_meta_data = jsonb_set(coalesce(raw_app_meta_data, '{}'::jsonb), '{role}', '"admin"', true)
+where email = 'admin@example.com';
 ```
 
-## Build produkcyjny
-```bash
-npm run build
-```
-
-## GitHub Pages
-Workflow **pages.yml** publikuje `dist/` na GitHub Pages (repo: `iniemamocny/MebloPlan`).
-Adres po wdrożeniu: https://iniemamocny.github.io/MebloPlan/
-
-## Codespaces
-Repo → **Code → Create codespace on main**
-Po starcie:
-```bash
-npm ci
-npm run dev
-```
-Port 5173 otworzy się automatycznie.
-
-## Mobilne skanowanie i import pomieszczeń
-
-W katalogu `mobile/` znajdują się przykładowe moduły do skanowania pomieszczeń:
-
-* `ios/RoomPlanScanner.swift` — wykorzystuje ARKit/RoomPlan do wygenerowania modelu pokoju i zapisania go do pliku OBJ.
-* `android/RoomScanner.kt` — używa ARCore z Depth API do rekonstrukcji siatki i eksportu do glTF.
-
-Po wykonaniu skanu plik można zapisać lokalnie i przesłać przez HTTPS do backendu (kod przykładowy znajduje się w modułach mobilnych).
-
-W aplikacji webowej przejdź do zakładki **Room** i w sekcji "Import room scan" wybierz plik `.gltf`, `.glb` lub `.obj`. Model zostanie dodany do sceny, a jego jednostki i położenie zostaną dopasowane do układu MebloPlanu.
-
-Obsługiwane formaty: **glTF** oraz **OBJ**.
+Po zapisaniu zmian użytkownik otrzyma uprawnienia administratora przy następnym logowaniu.
 
 ## Licencja
 

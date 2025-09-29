@@ -1,138 +1,190 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { FAMILY, Kind, Variant } from '../core/catalog';
-import { usePlannerStore } from '../state/store';
-import SceneViewer from './SceneViewer';
-import useCabinetConfig from './useCabinetConfig';
-import TopBar from './TopBar';
-import { createTranslator } from './i18n';
-import MainTabs from './MainTabs';
-import WallDrawPanel from './WallDrawPanel';
-import { safeSetItem } from '../utils/storage';
+import { StrictMode, useEffect, useState } from 'react'
+import { createRoot, type Root } from 'react-dom/client'
+import type { Session } from '@supabase/supabase-js'
+import ClientDashboard from './ClientDashboard'
+import CarpenterDashboard from './CarpenterDashboard'
+import AdminDashboard from './AdminDashboard'
+import SignUpForm from './auth/SignUpForm'
+import AdminSetupPage from './auth/AdminSetupPage'
+import supabase from '../core/supabaseClient'
 
-export default function App() {
-  const store = usePlannerStore();
-  const [family, setFamily] = useState<FAMILY>(FAMILY.BASE);
-  const [kind, setKind] = useState<Kind | null>(null);
-  const [variant, setVariant] = useState<Variant | null>(null);
-    const [selWall, setSelWall] = useState(() => usePlannerStore.getState().room.walls[0]?.id || '');
-  const [addCountertop, setAddCountertop] = useState(true);
-  const threeRef = useRef<any>({});
+export const APP_TITLE = 'MebloPlan – panel planowania'
 
-  const { t, i18n } = createTranslator();
-  const [lang, setLang] = useState(
-    localStorage.getItem('lang') || i18n.language,
-  );
+const App: React.FC = () => {
+  const [session, setSession] = useState<Session | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [authError, setAuthError] = useState<string | null>(null)
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname : ''
+  const isAdminSetupRoute = currentPath === '/admin-setup'
+
   useEffect(() => {
-    i18n.changeLanguage(lang);
-    safeSetItem('lang', lang);
-  }, [lang, i18n]);
+    document.title = APP_TITLE
+  }, [])
 
-  const {
-    widthMM,
-    setWidthMM,
-    gLocal,
-    setAdv,
-    onAdd,
-    doAutoOnSelectedWall,
-    initBlenda,
-    initSidePanel,
-    } = useCabinetConfig(family, kind, variant, selWall, setVariant);
-
-  const [tab, setTab] = useState<
-    'cab' | 'room' | 'costs' | 'cut' | 'global' | null
-  >(null);
-  const [boardL, setBoardL] = useState(2800);
-  const [boardW, setBoardW] = useState(2070);
-  const [boardKerf, setBoardKerf] = useState(3);
-  const [boardHasGrain, setBoardHasGrain] = useState(false);
-  const [isDrawingWalls, setIsDrawingWalls] = useState(false);
-  const [wallPanelOpen, setWallPanelOpen] = useState(false);
-
-  const undo = store.undo;
-  const redo = store.redo;
-  const removeWall = store.removeWall;
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-        e.preventDefault();
-        if (e.shiftKey) redo();
-        else undo();
-      } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
-        e.preventDefault();
-        redo();
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-          if (selWall) {
-            removeWall(selWall);
-            const first = usePlannerStore.getState().room.walls[0];
-            setSelWall(first ? first.id : '');
-          }
+    let isMounted = true
+
+    const loadSession = async () => {
+      const { data, error } = await supabase.auth.getSession()
+
+      if (error) {
+        console.error('Błąd podczas pobierania sesji Supabase', error)
+        if (isMounted) {
+          setAuthError('Nie udało się pobrać sesji użytkownika. Odśwież stronę lub spróbuj ponownie później.')
+        }
       }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [undo, redo, removeWall, selWall]);
+
+      if (isMounted) {
+        setSession(data.session ?? null)
+        setIsLoading(false)
+      }
+    }
+
+    void loadSession()
+
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession)
+      setAuthError(null)
+    })
+
+    return () => {
+      isMounted = false
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      setAuthError(error.message)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <StrictMode>
+        <div style={{ padding: '3rem', textAlign: 'center', fontFamily: 'Inter, system-ui, sans-serif' }}>
+          Ładowanie danych logowania...
+        </div>
+      </StrictMode>
+    )
+  }
+
+  const metadata = session?.user?.user_metadata as { role?: unknown } | undefined
+  const rawRole = typeof metadata?.role === 'string' ? metadata.role.trim().toLowerCase() : ''
+  const recognizedRole = rawRole === 'client' || rawRole === 'carpenter' || rawRole === 'admin' ? rawRole : null
+
+  const fallbackNotice = (
+    <div
+      role="alert"
+      style={{
+        margin: '1rem auto 2rem',
+        maxWidth: '960px',
+        padding: '1.25rem 1.5rem',
+        borderRadius: '1rem',
+        backgroundColor: '#fef3c7',
+        color: '#92400e',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        boxShadow: '0 12px 30px rgba(202, 138, 4, 0.18)'
+      }}
+    >
+      <h2 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Ograniczony dostęp</h2>
+      <p style={{ margin: 0 }}>
+        Nie udało się ustalić rodzaju Twojego konta. Skontaktuj się z administratorem, aby zweryfikować uprawnienia. Na
+        potrzeby przeglądu udostępniamy bezpieczny widok katalogu w trybie tylko do odczytu.
+      </p>
+    </div>
+  )
 
   return (
-    <div className="app">
-      <div className="mainTabs">
-        <MainTabs
-          t={t}
-          tab={tab}
-          setTab={setTab}
-          family={family}
-          setFamily={setFamily}
-          kind={kind}
-          setKind={setKind}
-          variant={variant}
-          setVariant={setVariant}
-          widthMM={widthMM}
-          setWidthMM={setWidthMM}
-          gLocal={gLocal}
-          setAdv={setAdv}
-          onAdd={onAdd}
-          initBlenda={initBlenda}
-          initSidePanel={initSidePanel}
-          threeRef={threeRef}
-          boardL={boardL}
-          setBoardL={setBoardL}
-          boardW={boardW}
-          setBoardW={setBoardW}
-          boardKerf={boardKerf}
-          setBoardKerf={setBoardKerf}
-          boardHasGrain={boardHasGrain}
-          setBoardHasGrain={setBoardHasGrain}
-          addCountertop={addCountertop}
-          setAddCountertop={setAddCountertop}
-          isDrawingWalls={isDrawingWalls}
-          setWallPanelOpen={setWallPanelOpen}
-        />
-      </div>
-      <div className="canvasWrap">
-        <SceneViewer
-          threeRef={threeRef}
-          addCountertop={addCountertop}
-          setIsDrawingWalls={setIsDrawingWalls}
-        />
-        <WallDrawPanel
-          threeRef={threeRef}
-          isOpen={wallPanelOpen}
-          isDrawing={isDrawingWalls}
-        />
-        <TopBar
-          t={t}
-          store={store}
-          setVariant={setVariant}
-          setKind={setKind}
-            selWall={selWall}
-            setSelWall={setSelWall}
-          doAutoOnSelectedWall={doAutoOnSelectedWall}
-          lang={lang}
-          setLang={setLang}
-          threeRef={threeRef}
-          isTopDown={isDrawingWalls}
-        />
-      </div>
-    </div>
-  );
+    <StrictMode>
+      {session ? (
+        <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
+          <header
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              padding: '1rem 2rem',
+              backgroundColor: '#1e293b',
+              color: '#f8fafc'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <span>Zalogowano jako {session.user.email ?? 'użytkownik'}</span>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '9999px',
+                  border: 'none',
+                  backgroundColor: '#facc15',
+                  color: '#1e293b',
+                  cursor: 'pointer',
+                  fontWeight: 600
+                }}
+              >
+                Wyloguj się
+              </button>
+            </div>
+          </header>
+          {authError ? (
+            <div
+              role="alert"
+              style={{
+                margin: '1rem auto',
+                maxWidth: '960px',
+                padding: '1rem',
+                borderRadius: '0.75rem',
+                backgroundColor: '#fee2e2',
+                color: '#b91c1c'
+              }}
+            >
+              {authError}
+            </div>
+          ) : null}
+          {recognizedRole === 'carpenter' ? (
+            <CarpenterDashboard />
+          ) : recognizedRole === 'admin' ? (
+            <AdminDashboard />
+          ) : (
+            <>
+              {recognizedRole === null && fallbackNotice}
+              <ClientDashboard />
+            </>
+          )}
+        </div>
+      ) : (
+        <>
+          {authError ? (
+            <div
+              role="alert"
+              style={{
+                margin: '1rem auto',
+                maxWidth: '480px',
+                padding: '1rem',
+                borderRadius: '0.75rem',
+                backgroundColor: '#fee2e2',
+                color: '#b91c1c',
+                fontFamily: 'Inter, system-ui, sans-serif'
+              }}
+            >
+              {authError}
+            </div>
+          ) : null}
+          {isAdminSetupRoute ? <AdminSetupPage /> : <SignUpForm />}
+        </>
+      )}
+    </StrictMode>
+  )
+}
+
+export default App
+
+export function mountApp(container: HTMLElement): Root {
+  const root = createRoot(container)
+  root.render(<App />)
+  return root
 }
