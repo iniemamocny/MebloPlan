@@ -1,7 +1,9 @@
 import { StrictMode, useEffect, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import type { Session } from '@supabase/supabase-js'
-import Dashboard from './Dashboard'
+import ClientDashboard from './ClientDashboard'
+import CarpenterDashboard from './CarpenterDashboard'
+import AdminDashboard from './AdminDashboard'
 import SignUpForm from './auth/SignUpForm'
 import supabase from '../core/supabaseClient'
 
@@ -67,6 +69,32 @@ const App: React.FC = () => {
     )
   }
 
+  const metadata = session?.user?.user_metadata as { role?: unknown } | undefined
+  const rawRole = typeof metadata?.role === 'string' ? metadata.role.trim().toLowerCase() : ''
+  const recognizedRole = rawRole === 'client' || rawRole === 'carpenter' || rawRole === 'admin' ? rawRole : null
+
+  const fallbackNotice = (
+    <div
+      role="alert"
+      style={{
+        margin: '1rem auto 2rem',
+        maxWidth: '960px',
+        padding: '1.25rem 1.5rem',
+        borderRadius: '1rem',
+        backgroundColor: '#fef3c7',
+        color: '#92400e',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        boxShadow: '0 12px 30px rgba(202, 138, 4, 0.18)'
+      }}
+    >
+      <h2 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Ograniczony dostęp</h2>
+      <p style={{ margin: 0 }}>
+        Nie udało się ustalić rodzaju Twojego konta. Skontaktuj się z administratorem, aby zweryfikować uprawnienia. Na
+        potrzeby przeglądu udostępniamy bezpieczny widok katalogu w trybie tylko do odczytu.
+      </p>
+    </div>
+  )
+
   return (
     <StrictMode>
       {session ? (
@@ -114,7 +142,16 @@ const App: React.FC = () => {
               {authError}
             </div>
           ) : null}
-          <Dashboard />
+          {recognizedRole === 'carpenter' ? (
+            <CarpenterDashboard />
+          ) : recognizedRole === 'admin' ? (
+            <AdminDashboard />
+          ) : (
+            <>
+              {recognizedRole === null && fallbackNotice}
+              <ClientDashboard />
+            </>
+          )}
         </div>
       ) : (
         <>
